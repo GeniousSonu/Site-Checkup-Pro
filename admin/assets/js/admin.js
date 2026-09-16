@@ -355,7 +355,18 @@
 		}
 
 		if (filtered.length === 0) {
-			dom.tbody.innerHTML = `<tr><td colspan="5" class="wpsg-empty-state"><span class="dashicons dashicons-search"></span> No tasks match the selected filter.</td></tr>`;
+			const emptyImg = (window.wpsgData && window.wpsgData.mediaUrl) ? `${window.wpsgData.mediaUrl}empty-state.svg` : '';
+			dom.tbody.innerHTML = `
+				<tr>
+					<td colspan="5">
+						<div class="wpsg-empty-state">
+							${emptyImg ? `<img src="${emptyImg}" width="120" height="85" alt="" />` : '<span class="dashicons dashicons-search"></span>'}
+							<h4>No checklist tasks found</h4>
+							<p>No tasks match the active filters. Try switching section tabs or clearing status filters.</p>
+						</div>
+					</td>
+				</tr>
+			`;
 			return;
 		}
 
@@ -935,9 +946,19 @@
 				path: '/site-checkup-pro/v1/audit-log',
 			});
 
-			const logs = res.logs || [];
 			if (logs.length === 0) {
-				dom.auditTbody.innerHTML = '<tr><td colspan="6">No audit log records found.</td></tr>';
+				const emptyImg = (window.wpsgData && window.wpsgData.mediaUrl) ? `${window.wpsgData.mediaUrl}empty-state.svg` : '';
+				dom.auditTbody.innerHTML = `
+					<tr>
+						<td colspan="6">
+							<div class="wpsg-empty-state">
+								${emptyImg ? `<img src="${emptyImg}" width="120" height="85" alt="" />` : '<span class="dashicons dashicons-portfolio"></span>'}
+								<h4>No audit log records found</h4>
+								<p>Security actions, file modifications, and baseline checks will appear here once executed.</p>
+							</div>
+						</td>
+					</tr>
+				`;
 				return;
 			}
 

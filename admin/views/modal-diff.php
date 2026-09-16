@@ -16,11 +16,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="wpsg-modal-overlay" id="wpsg-modal-diff" style="display: none;">
 	<div class="wpsg-modal wpsg-modal-lg">
 		<div class="wpsg-modal-header">
-			<h3 class="wpsg-modal-title" id="wpsg-diff-modal-title">
-				<span class="dashicons dashicons-visibility" aria-hidden="true"></span>
+			<h3 class="wpsg-modal-title">
+				<img src="<?php echo esc_url( WPSG_PLUGIN_URL . 'media/icon-diff.svg' ); ?>" width="20" height="20" alt="" />
 				<?php esc_html_e( 'Pre-Execution Diff Preview', 'site-checkup-pro' ); ?>
 			</h3>
-			<button type="button" class="wpsg-modal-close" data-close-modal aria-label="<?php esc_attr_e( 'Close dialog', 'site-checkup-pro' ); ?>">&times;</button>
+			<button type="button" class="wpsg-modal-close" data-close-modal aria-label="<?php esc_attr_e( 'Close', 'site-checkup-pro' ); ?>">&times;</button>
 		</div>
 
 		<div class="wpsg-modal-body">

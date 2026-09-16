@@ -99,7 +99,10 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			'callback'            => array( $this, 'update_task_status' ),
 			'permission_callback' => array( $this, 'check_permissions' ),
 			'args'                => array(
-				'id' => array( 'sanitize_callback' => 'sanitize_key', 'required' => true ),
+				'id'               => array( 'sanitize_callback' => 'sanitize_key', 'required' => true ),
+				'status'           => array( 'sanitize_callback' => 'sanitize_key' ),
+				'note'             => array( 'sanitize_callback' => 'sanitize_textarea_field' ),
+				'next_reminder_at' => array( 'sanitize_callback' => 'sanitize_text_field' ),
 			),
 		) );
 
@@ -122,6 +125,10 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			'methods'             => WP_REST_Server::CREATABLE,
 			'callback'            => array( $this, 'set_login_slug' ),
 			'permission_callback' => array( $this, 'check_permissions' ),
+			'args'                => array(
+				'slug'    => array( 'sanitize_callback' => 'sanitize_title', 'required' => true ),
+				'confirm' => array( 'sanitize_callback' => 'sanitize_text_field', 'required' => true ),
+			),
 		) );
 
 		// 9. Restore Plugin from Zip Backup
@@ -129,6 +136,9 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			'methods'             => WP_REST_Server::CREATABLE,
 			'callback'            => array( $this, 'restore_plugin' ),
 			'permission_callback' => array( $this, 'check_permissions' ),
+			'args'                => array(
+				'slug' => array( 'sanitize_callback' => 'sanitize_file_name', 'required' => true ),
+			),
 		) );
 
 		// 10. Get Audit Log
@@ -136,6 +146,10 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			'methods'             => WP_REST_Server::READABLE,
 			'callback'            => array( $this, 'get_audit_log' ),
 			'permission_callback' => array( $this, 'check_permissions' ),
+			'args'                => array(
+				'limit'  => array( 'sanitize_callback' => 'absint', 'default' => 50 ),
+				'offset' => array( 'sanitize_callback' => 'absint', 'default' => 0 ),
+			),
 		) );
 
 		// 11. Get Report Data

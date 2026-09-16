@@ -1,32 +1,31 @@
 <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="80" height="80" rx="18" fill="#2563EB"/>
+  <defs>
+    <linearGradient id="wpsgIconGrad" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </linearGradient>
+    <filter id="wpsgShadow" x="8" y="24" width="64" height="48" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0F172A" flood-opacity="0.12"/>
+    </filter>
+  </defs>
 
-  <!-- Browser controls -->
-  <circle cx="19" cy="18" r="4" fill="white"/>
-  <circle cx="32" cy="18" r="4" fill="white"/>
-  <circle cx="45" cy="18" r="4" fill="white"/>
+  <!-- Base Rounded Container -->
+  <rect width="80" height="80" rx="18" fill="url(#wpsgIconGrad)"/>
 
-  <!-- Site content -->
-  <path
-    d="M16 32H64V62H16V32Z"
-    fill="white"
-  />
+  <!-- Browser Header Dots -->
+  <circle cx="18" cy="16" r="3" fill="#FFFFFF" fill-opacity="0.8"/>
+  <circle cx="28" cy="16" r="3" fill="#FFFFFF" fill-opacity="0.8"/>
+  <circle cx="38" cy="16" r="3" fill="#FFFFFF" fill-opacity="0.8"/>
 
-  <!-- Check -->
-  <path
-    d="M27 47L39 59L64 34"
-    stroke="#2563EB"
-    stroke-width="9"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  />
+  <!-- Inner Surface Window -->
+  <rect x="12" y="26" width="56" height="42" rx="10" fill="#FFFFFF" filter="url(#wpsgShadow)"/>
 
-  <!-- Teal accent -->
-  <path
-    d="M52 46L64 34"
-    stroke="#14B8A6"
-    stroke-width="9"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  />
+  <!-- Shield Shape Subtle Background inside window -->
+  <path d="M40 32C46 32 52 34 52 34V46C52 53 45 58 40 60C35 58 28 53 28 46V34C28 34 34 32 40 32Z" fill="#EFF6FF"/>
+
+  <!-- Precision Checkmark -->
+  <path d="M33 46L38 51L48 40" stroke="#2563EB" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Teal Verification Accent on Tip -->
+  <path d="M44 44L48 40" stroke="#14B8A6" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

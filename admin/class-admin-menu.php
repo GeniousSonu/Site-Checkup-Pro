@@ -49,13 +49,22 @@ class WPSG_Admin_Menu {
 	 * Register admin menu and submenus.
 	 */
 	public function register_menu() {
+		$icon_svg_path = WPSG_PLUGIN_DIR . 'media/menu-icon.svg';
+		$icon = 'dashicons-shield';
+		if ( file_exists( $icon_svg_path ) ) {
+			$svg_content = file_get_contents( $icon_svg_path );
+			if ( ! empty( $svg_content ) ) {
+				$icon = 'data:image/svg+xml;base64,' . base64_encode( $svg_content );
+			}
+		}
+
 		$hook = add_menu_page(
 			__( 'Site Checkup Pro', 'site-checkup-pro' ),
 			__( 'Site Checkup', 'site-checkup-pro' ),
 			'manage_options',
 			'site-checkup-pro',
 			array( $this, 'render_dashboard' ),
-			'dashicons-shield',
+			$icon,
 			75
 		);
 
@@ -125,6 +134,7 @@ class WPSG_Admin_Menu {
 			'nonce'           => wp_create_nonce( 'wp_rest' ),
 			'homeUrl'         => home_url(),
 			'adminUrl'        => admin_url(),
+			'mediaUrl'        => esc_url_raw( WPSG_PLUGIN_URL . 'media/' ),
 			'serverType'      => WPSG_Htaccess_Manager::get_server_type(),
 			'supportsHtaccess'=> WPSG_Htaccess_Manager::supports_htaccess(),
 		) );

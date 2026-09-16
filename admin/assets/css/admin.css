@@ -143,6 +143,14 @@
 	justify-content: center;
 }
 
+.wpsg-brand-icon-img {
+	width: 36px;
+	height: 36px;
+	border-radius: var(--wpsg-radius-sm);
+	display: block;
+	flex-shrink: 0;
+}
+
 .wpsg-brand-badge .dashicons {
 	font-size: 18px;
 	width: 18px;
@@ -535,6 +543,36 @@
 
 .wpsg-table tr:hover td {
 	background: var(--wpsg-surface-hover);
+}
+
+/* Empty State Illustration Component */
+.wpsg-empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: var(--wpsg-space-8) var(--wpsg-space-4);
+	text-align: center;
+}
+
+.wpsg-empty-state img {
+	margin-bottom: var(--wpsg-space-3);
+	display: block;
+	opacity: 0.92;
+}
+
+.wpsg-empty-state h4 {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--wpsg-text-primary);
+	margin: 0 0 var(--wpsg-space-1) 0;
+}
+
+.wpsg-empty-state p {
+	font-size: 13px;
+	color: var(--wpsg-text-secondary);
+	margin: 0;
+	max-width: 380px;
 }
 
 /* Column Dimensions */
@@ -1067,6 +1105,38 @@
 	margin: 0 0 var(--wpsg-space-3) 0;
 	padding-bottom: var(--wpsg-space-2);
 	border-bottom: 1px solid var(--wpsg-border);
+}
+
+.wpsg-report-brand-lockup {
+	margin-bottom: var(--wpsg-space-3);
+}
+
+.wpsg-report-logo-img {
+	height: 40px;
+	width: auto;
+	max-width: 280px;
+	display: block;
+}
+
+.wpsg-report-badge-img {
+	width: 64px;
+	height: 64px;
+	display: block;
+	flex-shrink: 0;
+}
+
+/* WordPress Admin Menu Icon */
+#adminmenu .toplevel_page_site-checkup-pro .wp-menu-image img {
+	width: 18px;
+	height: 18px;
+	padding: 8px 0 0 0;
+	opacity: 0.85;
+	transition: opacity 0.15s ease;
+}
+
+#adminmenu .toplevel_page_site-checkup-pro:hover .wp-menu-image img,
+#adminmenu .toplevel_page_site-checkup-pro.wp-has-current-submenu .wp-menu-image img {
+	opacity: 1;
 }
 
 /* Print Overrides */

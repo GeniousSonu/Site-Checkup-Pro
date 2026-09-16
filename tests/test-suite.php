@@ -300,6 +300,47 @@ run_test( "Baseline Scanner: Accurately detects new unapproved admin created aft
 	return ( 'done' === $scan3['status'] && empty( $scan3['rogue_admins'] ) );
 } );
 
+// TEST 12: Zip Slip & Malicious Path Traversal Protection
+run_test( "Security: Zip Slip path traversal attempts are detected and rejected", function () {
+	// Create a zip with a malicious relative path entry
+	$zip_path = sys_get_temp_dir() . '/malicious_test.zip';
+	$zip = new ZipArchive();
+	if ( true === $zip->open( $zip_path, ZipArchive::CREATE | ZipArchive::OVERWRITE ) ) {
+		$zip->addFromString( '../evil.php', '<?php phpinfo(); ?>' );
+		$zip->close();
+
+		update_option( 'wpsg_last_deleted_plugin_fake-plugin', array(
+			'zip_path'    => $zip_path,
+			'plugin_path' => 'fake-plugin/fake.php',
+			'deleted_at'  => current_time( 'mysql' ),
+		) );
+
+		$res = WPSG_Plugin_Integrity::restore_plugin( 'fake-plugin' );
+		@unlink( $zip_path );
+		delete_option( 'wpsg_last_deleted_plugin_fake-plugin' );
+
+		return ( false === $res['success'] && false !== strpos( $res['message'], 'path traversal' ) );
+	}
+	return false;
+} );
+
+// TEST 13: Unguessable Backup Token Generation
+run_test( "Security: Backup files contain unguessable 32-character random tokens", function () {
+	$temp_config = ABSPATH . 'wp-config.php';
+	file_put_contents( $temp_config, '<?php // Test config' );
+
+	$config_backup = WPSG_Wp_Config_Manager::backup_config();
+	@unlink( $temp_config );
+
+	if ( ! $config_backup ) return false;
+
+	$filename = basename( $config_backup );
+	// Format: wp-config-YYYYmmdd-HHiiss-[32chars].bak
+	$matched = preg_match( '/^wp-config-\d{8}-\d{6}-[a-zA-Z0-9]{32}\.bak$/', $filename );
+	@unlink( $config_backup );
+	return ( 1 === $matched );
+} );
+
 
 echo "\n=======================================================\n";
 echo " Test Results: {$tests_passed} Passed, {$tests_failed} Failed\n";

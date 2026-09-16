@@ -25,9 +25,7 @@ $backup_status = WPSG_Backup_Guard::get_backup_status();
 	<!-- Top Product Header -->
 	<header class="wpsg-page-header">
 		<div class="wpsg-header-title-area">
-			<div class="wpsg-brand-badge" aria-hidden="true">
-				<span class="dashicons dashicons-shield"></span>
-			</div>
+			<img src="<?php echo esc_url( WPSG_PLUGIN_URL . 'media/icon.svg' ); ?>" alt="Site Checkup Pro" width="36" height="36" class="wpsg-brand-icon-img" />
 			<div class="wpsg-header-titles">
 				<h1>
 					<?php esc_html_e( 'Site Checkup Pro', 'site-checkup-pro' ); ?>

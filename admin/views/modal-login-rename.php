@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="wpsg-modal wpsg-modal-lg">
 		<div class="wpsg-modal-header">
 			<h3 class="wpsg-modal-title">
-				<span class="dashicons dashicons-admin-network"></span>
+				<img src="<?php echo esc_url( WPSG_PLUGIN_URL . 'media/icon-safe.svg' ); ?>" width="20" height="20" alt="" />
 				<?php esc_html_e( 'Change WordPress Login URL', 'site-checkup-pro' ); ?>
 			</h3>
 			<button type="button" class="wpsg-modal-close" data-close-modal aria-label="<?php esc_attr_e( 'Close', 'site-checkup-pro' ); ?>">&times;</button>

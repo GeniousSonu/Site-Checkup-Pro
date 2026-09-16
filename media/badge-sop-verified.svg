@@ -1,0 +1,28 @@
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="wpsgBadgeGrad" x1="10" y1="10" x2="90" y2="90" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Outer Ring with notches -->
+  <circle cx="50" cy="50" r="46" stroke="#DBEAFE" stroke-width="2"/>
+  <circle cx="50" cy="50" r="42" stroke="#2563EB" stroke-width="1.5" stroke-dasharray="3 3"/>
+
+  <!-- Inner Solid Circle -->
+  <circle cx="50" cy="50" r="36" fill="url(#wpsgBadgeGrad)"/>
+
+  <!-- Shield Shape -->
+  <path d="M50 26C56 26 62 28 62 28V41C62 50 54 57 50 59C46 57 38 50 38 41V28C38 28 44 26 50 26Z" fill="#FFFFFF"/>
+
+  <!-- Checkmark -->
+  <path d="M44 42L48 46L56 37" stroke="#2563EB" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M53 40L56 37" stroke="#14B8A6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Banner Label -->
+  <rect x="22" y="66" width="56" height="15" rx="3" fill="#0F172A"/>
+  <text x="50" y="77" font-family="'Inter', -apple-system, sans-serif" font-size="7.5" font-weight="700" letter-spacing="0.6" fill="#FFFFFF" text-anchor="middle">
+    SOP VERIFIED
+  </text>
+</svg>

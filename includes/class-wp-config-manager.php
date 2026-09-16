@@ -63,8 +63,9 @@ class WPSG_Wp_Config_Manager {
 			return false;
 		}
 
-		$backup_dir = WPSG_Htaccess_Manager::get_backup_dir();
-		$backup_file = $backup_dir . 'wp-config-' . gmdate( 'Ymd-His' ) . '.bak';
+		$backup_dir  = WPSG_Htaccess_Manager::get_backup_dir();
+		$token       = wp_generate_password( 32, false, false );
+		$backup_file = $backup_dir . 'wp-config-' . gmdate( 'Ymd-His' ) . '-' . $token . '.bak';
 
 		if ( copy( $config_path, $backup_file ) ) {
 			return $backup_file;

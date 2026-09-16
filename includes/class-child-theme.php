@@ -154,6 +154,16 @@ class WPSG_Child_Theme {
 			);
 		}
 
+		// Security: verify directory is strictly inside theme root
+		$real_child  = realpath( $child_dir );
+		$real_themes = realpath( get_theme_root() );
+		if ( ! $real_child || ! $real_themes || 0 !== strpos( $real_child, $real_themes ) ) {
+			return array(
+				'success' => false,
+				'message' => __( 'Security error: Invalid child theme directory location.', 'site-checkup-pro' ),
+			);
+		}
+
 		// Delete files
 		@unlink( $child_dir . '/style.css' );
 		@unlink( $child_dir . '/functions.php' );

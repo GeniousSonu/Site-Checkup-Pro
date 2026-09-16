@@ -34,9 +34,8 @@ $data = WPSG_Report_Generator::get_report_data();
 		<!-- Document Header -->
 		<header class="wpsg-report-header">
 			<div class="wpsg-report-header-left">
-				<div class="wpsg-report-brand">
-					<span class="dashicons dashicons-shield"></span>
-					<span><?php esc_html_e( 'Site Checkup Pro', 'site-checkup-pro' ); ?></span>
+				<div class="wpsg-report-brand-lockup">
+					<img src="<?php echo esc_url( WPSG_PLUGIN_URL . 'media/logo.svg' ); ?>" alt="Site Checkup Pro" class="wpsg-report-logo-img" height="42" />
 				</div>
 				<h1 class="wpsg-report-title"><?php esc_html_e( 'Security Check-up & SOP Hardening Report', 'site-checkup-pro' ); ?></h1>
 				<div class="wpsg-report-meta-grid">
@@ -45,11 +44,16 @@ $data = WPSG_Report_Generator::get_report_data();
 				</div>
 			</div>
 
-			<div class="wpsg-report-score-panel">
-				<div class="wpsg-report-score-number"><?php echo esc_html( $data['coverage_pct'] ); ?>%</div>
-				<div class="wpsg-report-score-label"><?php esc_html_e( 'SOP Coverage', 'site-checkup-pro' ); ?></div>
-				<div style="font-size: 12px; color: var(--wpsg-text-secondary); margin-top: 4px;">
-					<?php printf( esc_html__( '%1$d of %2$d tasks complete', 'site-checkup-pro' ), esc_html( $data['done_tasks'] ), esc_html( $data['total_tasks'] ) ); ?>
+			<div class="wpsg-report-score-panel" style="display: flex; align-items: center; gap: 20px;">
+				<?php if ( $data['coverage_pct'] >= 80 ) : ?>
+					<img src="<?php echo esc_url( WPSG_PLUGIN_URL . 'media/badge-sop-verified.svg' ); ?>" alt="<?php esc_attr_e( 'SOP Verified', 'site-checkup-pro' ); ?>" class="wpsg-report-badge-img" width="68" height="68" />
+				<?php endif; ?>
+				<div>
+					<div class="wpsg-report-score-number"><?php echo esc_html( $data['coverage_pct'] ); ?>%</div>
+					<div class="wpsg-report-score-label"><?php esc_html_e( 'SOP Coverage', 'site-checkup-pro' ); ?></div>
+					<div style="font-size: 12px; color: var(--wpsg-text-secondary); margin-top: 4px;">
+						<?php printf( esc_html__( '%1$d of %2$d tasks complete', 'site-checkup-pro' ), esc_html( $data['done_tasks'] ), esc_html( $data['total_tasks'] ) ); ?>
+					</div>
 				</div>
 			</div>
 		</header>

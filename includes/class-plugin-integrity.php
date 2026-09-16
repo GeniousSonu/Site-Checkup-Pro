@@ -105,8 +105,20 @@ class WPSG_Plugin_Integrity {
 
 		if ( ! file_exists( $dir ) ) {
 			wp_mkdir_p( $dir );
-			file_put_contents( $dir . 'index.php', '<?php // Silence is golden.' );
-			file_put_contents( $dir . '.htaccess', 'Deny from all' );
+		}
+
+		// Ensure access-denial guards always exist across Apache, LiteSpeed, Nginx, and IIS.
+		$htaccess_content = "<IfModule !mod_authz_core.c>\nOrder deny,allow\nDeny from all\n</IfModule>\n<IfModule mod_authz_core.c>\nRequire all denied\n</IfModule>\n";
+		if ( ! file_exists( $dir . '.htaccess' ) ) {
+			file_put_contents( $dir . '.htaccess', $htaccess_content );
+		}
+
+		if ( ! file_exists( $dir . 'index.php' ) ) {
+			file_put_contents( $dir . 'index.php', "<?php\nhttp_response_code( 403 );\nexit;\n" );
+		}
+
+		if ( ! file_exists( $dir . 'web.config' ) ) {
+			file_put_contents( $dir . 'web.config', '<configuration><system.webServer><authorization><clear /><deny users="*" /></authorization></system.webServer></configuration>' );
 		}
 
 		return $dir;
@@ -119,8 +131,16 @@ class WPSG_Plugin_Integrity {
 	 * @return string|false Path to created zip file or false on failure.
 	 */
 	public static function zip_plugin_directory( $plugin_slug ) {
-		$plugin_dir = WP_PLUGIN_DIR . '/' . $plugin_slug;
+		$plugin_slug = sanitize_file_name( basename( $plugin_slug ) );
+		$plugin_dir  = WP_PLUGIN_DIR . '/' . $plugin_slug;
 		if ( ! is_dir( $plugin_dir ) ) {
+			return false;
+		}
+
+		// Verify plugin dir is strictly within WP_PLUGIN_DIR.
+		$real_plugin_dir = realpath( $plugin_dir );
+		$real_wp_plugins = realpath( WP_PLUGIN_DIR );
+		if ( ! $real_plugin_dir || ! $real_wp_plugins || 0 !== strpos( $real_plugin_dir, $real_wp_plugins ) ) {
 			return false;
 		}
 
@@ -129,7 +149,8 @@ class WPSG_Plugin_Integrity {
 		}
 
 		$backup_dir = self::get_plugin_backup_dir();
-		$zip_file   = $backup_dir . sanitize_file_name( $plugin_slug ) . '-' . gmdate( 'Ymd-His' ) . '.zip';
+		$token      = wp_generate_password( 32, false, false );
+		$zip_file   = $backup_dir . $plugin_slug . '-' . gmdate( 'Ymd-His' ) . '-' . $token . '.zip';
 
 		$zip = new ZipArchive();
 		if ( true !== $zip->open( $zip_file, ZipArchive::CREATE | ZipArchive::OVERWRITE ) ) {
@@ -137,14 +158,14 @@ class WPSG_Plugin_Integrity {
 		}
 
 		$files = new RecursiveIteratorIterator(
-			new RecursiveDirectoryIterator( $plugin_dir, RecursiveDirectoryIterator::SKIP_DOTS ),
+			new RecursiveDirectoryIterator( $real_plugin_dir, RecursiveDirectoryIterator::SKIP_DOTS ),
 			RecursiveIteratorIterator::LEAVES_ONLY
 		);
 
 		foreach ( $files as $file ) {
 			if ( ! $file->isDir() ) {
 				$file_path     = $file->getRealPath();
-				$relative_path = substr( $file_path, strlen( $plugin_dir ) + 1 );
+				$relative_path = substr( $file_path, strlen( $real_plugin_dir ) + 1 );
 				$zip->addFile( $file_path, $relative_path );
 			}
 		}
@@ -167,9 +188,23 @@ class WPSG_Plugin_Integrity {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 
-		$slug = dirname( $plugin_path );
+		$clean_path = ltrim( sanitize_text_field( $plugin_path ), '/\\' );
+		$slug       = dirname( $clean_path );
 		if ( '.' === $slug || empty( $slug ) ) {
-			$slug = basename( $plugin_path, '.php' );
+			$slug = basename( $clean_path, '.php' );
+		}
+		$slug = sanitize_file_name( basename( $slug ) );
+
+		// Validate that the target plugin file is strictly within WP_PLUGIN_DIR.
+		$full_plugin_file   = WP_PLUGIN_DIR . '/' . $clean_path;
+		$real_plugin_parent = realpath( dirname( $full_plugin_file ) );
+		$real_wp_plugins    = realpath( WP_PLUGIN_DIR );
+
+		if ( ! $real_plugin_parent || ! $real_wp_plugins || 0 !== strpos( $real_plugin_parent, $real_wp_plugins ) ) {
+			return array(
+				'success' => false,
+				'message' => __( 'Security error: Invalid plugin file path.', 'site-checkup-pro' ),
+			);
 		}
 
 		// 1. Create zip backup.
@@ -182,12 +217,12 @@ class WPSG_Plugin_Integrity {
 		}
 
 		// 2. Deactivate plugin first.
-		if ( is_plugin_active( $plugin_path ) ) {
-			deactivate_plugins( $plugin_path, true );
+		if ( is_plugin_active( $clean_path ) ) {
+			deactivate_plugins( $clean_path, true );
 		}
 
 		// 3. Delete plugin directory.
-		$result = delete_plugins( array( $plugin_path ) );
+		$result = delete_plugins( array( $clean_path ) );
 
 		if ( is_wp_error( $result ) ) {
 			return array(
@@ -199,7 +234,7 @@ class WPSG_Plugin_Integrity {
 		// Store last backup path in option for undo.
 		update_option( 'wpsg_last_deleted_plugin_' . $slug, array(
 			'zip_path'    => $zip_path,
-			'plugin_path' => $plugin_path,
+			'plugin_path' => $clean_path,
 			'deleted_at'  => current_time( 'mysql' ),
 		) );
 
@@ -221,6 +256,7 @@ class WPSG_Plugin_Integrity {
 	 * @return array
 	 */
 	public static function restore_plugin( $slug ) {
+		$slug = sanitize_file_name( basename( $slug ) );
 		$data = get_option( 'wpsg_last_deleted_plugin_' . $slug );
 		if ( empty( $data ) || empty( $data['zip_path'] ) || ! file_exists( $data['zip_path'] ) ) {
 			return array(
@@ -236,9 +272,31 @@ class WPSG_Plugin_Integrity {
 			);
 		}
 
+		$target_dir      = WP_PLUGIN_DIR . '/' . $slug;
+		$real_wp_plugins = realpath( WP_PLUGIN_DIR );
+
+		// Security: verify target cannot escape plugins root.
+		if ( ! $real_wp_plugins ) {
+			return array(
+				'success' => false,
+				'message' => __( 'Cannot resolve plugins directory.', 'site-checkup-pro' ),
+			);
+		}
+
 		$zip = new ZipArchive();
 		if ( true === $zip->open( $data['zip_path'] ) ) {
-			$target_dir = WP_PLUGIN_DIR . '/' . $slug;
+			// Zip Slip Protection: Inspect all entry paths before extraction.
+			for ( $i = 0; $i < $zip->numFiles; $i++ ) {
+				$entry_name = $zip->getNameIndex( $i );
+				if ( false !== strpos( $entry_name, '../' ) || false !== strpos( $entry_name, '..\\' ) || 0 === strpos( $entry_name, '/' ) || 0 === strpos( $entry_name, '\\' ) ) {
+					$zip->close();
+					return array(
+						'success' => false,
+						'message' => __( 'Security error: Malicious path traversal entries detected in zip archive.', 'site-checkup-pro' ),
+					);
+				}
+			}
+
 			if ( ! is_dir( $target_dir ) ) {
 				wp_mkdir_p( $target_dir );
 			}

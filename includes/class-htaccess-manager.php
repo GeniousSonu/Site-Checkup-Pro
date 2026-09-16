@@ -81,16 +81,27 @@ class WPSG_Htaccess_Manager {
 
 		if ( ! file_exists( $dir ) ) {
 			wp_mkdir_p( $dir );
-			// Write an index.php and .htaccess to protect backups.
-			file_put_contents( $dir . 'index.php', '<?php // Silence is golden.' );
-			file_put_contents( $dir . '.htaccess', 'Deny from all' );
+		}
+
+		// Ensure access-denial guards always exist across Apache, LiteSpeed, Nginx, and IIS.
+		$htaccess_content = "<IfModule !mod_authz_core.c>\nOrder deny,allow\nDeny from all\n</IfModule>\n<IfModule mod_authz_core.c>\nRequire all denied\n</IfModule>\n";
+		if ( ! file_exists( $dir . '.htaccess' ) ) {
+			file_put_contents( $dir . '.htaccess', $htaccess_content );
+		}
+
+		if ( ! file_exists( $dir . 'index.php' ) ) {
+			file_put_contents( $dir . 'index.php', "<?php\nhttp_response_code( 403 );\nexit;\n" );
+		}
+
+		if ( ! file_exists( $dir . 'web.config' ) ) {
+			file_put_contents( $dir . 'web.config', '<configuration><system.webServer><authorization><clear /><deny users="*" /></authorization></system.webServer></configuration>' );
 		}
 
 		return $dir;
 	}
 
 	/**
-	 * Create a timestamped backup of the current .htaccess file.
+	 * Create a timestamped backup of the current .htaccess file with an unguessable token.
 	 *
 	 * @return string|false Path to backup file or false on failure.
 	 */
@@ -100,8 +111,9 @@ class WPSG_Htaccess_Manager {
 			return false;
 		}
 
-		$backup_dir = self::get_backup_dir();
-		$backup_file = $backup_dir . 'htaccess-' . gmdate( 'Ymd-His' ) . '.bak';
+		$backup_dir  = self::get_backup_dir();
+		$token       = wp_generate_password( 32, false, false );
+		$backup_file = $backup_dir . 'htaccess-' . gmdate( 'Ymd-His' ) . '-' . $token . '.bak';
 
 		if ( copy( $htaccess, $backup_file ) ) {
 			return $backup_file;
