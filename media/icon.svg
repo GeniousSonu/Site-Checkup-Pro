@@ -1,0 +1,32 @@
+<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="80" height="80" rx="18" fill="#2563EB"/>
+
+  <!-- Browser controls -->
+  <circle cx="19" cy="18" r="4" fill="white"/>
+  <circle cx="32" cy="18" r="4" fill="white"/>
+  <circle cx="45" cy="18" r="4" fill="white"/>
+
+  <!-- Site content -->
+  <path
+    d="M16 32H64V62H16V32Z"
+    fill="white"
+  />
+
+  <!-- Check -->
+  <path
+    d="M27 47L39 59L64 34"
+    stroke="#2563EB"
+    stroke-width="9"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Teal accent -->
+  <path
+    d="M52 46L64 34"
+    stroke="#14B8A6"
+    stroke-width="9"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>

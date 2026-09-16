@@ -1,0 +1,71 @@
+<svg width="520" height="96" viewBox="0 0 520 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Site Checkup Pro -->
+  
+  <!-- Icon -->
+  <g transform="translate(4 8)">
+    <!-- Browser / Site shape -->
+    <rect
+      x="0"
+      y="0"
+      width="80"
+      height="80"
+      rx="18"
+      fill="#2563EB"
+    />
+
+    <!-- Browser top bar -->
+    <circle cx="19" cy="18" r="4" fill="white"/>
+    <circle cx="32" cy="18" r="4" fill="white"/>
+    <circle cx="45" cy="18" r="4" fill="white"/>
+
+    <!-- Website content frame -->
+    <path
+      d="M16 32H64V62H16V32Z"
+      fill="white"
+    />
+
+    <!-- Check mark -->
+    <path
+      d="M27 47L39 59L64 34"
+      stroke="#2563EB"
+      stroke-width="9"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+
+    <!-- Small teal verification accent -->
+    <path
+      d="M52 46L64 34"
+      stroke="#14B8A6"
+      stroke-width="9"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </g>
+
+  <!-- Wordmark -->
+  <text
+    x="104"
+    y="60"
+    font-family="Inter, Geist, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    font-size="35"
+    font-weight="600"
+    letter-spacing="-1.2"
+    fill="#111827"
+  >
+    Site Checkup
+  </text>
+
+  <!-- Pro -->
+  <text
+    x="356"
+    y="60"
+    font-family="Inter, Geist, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    font-size="35"
+    font-weight="500"
+    letter-spacing="-1.2"
+    fill="#64748B"
+  >
+    Pro
+  </text>
+</svg>
