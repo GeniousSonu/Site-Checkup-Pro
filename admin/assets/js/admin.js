@@ -364,73 +364,80 @@
 	}
 
 	/**
-	 * Render a single task row with accessible badges (SVG/Icon + Text)
+	 * Render a single task row with accessible badges (Dot + Label + Accessible text)
 	 */
 	function renderTaskRow(task) {
 		const statusBadge = getStatusBadgeHtml(task.status);
 		const levelBadge = getLevelBadgeHtml(task.automation_level, task.sub_type);
 		const actionButtons = getActionButtonsHtml(task);
 		const lastRunText = task.last_run_at ? formatDate(task.last_run_at) : '<span class="wpsg-text-muted">Not checked yet</span>';
+		const rowClass = `wpsg-task-row ${task.status === 'done' ? 'wpsg-row-completed' : ''}`;
 
 		return `
-			<tr data-task-id="${escapeHtml(task.id)}" class="wpsg-task-row wpsg-status-${escapeHtml(task.status)}">
+			<tr data-task-id="${escapeHtml(task.id)}" class="${rowClass}">
 				<td class="wpsg-col-status">${statusBadge}</td>
 				<td class="wpsg-col-level">${levelBadge}</td>
 				<td class="wpsg-col-task">
-					<div class="wpsg-task-title-wrap">
+					<div class="wpsg-task-cell">
 						<span class="wpsg-task-title">${escapeHtml(task.title)}</span>
 						<span class="wpsg-task-desc">${escapeHtml(task.description)}</span>
-						${task.live_message ? `<span class="wpsg-task-live-msg">${escapeHtml(task.live_message)}</span>` : ''}
-						${task.note ? `<span class="wpsg-task-live-msg"><span class="dashicons dashicons-edit"></span> Note: ${escapeHtml(task.note)}</span>` : ''}
+						${task.live_message ? `<div class="wpsg-task-evidence"><span class="dashicons dashicons-info" style="font-size:12px;width:12px;height:12px;margin-top:1px;"></span> <span>${escapeHtml(task.live_message)}</span></div>` : ''}
+						${task.note ? `<div class="wpsg-task-evidence"><span class="dashicons dashicons-edit" style="font-size:12px;width:12px;height:12px;margin-top:1px;"></span> <span>Note: ${escapeHtml(task.note)}</span></div>` : ''}
 					</div>
 				</td>
-				<td class="wpsg-col-lastrun">${lastRunText}</td>
+				<td class="wpsg-col-checked">${lastRunText}</td>
 				<td class="wpsg-col-actions">${actionButtons}</td>
 			</tr>
 		`;
 	}
 
 	/**
-	 * Colorblind Accessible Status Badges (Icon + Text)
+	 * Colorblind Accessible Status Badges (Dot + Label)
 	 */
 	function getStatusBadgeHtml(status) {
 		switch (status) {
 			case 'done':
-				return '<span class="wpsg-badge wpsg-badge-done"><span class="dashicons dashicons-yes-alt"></span> Completed</span>';
+				return '<span class="wpsg-status-indicator wpsg-status-done"><span class="wpsg-status-dot"></span> Completed</span>';
 			case 'attention':
-				return '<span class="wpsg-badge wpsg-badge-attention"><span class="dashicons dashicons-warning"></span> Action Needed</span>';
+				return '<span class="wpsg-status-indicator wpsg-status-attention"><span class="wpsg-status-dot"></span> Action Needed</span>';
 			case 'failed':
-				return '<span class="wpsg-badge wpsg-badge-failed"><span class="dashicons dashicons-dismiss"></span> Failed</span>';
+				return '<span class="wpsg-status-indicator wpsg-status-critical"><span class="wpsg-status-dot"></span> Failed</span>';
 			case 'not_applicable':
-				return '<span class="wpsg-badge wpsg-badge-subtle"><span class="dashicons dashicons-minus"></span> Not Applicable</span>';
+				return '<span class="wpsg-status-indicator wpsg-status-na"><span class="wpsg-status-dot"></span> Not Applicable</span>';
 			case 'pending':
 			default:
-				return '<span class="wpsg-badge wpsg-badge-pending"><span class="dashicons dashicons-clock"></span> Pending</span>';
+				return '<span class="wpsg-status-indicator wpsg-status-pending"><span class="wpsg-status-dot"></span> Pending</span>';
 		}
 	}
 
 	/**
-	 * Level Badge HTML
+	 * Level Badge HTML (Crisp Chips)
 	 */
 	function getLevelBadgeHtml(level, subType) {
-		let label = `Level ${level}`;
-		let sub = '';
 		if (level === 'A') {
-			sub = subType === 'writes_files' ? ' (Config)' : ' (Instant)';
+			if (subType === 'writes_files') {
+				return '<span class="wpsg-chip" title="Automated: File/Config Write">Level A (Config)</span>';
+			}
+			return '<span class="wpsg-chip wpsg-chip-instant" title="Automated: Instant Safe Runtime">Level A (Instant)</span>';
 		}
-		const levelClass = `wpsg-badge-level-${level.toLowerCase()}`;
-		return `<span class="wpsg-badge-level ${levelClass}" title="Automation Level ${level}">${label}${sub}</span>`;
+		if (level === 'B') {
+			return '<span class="wpsg-chip" title="Guided Procedure">Level B (Guided)</span>';
+		}
+		if (level === 'C') {
+			return '<span class="wpsg-chip" title="Manual SOP Verification">Level C (Manual)</span>';
+		}
+		return `<span class="wpsg-chip">Level ${escapeHtml(level)}</span>`;
 	}
 
 	/**
 	 * Action Buttons HTML based on Task Classification
 	 */
 	function getActionButtonsHtml(task) {
-		let html = '<div class="wpsg-row-btn-group">';
+		let html = '<div class="wpsg-action-group">';
 
 		// If server is Nginx and task is .htaccess-only rule
 		if (!state.supportsHtaccess && task.nginx_snippet && task.is_na) {
-			html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-outline wpsg-btn-view-nginx" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-networking"></span> View Nginx Snippet</button>`;
+			html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary wpsg-btn-view-nginx" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-networking"></span> Nginx Snippet</button>`;
 			html += '</div>';
 			return html;
 		}
@@ -438,11 +445,11 @@
 		// Level A: Automated
 		if (task.automation_level === 'A') {
 			if (task.has_diff && task.status !== 'done') {
-				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-outline wpsg-btn-diff" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-visibility"></span> Diff</button> `;
+				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary wpsg-btn-diff" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-visibility"></span> Diff</button> `;
 			}
 
 			if (task.status === 'done' && task.has_undo) {
-				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-outline wpsg-btn-undo" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-undo"></span> Undo</button>`;
+				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary wpsg-btn-undo" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-undo"></span> Undo</button>`;
 			} else {
 				const runLabel = task.status === 'done' ? 'Re-run' : 'Run';
 				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-primary wpsg-btn-run" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-controls-play"></span> ${runLabel}</button>`;
@@ -455,15 +462,15 @@
 				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-primary wpsg-btn-open-login-rename"><span class="dashicons dashicons-admin-network"></span> Change Login URL</button>`;
 			} else if (task.id === 'scaffold_child_theme') {
 				if (task.status === 'done') {
-					html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-outline wpsg-btn-undo" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-undo"></span> Undo</button>`;
+					html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary wpsg-btn-undo" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-undo"></span> Undo</button>`;
 				} else {
 					html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-primary wpsg-btn-run" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-admin-appearance"></span> Create Child Theme</button>`;
 				}
 			} else if (task.guide_data && task.guide_data.link) {
-				html += `<a href="${escapeHtml(task.guide_data.link)}" class="wpsg-btn wpsg-btn-sm wpsg-btn-outline" target="_blank"><span class="dashicons dashicons-external"></span> ${escapeHtml(task.guide_data.button_label || 'Configure')}</a>`;
+				html += `<a href="${escapeHtml(task.guide_data.link)}" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary" target="_blank"><span class="dashicons dashicons-external"></span> ${escapeHtml(task.guide_data.button_label || 'Configure')}</a>`;
 			} else if (task.id === 'gsc_bing_audit') {
-				html += `<a href="${escapeHtml(task.guide_data.gsc_url)}" class="wpsg-btn wpsg-btn-sm wpsg-btn-outline" target="_blank"><span class="dashicons dashicons-search"></span> GSC</a> `;
-				html += `<a href="${escapeHtml(task.guide_data.bing_url)}" class="wpsg-btn wpsg-btn-sm wpsg-btn-outline" target="_blank"><span class="dashicons dashicons-admin-site"></span> Bing</a>`;
+				html += `<a href="${escapeHtml(task.guide_data.gsc_url)}" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary" target="_blank"><span class="dashicons dashicons-search"></span> GSC</a> `;
+				html += `<a href="${escapeHtml(task.guide_data.bing_url)}" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary" target="_blank"><span class="dashicons dashicons-admin-site"></span> Bing</a>`;
 			}
 		}
 
@@ -936,11 +943,15 @@
 
 			dom.auditTbody.innerHTML = logs.map(l => `
 				<tr>
-					<td>${escapeHtml(l.created_at)}</td>
+					<td style="font-variant-numeric: tabular-nums;">${escapeHtml(l.created_at)}</td>
 					<td><code>${escapeHtml(l.task_id)}</code></td>
 					<td>${escapeHtml(l.action)}</td>
 					<td>${escapeHtml(l.display_name || l.user_login || 'System')}</td>
-					<td><span class="wpsg-badge wpsg-badge-${l.result === 'success' ? 'done' : 'failed'}">${escapeHtml(l.result)}</span></td>
+					<td>
+						<span class="wpsg-status-indicator wpsg-status-${l.result === 'success' ? 'done' : 'critical'}">
+							<span class="wpsg-status-dot"></span> ${escapeHtml(l.result === 'success' ? 'Success' : 'Failed')}
+						</span>
+					</td>
 					<td>${escapeHtml(l.message || '')}</td>
 				</tr>
 			`).join('');

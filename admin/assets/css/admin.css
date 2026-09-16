@@ -220,13 +220,15 @@
 	color: var(--wpsg-text-inverse);
 }
 
-.wpsg-btn-secondary {
+.wpsg-btn-secondary,
+.wpsg-btn-outline {
 	background: var(--wpsg-surface);
 	color: var(--wpsg-text-primary);
 	border-color: var(--wpsg-border);
 }
 
-.wpsg-btn-secondary:hover {
+.wpsg-btn-secondary:hover,
+.wpsg-btn-outline:hover {
 	background: var(--wpsg-surface-subtle);
 	border-color: var(--wpsg-border-strong);
 	color: var(--wpsg-text-primary);
