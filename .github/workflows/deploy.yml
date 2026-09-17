@@ -72,8 +72,11 @@ jobs:
         run: |
           php -r '
             $readme = file_get_contents("readme.txt");
+            $version = preg_quote("${{ steps.get_version.outputs.version }}", "/");
             $changelog = "";
-            if (preg_match("/== Changelog ==(.*?)(?:==|$)/s", $readme, $m)) {
+            if (preg_match("/=\s*{$version}\s*=\s*\n(.*?)(?=\n=\s*[0-9]|\n==|$)/s", $readme, $m)) {
+              $changelog = trim($m[1]);
+            } elseif (preg_match("/== Changelog ==(.*?)(?:==|$)/s", $readme, $m)) {
               $changelog = trim($m[1]);
             }
             file_put_contents("/tmp/release_notes.txt", $changelog);
