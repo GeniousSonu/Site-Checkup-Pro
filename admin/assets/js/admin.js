@@ -142,6 +142,9 @@
 		dom.btnCancelSettings = document.getElementById('wpsg-btn-cancel-settings');
 		dom.btnSaveSettings = document.getElementById('wpsg-btn-save-settings');
 		dom.settingPatchstackKey = document.getElementById('wpsg-setting-patchstack-key');
+		dom.settingPatchstackOptin = document.getElementById('wpsg-setting-patchstack-optin');
+		dom.settingWebhookUrl = document.getElementById('wpsg-setting-webhook-url');
+		dom.settingWebhookOptin = document.getElementById('wpsg-setting-webhook-optin');
 		dom.patchstackMaskedStatus = document.getElementById('wpsg-patchstack-masked-status');
 		dom.settingIncidentName = document.getElementById('wpsg-setting-incident-name');
 		dom.settingIncidentEmail = document.getElementById('wpsg-setting-incident-email');
@@ -1385,6 +1388,9 @@
 						? `Current Key: ${res.settings.patchstack_api_key_masked}`
 						: 'No API key set (default checks active).';
 				}
+				if (dom.settingPatchstackOptin) dom.settingPatchstackOptin.checked = !!res.settings.patchstack_optin;
+				if (dom.settingWebhookUrl) dom.settingWebhookUrl.value = res.settings.webhook_url || '';
+				if (dom.settingWebhookOptin) dom.settingWebhookOptin.checked = !!res.settings.webhook_optin;
 				if (dom.settingIncidentName) dom.settingIncidentName.value = res.settings.incident_contact_name || '';
 				if (dom.settingIncidentEmail) dom.settingIncidentEmail.value = res.settings.incident_contact_email || '';
 				if (dom.settingIncidentPhone) dom.settingIncidentPhone.value = res.settings.incident_contact_phone || '';
@@ -1408,6 +1414,9 @@
 		if (dom.settingPatchstackKey && dom.settingPatchstackKey.value.trim()) {
 			payload.patchstack_api_key = dom.settingPatchstackKey.value.trim();
 		}
+		if (dom.settingPatchstackOptin) payload.patchstack_optin = dom.settingPatchstackOptin.checked ? 1 : 0;
+		if (dom.settingWebhookUrl) payload.webhook_url = dom.settingWebhookUrl.value.trim();
+		if (dom.settingWebhookOptin) payload.webhook_optin = dom.settingWebhookOptin.checked ? 1 : 0;
 		if (dom.settingIncidentName) payload.incident_contact_name = dom.settingIncidentName.value.trim();
 		if (dom.settingIncidentEmail) payload.incident_contact_email = dom.settingIncidentEmail.value.trim();
 		if (dom.settingIncidentPhone) payload.incident_contact_phone = dom.settingIncidentPhone.value.trim();

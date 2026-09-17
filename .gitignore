@@ -1,0 +1,7 @@
+# Build and distribution artifacts
+build/
+site-checkup-pro-*.zip
+*.log
+*.tmp
+.DS_Store
+Thumbs.db

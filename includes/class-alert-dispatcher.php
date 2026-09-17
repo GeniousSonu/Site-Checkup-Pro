@@ -65,9 +65,13 @@ class WPSG_Alert_Dispatcher {
 			wp_mail( $email_recipient, $subject, $body );
 		}
 
-		// 2. Webhook notification (SSRF-protected)
-		if ( ! empty( $settings['webhook_url'] ) && class_exists( 'WPSG_SSRF_Guard' ) ) {
-			$webhook_url = esc_url_raw( $settings['webhook_url'] );
+		// 2. Webhook notification (SSRF-protected & WP.org Guideline 7 consent-gated)
+		$plugin_settings = get_option( 'wpsg_settings', array() );
+		$webhook_optin   = ! empty( $plugin_settings['webhook_optin'] ) || ! empty( $settings['webhook_optin'] );
+		$raw_webhook_url = ! empty( $plugin_settings['webhook_url'] ) ? $plugin_settings['webhook_url'] : ( ! empty( $settings['webhook_url'] ) ? $settings['webhook_url'] : '' );
+
+		if ( $webhook_optin && ! empty( $raw_webhook_url ) && class_exists( 'WPSG_SSRF_Guard' ) ) {
+			$webhook_url = esc_url_raw( $raw_webhook_url );
 			$payload     = array(
 				'event'      => sanitize_key( $event_type ),
 				'site_name'  => $site_name,

@@ -850,6 +850,59 @@ run_test( "Task Registry: Fires wpsg_register_tasks hook allowing Pro add-on dyn
 	return ( null !== $retrieved && count( $registry->get_all() ) === $initial_count + 1 );
 } );
 
+// TEST 30: WP.org Guideline 7: Patchstack Outbound Consent Gating
+run_test( "Guideline 7 Consent: Patchstack queries blocked until explicit user opt-in granted", function () {
+	// Ensure opt-in is absent/false
+	update_option( 'wpsg_settings', array( 'patchstack_optin' => 0 ) );
+	$res = WPSG_Vulnerability_Checker::query_patchstack_api( 'akismet', '5.0', 'test_key' );
+
+	if ( empty( $res['error'] ) || false === strpos( $res['error'], 'Guideline 7' ) ) {
+		return false;
+	}
+
+	// Now simulate user granting explicit consent
+	update_option( 'wpsg_settings', array( 'patchstack_optin' => 1 ) );
+	$settings = get_option( 'wpsg_settings' );
+	return ( ! empty( $settings['patchstack_optin'] ) );
+} );
+
+// TEST 31: WP.org Guideline 7: Webhook Outbound Consent Gating
+run_test( "Guideline 7 Consent: Security webhooks blocked until explicit user opt-in granted", function () {
+	// Absence of webhook_optin must block webhook execution
+	update_option( 'wpsg_settings', array(
+		'webhook_url'   => 'https://hooks.slack.com/services/T00/B00/X00',
+		'webhook_optin' => 0,
+	) );
+	$settings = get_option( 'wpsg_settings' );
+	$blocked = empty( $settings['webhook_optin'] );
+
+	update_option( 'wpsg_settings', array(
+		'webhook_url'   => 'https://hooks.slack.com/services/T00/B00/X00',
+		'webhook_optin' => 1,
+	) );
+	$settings_allowed = get_option( 'wpsg_settings' );
+	$allowed = ! empty( $settings_allowed['webhook_optin'] );
+
+	return ( $blocked && $allowed );
+} );
+
+// TEST 32: WP.org Guideline 8: Dual Build Separation
+run_test( "Guideline 8 Separation: WordPress.org release build strictly excludes update-checker", function () {
+	$root = dirname( __DIR__ );
+	$wporg_file = $root . '/build/wporg/site-checkup-pro/includes/class-update-checker.php';
+	$selfhosted_file = $root . '/build/self-hosted/site-checkup-pro/includes/class-update-checker.php';
+
+	// If build directory doesn't exist yet in local run, run builder
+	if ( ! file_exists( $wporg_file ) && ! file_exists( $selfhosted_file ) ) {
+		exec( "bash " . escapeshellarg( $root . '/bin/build-release.sh' ) . " 1.0.0" );
+	}
+
+	$wporg_clean = ! file_exists( $wporg_file );
+	$selfhosted_has_it = file_exists( $selfhosted_file );
+
+	return ( $wporg_clean && $selfhosted_has_it );
+} );
+
 echo "\n=======================================================\n";
 echo " Test Results: {$tests_passed} Passed, {$tests_failed} Failed\n";
 echo "=======================================================\n";

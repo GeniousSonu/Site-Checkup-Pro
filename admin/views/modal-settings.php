@@ -40,6 +40,44 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<input type="password" id="wpsg-setting-patchstack-key" class="wpsg-input" placeholder="<?php esc_attr_e( 'Paste API key or leave blank for default check', 'site-checkup-pro' ); ?>" style="width: 100%;" autocomplete="off" />
 					<p id="wpsg-patchstack-masked-status" style="margin: 4px 0 0 0; font-size: 11px; color: var(--wpsg-text-muted);"></p>
 				</div>
+				<div style="margin-top: 10px; padding: 10px; background: var(--wpsg-bg); border: 1px solid var(--wpsg-border); border-radius: 6px;">
+					<label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px; font-weight: 500; cursor: pointer;">
+						<input type="checkbox" id="wpsg-setting-patchstack-optin" style="margin-top: 2px;" />
+						<span>
+							<strong><?php esc_html_e( 'Allow outbound queries to Patchstack API (Explicit Consent)', 'site-checkup-pro' ); ?></strong><br />
+							<span style="font-weight: 400; color: var(--wpsg-text-secondary); font-size: 11px;">
+								<?php esc_html_e( 'Per WordPress.org Guideline 7, outbound network calls require explicit user consent. When enabled, Site Checkup Pro transmits installed plugin/theme slugs and version numbers to Patchstack (https://patchstack.com/database/api/v2/vulnerabilities) to query public CVE advisories. No personal data, user credentials, or database records are ever transmitted.', 'site-checkup-pro' ); ?>
+							</span>
+						</span>
+					</label>
+				</div>
+			</div>
+
+			<!-- Webhook Notification Settings -->
+			<div class="wpsg-form-section" style="margin-bottom: 20px; padding-top: 16px; border-top: 1px solid var(--wpsg-border);">
+				<h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: var(--wpsg-text-primary);">
+					<?php esc_html_e( 'Security Alert Webhooks (Optional)', 'site-checkup-pro' ); ?>
+				</h4>
+				<p style="margin: 0 0 10px 0; font-size: 12px; color: var(--wpsg-text-secondary);">
+					<?php esc_html_e( 'Forward real-time security alerts (rogue admin creation, login spikes, PHP uploads execution) to an external webhook endpoint (e.g. Slack, Discord, OpsGenie).', 'site-checkup-pro' ); ?>
+				</p>
+				<div class="wpsg-input-group" style="margin-bottom: 8px;">
+					<label for="wpsg-setting-webhook-url" style="display: block; font-size: 12px; font-weight: 500; margin-bottom: 4px;">
+						<?php esc_html_e( 'Webhook Endpoint URL', 'site-checkup-pro' ); ?>
+					</label>
+					<input type="url" id="wpsg-setting-webhook-url" class="wpsg-input" placeholder="https://hooks.slack.com/services/..." style="width: 100%;" />
+				</div>
+				<div style="padding: 10px; background: var(--wpsg-bg); border: 1px solid var(--wpsg-border); border-radius: 6px;">
+					<label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px; font-weight: 500; cursor: pointer;">
+						<input type="checkbox" id="wpsg-setting-webhook-optin" style="margin-top: 2px;" />
+						<span>
+							<strong><?php esc_html_e( 'Allow outbound alert dispatch to this webhook (Explicit Consent)', 'site-checkup-pro' ); ?></strong><br />
+							<span style="font-weight: 400; color: var(--wpsg-text-secondary); font-size: 11px;">
+								<?php esc_html_e( 'Per WordPress.org Guideline 7, outbound notifications require explicit consent. When enabled, alerts send event summaries, timestamp, and site URL to the specified endpoint. Outbound requests are strictly filtered through SSRF guards to block internal/loopback addresses.', 'site-checkup-pro' ); ?>
+							</span>
+						</span>
+					</label>
+				</div>
 			</div>
 
 			<!-- Emergency Incident Response Contact -->

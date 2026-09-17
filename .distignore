@@ -12,7 +12,8 @@ package.json
 package-lock.json
 node_modules/
 build/
-site-checkup-pro.zip
+site-checkup-pro*.zip
+media/*.png
 *.bak
 *.log
 *.tmp

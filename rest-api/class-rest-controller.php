@@ -971,6 +971,9 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			'settings' => array(
 				'patchstack_api_key_masked' => $redacted_key,
 				'has_patchstack_key'        => ! empty( $settings['patchstack_api_key'] ),
+				'patchstack_optin'          => ! empty( $settings['patchstack_optin'] ),
+				'webhook_url'               => isset( $settings['webhook_url'] ) ? $settings['webhook_url'] : '',
+				'webhook_optin'             => ! empty( $settings['webhook_optin'] ),
 				'incident_contact_name'     => isset( $settings['incident_contact_name'] ) ? $settings['incident_contact_name'] : '',
 				'incident_contact_email'    => isset( $settings['incident_contact_email'] ) ? $settings['incident_contact_email'] : '',
 				'incident_contact_phone'    => isset( $settings['incident_contact_phone'] ) ? $settings['incident_contact_phone'] : '',
@@ -990,6 +993,9 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 	public function save_settings( $request ) {
 		$allowlist = array(
 			'patchstack_api_key'     => function( $v ) { return sanitize_text_field( trim( (string) $v ) ); },
+			'patchstack_optin'       => function( $v ) { return ! empty( $v ) ? 1 : 0; },
+			'webhook_url'            => function( $v ) { return esc_url_raw( trim( (string) $v ) ); },
+			'webhook_optin'          => function( $v ) { return ! empty( $v ) ? 1 : 0; },
 			'incident_contact_name'  => function( $v ) { return sanitize_text_field( trim( (string) $v ) ); },
 			'incident_contact_email' => function( $v ) { return sanitize_email( trim( (string) $v ) ); },
 			'incident_contact_phone' => function( $v ) {

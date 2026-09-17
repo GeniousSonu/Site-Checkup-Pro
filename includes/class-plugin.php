@@ -125,8 +125,8 @@ class WPSG_Plugin {
 			WPSG_Notice_Inbox::get_instance();
 		}
 
-		// Initialize Self-Hosted Update Checker.
-		if ( is_admin() && class_exists( 'WPSG_Update_Checker' ) && defined( 'WPSG_PLUGIN_FILE' ) ) {
+		// Initialize Self-Hosted Update Checker (Excluded from WordPress.org directory releases per Guideline 8).
+		if ( is_admin() && file_exists( WPSG_PLUGIN_DIR . 'includes/class-update-checker.php' ) && class_exists( 'WPSG_Update_Checker' ) && defined( 'WPSG_PLUGIN_FILE' ) ) {
 			new WPSG_Update_Checker( WPSG_PLUGIN_FILE, WPSG_VERSION );
 		}
 	}

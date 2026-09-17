@@ -79,30 +79,32 @@ jobs:
             file_put_contents("/tmp/release_notes.txt", $changelog);
           '
 
-      - name: Build Clean Release Package (.distignore Compliant)
+      # Build Dual Distribution Targets (WP.org Guideline 8 Compliance)
+      - name: Build Dual Release Packages
         run: |
-          mkdir -p build/site-checkup-pro
-          # Copy files respecting .distignore
-          rsync -rc --exclude-from='.distignore' ./ build/site-checkup-pro/
-          cd build
-          zip -r ../site-checkup-pro.zip site-checkup-pro
-          cd ..
-          echo "Built release package site-checkup-pro.zip:"
-          ls -lh site-checkup-pro.zip
+          chmod +x bin/build-release.sh
+          ./bin/build-release.sh "${{ steps.get_version.outputs.version }}"
 
-      - name: Create GitHub Release & Upload Asset
+      - name: Create GitHub Release & Upload Assets
         uses: softprops/action-gh-release@v2
         with:
           name: "Site Checkup Pro v${{ steps.get_version.outputs.version }}"
           body_path: /tmp/release_notes.txt
-          files: site-checkup-pro.zip
+          files: |
+            site-checkup-pro.zip
+            site-checkup-pro-selfhosted.zip
+            site-checkup-pro-wporg.zip
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 3. WordPress.org SVN Deploy (Triggers when SVN secrets are present)
-      - name: Deploy to WordPress.org SVN Repository
+      # 3. WordPress.org SVN Deploy (WP.org Guidelines 8, 14 & 15 Compliance)
+      # - Guideline 8: Deploys the stripped WP.org target (zero self-hosted update checkers).
+      # - Guideline 14: Triggered strictly on git tags (v*), never on routine main commits or readme tweaks.
+      # - Guideline 15: 10up action commits atomically to both /tags/{version}/ and /trunk/ in one operation,
+      #   guaranteeing trunk/readme.txt reflects the current version simultaneously.
+      - name: Deploy to WordPress.org SVN Repository (Stripped Guideline 8 Build)
         if: env.SVN_PASSWORD != ''
         uses: 10up/action-wordpress-plugin-deploy-svn@v2.2.2
         with:
@@ -112,3 +114,4 @@ jobs:
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
           SLUG: site-checkup-pro
+          BUILD_DIR: 'build/wporg/site-checkup-pro'

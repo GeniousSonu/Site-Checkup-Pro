@@ -84,9 +84,30 @@ To maintain high directory ranking and community trust, follow these standing op
 
 ---
 
-## 4. Prohibited Tactics (Do NOT Attempt)
+## 4. WordPress.org Guidelines Compliance Rules (Guidelines 3, 14, 15)
+
+### Guideline 3: Sole Canonical Release Rule
+- Once approved on WordPress.org, the SVN-hosted repository is the **sole canonical distribution**.
+- **No Directory Drift**: Never allow the GitHub `main` branch or the self-hosted zip on `genioussonu.me` to drift meaningfully ahead of what is published to WordPress.org SVN for extended periods. Guideline 3 explicitly permits directory removal for this pattern. All release tags must be deployed simultaneously across both channels.
+
+### Guideline 14: Commit Frequency & Anti-Gaming Rules
+- **No Rapid-Fire Commits**: Guideline 14 strictly forbids frequent, trivial SVN commits (especially rapid-fire readme edits) intended to game the "Recently Updated" algorithm.
+- **Tag-Driven Deployment Only**: The CI/CD deploy pipeline is strictly hardcoded to fire on version tags (`v*`), never on push to `main`.
+- **Allowed Readme-Only Exception**: The only permitted readme-only commit to SVN without a code bump is an update to the `Tested up to: X.X` header for a new WordPress core release.
+
+### Guideline 15: Trunk and Tag Version Synchronization
+- Guideline 15 mandates that `readme.txt` in SVN `trunk` must always reflect the current stable version at all times.
+- Automated deployment via `10up/action-wordpress-plugin-deploy-svn` commits the build directory to both `tags/{version}/` and `trunk/` synchronously in a single atomic transaction.
+
+---
+
+## 5. Prohibited Tactics (Do NOT Attempt)
 
 1. **No Keyword Stuffing**: Do not repeat keywords artificially in headings or text blocks.
-2. **No Fake Installs**: Do not script automated downloads or dummy installations.
-3. **No Review Incentives**: Never offer pro features, discounts, or services in exchange for positive reviews.
-4. **No Hidden Telemetry**: All external HTTP connections (Patchstack, WordPress.org API) must remain documented in the `== Third Party Services ==` section of `readme.txt`.
+2. **No Tag Spam**: Keep tags strictly at or below 5 total (Guideline 12 treats >5 tags as spam).
+3. **No Fake Installs**: Do not script automated downloads or dummy installations.
+4. **No Review Incentives**: Never offer pro features, discounts, or services in exchange for positive reviews.
+5. **No Third-Party CDNs**: All scripts and styles must be local (Guideline 8).
+6. **No Unconsented Outbound Telemetry**: Outbound calls to Patchstack or Webhooks require explicit opt-in consent checkboxes in Settings (Guideline 7).
+7. **No Self-Hosted Update Libraries in SVN**: `class-update-checker.php` is stripped from the WP.org build target (Guideline 8).
+

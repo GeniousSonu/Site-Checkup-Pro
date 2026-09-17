@@ -46,14 +46,23 @@ Site Checkup Pro connects to the following external third-party services to deli
 
 2. **Patchstack Vulnerability Database API (`https://patchstack.com`)**
    - **Service & Purpose:** Checks installed plugin and theme versions against the Patchstack vulnerability intelligence database to identify known CVEs.
+   - **Explicit Consent Required:** Outbound queries to Patchstack require an explicit opt-in checkbox to be enabled in Plugin Settings per WordPress.org Guideline 7. If disabled, local plugin assessments are performed with zero outbound network calls.
    - **Data Sent:** Plugin and theme software slugs and version numbers. If configured by an administrator, an optional API authentication key is transmitted over HTTPS. No site visitor data, user credentials, or database contents are sent.
    - **Privacy Policy:** [Patchstack Privacy Policy](https://patchstack.com/privacy-policy/)
    - **Terms of Service:** [Patchstack Terms of Service](https://patchstack.com/terms-of-service/)
 
 3. **User-Configured Alert Webhooks (Optional)**
    - **Service & Purpose:** When configured by an administrator, outbound security event notifications (e.g., brute-force lockouts, rogue admin detections) are dispatched to the customer's chosen webhook endpoint (e.g., Slack, Discord, or agency automation endpoint).
+   - **Explicit Consent Required:** Outbound alert dispatch requires an explicit opt-in checkbox to be enabled in Plugin Settings per WordPress.org Guideline 7.
    - **Data Sent:** Factual incident event summaries (timestamp, alert type, sanitized technical message). Audit logs and webhook payloads strictly redact passwords, security salts, and authentication tokens.
    - **Terms & Privacy:** Governed by the destination endpoint provider chosen by the site administrator.
+
+== Source Code & Development ==
+
+The full, unminified source code for Site Checkup Pro is developed publicly on GitHub:
+https://github.com/GeniousSonu/site-checkup-pro
+
+All JavaScript and CSS distributed in this plugin are 100% human-readable, unminified, locally bundled, and licensed under the GNU General Public License v2 or later per WordPress.org Guidelines 2 and 4.
 
 == Installation ==
 
