@@ -1,7 +1,17 @@
-<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect x="1.5" y="1.5" width="17" height="17" rx="4" fill="#2563EB"/>
-  <circle cx="5" cy="5" r="0.8" fill="#FFFFFF" fill-opacity="0.85"/>
-  <circle cx="7.5" cy="5" r="0.8" fill="#FFFFFF" fill-opacity="0.85"/>
-  <circle cx="10" cy="5" r="0.8" fill="#FFFFFF" fill-opacity="0.85"/>
-  <path d="M5.5 10.5L8.5 13.5L14.5 7.5" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="20" height="20" fill="none" role="img" aria-hidden="true">
+  <!-- Transparent canvas: open inspection ring with integrated verification check -->
+  <path
+    d="M128 24 A104 104 0 1 0 224 128"
+    fill="none"
+    stroke="#3B82F6"
+    stroke-width="28"
+    stroke-linecap="round"/>
+  <path
+    d="M76 137 L113 174 L181 95"
+    fill="none"
+    stroke="#14B8A6"
+    stroke-width="28"
+    stroke-linecap="round"
+    stroke-linejoin="round"/>
+  <circle cx="224" cy="128" r="14" fill="#3B82F6"/>
 </svg>

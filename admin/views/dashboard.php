@@ -29,7 +29,7 @@ $login_slug    = WPSG_Login_Renamer::get_login_slug();
 	<!-- Top Product Header -->
 	<header class="wpsg-page-header">
 		<div class="wpsg-header-title-area">
-			<img src="<?php echo esc_url( WPSG_PLUGIN_URL . 'media/icon.svg' ); ?>" alt="Site Checkup Pro" width="36" height="36" class="wpsg-brand-icon-img" />
+			<img src="<?php echo esc_url( WPSG_PLUGIN_URL . 'media/site-checkup-pro-icon.svg' ); ?>" alt="Site Checkup Pro" width="38" height="38" class="wpsg-brand-icon-img" />
 			<div class="wpsg-header-titles">
 				<h1>
 					<?php esc_html_e( 'Site Checkup Pro', 'site-checkup-pro' ); ?>

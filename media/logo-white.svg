@@ -1,21 +1,20 @@
 <svg width="320" height="48" viewBox="0 0 320 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="wpsgLogoGradWhite" x1="0" y1="4" x2="40" y2="44" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#3B82F6"/>
-      <stop offset="100%" stop-color="#1D4ED8"/>
-    </linearGradient>
-  </defs>
-
-  <!-- Left Icon Lockup (40x40) -->
-  <g transform="translate(0, 4)">
-    <rect width="40" height="40" rx="10" fill="url(#wpsgLogoGradWhite)"/>
-    <circle cx="9" cy="9" r="1.5" fill="#FFFFFF" fill-opacity="0.85"/>
-    <circle cx="14" cy="9" r="1.5" fill="#FFFFFF" fill-opacity="0.85"/>
-    <circle cx="19" cy="9" r="1.5" fill="#FFFFFF" fill-opacity="0.85"/>
-    <rect x="6" y="14" width="28" height="20" rx="5" fill="#FFFFFF"/>
-    <path d="M20 17C23 17 26 18 26 18V24C26 27.5 22.5 30 20 31C17.5 30 14 27.5 14 24V18C14 18 17 17 20 17Z" fill="#EFF6FF"/>
-    <path d="M17 24L19.5 26.5L24 21" stroke="#2563EB" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M22 23L24 21" stroke="#14B8A6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Symbol: Open inspection ring with verification check (40x40) -->
+  <g transform="translate(2, 4)">
+    <path
+      d="M20 4 A16 16 0 1 0 35 20"
+      fill="none"
+      stroke="#3B82F6"
+      stroke-width="4.5"
+      stroke-linecap="round"/>
+    <path
+      d="M12 21 L18 27 L28 15"
+      fill="none"
+      stroke="#14B8A6"
+      stroke-width="4.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"/>
+    <circle cx="35" cy="20" r="2.2" fill="#3B82F6"/>
   </g>
 
   <!-- Wordmark in White/Light Colors -->

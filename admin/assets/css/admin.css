@@ -144,11 +144,16 @@
 }
 
 .wpsg-brand-icon-img {
-	width: 36px;
-	height: 36px;
-	border-radius: var(--wpsg-radius-sm);
+	width: 38px;
+	height: 38px;
 	display: block;
 	flex-shrink: 0;
+	filter: drop-shadow(0 2px 6px rgba(37, 99, 235, 0.22));
+	transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.wpsg-brand-icon-img:hover {
+	transform: scale(1.08) rotate(3deg);
 }
 
 .wpsg-brand-badge .dashicons {

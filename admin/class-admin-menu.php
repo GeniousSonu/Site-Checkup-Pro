@@ -46,6 +46,7 @@ class WPSG_Admin_Menu {
 	private function __construct() {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+		add_action( 'admin_head', array( $this, 'enqueue_admin_menu_icon_styles' ) );
 
 		// Plugin action links and row meta on plugins.php.
 		$basename = defined( 'WPSG_BASENAME' ) ? WPSG_BASENAME : 'site-checkup-pro/site-checkup-pro.php';
@@ -307,5 +308,33 @@ class WPSG_Admin_Menu {
 			esc_attr( $action ),
 			esc_html( $text )
 		);
+	}
+
+	/**
+	 * Output crisp menu icon styles across all admin pages.
+	 * Ensures the custom brand mark is cleanly sized, centered, and smooth on hover.
+	 */
+	public function enqueue_admin_menu_icon_styles() {
+		?>
+		<style id="wpsg-menu-icon-styles">
+			#adminmenu .toplevel_page_site-checkup-pro .wp-menu-image {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			#adminmenu .toplevel_page_site-checkup-pro .wp-menu-image img {
+				width: 19px !important;
+				height: 19px !important;
+				padding: 0 !important;
+				opacity: 0.88;
+				transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease;
+			}
+			#adminmenu .toplevel_page_site-checkup-pro:hover .wp-menu-image img,
+			#adminmenu .toplevel_page_site-checkup-pro.wp-has-current-submenu .wp-menu-image img {
+				opacity: 1;
+				transform: scale(1.12);
+			}
+		</style>
+		<?php
 	}
 }

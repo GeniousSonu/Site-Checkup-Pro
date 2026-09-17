@@ -1,31 +1,25 @@
-<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="wpsgIconGrad" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#3B82F6"/>
-      <stop offset="100%" stop-color="#1D4ED8"/>
-    </linearGradient>
-    <filter id="wpsgShadow" x="8" y="24" width="64" height="48" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0F172A" flood-opacity="0.12"/>
-    </filter>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="80" height="80" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Site Checkup Pro mark</title>
+  <desc id="desc">An open inspection ring with an integrated verification check.</desc>
 
-  <!-- Base Rounded Container -->
-  <rect width="80" height="80" rx="18" fill="url(#wpsgIconGrad)"/>
+  <!-- Transparent canvas: open inspection ring with integrated verification check -->
+  <path
+    d="M128 24
+       A104 104 0 1 0 224 128"
+    fill="none"
+    stroke="#2563EB"
+    stroke-width="30"
+    stroke-linecap="round"/>
 
-  <!-- Browser Header Dots -->
-  <circle cx="18" cy="16" r="3" fill="#FFFFFF" fill-opacity="0.8"/>
-  <circle cx="28" cy="16" r="3" fill="#FFFFFF" fill-opacity="0.8"/>
-  <circle cx="38" cy="16" r="3" fill="#FFFFFF" fill-opacity="0.8"/>
+  <path
+    d="M76 137
+       L113 174
+       L181 95"
+    fill="none"
+    stroke="#14B8A6"
+    stroke-width="30"
+    stroke-linecap="round"
+    stroke-linejoin="round"/>
 
-  <!-- Inner Surface Window -->
-  <rect x="12" y="26" width="56" height="42" rx="10" fill="#FFFFFF" filter="url(#wpsgShadow)"/>
-
-  <!-- Shield Shape Subtle Background inside window -->
-  <path d="M40 32C46 32 52 34 52 34V46C52 53 45 58 40 60C35 58 28 53 28 46V34C28 34 34 32 40 32Z" fill="#EFF6FF"/>
-
-  <!-- Precision Checkmark -->
-  <path d="M33 46L38 51L48 40" stroke="#2563EB" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
-  
-  <!-- Teal Verification Accent on Tip -->
-  <path d="M44 44L48 40" stroke="#14B8A6" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="224" cy="128" r="15" fill="#2563EB"/>
 </svg>
