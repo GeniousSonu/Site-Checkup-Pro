@@ -53,8 +53,8 @@
 			headers['X-WP-Nonce'] = window.wpsgData.nonce;
 		}
 
-		// Try apiCall first if available
-		if (window.wp && typeof window.apiCall === 'function') {
+		// Try window.wp.apiFetch first if available
+		if (window.wp && typeof window.wp.apiFetch === 'function') {
 			try {
 				const apiFetchOpts = {
 					path: path,
@@ -64,14 +64,14 @@
 				if (data && method !== 'GET') {
 					apiFetchOpts.data = data;
 				}
-				return await window.apiCall(apiFetchOpts);
+				return await window.wp.apiFetch(apiFetchOpts);
 			} catch (fetchErr) {
 				// If server returned structured WP_Error with code and message, re-throw it
 				if (fetchErr && fetchErr.code && fetchErr.message) {
 					throw fetchErr;
 				}
 				// Otherwise fall through to native fetch fallback
-				console.warn('apiCall encountered an error, attempting native fetch fallback:', fetchErr);
+				console.warn('wp.apiFetch encountered an error, attempting native fetch fallback:', fetchErr);
 			}
 		}
 
@@ -143,10 +143,10 @@
 		if (!dom.app) return;
 		initialized = true;
 
-		// Setup nonce middleware on apiCall if available
-		if (window.wp && window.apiCall && window.apiCall.createNonceMiddleware && window.wpsgData && window.wpsgData.nonce) {
+		// Setup nonce middleware on wp.apiFetch if available
+		if (window.wp && window.wp.apiFetch && window.wp.apiFetch.createNonceMiddleware && window.wpsgData && window.wpsgData.nonce) {
 			try {
-				window.apiCall.use(window.apiCall.createNonceMiddleware(window.wpsgData.nonce));
+				window.wp.apiFetch.use(window.wp.apiFetch.createNonceMiddleware(window.wpsgData.nonce));
 			} catch (_) {}
 		}
 
@@ -305,6 +305,39 @@
 		dom.settingIncidentNotes = document.getElementById('wpsg-setting-incident-notes');
 		dom.settingAgencyName = document.getElementById('wpsg-setting-agency-name');
 		dom.settingsSaveStatus = document.getElementById('wpsg-settings-save-status');
+
+		// Posture Hero & Gauge
+		dom.posturePct = document.getElementById('wpsg-posture-pct');
+		dom.postureGrade = document.getElementById('wpsg-posture-grade');
+		dom.postureStatsText = document.getElementById('wpsg-posture-stats-text');
+		dom.gaugeCircle = document.getElementById('wpsg-gauge-circle');
+		dom.btnHeroRunSafe = document.getElementById('wpsg-btn-hero-run-safe');
+		dom.btnHeroViewAll = document.getElementById('wpsg-btn-hero-view-all');
+
+		// Attention queue on Overview
+		dom.overviewAttention = document.getElementById('wpsg-overview-attention');
+		dom.attentionCount = document.getElementById('wpsg-attention-count');
+		dom.attentionItems = document.getElementById('wpsg-attention-items');
+
+		// In-page Settings
+		dom.pageSettingPatchstackKey = document.getElementById('wpsg-page-setting-patchstack-key');
+		dom.pagePatchstackMaskedStatus = document.getElementById('wpsg-page-patchstack-masked-status');
+		dom.pageSettingPatchstackOptin = document.getElementById('wpsg-page-setting-patchstack-optin');
+		dom.pagePanelDetectionInfo = document.getElementById('wpsg-page-panel-detection-info');
+		dom.pageSettingPanelType = document.getElementById('wpsg-page-setting-panel-type');
+		dom.pageSettingPanelUrl = document.getElementById('wpsg-page-setting-panel-url');
+		dom.pageSettingPanelToken = document.getElementById('wpsg-page-setting-panel-token');
+		dom.pagePanelMaskedStatus = document.getElementById('wpsg-page-panel-masked-status');
+		dom.pageSettingPanelOptin = document.getElementById('wpsg-page-setting-panel-optin');
+		dom.pageSettingWebhookUrl = document.getElementById('wpsg-page-setting-webhook-url');
+		dom.pageSettingWebhookOptin = document.getElementById('wpsg-page-setting-webhook-optin');
+		dom.pageSettingIncidentName = document.getElementById('wpsg-page-setting-incident-name');
+		dom.pageSettingIncidentEmail = document.getElementById('wpsg-page-setting-incident-email');
+		dom.pageSettingIncidentPhone = document.getElementById('wpsg-page-setting-incident-phone');
+		dom.pageSettingAgencyName = document.getElementById('wpsg-page-setting-agency-name');
+		dom.pageSettingIncidentNotes = document.getElementById('wpsg-page-setting-incident-notes');
+		dom.pageSettingsSaveStatus = document.getElementById('wpsg-page-settings-save-status');
+		dom.btnPageSaveSettings = document.getElementById('wpsg-btn-page-save-settings');
 	}
 
 	/**
@@ -339,6 +372,21 @@
 			if (catCard && !e.target.closest('button, a')) {
 				const targetSec = catCard.getAttribute('data-section-target');
 				if (targetSec) switchTab(targetSec);
+				return;
+			}
+
+			// Attention item Go / Inspect button (.wpsg-attention-go-btn)
+			const attGoBtn = e.target.closest('.wpsg-attention-go-btn');
+			if (attGoBtn) {
+				e.preventDefault();
+				const targetSec = attGoBtn.getAttribute('data-go-section') || 'all';
+				const targetTaskId = attGoBtn.getAttribute('data-go-task') || '';
+				switchTab(targetSec);
+				if (targetTaskId && dom.searchTasks) {
+					dom.searchTasks.value = targetTaskId;
+					state.searchQuery = targetTaskId;
+					renderTasksTable();
+				}
 				return;
 			}
 
@@ -462,6 +510,19 @@
 		// Run Section Batch Button
 		if (dom.btnRunSection) {
 			dom.btnRunSection.addEventListener('click', runCurrentSectionBatch);
+		}
+
+		// Hero Posture Banner Buttons
+		if (dom.btnHeroRunSafe) {
+			dom.btnHeroRunSafe.addEventListener('click', runBatchSafeTasks);
+		}
+		if (dom.btnHeroViewAll) {
+			dom.btnHeroViewAll.addEventListener('click', () => switchTab('all'));
+		}
+
+		// In-page Settings Save Button
+		if (dom.btnPageSaveSettings) {
+			dom.btnPageSaveSettings.addEventListener('click', () => saveSettings(true));
 		}
 
 		// Quick Buttons in Overview
@@ -868,11 +929,11 @@
 	}
 
 	/**
-	 * Update KPI summary cards
+	 * Update KPI summary cards & Executive Posture Gauge
 	 */
 	function updateKpis() {
 		if (dom.kpiCoverage) dom.kpiCoverage.textContent = `${state.sopCoveragePct}%`;
-		if (dom.kpiFraction) dom.kpiFraction.textContent = `${state.doneCount} / ${state.totalCount} tasks`;
+		if (dom.kpiFraction) dom.kpiFraction.textContent = `${state.doneCount} of ${state.totalCount} tasks active`;
 		if (dom.coverageBar) dom.coverageBar.style.width = `${state.sopCoveragePct}%`;
 		if (dom.kpiServer) dom.kpiServer.textContent = state.serverType.toUpperCase();
 
@@ -880,7 +941,98 @@
 		const reminderCount = state.tasks.filter(t => t.next_reminder_at).length;
 		if (dom.kpiReminders) dom.kpiReminders.textContent = reminderCount;
 
+		renderPostureGauge();
+		renderAttentionQueue();
 		updateOverviewStats();
+	}
+
+	/**
+	 * Render Executive Security Posture SVG Gauge & Grade
+	 */
+	function renderPostureGauge() {
+		const total = state.totalCount || state.tasks.length || 1;
+		const done = state.doneCount || state.tasks.filter(t => t.status === 'done' || t.status === 'applied_unverified').length;
+		const pct = Math.min(100, Math.round((done / total) * 100));
+
+		if (dom.posturePct) dom.posturePct.textContent = `${pct}%`;
+
+		// Grade calculation
+		let grade = 'Grade D';
+		let strokeColor = '#ef4444'; // Red
+		if (pct >= 90) {
+			grade = 'Grade A+';
+			strokeColor = '#10b981';
+		} else if (pct >= 75) {
+			grade = 'Grade A';
+			strokeColor = '#10b981';
+		} else if (pct >= 60) {
+			grade = 'Grade B';
+			strokeColor = '#06b6d4';
+		} else if (pct >= 40) {
+			grade = 'Grade C';
+			strokeColor = '#f59e0b';
+		}
+
+		if (dom.postureGrade) {
+			dom.postureGrade.textContent = grade;
+			dom.postureGrade.style.color = strokeColor;
+		}
+
+		// Animate circular progress SVG
+		if (dom.gaugeCircle) {
+			const circumference = 2 * Math.PI * 50; // ~314.159
+			const offset = circumference - (pct / 100) * circumference;
+			dom.gaugeCircle.style.strokeDasharray = `${circumference}`;
+			dom.gaugeCircle.style.strokeDashoffset = `${offset}`;
+			dom.gaugeCircle.style.stroke = strokeColor;
+		}
+
+		if (dom.postureStatsText) {
+			dom.postureStatsText.textContent = `${done} of ${total} verified standard operating procedures active across all 6 hardening domains.`;
+		}
+	}
+
+	/**
+	 * Render Priority Action Needed Queue on Overview
+	 */
+	function renderAttentionQueue() {
+		if (!dom.overviewAttention || !dom.attentionItems) return;
+
+		const attentionTasks = state.tasks.filter(t => t.status === 'attention' || t.status === 'failed');
+
+		if (attentionTasks.length === 0) {
+			dom.overviewAttention.style.display = 'none';
+			return;
+		}
+
+		dom.overviewAttention.style.display = 'block';
+		if (dom.attentionCount) {
+			dom.attentionCount.textContent = `${attentionTasks.length} ${attentionTasks.length === 1 ? 'item requires attention' : 'items require attention'}`;
+		}
+
+		dom.attentionItems.innerHTML = attentionTasks.slice(0, 5).map(task => {
+			const isFailed = task.status === 'failed';
+			const badgeClass = isFailed ? 'wpsg-status-critical' : 'wpsg-status-attention';
+			const badgeLabel = isFailed ? 'Failed' : 'Action Needed';
+			const reason = task.live_message || task.description || 'Verification requires administrator review.';
+
+			return `
+				<div class="wpsg-attention-item">
+					<div class="wpsg-attention-item-info">
+						<span class="wpsg-status-indicator ${badgeClass}"><span class="wpsg-status-dot"></span> ${badgeLabel}</span>
+						<div>
+							<div class="wpsg-attention-item-title">${escapeHtml(task.title)}</div>
+							<div class="wpsg-attention-item-reason">${escapeHtml(reason)}</div>
+						</div>
+					</div>
+					<div class="wpsg-action-group">
+						<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-primary wpsg-attention-go-btn" data-go-task="${escapeHtml(task.id)}" data-go-section="${escapeHtml(task.section)}">
+							<span class="dashicons dashicons-arrow-right-alt"></span> Inspect & Resolve
+						</button>
+					</div>
+				</div>
+			`;
+		}).join('');
 	}
 
 	/**
@@ -896,10 +1048,10 @@
 
 		if (state.activeTab === 'overview') {
 			if (dom.panelOverview) dom.panelOverview.style.display = 'block';
-			if (dom.panelTasks) dom.panelTasks.style.display = 'block';
+			if (dom.panelTasks) dom.panelTasks.style.display = 'none'; // Clean separation: overview dashboard only!
 			updateOverviewStats();
-			updateSectionBanner();
-			renderTasksTable();
+			renderPostureGauge();
+			renderAttentionQueue();
 		} else if (state.activeTab === 'features') {
 			if (dom.panelFeatures) dom.panelFeatures.style.display = 'block';
 		} else if (state.activeTab === 'audit_trail') {
@@ -907,6 +1059,7 @@
 			loadAuditLogs();
 		} else if (state.activeTab === 'settings') {
 			if (dom.panelSettings) dom.panelSettings.style.display = 'block';
+			loadSettings(true);
 		} else {
 			// Specific task section or 'all'
 			if (dom.panelTasks) dom.panelTasks.style.display = 'block';
@@ -1919,91 +2072,158 @@
 	}
 
 	/**
-	 * Settings Modal Operations
+	 * Settings Operations (Modal & In-Page)
 	 */
 	async function openSettingsModal() {
 		if (!dom.modalSettings) return;
 		openModal(dom.modalSettings);
-		if (dom.settingsSaveStatus) dom.settingsSaveStatus.textContent = 'Loading settings...';
+		await loadSettings(false);
+	}
+
+	async function loadSettings(isPage = false) {
+		const statusEl = isPage ? dom.pageSettingsSaveStatus : dom.settingsSaveStatus;
+		if (statusEl) statusEl.textContent = 'Loading settings...';
 		try {
 			const res = await apiCall({ path: '/site-checkup-pro/v1/settings' });
 			if (res && res.settings) {
+				const s = res.settings;
+
+				// Patchstack API Key
 				if (dom.settingPatchstackKey) dom.settingPatchstackKey.value = '';
-				if (dom.patchstackMaskedStatus) {
-					dom.patchstackMaskedStatus.textContent = res.settings.has_patchstack_key
-						? `Current Key: ${res.settings.patchstack_api_key_masked}`
-						: 'No API key set (default checks active).';
-				}
-				if (dom.settingPatchstackOptin) dom.settingPatchstackOptin.checked = !!res.settings.patchstack_optin;
+				if (dom.pageSettingPatchstackKey) dom.pageSettingPatchstackKey.value = '';
+
+				const patchstackMasked = s.has_patchstack_key
+					? `Current Key: ${s.patchstack_api_key_masked}`
+					: 'No API key set (default checks active).';
+				if (dom.patchstackMaskedStatus) dom.patchstackMaskedStatus.textContent = patchstackMasked;
+				if (dom.pagePatchstackMaskedStatus) dom.pagePatchstackMaskedStatus.textContent = patchstackMasked;
+
+				if (dom.settingPatchstackOptin) dom.settingPatchstackOptin.checked = !!s.patchstack_optin;
+				if (dom.pageSettingPatchstackOptin) dom.pageSettingPatchstackOptin.checked = !!s.patchstack_optin;
 
 				// Hosting Panel Bridge
-				if (dom.settingPanelType) dom.settingPanelType.value = res.settings.hosting_panel_type || '';
-				if (dom.settingPanelUrl) dom.settingPanelUrl.value = res.settings.hosting_panel_url || '';
+				if (dom.settingPanelType) dom.settingPanelType.value = s.hosting_panel_type || '';
+				if (dom.pageSettingPanelType) dom.pageSettingPanelType.value = s.hosting_panel_type || '';
+
+				if (dom.settingPanelUrl) dom.settingPanelUrl.value = s.hosting_panel_url || '';
+				if (dom.pageSettingPanelUrl) dom.pageSettingPanelUrl.value = s.hosting_panel_url || '';
+
 				if (dom.settingPanelToken) dom.settingPanelToken.value = '';
-				if (dom.panelMaskedStatus) {
-					dom.panelMaskedStatus.textContent = res.settings.hosting_panel_has_token
-						? 'Token configured & encrypted at rest with HKDF + AES-256-GCM / libsodium.'
-						: 'No API token configured.';
+				if (dom.pageSettingPanelToken) dom.pageSettingPanelToken.value = '';
+
+				const panelMasked = s.hosting_panel_has_token
+					? 'Token configured & encrypted at rest with HKDF + AES-256-GCM / libsodium.'
+					: 'No API token configured.';
+				if (dom.panelMaskedStatus) dom.panelMaskedStatus.textContent = panelMasked;
+				if (dom.pagePanelMaskedStatus) dom.pagePanelMaskedStatus.textContent = panelMasked;
+
+				if (dom.settingPanelOptin) dom.settingPanelOptin.checked = !!s.hosting_panel_optin;
+				if (dom.pageSettingPanelOptin) dom.pageSettingPanelOptin.checked = !!s.hosting_panel_optin;
+
+				let detectionHtml = '';
+				if (s.detected_panel) {
+					detectionHtml += `Auto-detected server environment: <strong>${escapeHtml(s.detected_panel)}</strong>. `;
 				}
-				if (dom.settingPanelOptin) dom.settingPanelOptin.checked = !!res.settings.hosting_panel_optin;
-				if (dom.panelDetectionInfo) {
-					let info = '';
-					if (res.settings.detected_panel) {
-						info += `Auto-detected server environment: <strong>${escapeHtml(res.settings.detected_panel)}</strong>. `;
-					}
-					if (res.settings.nginx_tier === 'tier2') {
-						info += '<span style="color:#10b981;font-weight:600;">&bull; Tier 2 Companion Script Active</span>';
-					} else if (res.settings.nginx_tier === 'tier1') {
-						info += '<span style="color:#10b981;font-weight:600;">&bull; Tier 1 Control Panel Bridge Active</span>';
-					} else {
-						info += '<span style="color:#d97706;font-weight:500;">&bull; Direct file-write mode / Manual Nginx</span>';
-					}
-					dom.panelDetectionInfo.innerHTML = info;
-					dom.panelDetectionInfo.style.display = 'block';
+				if (s.nginx_tier === 'tier2') {
+					detectionHtml += '<span style="color:#10b981;font-weight:600;">&bull; Tier 2 Companion Script Active</span>';
+				} else if (s.nginx_tier === 'tier1') {
+					detectionHtml += '<span style="color:#10b981;font-weight:600;">&bull; Tier 1 Control Panel Bridge Active</span>';
+				} else {
+					detectionHtml += '<span style="color:#d97706;font-weight:500;">&bull; Direct file-write mode / Manual Nginx</span>';
 				}
 
-				if (dom.settingWebhookUrl) dom.settingWebhookUrl.value = res.settings.webhook_url || '';
-				if (dom.settingWebhookOptin) dom.settingWebhookOptin.checked = !!res.settings.webhook_optin;
-				if (dom.settingIncidentName) dom.settingIncidentName.value = res.settings.incident_contact_name || '';
-				if (dom.settingIncidentEmail) dom.settingIncidentEmail.value = res.settings.incident_contact_email || '';
-				if (dom.settingIncidentPhone) dom.settingIncidentPhone.value = res.settings.incident_contact_phone || '';
-				if (dom.settingIncidentNotes) dom.settingIncidentNotes.value = res.settings.incident_contact_notes || '';
-				if (dom.settingAgencyName) dom.settingAgencyName.value = res.settings.agency_name || '';
-				if (dom.settingsSaveStatus) dom.settingsSaveStatus.textContent = '';
+				if (dom.panelDetectionInfo) {
+					dom.panelDetectionInfo.innerHTML = detectionHtml;
+					dom.panelDetectionInfo.style.display = 'block';
+				}
+				if (dom.pagePanelDetectionInfo) {
+					dom.pagePanelDetectionInfo.innerHTML = detectionHtml;
+					dom.pagePanelDetectionInfo.style.display = 'block';
+				}
+
+				// Webhook
+				if (dom.settingWebhookUrl) dom.settingWebhookUrl.value = s.webhook_url || '';
+				if (dom.pageSettingWebhookUrl) dom.pageSettingWebhookUrl.value = s.webhook_url || '';
+
+				if (dom.settingWebhookOptin) dom.settingWebhookOptin.checked = !!s.webhook_optin;
+				if (dom.pageSettingWebhookOptin) dom.pageSettingWebhookOptin.checked = !!s.webhook_optin;
+
+				// Incident Contact & Agency
+				if (dom.settingIncidentName) dom.settingIncidentName.value = s.incident_contact_name || '';
+				if (dom.pageSettingIncidentName) dom.pageSettingIncidentName.value = s.incident_contact_name || '';
+
+				if (dom.settingIncidentEmail) dom.settingIncidentEmail.value = s.incident_contact_email || '';
+				if (dom.pageSettingIncidentEmail) dom.pageSettingIncidentEmail.value = s.incident_contact_email || '';
+
+				if (dom.settingIncidentPhone) dom.settingIncidentPhone.value = s.incident_contact_phone || '';
+				if (dom.pageSettingIncidentPhone) dom.pageSettingIncidentPhone.value = s.incident_contact_phone || '';
+
+				if (dom.settingIncidentNotes) dom.settingIncidentNotes.value = s.incident_contact_notes || '';
+				if (dom.pageSettingIncidentNotes) dom.pageSettingIncidentNotes.value = s.incident_contact_notes || '';
+
+				if (dom.settingAgencyName) dom.settingAgencyName.value = s.agency_name || '';
+				if (dom.pageSettingAgencyName) dom.pageSettingAgencyName.value = s.agency_name || '';
+
+				if (statusEl) statusEl.textContent = '';
 			}
 		} catch (e) {
-			if (dom.settingsSaveStatus) dom.settingsSaveStatus.textContent = 'Error loading settings.';
+			if (statusEl) statusEl.textContent = 'Error loading settings.';
 		}
 	}
 
-	async function saveSettings() {
-		if (!dom.btnSaveSettings) return;
-		const orig = dom.btnSaveSettings.innerHTML;
-		dom.btnSaveSettings.disabled = true;
-		dom.btnSaveSettings.innerHTML = '<span class="wpsg-spinner" aria-hidden="true"></span> Saving...';
-		if (dom.settingsSaveStatus) dom.settingsSaveStatus.textContent = '';
+	async function saveSettings(isPage = false) {
+		const btn = isPage ? dom.btnPageSaveSettings : dom.btnSaveSettings;
+		const statusEl = isPage ? dom.pageSettingsSaveStatus : dom.settingsSaveStatus;
+		if (!btn) return;
+
+		const orig = btn.innerHTML;
+		btn.disabled = true;
+		btn.innerHTML = '<span class="wpsg-spinner" aria-hidden="true"></span> Saving...';
+		if (statusEl) statusEl.textContent = '';
 
 		const payload = {};
-		if (dom.settingPatchstackKey && dom.settingPatchstackKey.value.trim()) {
-			payload.patchstack_api_key = dom.settingPatchstackKey.value.trim();
-		}
-		if (dom.settingPatchstackOptin) payload.patchstack_optin = dom.settingPatchstackOptin.checked ? 1 : 0;
 
-		// Hosting Panel Bridge
-		if (dom.settingPanelType) payload.hosting_panel_type = dom.settingPanelType.value;
-		if (dom.settingPanelUrl) payload.hosting_panel_url = dom.settingPanelUrl.value.trim();
-		if (dom.settingPanelToken && dom.settingPanelToken.value.trim()) {
-			payload.hosting_panel_token = dom.settingPanelToken.value.trim();
-		}
-		if (dom.settingPanelOptin) payload.hosting_panel_optin = dom.settingPanelOptin.checked ? 1 : 0;
+		if (isPage) {
+			if (dom.pageSettingPatchstackKey && dom.pageSettingPatchstackKey.value.trim()) {
+				payload.patchstack_api_key = dom.pageSettingPatchstackKey.value.trim();
+			}
+			if (dom.pageSettingPatchstackOptin) payload.patchstack_optin = dom.pageSettingPatchstackOptin.checked ? 1 : 0;
 
-		if (dom.settingWebhookUrl) payload.webhook_url = dom.settingWebhookUrl.value.trim();
-		if (dom.settingWebhookOptin) payload.webhook_optin = dom.settingWebhookOptin.checked ? 1 : 0;
-		if (dom.settingIncidentName) payload.incident_contact_name = dom.settingIncidentName.value.trim();
-		if (dom.settingIncidentEmail) payload.incident_contact_email = dom.settingIncidentEmail.value.trim();
-		if (dom.settingIncidentPhone) payload.incident_contact_phone = dom.settingIncidentPhone.value.trim();
-		if (dom.settingIncidentNotes) payload.incident_contact_notes = dom.settingIncidentNotes.value.trim();
-		if (dom.settingAgencyName) payload.agency_name = dom.settingAgencyName.value.trim();
+			if (dom.pageSettingPanelType) payload.hosting_panel_type = dom.pageSettingPanelType.value;
+			if (dom.pageSettingPanelUrl) payload.hosting_panel_url = dom.pageSettingPanelUrl.value.trim();
+			if (dom.pageSettingPanelToken && dom.pageSettingPanelToken.value.trim()) {
+				payload.hosting_panel_token = dom.pageSettingPanelToken.value.trim();
+			}
+			if (dom.pageSettingPanelOptin) payload.hosting_panel_optin = dom.pageSettingPanelOptin.checked ? 1 : 0;
+
+			if (dom.pageSettingWebhookUrl) payload.webhook_url = dom.pageSettingWebhookUrl.value.trim();
+			if (dom.pageSettingWebhookOptin) payload.webhook_optin = dom.pageSettingWebhookOptin.checked ? 1 : 0;
+			if (dom.pageSettingIncidentName) payload.incident_contact_name = dom.pageSettingIncidentName.value.trim();
+			if (dom.pageSettingIncidentEmail) payload.incident_contact_email = dom.pageSettingIncidentEmail.value.trim();
+			if (dom.pageSettingIncidentPhone) payload.incident_contact_phone = dom.pageSettingIncidentPhone.value.trim();
+			if (dom.pageSettingIncidentNotes) payload.incident_contact_notes = dom.pageSettingIncidentNotes.value.trim();
+			if (dom.pageSettingAgencyName) payload.agency_name = dom.pageSettingAgencyName.value.trim();
+		} else {
+			if (dom.settingPatchstackKey && dom.settingPatchstackKey.value.trim()) {
+				payload.patchstack_api_key = dom.settingPatchstackKey.value.trim();
+			}
+			if (dom.settingPatchstackOptin) payload.patchstack_optin = dom.settingPatchstackOptin.checked ? 1 : 0;
+
+			if (dom.settingPanelType) payload.hosting_panel_type = dom.settingPanelType.value;
+			if (dom.settingPanelUrl) payload.hosting_panel_url = dom.settingPanelUrl.value.trim();
+			if (dom.settingPanelToken && dom.settingPanelToken.value.trim()) {
+				payload.hosting_panel_token = dom.settingPanelToken.value.trim();
+			}
+			if (dom.settingPanelOptin) payload.hosting_panel_optin = dom.settingPanelOptin.checked ? 1 : 0;
+
+			if (dom.settingWebhookUrl) payload.webhook_url = dom.settingWebhookUrl.value.trim();
+			if (dom.settingWebhookOptin) payload.webhook_optin = dom.settingWebhookOptin.checked ? 1 : 0;
+			if (dom.settingIncidentName) payload.incident_contact_name = dom.settingIncidentName.value.trim();
+			if (dom.settingIncidentEmail) payload.incident_contact_email = dom.settingIncidentEmail.value.trim();
+			if (dom.settingIncidentPhone) payload.incident_contact_phone = dom.settingIncidentPhone.value.trim();
+			if (dom.settingIncidentNotes) payload.incident_contact_notes = dom.settingIncidentNotes.value.trim();
+			if (dom.settingAgencyName) payload.agency_name = dom.settingAgencyName.value.trim();
+		}
 
 		try {
 			const res = await apiCall({
@@ -2012,17 +2232,32 @@
 				data: payload,
 			});
 			if (res && res.success) {
-				if (dom.settingsSaveStatus) dom.settingsSaveStatus.textContent = 'Settings saved!';
-				setTimeout(() => {
-					closeAllModals();
+				if (statusEl) {
+					statusEl.style.color = 'var(--wpsg-success)';
+					statusEl.textContent = 'Settings saved successfully!';
+				}
+				await loadSettings(isPage);
+
+				if (!isPage) {
+					setTimeout(() => {
+						closeAllModals();
+						loadTasks();
+					}, 600);
+				} else {
 					loadTasks();
-				}, 600);
+					setTimeout(() => {
+						if (statusEl) statusEl.textContent = '';
+					}, 4000);
+				}
 			}
 		} catch (e) {
-			if (dom.settingsSaveStatus) dom.settingsSaveStatus.textContent = e.message || 'Failed to save settings.';
+			if (statusEl) {
+				statusEl.style.color = 'var(--wpsg-danger)';
+				statusEl.textContent = e.message || 'Failed to save settings.';
+			}
 		} finally {
-			dom.btnSaveSettings.disabled = false;
-			dom.btnSaveSettings.innerHTML = orig;
+			btn.disabled = false;
+			btn.innerHTML = orig;
 		}
 	}
 

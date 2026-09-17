@@ -205,80 +205,171 @@ $login_slug    = WPSG_Login_Renamer::get_login_slug();
 		<!-- Right Content Panels Area -->
 		<div class="wpsg-main-content">
 
-			<!-- PANEL 1: OVERVIEW (Default Landing) -->
+			<!-- PANEL 1: OVERVIEW (Executive Command Center) -->
 			<section class="wpsg-panel" id="wpsg-panel-overview">
-				
-				<!-- Factual KPI Metric Strip -->
-				<div class="wpsg-kpi-strip" aria-label="<?php esc_attr_e( 'System Status Overview', 'site-checkup-pro' ); ?>">
+
+				<!-- Executive Security Posture Hero Banner -->
+				<div class="wpsg-posture-hero">
+					<div class="wpsg-posture-gauge-col">
+						<div class="wpsg-gauge-wrapper">
+							<svg class="wpsg-gauge-svg" viewBox="0 0 120 120">
+								<circle class="wpsg-gauge-bg" cx="60" cy="60" r="50" />
+								<circle class="wpsg-gauge-progress" id="wpsg-gauge-circle" cx="60" cy="60" r="50" stroke-dasharray="314.159" stroke-dashoffset="314.159" />
+							</svg>
+							<div class="wpsg-gauge-center">
+								<span class="wpsg-gauge-score" id="wpsg-posture-pct">0%</span>
+								<span class="wpsg-gauge-grade" id="wpsg-posture-grade">Grade --</span>
+							</div>
+						</div>
+					</div>
+					<div class="wpsg-posture-info-col">
+						<div class="wpsg-posture-badge-row">
+							<span class="wpsg-pulse-badge">
+								<span class="wpsg-pulse-dot"></span>
+								<?php esc_html_e( 'Real-Time Protection Active', 'site-checkup-pro' ); ?>
+							</span>
+							<span class="wpsg-posture-env-pill">
+								<?php echo esc_html( strtoupper( $server_type ) ); ?> &bull; PHP <?php echo esc_html( PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION ); ?>
+							</span>
+						</div>
+						<h2 class="wpsg-posture-title"><?php esc_html_e( 'Site Security Hardening & Posture', 'site-checkup-pro' ); ?></h2>
+						<p class="wpsg-posture-desc" id="wpsg-posture-stats-text">
+							<?php esc_html_e( 'Calculating verified standard operating procedures across all 6 hardening domains...', 'site-checkup-pro' ); ?>
+						</p>
+						<div class="wpsg-posture-actions">
+							<button type="button" class="wpsg-btn wpsg-btn-primary wpsg-btn-hero" id="wpsg-btn-hero-run-safe">
+								<span class="dashicons dashicons-controls-play"></span> <?php esc_html_e( 'Run Safe Verification Tasks', 'site-checkup-pro' ); ?>
+							</button>
+							<button type="button" class="wpsg-btn wpsg-btn-secondary" id="wpsg-btn-hero-view-all">
+								<span class="dashicons dashicons-list-view"></span> <?php esc_html_e( 'Inspect All Checks', 'site-checkup-pro' ); ?>
+							</button>
+						</div>
+					</div>
+				</div>
+
+				<!-- Priority Action Needed Queue (Rendered conditionally via JS) -->
+				<div class="wpsg-attention-block" id="wpsg-overview-attention" style="display: none;">
+					<div class="wpsg-attention-header">
+						<div class="wpsg-attention-title-area">
+							<span class="dashicons dashicons-warning wpsg-attention-icon"></span>
+							<div>
+								<h3><?php esc_html_e( 'Priority Action Required', 'site-checkup-pro' ); ?></h3>
+								<p><?php esc_html_e( 'These items have failed verification or require immediate administrator attention.', 'site-checkup-pro' ); ?></p>
+							</div>
+						</div>
+						<span class="wpsg-attention-badge" id="wpsg-attention-count">0 items</span>
+					</div>
+					<div class="wpsg-attention-list" id="wpsg-attention-items">
+						<!-- Populated via admin.js -->
+					</div>
+				</div>
+
+				<!-- 4 High-Impact KPI Metric Cards -->
+				<div class="wpsg-kpi-grid" aria-label="<?php esc_attr_e( 'System Status Overview', 'site-checkup-pro' ); ?>">
 					
 					<!-- KPI 1: SOP Coverage -->
-					<div class="wpsg-kpi-cell">
-						<div class="wpsg-kpi-header-row">
-							<span class="wpsg-kpi-title"><?php esc_html_e( 'SOP Coverage', 'site-checkup-pro' ); ?></span>
-							<span class="dashicons dashicons-chart-pie" aria-hidden="true"></span>
+					<div class="wpsg-kpi-card">
+						<div class="wpsg-kpi-card-header">
+							<span class="wpsg-kpi-card-title"><?php esc_html_e( 'SOP Checklist Coverage', 'site-checkup-pro' ); ?></span>
+							<div class="wpsg-kpi-icon-wrap wpsg-icon-brand">
+								<span class="dashicons dashicons-chart-pie"></span>
+							</div>
 						</div>
-						<div class="wpsg-kpi-metric" id="wpsg-kpi-coverage">0%</div>
-						<p class="wpsg-kpi-meta-line" id="wpsg-kpi-fraction">0 / 0 tasks active</p>
-						<div class="wpsg-kpi-progress-track">
-							<div class="wpsg-kpi-progress-fill" id="wpsg-coverage-bar" style="width: 0%;"></div>
+						<div class="wpsg-kpi-card-body">
+							<div class="wpsg-kpi-card-metric" id="wpsg-kpi-coverage">0%</div>
+							<p class="wpsg-kpi-card-meta" id="wpsg-kpi-fraction"><?php esc_html_e( '0 of 0 tasks active', 'site-checkup-pro' ); ?></p>
+							<div class="wpsg-kpi-progress-track">
+								<div class="wpsg-kpi-progress-fill" id="wpsg-coverage-bar" style="width: 0%;"></div>
+							</div>
 						</div>
-						<p class="wpsg-kpi-disclaimer-note"><?php esc_html_e( 'Factual checklist coverage; not a penetration test.', 'site-checkup-pro' ); ?></p>
+						<div class="wpsg-kpi-card-footer">
+							<span class="wpsg-kpi-footnote"><?php esc_html_e( 'Factual SOP verification', 'site-checkup-pro' ); ?></span>
+						</div>
 					</div>
 
-					<!-- KPI 2: Server Environment -->
-					<div class="wpsg-kpi-cell">
-						<div class="wpsg-kpi-header-row">
-							<span class="wpsg-kpi-title"><?php esc_html_e( 'Environment', 'site-checkup-pro' ); ?></span>
-							<span class="dashicons dashicons-networking" aria-hidden="true"></span>
+					<!-- KPI 2: Server Environment & Directives -->
+					<div class="wpsg-kpi-card">
+						<div class="wpsg-kpi-card-header">
+							<span class="wpsg-kpi-card-title"><?php esc_html_e( 'Web Server Architecture', 'site-checkup-pro' ); ?></span>
+							<div class="wpsg-kpi-icon-wrap wpsg-icon-server">
+								<span class="dashicons dashicons-networking"></span>
+							</div>
 						</div>
-						<div class="wpsg-kpi-metric" id="wpsg-kpi-server"><?php echo esc_html( strtoupper( $server_type ) ); ?></div>
-						<p class="wpsg-kpi-meta-line">
-							<?php if ( $has_htaccess ) : ?>
-								<span class="wpsg-status-indicator wpsg-status-done">
-									<span class="wpsg-status-dot"></span> <?php esc_html_e( '.htaccess active', 'site-checkup-pro' ); ?>
-								</span>
-							<?php else : ?>
-								<span class="wpsg-status-indicator wpsg-status-na">
-									<span class="wpsg-status-dot"></span> <?php esc_html_e( 'Nginx Directives Mode', 'site-checkup-pro' ); ?>
-								</span>
-							<?php endif; ?>
-						</p>
-						<p class="wpsg-kpi-disclaimer-note"><?php printf( esc_html__( 'PHP %s runtime.', 'site-checkup-pro' ), esc_html( PHP_VERSION ) ); ?></p>
+						<div class="wpsg-kpi-card-body">
+							<div class="wpsg-kpi-card-metric" id="wpsg-kpi-server"><?php echo esc_html( strtoupper( $server_type ) ); ?></div>
+							<p class="wpsg-kpi-card-meta">
+								<?php if ( $has_htaccess ) : ?>
+									<span class="wpsg-status-indicator wpsg-status-done">
+										<span class="wpsg-status-dot"></span> <?php esc_html_e( '.htaccess rules supported', 'site-checkup-pro' ); ?>
+									</span>
+								<?php else : ?>
+									<span class="wpsg-status-indicator wpsg-status-attention" id="wpsg-kpi-nginx-tier-indicator">
+										<span class="wpsg-status-dot"></span> <?php esc_html_e( 'Nginx Directives Mode', 'site-checkup-pro' ); ?>
+									</span>
+								<?php endif; ?>
+							</p>
+						</div>
+						<div class="wpsg-kpi-card-footer">
+							<span class="wpsg-kpi-footnote"><?php printf( esc_html__( 'PHP %s engine', 'site-checkup-pro' ), esc_html( PHP_VERSION ) ); ?></span>
+						</div>
 					</div>
 
-					<!-- KPI 3: Backup Gate -->
-					<div class="wpsg-kpi-cell">
-						<div class="wpsg-kpi-header-row">
-							<span class="wpsg-kpi-title"><?php esc_html_e( 'Backup Protection', 'site-checkup-pro' ); ?></span>
-							<span class="dashicons dashicons-backup" aria-hidden="true"></span>
+					<!-- KPI 3: Backup Safety Gate -->
+					<div class="wpsg-kpi-card">
+						<div class="wpsg-kpi-card-header">
+							<span class="wpsg-kpi-card-title"><?php esc_html_e( 'Backup Safety Gate', 'site-checkup-pro' ); ?></span>
+							<div class="wpsg-kpi-icon-wrap wpsg-icon-backup">
+								<span class="dashicons dashicons-backup"></span>
+							</div>
 						</div>
-						<div class="wpsg-kpi-metric" id="wpsg-kpi-backup-name">
-							<?php echo ! empty( $backup_status['plugin_name'] ) ? esc_html( $backup_status['plugin_name'] ) : esc_html__( 'Unverified', 'site-checkup-pro' ); ?>
+						<div class="wpsg-kpi-card-body">
+							<div class="wpsg-kpi-card-metric" id="wpsg-kpi-backup-name">
+								<?php echo ! empty( $backup_status['plugin_name'] ) ? esc_html( $backup_status['plugin_name'] ) : esc_html__( 'Unverified', 'site-checkup-pro' ); ?>
+							</div>
+							<p class="wpsg-kpi-card-meta">
+								<?php if ( ! empty( $backup_status['is_recent'] ) ) : ?>
+									<span class="wpsg-status-indicator wpsg-status-done">
+										<span class="wpsg-status-dot"></span> <?php printf( esc_html__( 'Verified (%s hrs ago)', 'site-checkup-pro' ), esc_html( $backup_status['age_hours'] ) ); ?>
+									</span>
+								<?php else : ?>
+									<span class="wpsg-status-indicator wpsg-status-attention">
+										<span class="wpsg-status-dot"></span> <?php esc_html_e( 'Backup > 48h required', 'site-checkup-pro' ); ?>
+									</span>
+								<?php endif; ?>
+							</p>
 						</div>
-						<p class="wpsg-kpi-meta-line">
-							<?php if ( ! empty( $backup_status['is_recent'] ) ) : ?>
-								<span class="wpsg-status-indicator wpsg-status-done">
-									<span class="wpsg-status-dot"></span> <?php printf( esc_html__( 'Verified (%s hrs ago)', 'site-checkup-pro' ), esc_html( $backup_status['age_hours'] ) ); ?>
-								</span>
-							<?php else : ?>
-								<span class="wpsg-status-indicator wpsg-status-attention">
-									<span class="wpsg-status-dot"></span> <?php esc_html_e( 'Backup > 48h required', 'site-checkup-pro' ); ?>
-								</span>
-							<?php endif; ?>
-						</p>
-						<p class="wpsg-kpi-disclaimer-note"><?php esc_html_e( 'Protects all file-modifying tasks.', 'site-checkup-pro' ); ?></p>
+						<div class="wpsg-kpi-card-footer">
+							<span class="wpsg-kpi-footnote"><?php esc_html_e( 'Protects all file-writing tasks', 'site-checkup-pro' ); ?></span>
+						</div>
 					</div>
 
-					<!-- KPI 4: Reminders -->
-					<div class="wpsg-kpi-cell">
-						<div class="wpsg-kpi-header-row">
-							<span class="wpsg-kpi-title"><?php esc_html_e( 'Scheduled Checks', 'site-checkup-pro' ); ?></span>
-							<span class="dashicons dashicons-clock" aria-hidden="true"></span>
+					<!-- KPI 4: Active Defenses & Reminders -->
+					<div class="wpsg-kpi-card">
+						<div class="wpsg-kpi-card-header">
+							<span class="wpsg-kpi-card-title"><?php esc_html_e( 'Cadence & Defense', 'site-checkup-pro' ); ?></span>
+							<div class="wpsg-kpi-icon-wrap wpsg-icon-clock">
+								<span class="dashicons dashicons-shield"></span>
+							</div>
 						</div>
-						<div class="wpsg-kpi-metric" id="wpsg-kpi-reminders">0</div>
-						<p class="wpsg-kpi-meta-line"><?php esc_html_e( 'Active cadence reminders', 'site-checkup-pro' ); ?></p>
-						<p class="wpsg-kpi-disclaimer-note"><?php esc_html_e( '15-day credentials & 6-month reviews.', 'site-checkup-pro' ); ?></p>
+						<div class="wpsg-kpi-card-body">
+							<div class="wpsg-kpi-card-metric" id="wpsg-kpi-reminders">0</div>
+							<p class="wpsg-kpi-card-meta">
+								<?php if ( ! empty( $login_slug ) ) : ?>
+									<span class="wpsg-status-indicator wpsg-status-done">
+										<span class="wpsg-status-dot"></span> <?php printf( esc_html__( 'Custom Login (/%s/)', 'site-checkup-pro' ), esc_html( $login_slug ) ); ?>
+									</span>
+								<?php else : ?>
+									<span class="wpsg-status-indicator wpsg-status-attention">
+										<span class="wpsg-status-dot"></span> <?php esc_html_e( 'Default Login Active', 'site-checkup-pro' ); ?>
+									</span>
+								<?php endif; ?>
+							</p>
+						</div>
+						<div class="wpsg-kpi-card-footer">
+							<span class="wpsg-kpi-footnote"><?php esc_html_e( '15-day reviews & lockouts active', 'site-checkup-pro' ); ?></span>
+						</div>
 					</div>
+
 				</div>
 
 				<!-- Section Cards Grid: Clear, organized category navigation -->
@@ -751,13 +842,159 @@ $login_slug    = WPSG_Login_Renamer::get_login_slug();
 					</div>
 				</div>
 
-				<div class="wpsg-settings-page-card">
-					<p style="color: var(--wpsg-text-secondary); margin-bottom: 20px;">
-						<?php esc_html_e( 'Click the button below to configure API integrations, emergency alert emails, Slack webhook endpoints, and automated cadence schedules.', 'site-checkup-pro' ); ?>
-					</p>
-					<button type="button" class="wpsg-btn wpsg-btn-primary" id="wpsg-btn-trigger-settings-modal">
-						<span class="dashicons dashicons-admin-generic"></span> <?php esc_html_e( 'Open Settings Modal', 'site-checkup-pro' ); ?>
-					</button>
+				<div class="wpsg-settings-inpage-container">
+					<form id="wpsg-inpage-settings-form" onsubmit="return false;">
+						
+						<!-- Section 1: Patchstack API -->
+						<div class="wpsg-settings-card">
+							<div class="wpsg-settings-card-header">
+								<div class="wpsg-settings-icon wpsg-icon-brand"><span class="dashicons dashicons-shield"></span></div>
+								<div>
+									<h3><?php esc_html_e( 'Patchstack Vulnerability Intelligence API', 'site-checkup-pro' ); ?></h3>
+									<p><?php esc_html_e( 'Live cross-referencing of installed plugins & themes against active CVE vulnerabilities.', 'site-checkup-pro' ); ?></p>
+								</div>
+							</div>
+							<div class="wpsg-settings-card-body">
+								<div class="wpsg-input-group">
+									<label for="wpsg-page-setting-patchstack-key"><?php esc_html_e( 'Patchstack API Token', 'site-checkup-pro' ); ?></label>
+									<input type="password" id="wpsg-page-setting-patchstack-key" class="wpsg-input" placeholder="<?php esc_attr_e( 'Paste API key or leave blank for default local advisories', 'site-checkup-pro' ); ?>" autocomplete="off" />
+									<p id="wpsg-page-patchstack-masked-status" class="wpsg-input-hint"></p>
+								</div>
+								<div class="wpsg-consent-box">
+									<label class="wpsg-checkbox-label">
+										<input type="checkbox" id="wpsg-page-setting-patchstack-optin" />
+										<span>
+											<strong><?php esc_html_e( 'Allow outbound queries to Patchstack API (Explicit Consent)', 'site-checkup-pro' ); ?></strong><br />
+											<span class="wpsg-consent-desc">
+												<?php esc_html_e( 'Per WordPress.org Guideline 7, outbound network calls require explicit consent. Transmits installed plugin/theme slugs and versions to Patchstack to check public advisories. No personal data or database records are ever transmitted.', 'site-checkup-pro' ); ?>
+											</span>
+										</span>
+									</label>
+								</div>
+							</div>
+						</div>
+
+						<!-- Section 2: Hosting Control Panel Bridge (Nginx Tier 1) -->
+						<div class="wpsg-settings-card">
+							<div class="wpsg-settings-card-header">
+								<div class="wpsg-settings-icon wpsg-icon-server"><span class="dashicons dashicons-networking"></span></div>
+								<div>
+									<h3><?php esc_html_e( 'Hosting Control Panel Bridge (Nginx Tier 1 Directives)', 'site-checkup-pro' ); ?></h3>
+									<p><?php esc_html_e( 'For sites running on Nginx, route directive applications through your hosting panel official API.', 'site-checkup-pro' ); ?></p>
+								</div>
+							</div>
+							<div class="wpsg-settings-card-body">
+								<div id="wpsg-page-panel-detection-info" class="wpsg-detection-pill" style="display: none;"></div>
+								<div class="wpsg-form-grid-2">
+									<div class="wpsg-input-group">
+										<label for="wpsg-page-setting-panel-type"><?php esc_html_e( 'Control Panel Type', 'site-checkup-pro' ); ?></label>
+										<select id="wpsg-page-setting-panel-type" class="wpsg-select">
+											<option value=""><?php esc_html_e( 'None / Not Applicable', 'site-checkup-pro' ); ?></option>
+											<option value="cpanel"><?php esc_html_e( 'cPanel (UAPI)', 'site-checkup-pro' ); ?></option>
+											<option value="plesk"><?php esc_html_e( 'Plesk (REST API)', 'site-checkup-pro' ); ?></option>
+											<option value="cloudpanel"><?php esc_html_e( 'CloudPanel (v2 API)', 'site-checkup-pro' ); ?></option>
+											<option value="runcloud"><?php esc_html_e( 'RunCloud (API)', 'site-checkup-pro' ); ?></option>
+											<option value="cyberpanel"><?php esc_html_e( 'CyberPanel (REST API)', 'site-checkup-pro' ); ?></option>
+										</select>
+									</div>
+									<div class="wpsg-input-group">
+										<label for="wpsg-page-setting-panel-url"><?php esc_html_e( 'Panel URL / Port', 'site-checkup-pro' ); ?></label>
+										<input type="url" id="wpsg-page-setting-panel-url" class="wpsg-input" placeholder="https://cp.server.com:8443" />
+									</div>
+								</div>
+								<div class="wpsg-input-group">
+									<label for="wpsg-page-setting-panel-token"><?php esc_html_e( 'API Token / Secret Key (Stored Encrypted)', 'site-checkup-pro' ); ?></label>
+									<input type="password" id="wpsg-page-setting-panel-token" class="wpsg-input" placeholder="<?php esc_attr_e( 'Paste panel API token (stored encrypted with HKDF + AES-256-GCM)', 'site-checkup-pro' ); ?>" autocomplete="off" />
+									<p id="wpsg-page-panel-masked-status" class="wpsg-input-hint"></p>
+								</div>
+								<div class="wpsg-consent-box">
+									<label class="wpsg-checkbox-label">
+										<input type="checkbox" id="wpsg-page-setting-panel-optin" />
+										<span>
+											<strong><?php esc_html_e( 'Authorize API Directive Application (Explicit Consent)', 'site-checkup-pro' ); ?></strong><br />
+											<span class="wpsg-consent-desc">
+												<?php esc_html_e( 'Authorizes Site Checkup Pro to transmit authenticated Nginx directive configurations to the specified control panel API endpoint. Token is never logged or exported.', 'site-checkup-pro' ); ?>
+											</span>
+										</span>
+									</label>
+								</div>
+							</div>
+						</div>
+
+						<!-- Section 3: Security Alert Webhooks -->
+						<div class="wpsg-settings-card">
+							<div class="wpsg-settings-card-header">
+								<div class="wpsg-settings-icon wpsg-icon-clock"><span class="dashicons dashicons-bell"></span></div>
+								<div>
+									<h3><?php esc_html_e( 'Security Alert Webhooks', 'site-checkup-pro' ); ?></h3>
+									<p><?php esc_html_e( 'Forward real-time security alerts (rogue admin creation, login spikes, PHP uploads execution) to Slack or Discord.', 'site-checkup-pro' ); ?></p>
+								</div>
+							</div>
+							<div class="wpsg-settings-card-body">
+								<div class="wpsg-input-group">
+									<label for="wpsg-page-setting-webhook-url"><?php esc_html_e( 'Webhook Endpoint URL', 'site-checkup-pro' ); ?></label>
+									<input type="url" id="wpsg-page-setting-webhook-url" class="wpsg-input" placeholder="https://hooks.slack.com/services/..." />
+								</div>
+								<div class="wpsg-consent-box">
+									<label class="wpsg-checkbox-label">
+										<input type="checkbox" id="wpsg-page-setting-webhook-optin" />
+										<span>
+											<strong><?php esc_html_e( 'Allow outbound alert dispatch to this webhook (Explicit Consent)', 'site-checkup-pro' ); ?></strong><br />
+											<span class="wpsg-consent-desc">
+												<?php esc_html_e( 'Transmits event summaries, timestamp, and site URL to the specified endpoint. Outbound requests are strictly verified through SSRF guards.', 'site-checkup-pro' ); ?>
+											</span>
+										</span>
+									</label>
+								</div>
+							</div>
+						</div>
+
+						<!-- Section 4: Emergency Incident Contacts & Agency -->
+						<div class="wpsg-settings-card">
+							<div class="wpsg-settings-card-header">
+								<div class="wpsg-settings-icon wpsg-icon-backup"><span class="dashicons dashicons-groups"></span></div>
+								<div>
+									<h3><?php esc_html_e( 'Incident Escalation & Agency Information', 'site-checkup-pro' ); ?></h3>
+									<p><?php esc_html_e( 'Designate emergency contacts for after-hours breaches and configure agency white-labeling.', 'site-checkup-pro' ); ?></p>
+								</div>
+							</div>
+							<div class="wpsg-settings-card-body">
+								<div class="wpsg-form-grid-2">
+									<div class="wpsg-input-group">
+										<label for="wpsg-page-setting-incident-name"><?php esc_html_e( 'Emergency Contact Person / Role', 'site-checkup-pro' ); ?></label>
+										<input type="text" id="wpsg-page-setting-incident-name" class="wpsg-input" placeholder="e.g. Lead SecOps Engineer" />
+									</div>
+									<div class="wpsg-input-group">
+										<label for="wpsg-page-setting-incident-email"><?php esc_html_e( 'Emergency Email', 'site-checkup-pro' ); ?></label>
+										<input type="email" id="wpsg-page-setting-incident-email" class="wpsg-input" placeholder="e.g. security@clientsite.com" />
+									</div>
+								</div>
+								<div class="wpsg-form-grid-2">
+									<div class="wpsg-input-group">
+										<label for="wpsg-page-setting-incident-phone"><?php esc_html_e( 'Emergency Phone / Pager', 'site-checkup-pro' ); ?></label>
+										<input type="text" id="wpsg-page-setting-incident-phone" class="wpsg-input" placeholder="e.g. +1 (555) 019-2831" />
+									</div>
+									<div class="wpsg-input-group">
+										<label for="wpsg-page-setting-agency-name"><?php esc_html_e( 'Agency / Preparer Name (Client Reports)', 'site-checkup-pro' ); ?></label>
+										<input type="text" id="wpsg-page-setting-agency-name" class="wpsg-input" placeholder="e.g. Acme Security Services" />
+									</div>
+								</div>
+								<div class="wpsg-input-group">
+									<label for="wpsg-page-setting-incident-notes"><?php esc_html_e( 'Incident Protocol & Vault Reference', 'site-checkup-pro' ); ?></label>
+									<textarea id="wpsg-page-setting-incident-notes" class="wpsg-textarea" rows="2" placeholder="<?php esc_attr_e( 'e.g. Contact 24/7 hosting desk, access 1Password Emergency Vault for root credentials.', 'site-checkup-pro' ); ?>"></textarea>
+								</div>
+							</div>
+						</div>
+
+						<!-- Settings Actions Bar -->
+						<div class="wpsg-settings-footer-bar">
+							<span id="wpsg-page-settings-save-status" class="wpsg-save-status"></span>
+							<button type="button" class="wpsg-btn wpsg-btn-primary wpsg-btn-lg" id="wpsg-btn-page-save-settings">
+								<span class="dashicons dashicons-saved"></span> <?php esc_html_e( 'Save All Settings', 'site-checkup-pro' ); ?>
+							</button>
+						</div>
+
+					</form>
 				</div>
 
 			</section>
