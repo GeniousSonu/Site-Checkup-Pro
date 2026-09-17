@@ -30,8 +30,9 @@ elif [ -f "/home/dayshift/.config/Local/lightning-services/php-8.2.29+0/bin/linu
     LD_LIBRARY_PATH=/home/dayshift/.config/Local/lightning-services/php-8.2.29+0/bin/linux/shared-libs /home/dayshift/.config/Local/lightning-services/php-8.2.29+0/bin/linux/bin/php bin/check-version-consistency.php --tag="v${VERSION}"
 fi
 
-# Clean previous build artifacts
+# Clean previous build artifacts and old root zip variants
 rm -rf build/
+rm -f site-checkup-pro-selfhosted.zip site-checkup-pro-wporg.zip
 mkdir -p build/self-hosted/site-checkup-pro
 mkdir -p build/wporg/site-checkup-pro
 
@@ -40,11 +41,10 @@ echo "Packaging Target 1: Self-Hosted (with Update Checker)..."
 rsync -rc --exclude-from='.distignore' ./ build/self-hosted/site-checkup-pro/
 
 cd build/self-hosted
-zip -r ../../site-checkup-pro-selfhosted.zip site-checkup-pro -x "*.DS_Store"
-cp ../../site-checkup-pro-selfhosted.zip ../../site-checkup-pro.zip
+zip -r ../site-checkup-pro-selfhosted.zip site-checkup-pro -x "*.DS_Store"
 cd "${ROOT_DIR}"
 
-# 3. Build Target B: WordPress.org SVN Release (Guideline 8 Compliant: Strips Update Checker)
+# 3. Build Target B: WordPress.org Release (Guideline 8 Compliant: Strips Update Checker)
 echo "Packaging Target 2: WordPress.org Compliant (stripped update-checker)..."
 rsync -rc --exclude-from='.distignore' ./ build/wporg/site-checkup-pro/
 
@@ -52,13 +52,15 @@ rsync -rc --exclude-from='.distignore' ./ build/wporg/site-checkup-pro/
 rm -f build/wporg/site-checkup-pro/includes/class-update-checker.php
 
 cd build/wporg
-zip -r ../../site-checkup-pro-wporg.zip site-checkup-pro -x "*.DS_Store"
+zip -r ../site-checkup-pro-wporg.zip site-checkup-pro -x "*.DS_Store"
+# Copy the clean, fully compliant WP.org package as the official root release with the actual plugin name
+cp ../site-checkup-pro-wporg.zip "${ROOT_DIR}/site-checkup-pro.zip"
 cd "${ROOT_DIR}"
 
 echo ""
 echo "======================================================="
 echo " Build Complete:"
-echo " 1. Self-Hosted Zip: site-checkup-pro.zip ($(du -h site-checkup-pro.zip | cut -f1))"
-echo " 2. WP.org Directory: build/wporg/site-checkup-pro/"
-echo " 3. WP.org Zip:      site-checkup-pro-wporg.zip ($(du -h site-checkup-pro-wporg.zip | cut -f1))"
+echo " Official Package: site-checkup-pro.zip ($(du -h site-checkup-pro.zip | cut -f1)) [WP.org Compliant, Latest]"
+echo " WP.org Build Dir: build/wporg/site-checkup-pro/"
+echo " Self-Hosted Zip:  build/site-checkup-pro-selfhosted.zip ($(du -h build/site-checkup-pro-selfhosted.zip | cut -f1))"
 echo "======================================================="
