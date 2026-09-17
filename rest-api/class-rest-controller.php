@@ -351,12 +351,11 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 	}
 
 	/**
-	 * Get tasks catalog with live status and section groupings.
+	 * Get tasks catalog array with live status and section groupings.
 	 *
-	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * @return array
 	 */
-	public function get_tasks( $request ) {
+	public function get_tasks_catalog() {
 		global $wpdb;
 
 		$registry = WPSG_Task_Registry::get_instance();
@@ -421,7 +420,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 		$supports_htaccess = WPSG_Htaccess_Manager::supports_htaccess();
 		$backup_status     = WPSG_Backup_Guard::get_backup_status();
 
-		return rest_ensure_response( array(
+		return array(
 			'tasks'             => $serialized_tasks,
 			'sections'          => WPSG_Task_Registry::$sections,
 			'safe_instant_ids'  => $safe_instant_ids,
@@ -431,7 +430,17 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			'server_type'       => $server_type,
 			'supports_htaccess' => $supports_htaccess,
 			'backup_status'     => $backup_status,
-		) );
+		);
+	}
+
+	/**
+	 * Get tasks catalog with live status and section groupings (REST callback).
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
+	 */
+	public function get_tasks( $request ) {
+		return rest_ensure_response( $this->get_tasks_catalog() );
 	}
 
 	/**

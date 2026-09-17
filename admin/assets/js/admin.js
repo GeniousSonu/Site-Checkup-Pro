@@ -11,6 +11,9 @@
 (function () {
 	'use strict';
 
+	// Boot Guard
+	let initialized = false;
+
 	// Main App State
 	const state = {
 		tasks: [],
@@ -37,11 +40,123 @@
 	const dom = {};
 
 	/**
+	 * Resilient REST API caller with automatic nonce injection & native fetch fallback
+	 */
+	async function apiCall(options) {
+		const path = options.path;
+		const method = options.method || 'GET';
+		const data = options.data || null;
+		const headers = Object.assign({}, options.headers || {});
+
+		// Ensure standard WP REST nonce is present for cookie authentication
+		if (window.wpsgData && window.wpsgData.nonce && !headers['X-WP-Nonce']) {
+			headers['X-WP-Nonce'] = window.wpsgData.nonce;
+		}
+
+		// Try apiCall first if available
+		if (window.wp && typeof window.apiCall === 'function') {
+			try {
+				const apiFetchOpts = {
+					path: path,
+					method: method,
+					headers: headers,
+				};
+				if (data && method !== 'GET') {
+					apiFetchOpts.data = data;
+				}
+				return await window.apiCall(apiFetchOpts);
+			} catch (fetchErr) {
+				// If server returned structured WP_Error with code and message, re-throw it
+				if (fetchErr && fetchErr.code && fetchErr.message) {
+					throw fetchErr;
+				}
+				// Otherwise fall through to native fetch fallback
+				console.warn('apiCall encountered an error, attempting native fetch fallback:', fetchErr);
+			}
+		}
+
+		// Native fetch fallback
+		const baseUrl = (window.wpsgData && window.wpsgData.restUrl)
+			? window.wpsgData.restUrl.replace(/\/$/, '')
+			: '/wp-json/site-checkup-pro/v1';
+		const relativePath = path.replace(/^\/site-checkup-pro\/v1/, '');
+		const fullUrl = baseUrl + relativePath;
+
+		const fetchOptions = {
+			method: method,
+			headers: Object.assign({
+				'Accept': 'application/json',
+				'Content-Type': 'application/json',
+			}, headers),
+			credentials: 'same-origin',
+		};
+
+		if (data && method !== 'GET') {
+			fetchOptions.body = JSON.stringify(data);
+		}
+
+		const response = await fetch(fullUrl, fetchOptions);
+		let responseData = {};
+		try {
+			responseData = await response.json();
+		} catch (_) {
+			responseData = {};
+		}
+
+		if (!response.ok) {
+			const msg = responseData.message || ('Server error (' + response.status + ')');
+			const err = new Error(msg);
+			err.status = response.status;
+			err.code = responseData.code;
+			throw err;
+		}
+
+		return responseData;
+	}
+
+	/**
+	 * Apply tasks catalog payload into local state and refresh views
+	 */
+	function applyTasksPayload(res) {
+		if (!res) return;
+		state.tasks = res.tasks || [];
+		state.sections = res.sections || {};
+		state.safeInstantIds = res.safe_instant_ids || [];
+		state.totalCount = res.total_count || 0;
+		state.doneCount = res.done_count || 0;
+		state.sopCoveragePct = res.sop_coverage_pct || 0;
+		if (res.server_type) state.serverType = res.server_type;
+		if (typeof res.supports_htaccess !== 'undefined') state.supportsHtaccess = res.supports_htaccess;
+		state.backupStatus = res.backup_status || {};
+
+		updateKpis();
+		renderViews();
+	}
+
+	/**
 	 * Initialize Application
 	 */
 	function init() {
+		if (initialized) return;
+
 		cacheDom();
+		if (!dom.app) return;
+		initialized = true;
+
+		// Setup nonce middleware on apiCall if available
+		if (window.wp && window.apiCall && window.apiCall.createNonceMiddleware && window.wpsgData && window.wpsgData.nonce) {
+			try {
+				window.apiCall.use(window.apiCall.createNonceMiddleware(window.wpsgData.nonce));
+			} catch (_) {}
+		}
+
 		bindEvents();
+
+		// Hydrate immediately from server-rendered initial data (Zero-latency UI render)
+		if (window.wpsgData && window.wpsgData.initialData) {
+			applyTasksPayload(window.wpsgData.initialData);
+		}
+
 		loadTasks();
 		initReviewPrompt();
 	}
@@ -192,37 +307,133 @@
 	function bindEvents() {
 		if (!dom.app) return;
 
-		// Tab Switching (Sidebar and top navigation)
-		document.querySelectorAll('.wpsg-tab').forEach(tab => {
-			tab.addEventListener('click', (e) => {
+		// 1. Delegated Click Listener on dom.app for 100% reliable interaction across re-renders
+		dom.app.addEventListener('click', (e) => {
+			// Tab buttons (.wpsg-tab)
+			const tabBtn = e.target.closest('.wpsg-tab');
+			if (tabBtn) {
 				e.preventDefault();
-				const targetTab = tab.getAttribute('data-tab');
-				if (targetTab) {
-					switchTab(targetTab);
-				}
-			});
-		});
+				const targetTab = tabBtn.getAttribute('data-tab');
+				if (targetTab) switchTab(targetTab);
+				return;
+			}
 
-		// Overview Category Card Clicks
-		document.querySelectorAll('[data-open-tab]').forEach(btn => {
-			btn.addEventListener('click', (e) => {
+			// Overview category card buttons [data-open-tab]
+			const openTabBtn = e.target.closest('[data-open-tab]');
+			if (openTabBtn) {
 				e.preventDefault();
 				e.stopPropagation();
-				const targetTab = btn.getAttribute('data-open-tab');
-				if (targetTab) {
-					switchTab(targetTab);
+				const targetTab = openTabBtn.getAttribute('data-open-tab');
+				if (targetTab) switchTab(targetTab);
+				return;
+			}
+
+			// Overview category cards (.wpsg-category-card)
+			const catCard = e.target.closest('.wpsg-category-card');
+			if (catCard && !e.target.closest('button, a')) {
+				const targetSec = catCard.getAttribute('data-section-target');
+				if (targetSec) switchTab(targetSec);
+				return;
+			}
+
+			// Modal close buttons [data-close-modal]
+			const closeBtn = e.target.closest('[data-close-modal]');
+			if (closeBtn) {
+				e.preventDefault();
+				closeAllModals();
+				return;
+			}
+
+			// Table Row Actions: Run Button
+			const runBtn = e.target.closest('.wpsg-btn-run');
+			if (runBtn) {
+				e.preventDefault();
+				const id = runBtn.getAttribute('data-id');
+				if (id) runTask(id, runBtn);
+				return;
+			}
+
+			// Table Row Actions: Undo Button
+			const undoBtn = e.target.closest('.wpsg-btn-undo');
+			if (undoBtn) {
+				e.preventDefault();
+				const id = undoBtn.getAttribute('data-id');
+				if (id) undoTask(id, undoBtn);
+				return;
+			}
+
+			// Table Row Actions: Diff Button
+			const diffBtn = e.target.closest('.wpsg-btn-diff');
+			if (diffBtn) {
+				e.preventDefault();
+				const id = diffBtn.getAttribute('data-id');
+				if (id) openDiffModal(id);
+				return;
+			}
+
+			// Table Row Actions: Nginx Snippet Button
+			const nginxBtn = e.target.closest('.wpsg-btn-view-nginx');
+			if (nginxBtn) {
+				e.preventDefault();
+				const id = nginxBtn.getAttribute('data-id');
+				if (id) openNginxModal(id);
+				return;
+			}
+
+			// Table Row Actions: Note / Mark Done Button
+			const noteBtn = e.target.closest('.wpsg-btn-open-note');
+			if (noteBtn) {
+				e.preventDefault();
+				const id = noteBtn.getAttribute('data-id');
+				if (id) openNoteModal(id);
+				return;
+			}
+
+			// Table Row Actions: Login Rename Button
+			const openLoginRenameBtn = e.target.closest('.wpsg-btn-open-login-rename');
+			if (openLoginRenameBtn) {
+				e.preventDefault();
+				openModal(dom.modalLoginRename);
+				return;
+			}
+
+			// Table Row Actions: Sessions Modal Button
+			const openSessionsBtn = e.target.closest('.wpsg-btn-open-sessions');
+			if (openSessionsBtn) {
+				e.preventDefault();
+				loadSessions();
+				return;
+			}
+
+			// Table Row Actions: App Passwords Modal Button
+			const openAppPassBtn = e.target.closest('.wpsg-btn-open-app-passwords');
+			if (openAppPassBtn) {
+				e.preventDefault();
+				loadAppPasswords();
+				return;
+			}
+
+			// Table Row Actions: CSP Reports Modal Button
+			const openCspBtn = e.target.closest('.wpsg-btn-open-csp-reports');
+			if (openCspBtn) {
+				e.preventDefault();
+				openCspReportsModal();
+				return;
+			}
+		});
+
+		// Close modals on overlay backdrop click
+		document.querySelectorAll('.wpsg-modal-overlay').forEach(overlay => {
+			overlay.addEventListener('click', (e) => {
+				if (e.target === overlay) {
+					closeAllModals();
 				}
 			});
 		});
 
-		document.querySelectorAll('.wpsg-category-card').forEach(card => {
-			card.addEventListener('click', (e) => {
-				if (e.target.closest('button') || e.target.closest('a')) return;
-				const targetSection = card.getAttribute('data-section-target');
-				if (targetSection) {
-					switchTab(targetSection);
-				}
-			});
+		// Close modal on escape key
+		window.addEventListener('keydown', e => {
+			if (e.key === 'Escape') closeAllModals();
 		});
 
 		// Task Search
@@ -246,7 +457,7 @@
 			});
 		}
 		if (dom.btnQuickSessions) {
-			dom.btnQuickSessions.addEventListener('click', openSessionsModal);
+			dom.btnQuickSessions.addEventListener('click', loadSessions);
 		}
 
 		// Features Panel Event Listeners
@@ -294,28 +505,15 @@
 		if (dom.btnBatchRun) {
 			dom.btnBatchRun.addEventListener('click', startBatchRunner);
 		}
-
 		if (dom.batchCancel) {
 			dom.batchCancel.addEventListener('click', stopBatchRunner);
 		}
-
 		if (dom.btnConfirmBackup) {
 			dom.btnConfirmBackup.addEventListener('click', confirmManualBackup);
 		}
-
 		if (dom.btnUpdateBaseline) {
 			dom.btnUpdateBaseline.addEventListener('click', updateBaseline);
 		}
-
-		// Modal Close Buttons
-		document.querySelectorAll('[data-close-modal]').forEach(btn => {
-			btn.addEventListener('click', closeAllModals);
-		});
-
-		// Close modal on escape key
-		window.addEventListener('keydown', e => {
-			if (e.key === 'Escape') closeAllModals();
-		});
 
 		// Diff Modal Confirm Run
 		if (dom.btnDiffConfirm) {
@@ -331,14 +529,16 @@
 		// Nginx Snippet Copy
 		if (dom.btnCopyNginx) {
 			dom.btnCopyNginx.addEventListener('click', () => {
-				const code = dom.nginxCode.textContent;
-				navigator.clipboard.writeText(code).then(() => {
-					const originalText = dom.btnCopyNginx.innerHTML;
-					dom.btnCopyNginx.innerHTML = '<span class="dashicons dashicons-yes"></span> Copied!';
-					setTimeout(() => {
-						dom.btnCopyNginx.innerHTML = originalText;
-					}, 2000);
-				});
+				const code = dom.nginxCode ? dom.nginxCode.textContent : '';
+				if (navigator.clipboard && navigator.clipboard.writeText) {
+					navigator.clipboard.writeText(code).then(() => {
+						const originalText = dom.btnCopyNginx.innerHTML;
+						dom.btnCopyNginx.innerHTML = '<span class="dashicons dashicons-yes"></span> Copied!';
+						setTimeout(() => {
+							dom.btnCopyNginx.innerHTML = originalText;
+						}, 2000);
+					});
+				}
 			});
 		}
 
@@ -365,9 +565,15 @@
 				const chars = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%^&*()-_=+';
 				let pass = '';
 				const array = new Uint32Array(24);
-				window.crypto.getRandomValues(array);
-				for (let i = 0; i < 24; i++) {
-					pass += chars[array[i] % chars.length];
+				if (window.crypto && window.crypto.getRandomValues) {
+					window.crypto.getRandomValues(array);
+					for (let i = 0; i < 24; i++) {
+						pass += chars[array[i] % chars.length];
+					}
+				} else {
+					for (let i = 0; i < 24; i++) {
+						pass += chars.charAt(Math.floor(Math.random() * chars.length));
+					}
 				}
 				if (dom.generatedPass) dom.generatedPass.value = pass;
 			});
@@ -375,28 +581,28 @@
 		if (dom.btnCopyPass) {
 			dom.btnCopyPass.addEventListener('click', () => {
 				if (!dom.generatedPass || !dom.generatedPass.value) return;
-				navigator.clipboard.writeText(dom.generatedPass.value).then(() => {
-					const orig = dom.btnCopyPass.innerHTML;
-					dom.btnCopyPass.innerHTML = '<span class="dashicons dashicons-yes"></span> Copied!';
-					setTimeout(() => { dom.btnCopyPass.innerHTML = orig; }, 2000);
-				});
+				if (navigator.clipboard && navigator.clipboard.writeText) {
+					navigator.clipboard.writeText(dom.generatedPass.value).then(() => {
+						const orig = dom.btnCopyPass.innerHTML;
+						dom.btnCopyPass.innerHTML = '<span class="dashicons dashicons-yes"></span> Copied!';
+						setTimeout(() => { dom.btnCopyPass.innerHTML = orig; }, 2000);
+					});
+				}
 			});
 		}
 
 		// Login Renamer Input Validation (Typing 'CHANGE' required)
+		function updateLoginRenameButton() {
+			if (!dom.btnConfirmLoginRename) return;
+			const isConfirmed = dom.inputLoginConfirm ? dom.inputLoginConfirm.value.trim() === 'CHANGE' : false;
+			const hasSlug = dom.inputLoginSlug ? dom.inputLoginSlug.value.trim().length > 0 : false;
+			dom.btnConfirmLoginRename.disabled = !(isConfirmed && hasSlug);
+		}
 		if (dom.inputLoginConfirm) {
-			dom.inputLoginConfirm.addEventListener('input', e => {
-				const isConfirmed = e.target.value.trim() === 'CHANGE';
-				const hasSlug = dom.inputLoginSlug.value.trim().length > 0;
-				dom.btnConfirmLoginRename.disabled = !(isConfirmed && hasSlug);
-			});
+			dom.inputLoginConfirm.addEventListener('input', updateLoginRenameButton);
 		}
 		if (dom.inputLoginSlug) {
-			dom.inputLoginSlug.addEventListener('input', () => {
-				const isConfirmed = dom.inputLoginConfirm.value.trim() === 'CHANGE';
-				const hasSlug = dom.inputLoginSlug.value.trim().length > 0;
-				dom.btnConfirmLoginRename.disabled = !(isConfirmed && hasSlug);
-			});
+			dom.inputLoginSlug.addEventListener('input', updateLoginRenameButton);
 		}
 		if (dom.btnConfirmLoginRename) {
 			dom.btnConfirmLoginRename.addEventListener('click', submitLoginRename);
@@ -437,25 +643,13 @@
 	 */
 	async function loadTasks() {
 		try {
-			const res = await wp.apiFetch({
+			const res = await apiCall({
 				path: '/site-checkup-pro/v1/tasks',
 			});
-
-			state.tasks = res.tasks || [];
-			state.sections = res.sections || {};
-			state.safeInstantIds = res.safe_instant_ids || [];
-			state.totalCount = res.total_count || 0;
-			state.doneCount = res.done_count || 0;
-			state.sopCoveragePct = res.sop_coverage_pct || 0;
-			state.serverType = res.server_type || 'apache';
-			state.supportsHtaccess = res.supports_htaccess;
-			state.backupStatus = res.backup_status || {};
-
-			updateKpis();
-			renderViews();
+			applyTasksPayload(res);
 		} catch (err) {
 			console.error('Failed to load Site Checkup Pro tasks:', err);
-			if (dom.tbody) {
+			if (dom.tbody && (!state.tasks || state.tasks.length === 0)) {
 				dom.tbody.innerHTML = `<tr><td colspan="5" class="wpsg-error-state"><span class="dashicons dashicons-warning"></span> ${escapeHtml(err.message || 'Error communicating with REST API.')}</td></tr>`;
 			}
 		}
@@ -611,10 +805,10 @@
 
 		try {
 			dom.btnSaveFeatLogin.disabled = true;
-			const res = await wp.apiFetch({
+			const res = await apiCall({
 				path: '/site-checkup-pro/v1/tasks/set-login-slug',
 				method: 'POST',
-				headers: window.wpsgData?.nonces?.set_login_slug ? { 'X-WPSG-Nonce': window.wpsgData.nonces.set_login_slug } : {},
+				headers: (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.set_login_slug) ? { 'X-WPSG-Nonce': window.wpsgData.nonces.set_login_slug } : {},
 				data: { slug, confirm: 'CHANGE' },
 			});
 
@@ -640,10 +834,10 @@
 		}
 
 		try {
-			const res = await wp.apiFetch({
+			const res = await apiCall({
 				path: '/site-checkup-pro/v1/tasks/set-login-slug',
 				method: 'POST',
-				headers: window.wpsgData?.nonces?.set_login_slug ? { 'X-WPSG-Nonce': window.wpsgData.nonces.set_login_slug } : {},
+				headers: (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.set_login_slug) ? { 'X-WPSG-Nonce': window.wpsgData.nonces.set_login_slug } : {},
 				data: { slug: '', confirm: 'CHANGE' },
 			});
 
@@ -893,67 +1087,7 @@
 	 * Bind click listeners to table row action buttons
 	 */
 	function bindRowEvents() {
-		// Run Button
-		document.querySelectorAll('.wpsg-btn-run').forEach(btn => {
-			btn.addEventListener('click', () => {
-				const id = btn.getAttribute('data-id');
-				runTask(id, btn);
-			});
-		});
-
-		// Undo Button
-		document.querySelectorAll('.wpsg-btn-undo').forEach(btn => {
-			btn.addEventListener('click', () => {
-				const id = btn.getAttribute('data-id');
-				undoTask(id, btn);
-			});
-		});
-
-		// Diff Preview Button
-		document.querySelectorAll('.wpsg-btn-diff').forEach(btn => {
-			btn.addEventListener('click', () => {
-				const id = btn.getAttribute('data-id');
-				openDiffModal(id);
-			});
-		});
-
-		// Nginx Snippet Button
-		document.querySelectorAll('.wpsg-btn-view-nginx').forEach(btn => {
-			btn.addEventListener('click', () => {
-				const id = btn.getAttribute('data-id');
-				openNginxModal(id);
-			});
-		});
-
-		// Manual Note / Mark Done Button
-		document.querySelectorAll('.wpsg-btn-open-note').forEach(btn => {
-			btn.addEventListener('click', () => {
-				const id = btn.getAttribute('data-id');
-				openNoteModal(id);
-			});
-		});
-
-		// Login Rename Modal Button
-		document.querySelectorAll('.wpsg-btn-open-login-rename').forEach(btn => {
-			btn.addEventListener('click', () => {
-				openModal(dom.modalLoginRename);
-			});
-		});
-
-		// Open Sessions Modal Button
-		document.querySelectorAll('.wpsg-btn-open-sessions').forEach(btn => {
-			btn.addEventListener('click', loadSessions);
-		});
-
-		// Open App Passwords Modal Button
-		document.querySelectorAll('.wpsg-btn-open-app-passwords').forEach(btn => {
-			btn.addEventListener('click', loadAppPasswords);
-		});
-
-		// Open CSP Reports Modal Button
-		document.querySelectorAll('.wpsg-btn-open-csp-reports').forEach(btn => {
-			btn.addEventListener('click', loadCspReports);
-		});
+		// Event delegation on dom.app handles all row buttons reliably
 	}
 
 	/**
@@ -978,7 +1112,7 @@
 				headers['X-WPSG-Reauth'] = reauthToken;
 			}
 
-			const res = await wp.apiFetch({
+			const res = await apiCall({
 				path: `/site-checkup-pro/v1/tasks/${taskId}/run`,
 				method: 'POST',
 				headers: headers,
@@ -1053,7 +1187,7 @@
 				headers['X-WPSG-Reauth'] = reauthToken;
 			}
 
-			const res = await wp.apiFetch({
+			const res = await apiCall({
 				path: `/site-checkup-pro/v1/tasks/${taskId}/undo`,
 				method: 'POST',
 				headers: headers,
@@ -1133,7 +1267,7 @@
 		dom.batchProgress.style.width = `${progressPct}%`;
 
 		try {
-			const res = await wp.apiFetch({
+			const res = await apiCall({
 				path: `/site-checkup-pro/v1/tasks/${taskId}/run`,
 				method: 'POST',
 			});
@@ -1205,7 +1339,7 @@
 		openModal(dom.modalDiff);
 
 		try {
-			const res = await wp.apiFetch({
+			const res = await apiCall({
 				path: `/site-checkup-pro/v1/tasks/${taskId}/diff`,
 			});
 
@@ -1283,10 +1417,10 @@
 		dom.btnSaveNote.disabled = true;
 
 		try {
-			await wp.apiFetch({
+			await apiCall({
 				path: `/site-checkup-pro/v1/tasks/${taskId}/status`,
 				method: 'POST',
-				headers: window.wpsgData?.nonces?.update_status ? { 'X-WPSG-Nonce': window.wpsgData.nonces.update_status } : {},
+				headers: (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.update_status) ? { 'X-WPSG-Nonce': window.wpsgData.nonces.update_status } : {},
 				data: {
 					status: 'done',
 					note: note,
@@ -1321,10 +1455,10 @@
 		dom.btnConfirmLoginRename.disabled = true;
 
 		try {
-			const res = await wp.apiFetch({
+			const res = await apiCall({
 				path: '/site-checkup-pro/v1/tasks/set-login-slug',
 				method: 'POST',
-				headers: window.wpsgData?.nonces?.set_login_slug ? { 'X-WPSG-Nonce': window.wpsgData.nonces.set_login_slug } : {},
+				headers: (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.set_login_slug) ? { 'X-WPSG-Nonce': window.wpsgData.nonces.set_login_slug } : {},
 				data: { slug, confirm },
 			});
 
@@ -1354,10 +1488,10 @@
 	 */
 	async function confirmManualBackup(callback = null) {
 		try {
-			await wp.apiFetch({
+			await apiCall({
 				path: '/site-checkup-pro/v1/tasks/confirm-backup',
 				method: 'POST',
-				headers: window.wpsgData?.nonces?.confirm_backup ? { 'X-WPSG-Nonce': window.wpsgData.nonces.confirm_backup } : {},
+				headers: (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.confirm_backup) ? { 'X-WPSG-Nonce': window.wpsgData.nonces.confirm_backup } : {},
 			});
 
 			alert('Manual backup confirmation recorded. Safe file operations are now unblocked for the next 48 hours.');
@@ -1377,10 +1511,10 @@
 		}
 
 		try {
-			const res = await wp.apiFetch({
+			const res = await apiCall({
 				path: '/site-checkup-pro/v1/tasks/update-baseline',
 				method: 'POST',
-				headers: window.wpsgData?.nonces?.update_baseline ? { 'X-WPSG-Nonce': window.wpsgData.nonces.update_baseline } : {},
+				headers: (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.update_baseline) ? { 'X-WPSG-Nonce': window.wpsgData.nonces.update_baseline } : {},
 			});
 
 			alert(res.message || 'Baseline updated.');
@@ -1419,10 +1553,10 @@
 		if (dom.reauthErrorBox) dom.reauthErrorBox.style.display = 'none';
 
 		try {
-			const res = await wp.apiFetch({
+			const res = await apiCall({
 				path: '/site-checkup-pro/v1/reauth',
 				method: 'POST',
-				headers: window.wpsgData?.nonces?.reauth ? { 'X-WPSG-Nonce': window.wpsgData.nonces.reauth } : {},
+				headers: (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.reauth) ? { 'X-WPSG-Nonce': window.wpsgData.nonces.reauth } : {},
 				data: { password },
 			});
 
@@ -1456,7 +1590,7 @@
 		dom.sessionsTbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;"><span class="wpsg-spinner"></span> Loading active sessions...</td></tr>';
 
 		try {
-			const res = await wp.apiFetch({
+			const res = await apiCall({
 				path: '/site-checkup-pro/v1/sessions',
 			});
 
@@ -1487,10 +1621,10 @@
 					if (!confirm('Are you sure you want to terminate this remote session?')) return;
 					btn.disabled = true;
 					try {
-						await wp.apiFetch({
+						await apiCall({
 							path: '/site-checkup-pro/v1/sessions/destroy',
 							method: 'POST',
-							headers: window.wpsgData?.nonces?.destroy_session ? { 'X-WPSG-Nonce': window.wpsgData.nonces.destroy_session } : {},
+							headers: (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.destroy_session) ? { 'X-WPSG-Nonce': window.wpsgData.nonces.destroy_session } : {},
 							data: { verifier },
 						});
 						loadSessions();
@@ -1510,10 +1644,10 @@
 		if (dom.btnDestroyOtherSessions) dom.btnDestroyOtherSessions.disabled = true;
 
 		try {
-			await wp.apiFetch({
+			await apiCall({
 				path: '/site-checkup-pro/v1/sessions/destroy-others',
 				method: 'POST',
-				headers: window.wpsgData?.nonces?.destroy_session ? { 'X-WPSG-Nonce': window.wpsgData.nonces.destroy_session } : {},
+				headers: (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.destroy_session) ? { 'X-WPSG-Nonce': window.wpsgData.nonces.destroy_session } : {},
 			});
 			alert('All other sessions have been logged out.');
 			loadSessions();
@@ -1533,7 +1667,7 @@
 		dom.appPasswordsTbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;"><span class="wpsg-spinner"></span> Loading application passwords...</td></tr>';
 
 		try {
-			const res = await wp.apiFetch({
+			const res = await apiCall({
 				path: '/site-checkup-pro/v1/app-passwords',
 			});
 
@@ -1569,11 +1703,11 @@
 					requireReauth(async (token) => {
 						btn.disabled = true;
 						try {
-							const revRes = await wp.apiFetch({
+							const revRes = await apiCall({
 								path: '/site-checkup-pro/v1/app-passwords/revoke',
 								method: 'POST',
 								headers: {
-									'X-WPSG-Nonce': window.wpsgData?.nonces?.revoke_app_pass || '',
+									'X-WPSG-Nonce': (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.revoke_app_pass) || '',
 									'X-WPSG-Reauth': token,
 								},
 								data: {
@@ -1611,7 +1745,7 @@
 		dom.cspTbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;"><span class="wpsg-spinner"></span> Loading CSP violation records...</td></tr>';
 
 		try {
-			const res = await wp.apiFetch({
+			const res = await apiCall({
 				path: '/site-checkup-pro/v1/csp-reports',
 			});
 
@@ -1643,7 +1777,7 @@
 		dom.auditTbody.innerHTML = '<tr><td colspan="6"><span class="wpsg-spinner"></span> Loading audit trail...</td></tr>';
 
 		try {
-			const res = await wp.apiFetch({
+			const res = await apiCall({
 				path: '/site-checkup-pro/v1/audit-log',
 			});
 
@@ -1708,7 +1842,7 @@
 		openModal(dom.modalSettings);
 		if (dom.settingsSaveStatus) dom.settingsSaveStatus.textContent = 'Loading settings...';
 		try {
-			const res = await wp.apiFetch({ path: '/site-checkup-pro/v1/settings' });
+			const res = await apiCall({ path: '/site-checkup-pro/v1/settings' });
 			if (res && res.settings) {
 				if (dom.settingPatchstackKey) dom.settingPatchstackKey.value = '';
 				if (dom.patchstackMaskedStatus) {
@@ -1752,7 +1886,7 @@
 		if (dom.settingAgencyName) payload.agency_name = dom.settingAgencyName.value.trim();
 
 		try {
-			const res = await wp.apiFetch({
+			const res = await apiCall({
 				path: '/site-checkup-pro/v1/settings',
 				method: 'POST',
 				data: payload,
@@ -1801,9 +1935,9 @@
 		const dismissHandler = async () => {
 			promptEl.style.display = 'none';
 			try {
-				await fetch(`${apiBase}/review-prompt/dismiss`, {
+				await apiCall({
+					path: '/site-checkup-pro/v1/review-prompt/dismiss',
 					method: 'POST',
-					headers: { 'X-WP-Nonce': nonce },
 				});
 			} catch (e) {
 				console.error('Failed to dismiss review prompt:', e);
@@ -1827,7 +1961,12 @@
 		}
 	}
 
-	// Boot on DOM Ready
-	document.addEventListener('DOMContentLoaded', init);
+	// Boot immediately if document is already parsed, or wait for DOMContentLoaded
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', init);
+	} else {
+		init();
+	}
+	window.addEventListener('load', init);
 
 })();
