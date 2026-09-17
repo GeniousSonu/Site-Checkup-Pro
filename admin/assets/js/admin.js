@@ -417,7 +417,7 @@
 			const openCspBtn = e.target.closest('.wpsg-btn-open-csp-reports');
 			if (openCspBtn) {
 				e.preventDefault();
-				openCspReportsModal();
+				loadCspReports();
 				return;
 			}
 		});
@@ -468,16 +468,16 @@
 			dom.btnResetFeatLogin.addEventListener('click', resetFeatureLoginSlug);
 		}
 		if (dom.btnFeatViewSessions) {
-			dom.btnFeatViewSessions.addEventListener('click', openSessionsModal);
+			dom.btnFeatViewSessions.addEventListener('click', loadSessions);
 		}
 		if (dom.btnFeatDestroySessions) {
 			dom.btnFeatDestroySessions.addEventListener('click', destroyOtherSessions);
 		}
 		if (dom.btnFeatAppPasswords) {
-			dom.btnFeatAppPasswords.addEventListener('click', openAppPasswordsModal);
+			dom.btnFeatAppPasswords.addEventListener('click', loadAppPasswords);
 		}
 		if (dom.btnFeatCspReports) {
-			dom.btnFeatCspReports.addEventListener('click', openCspReportsModal);
+			dom.btnFeatCspReports.addEventListener('click', loadCspReports);
 		}
 		if (dom.btnFeatUpdateBaseline) {
 			dom.btnFeatUpdateBaseline.addEventListener('click', updateBaseline);
@@ -881,7 +881,10 @@
 
 		if (state.activeTab === 'overview') {
 			if (dom.panelOverview) dom.panelOverview.style.display = 'block';
+			if (dom.panelTasks) dom.panelTasks.style.display = 'block';
 			updateOverviewStats();
+			updateSectionBanner();
+			renderTasksTable();
 		} else if (state.activeTab === 'features') {
 			if (dom.panelFeatures) dom.panelFeatures.style.display = 'block';
 		} else if (state.activeTab === 'audit_trail') {
