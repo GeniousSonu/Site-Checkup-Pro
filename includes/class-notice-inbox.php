@@ -94,8 +94,27 @@ class WPSG_Notice_Inbox {
 			return;
 		}
 
-		// CRITICAL SECURITY FIX: Sanitize all captured notice HTML before storage or display!
-		$safe_html = wp_kses_post( $raw_html );
+		// Extract and isolate any <style>...</style> blocks so wp_kses_post doesn't strip the tags
+		// and dump naked CSS code and comments directly onto the screen as text.
+		$styles = array();
+		$clean_html = preg_replace_callback( '#<style\b[^>]*>(.*?)</style>#is', function ( $matches ) use ( &$styles ) {
+			// Sanitize CSS content: strip any HTML or potential script tags inside
+			$css = strip_tags( $matches[1] );
+			$styles[] = '<style>' . $css . '</style>';
+			return '';
+		}, $raw_html );
+
+		// Completely remove any <script>...</script> tags AND their inner JavaScript code
+		// so that executable JS does not leak as raw plain text on the admin screen.
+		$clean_html = preg_replace( '#<script\b[^>]*>(.*?)</script>#is', '', $clean_html );
+
+		// Sanitize all captured notice HTML before storage or display.
+		$safe_html = wp_kses_post( $clean_html );
+
+		// Re-attach safe CSS styles.
+		if ( ! empty( $styles ) ) {
+			$safe_html = implode( "\n", $styles ) . "\n" . $safe_html;
+		}
 
 		$dismissed = get_option( 'wpsg_dismissed_notices', array() );
 		if ( ! is_array( $dismissed ) ) {
@@ -103,7 +122,7 @@ class WPSG_Notice_Inbox {
 		}
 
 		// Hard allowlist: Core updates and Site Checkup Pro alerts must NEVER be dismissed!
-		$is_core_update = ( false !== strpos( $safe_html, 'update-nag' ) || false !== strpos( $safe_html, 'WordPress' ) && false !== strpos( $safe_html, 'update' ) );
+		$is_core_update = ( false !== strpos( $safe_html, 'update-nag' ) || ( false !== strpos( $safe_html, 'WordPress' ) && false !== strpos( $safe_html, 'update' ) ) );
 		$is_site_checkup = ( false !== strpos( $safe_html, 'site-checkup-pro' ) || false !== strpos( $safe_html, 'wpsg-' ) );
 
 		if ( $is_core_update || $is_site_checkup ) {

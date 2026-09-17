@@ -641,6 +641,29 @@ run_test( "Notice Inbox: Core update notices are immune to dismissal, arbitrary 
 	return ( true === $dismissed && in_array( $hash, $all_dismissed, true ) );
 } );
 
+// TEST 19b: Notice Inbox Prevents Script/Style Text Leak from Third-Party Notices
+run_test( "Notice Inbox: Prevents raw script and style text leaks from third-party notices", function () {
+	$inbox = WPSG_Notice_Inbox::get_instance();
+
+	$third_party_notice = '<style>#she-pro-launch-notice { color: red; }</style>' .
+		'<div id="she-pro-launch-notice" class="notice"><h3>Notice</h3></div>' .
+		'<script>jQuery(document).ready(function($){ alert("run"); });</script>';
+
+	ob_start(); // Outer buffer to capture what end_notice_buffer echoes
+	ob_start(); // Inner buffer that end_notice_buffer will consume with ob_get_clean()
+	echo $third_party_notice;
+	$inbox->end_notice_buffer();
+	$output = ob_get_clean();
+
+	// Output must NOT leak naked JavaScript code as text
+	$no_script_tag = ( false === strpos( $output, '<script>' ) );
+	$no_js_code_leak = ( false === strpos( $output, 'alert("run")' ) );
+	// Output should preserve the div
+	$has_notice_div = ( false !== strpos( $output, 'she-pro-launch-notice' ) );
+
+	return ( $no_script_tag && $no_js_code_leak && $has_notice_div );
+} );
+
 // TEST 20: Core Integrity Checksums wp-content Exclusion
 run_test( "Integrity Monitor: WordPress checksum verification strictly excludes wp-content directory", function () {
 	$files = array(
