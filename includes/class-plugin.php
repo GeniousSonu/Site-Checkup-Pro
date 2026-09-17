@@ -125,8 +125,12 @@ class WPSG_Plugin {
 			WPSG_Notice_Inbox::get_instance();
 		}
 
+		// Ensure Auto-Update support is registered in WordPress update transient and background updater.
+		add_filter( 'site_transient_update_plugins', array( $this, 'filter_update_plugins_transient' ) );
+		add_filter( 'auto_update_plugin', array( $this, 'filter_auto_update_plugin' ), 10, 2 );
+
 		// Initialize Self-Hosted Update Checker (Excluded from WordPress.org directory releases per Guideline 8).
-		if ( is_admin() && file_exists( WPSG_PLUGIN_DIR . 'includes/class-update-checker.php' ) && class_exists( 'WPSG_Update_Checker' ) && defined( 'WPSG_PLUGIN_FILE' ) ) {
+		if ( file_exists( WPSG_PLUGIN_DIR . 'includes/class-update-checker.php' ) && class_exists( 'WPSG_Update_Checker' ) && defined( 'WPSG_PLUGIN_FILE' ) ) {
 			new WPSG_Update_Checker( WPSG_PLUGIN_FILE, WPSG_VERSION );
 		}
 	}
@@ -225,5 +229,62 @@ class WPSG_Plugin {
 		}
 
 		return ( 'done' === $status );
+	}
+
+	/**
+	 * Ensure plugin is tracked in update_plugins transient so WordPress lists it as update-supported.
+	 *
+	 * @param object|false $transient The update_plugins transient.
+	 * @return object|false
+	 */
+	public function filter_update_plugins_transient( $transient ) {
+		if ( ! is_object( $transient ) ) {
+			return $transient;
+		}
+
+		if ( ! isset( $transient->response ) || ! is_array( $transient->response ) ) {
+			$transient->response = array();
+		}
+
+		if ( ! isset( $transient->no_update ) || ! is_array( $transient->no_update ) ) {
+			$transient->no_update = array();
+		}
+
+		$basename = defined( 'WPSG_BASENAME' ) ? WPSG_BASENAME : 'site-checkup-pro/site-checkup-pro.php';
+
+		if ( ! isset( $transient->response[ $basename ] ) && ! isset( $transient->no_update[ $basename ] ) ) {
+			$transient->no_update[ $basename ] = (object) array(
+				'id'            => 'wpsg-site-checkup-pro',
+				'slug'          => 'site-checkup-pro',
+				'plugin'        => $basename,
+				'new_version'   => defined( 'WPSG_VERSION' ) ? WPSG_VERSION : '1.0.0',
+				'url'           => 'https://www.genioussonu.me/plugin/site-checkup-pro/',
+				'package'       => '',
+				'icons'         => array(),
+				'banners'       => array(),
+				'tested'        => '6.7',
+				'requires_php'  => '7.4',
+				'compatibility' => new \stdClass(),
+			);
+		}
+
+		return $transient;
+	}
+
+	/**
+	 * Filter whether this plugin should be automatically updated in the background.
+	 * Respects WordPress's standard auto_update_plugins site option.
+	 *
+	 * @param bool|null $update Whether to update.
+	 * @param object    $item   The plugin update item.
+	 * @return bool|null
+	 */
+	public function filter_auto_update_plugin( $update, $item ) {
+		$basename = defined( 'WPSG_BASENAME' ) ? WPSG_BASENAME : 'site-checkup-pro/site-checkup-pro.php';
+		if ( isset( $item->plugin ) && $basename === $item->plugin ) {
+			$auto_updates = (array) get_site_option( 'auto_update_plugins', array() );
+			return in_array( $basename, $auto_updates, true );
+		}
+		return $update;
 	}
 }

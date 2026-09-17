@@ -46,6 +46,14 @@ class WPSG_Admin_Menu {
 	private function __construct() {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+
+		// Plugin action links and row meta on plugins.php.
+		$basename = defined( 'WPSG_BASENAME' ) ? WPSG_BASENAME : 'site-checkup-pro/site-checkup-pro.php';
+		add_filter( 'plugin_action_links_' . $basename, array( $this, 'add_action_links' ) );
+		add_filter( 'plugin_row_meta', array( $this, 'add_row_meta' ), 10, 2 );
+
+		// Auto-updates column fallback rendering on plugins.php.
+		add_filter( 'plugin_auto_update_setting_html', array( $this, 'filter_auto_update_setting_html' ), 10, 3 );
 	}
 
 	/**
@@ -201,5 +209,103 @@ class WPSG_Admin_Menu {
 		} catch ( \Throwable $e ) {
 			echo '<div class="notice notice-error"><p>' . esc_html( sprintf( __( 'Site Checkup Pro encountered an unexpected error generating the report: %s', 'site-checkup-pro' ), $e->getMessage() ) ) . '</p></div>';
 		}
+	}
+
+	/**
+	 * Add custom action links (Settings) under the plugin name on plugins.php.
+	 *
+	 * @param array $actions Existing action links.
+	 * @return array
+	 */
+	public function add_action_links( $actions ) {
+		$settings_url = admin_url( 'admin.php?page=site-checkup-pro' );
+		$settings_link = sprintf(
+			'<a href="%s">%s</a>',
+			esc_url( $settings_url ),
+			esc_html__( 'Settings', 'site-checkup-pro' )
+		);
+		array_unshift( $actions, $settings_link );
+		return $actions;
+	}
+
+	/**
+	 * Add row meta links below the plugin description on plugins.php.
+	 * Appends Settings, Docs & FAQs, and Video Tutorials to:
+	 * "Version 1.0.0 | By SK Sahinur Islam | Visit plugin site | Settings | Docs & FAQs | Video Tutorials"
+	 *
+	 * @param array  $meta Existing row meta items.
+	 * @param string $file Plugin file basename.
+	 * @return array
+	 */
+	public function add_row_meta( $meta, $file ) {
+		$basename = defined( 'WPSG_BASENAME' ) ? WPSG_BASENAME : 'site-checkup-pro/site-checkup-pro.php';
+		if ( $basename !== $file ) {
+			return $meta;
+		}
+
+		$docs_url      = apply_filters( 'wpsg_docs_url', 'https://www.genioussonu.me/plugin/site-checkup-pro/docs/' );
+		$tutorials_url = apply_filters( 'wpsg_tutorials_url', 'https://www.genioussonu.me/plugin/site-checkup-pro/tutorials/' );
+
+		$links = array(
+			sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( admin_url( 'admin.php?page=site-checkup-pro' ) ),
+				esc_html__( 'Settings', 'site-checkup-pro' )
+			),
+			sprintf(
+				'<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
+				esc_url( $docs_url ),
+				esc_html__( 'Docs & FAQs', 'site-checkup-pro' )
+			),
+			sprintf(
+				'<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
+				esc_url( $tutorials_url ),
+				esc_html__( 'Video Tutorials', 'site-checkup-pro' )
+			),
+		);
+
+		return array_merge( $meta, $links );
+	}
+
+	/**
+	 * Filters the HTML of the auto-updates column for Site Checkup Pro.
+	 * Ensures the Enable / Disable auto-updates link is always displayed and functional.
+	 *
+	 * @param string $html        The HTML of the auto-update column content.
+	 * @param string $plugin_file Path to the plugin file relative to the plugins directory.
+	 * @param array  $plugin_data Array of plugin data.
+	 * @return string
+	 */
+	public function filter_auto_update_setting_html( $html, $plugin_file, $plugin_data ) {
+		$basename = defined( 'WPSG_BASENAME' ) ? WPSG_BASENAME : 'site-checkup-pro/site-checkup-pro.php';
+		if ( $basename !== $plugin_file ) {
+			return $html;
+		}
+
+		// If core already produced a valid toggle link, preserve it.
+		if ( ! empty( $html ) && false !== strpos( $html, 'toggle-auto-update' ) ) {
+			return $html;
+		}
+
+		$auto_updates = (array) get_site_option( 'auto_update_plugins', array() );
+		$enabled      = in_array( $plugin_file, $auto_updates, true );
+		$action       = $enabled ? 'disable' : 'enable';
+		$text         = $enabled ? __( 'Disable auto-updates', 'site-checkup-pro' ) : __( 'Enable auto-updates', 'site-checkup-pro' );
+
+		$query_args = array(
+			'action'        => "{$action}-auto-update",
+			'plugin'        => $plugin_file,
+			'paged'         => isset( $_REQUEST['paged'] ) ? absint( $_REQUEST['paged'] ) : 1,
+			'plugin_status' => isset( $_REQUEST['plugin_status'] ) ? sanitize_key( $_REQUEST['plugin_status'] ) : 'all',
+		);
+
+		$url = wp_nonce_url( add_query_arg( $query_args, 'plugins.php' ), 'updates' );
+
+		return sprintf(
+			'<a href="%s" class="toggle-auto-update aria-button-if-js" data-wp-action="%s"><span class="dashicons dashicons-update spin hidden" aria-hidden="true"></span><span class="label">%s</span></a>',
+			esc_url( $url ),
+			esc_attr( $action ),
+			esc_html( $text )
+		);
 	}
 }

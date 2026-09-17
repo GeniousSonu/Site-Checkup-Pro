@@ -15,6 +15,11 @@ define( 'ABSPATH', __DIR__ . '/../' );
 define( 'WPSG_VERSION', '1.0.0' );
 define( 'WP_CONTENT_DIR', sys_get_temp_dir() . '/wp-content' );
 define( 'WP_PLUGIN_DIR', WP_CONTENT_DIR . '/plugins' );
+define( 'WPSG_PLUGIN_FILE', ABSPATH . 'site-checkup-pro.php' );
+define( 'WPSG_PLUGIN_DIR', ABSPATH );
+define( 'WPSG_PLUGIN_URL', 'https://example.com/wp-content/plugins/site-checkup-pro/' );
+define( 'WPSG_BASENAME', 'site-checkup-pro/site-checkup-pro.php' );
+define( 'WPSG_PLUGIN_BASENAME', WPSG_BASENAME );
 
 // Mock WordPress functions
 if ( ! function_exists( 'sanitize_key' ) ) {
@@ -46,6 +51,10 @@ if ( ! function_exists( 'wp_kses_post' ) ) {
 }
 if ( ! function_exists( '__' ) ) { function __( $t, $d = '' ) { return $t; } }
 if ( ! function_exists( '_e' ) ) { function _e( $t, $d = '' ) { echo $t; } }
+if ( ! function_exists( 'esc_html__' ) ) { function esc_html__( $t, $d = '' ) { return esc_html( $t ); } }
+if ( ! function_exists( 'esc_html_e' ) ) { function esc_html_e( $t, $d = '' ) { echo esc_html( $t ); } }
+if ( ! function_exists( 'esc_attr__' ) ) { function esc_attr__( $t, $d = '' ) { return esc_attr( $t ); } }
+if ( ! function_exists( 'esc_attr_e' ) ) { function esc_attr_e( $t, $d = '' ) { echo esc_attr( $t ); } }
 if ( ! function_exists( 'current_time' ) ) { function current_time( $type ) { return 'timestamp' === $type ? time() : date( 'Y-m-d H:i:s' ); } }
 if ( ! function_exists( 'get_current_user_id' ) ) { function get_current_user_id() { return 1; } }
 $GLOBALS['_mock_current_user_can'] = 'manage_options';
@@ -94,6 +103,8 @@ if ( ! function_exists( 'is_admin' ) ) { function is_admin() { return true; } }
 if ( ! function_exists( 'is_plugin_active' ) ) { function is_plugin_active( $p ) { return false; } }
 if ( ! function_exists( 'get_bloginfo' ) ) { function get_bloginfo( $show = '' ) { return 'Site Checkup Pro Test'; } }
 if ( ! function_exists( 'get_plugins' ) ) { function get_plugins() { return array(); } }
+if ( ! function_exists( 'wp_cache_get' ) ) { function wp_cache_get( $key, $group = '' ) { return false; } }
+if ( ! function_exists( 'wp_cache_set' ) ) { function wp_cache_set( $key, $val, $group = '', $expire = 0 ) { return true; } }
 
 // Mock $wpdb
 if ( ! class_exists( 'Mock_WPDB' ) ) {
@@ -140,6 +151,29 @@ if ( ! function_exists( 'set_transient' ) ) {
 }
 if ( ! function_exists( 'delete_transient' ) ) {
 	function delete_transient( $name ) { return delete_option( '_transient_' . $name ); }
+}
+if ( ! function_exists( 'get_site_option' ) ) {
+	function get_site_option( $name, $default = false ) { return get_option( $name, $default ); }
+}
+if ( ! function_exists( 'update_site_option' ) ) {
+	function update_site_option( $name, $val ) { return update_option( $name, $val ); }
+}
+if ( ! function_exists( 'delete_site_option' ) ) {
+	function delete_site_option( $name ) { return delete_option( $name ); }
+}
+if ( ! function_exists( 'add_query_arg' ) ) {
+	function add_query_arg( $args, $url = '' ) {
+		$query = http_build_query( $args );
+		return $url ? ( false !== strpos( $url, '?' ) ? $url . '&' . $query : $url . '?' . $query ) : $query;
+	}
+}
+if ( ! function_exists( 'wp_nonce_url' ) ) {
+	function wp_nonce_url( $actionurl, $action = -1, $name = '_wpnonce' ) {
+		return add_query_arg( array( $name => 'mock_nonce_' . $action ), $actionurl );
+	}
+}
+if ( ! function_exists( 'apply_filters' ) ) {
+	function apply_filters( $tag, $value, ...$args ) { return $value; }
 }
 
 if ( ! function_exists( 'add_action' ) ) { function add_action( $tag, $callback, $priority = 10, $accepted_args = 1 ) {} }
@@ -282,6 +316,8 @@ require_once ABSPATH . 'includes/class-update-checker.php';
 require_once ABSPATH . 'includes/class-task.php';
 require_once ABSPATH . 'includes/class-task-registry.php';
 require_once ABSPATH . 'includes/class-report-generator.php';
+require_once ABSPATH . 'includes/class-plugin.php';
+require_once ABSPATH . 'admin/class-admin-menu.php';
 
 // Test runner helper
 $tests_passed = 0;
@@ -976,6 +1012,79 @@ run_test( "Type Safety: Session manager and report generator handle numeric/inte
 	$status = $faulty_task->get_live_status();
 
 	return ( 'attention' === $status['status'] && false !== strpos( $status['message'], 'Simulated runtime error' ) );
+} );
+
+// TEST 34: Plugins Page Links (Settings, Docs & FAQs, Video Tutorials)
+run_test( "Plugins Screen: Action links and row meta provide Settings, Docs & FAQs, and Video Tutorials", function () {
+	$menu = WPSG_Admin_Menu::get_instance();
+	$basename = defined( 'WPSG_BASENAME' ) ? WPSG_BASENAME : 'site-checkup-pro/site-checkup-pro.php';
+
+	// 1. Action links: Ensure 'Settings' link is prepended
+	$actions = array( 'deactivate' => '<a href="#">Deactivate</a>' );
+	$updated_actions = $menu->add_action_links( $actions );
+	$has_settings_action = false;
+	foreach ( $updated_actions as $action ) {
+		if ( false !== strpos( $action, 'page=site-checkup-pro' ) && false !== strpos( $action, 'Settings' ) ) {
+			$has_settings_action = true;
+			break;
+		}
+	}
+
+	// 2. Row meta: Ensure Settings, Docs & FAQs, and Video Tutorials are appended
+	$meta = array( 'Version 1.0.0', 'By SK Sahinur Islam', 'Visit plugin site' );
+	$updated_meta = $menu->add_row_meta( $meta, $basename );
+
+	$has_settings_meta = false;
+	$has_docs_meta = false;
+	$has_tutorials_meta = false;
+
+	foreach ( $updated_meta as $item ) {
+		if ( false !== strpos( $item, 'page=site-checkup-pro' ) && false !== strpos( $item, 'Settings' ) ) {
+			$has_settings_meta = true;
+		}
+		if ( false !== strpos( $item, 'site-checkup-pro/docs/' ) && ( false !== strpos( $item, 'Docs &amp; FAQs' ) || false !== strpos( $item, 'Docs & FAQs' ) ) ) {
+			$has_docs_meta = true;
+		}
+		if ( false !== strpos( $item, 'site-checkup-pro/tutorials/' ) && false !== strpos( $item, 'Video Tutorials' ) ) {
+			$has_tutorials_meta = true;
+		}
+	}
+
+	return ( $has_settings_action && $has_settings_meta && $has_docs_meta && $has_tutorials_meta );
+} );
+
+// TEST 35: Auto-Updates Column Support & Toggle
+run_test( "Auto-Updates: Enables auto-update toggle link and updates transient data", function () {
+	$plugin = WPSG_Plugin::get_instance();
+	$menu = WPSG_Admin_Menu::get_instance();
+	$basename = defined( 'WPSG_BASENAME' ) ? WPSG_BASENAME : 'site-checkup-pro/site-checkup-pro.php';
+
+	// 1. Transient filter sets update-supported data in no_update when up-to-date
+	$mock_transient = new stdClass();
+	$mock_transient->response = array();
+	$mock_transient->no_update = array();
+	$filtered_transient = $plugin->filter_update_plugins_transient( $mock_transient );
+
+	$has_no_update_entry = isset( $filtered_transient->no_update[ $basename ] ) && 'site-checkup-pro' === $filtered_transient->no_update[ $basename ]->slug;
+
+	// 2. Auto-update setting HTML generates toggle link when disabled
+	update_site_option( 'auto_update_plugins', array() );
+	$html_disabled = $menu->filter_auto_update_setting_html( '', $basename, array() );
+	$has_enable_link = ( false !== strpos( $html_disabled, 'toggle-auto-update' ) && false !== strpos( $html_disabled, 'Enable auto-updates' ) && false !== strpos( $html_disabled, 'action=enable-auto-update' ) );
+
+	// 3. Auto-update setting HTML generates toggle link when enabled
+	update_site_option( 'auto_update_plugins', array( $basename ) );
+	$html_enabled = $menu->filter_auto_update_setting_html( '', $basename, array() );
+	$has_disable_link = ( false !== strpos( $html_enabled, 'toggle-auto-update' ) && false !== strpos( $html_enabled, 'Disable auto-updates' ) && false !== strpos( $html_enabled, 'action=disable-auto-update' ) );
+
+	// 4. Background auto_update_plugin filter check
+	$item = (object) array( 'plugin' => $basename );
+	$should_update = $plugin->filter_auto_update_plugin( false, $item );
+
+	// Reset option
+	delete_site_option( 'auto_update_plugins' );
+
+	return ( $has_no_update_entry && $has_enable_link && $has_disable_link && true === $should_update );
 } );
 
 echo "\n=======================================================\n";
