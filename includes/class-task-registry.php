@@ -542,13 +542,14 @@ class WPSG_Task_Registry {
 			'has_diff'         => true,
 			'nginx_snippet'    => $hsts_nginx,
 			'status_callback'  => function () {
-				if ( ! is_ssl() ) {
-					return array( 'status' => 'attention', 'message' => __( 'Site is not SSL enabled. HSTS requires HTTPS.', 'site-checkup-pro' ) );
-				}
 				if ( ! WPSG_Htaccess_Manager::supports_htaccess() ) {
 					return array( 'status' => 'not_applicable', 'is_na' => true, 'message' => __( 'Running on Nginx. Use Nginx snippet.', 'site-checkup-pro' ) );
 				}
 				$has = WPSG_Htaccess_Manager::has_rule( 'HSTS' );
+				if ( $has && ! is_ssl() ) {
+					// Rule written but no SSL yet — environmental condition, not a write failure.
+					return array( 'status' => 'attention', 'message' => __( 'HSTS rule is written to .htaccess but SSL is not yet active. Enable HTTPS to activate HSTS enforcement.', 'site-checkup-pro' ) );
+				}
 				return array( 'status' => $has ? 'done' : 'pending', 'message' => $has ? __( 'HSTS header active in .htaccess.', 'site-checkup-pro' ) : '' );
 			},
 			'diff_callback'    => function () use ( $hsts_rules ) {
@@ -766,7 +767,10 @@ class WPSG_Task_Registry {
 				return WPSG_Wp_Config_Manager::get_diff_preview( array( 'WP_DEBUG_DISPLAY' => false ) );
 			},
 			'run_callback'     => function () {
-				return WPSG_Wp_Config_Manager::update_constants( array( 'WP_DEBUG_DISPLAY' => false ) );
+				$result = WPSG_Wp_Config_Manager::update_constants( array( 'WP_DEBUG_DISPLAY' => false ) );
+				// Flush the cached result so the next status check reads wp-config.php directly.
+				delete_transient( 'wpsg_debug_display_cache' );
+				return $result;
 			},
 			'undo_callback'    => function () {
 				return WPSG_Wp_Config_Manager::update_constants( array( 'WP_DEBUG_DISPLAY' => true ) );

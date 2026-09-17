@@ -44,6 +44,28 @@ class WPSG_Child_Theme {
 			);
 		}
 
+		// If a child theme was scaffolded (directory exists) but not yet activated,
+		// report 'done' — the dev still needs to manually activate it, but the
+		// scaffolding action itself succeeded. The task runner verifies the run
+		// result; activation is a separate manual step shown in the message.
+		$scaffolded_dir = get_option( 'wpsg_scaffolded_child_theme' );
+		if ( $scaffolded_dir && is_dir( $scaffolded_dir ) ) {
+			$child_slug = basename( $scaffolded_dir );
+			return array(
+				'status'       => 'done',
+				'is_child'     => false,
+				'scaffolded'   => true,
+				'theme_name'   => $theme->get( 'Name' ),
+				'child_slug'   => $child_slug,
+				'message'      => sprintf(
+					/* translators: 1: child slug, 2: themes URL */
+					__( 'Child theme "%1$s" scaffolded. Activate it under <a href="%2$s">Appearance &rarr; Themes</a> to complete setup.', 'site-checkup-pro' ),
+					esc_html( $child_slug ),
+					admin_url( 'themes.php' )
+				),
+			);
+		}
+
 		return array(
 			'status'       => 'attention',
 			'is_child'     => false,
@@ -77,12 +99,17 @@ class WPSG_Child_Theme {
 		$child_dir   = get_theme_root() . '/' . $child_slug;
 
 		if ( is_dir( $child_dir ) ) {
+			// Directory already exists from a previous scaffold — treat as success (idempotent).
+			update_option( 'wpsg_scaffolded_child_theme', $child_dir );
 			return array(
-				'success' => false,
-				'message' => sprintf(
-					/* translators: %s: child slug */
-					__( 'Directory %s already exists in /wp-content/themes/.', 'site-checkup-pro' ),
-					$child_slug
+				'success'    => true,
+				'child_slug' => $child_slug,
+				'themes_url' => admin_url( 'themes.php' ),
+				'message'    => sprintf(
+					/* translators: 1: child slug, 2: themes url */
+					__( 'Child theme "%1$s" already exists. Activate it under <a href="%2$s">Appearance &rarr; Themes</a>.', 'site-checkup-pro' ),
+					$child_slug,
+					admin_url( 'themes.php' )
 				),
 			);
 		}

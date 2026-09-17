@@ -709,7 +709,34 @@ class WPSG_Scanner {
 
 		$debug_display_const = defined( 'WP_DEBUG_DISPLAY' ) ? WP_DEBUG_DISPLAY : null;
 		$display_errors_ini  = ini_get( 'display_errors' );
-		$is_display_on       = ( true === $debug_display_const || '1' === $display_errors_ini || 'on' === strtolower( (string) $display_errors_ini ) );
+
+		// PHP constants loaded at boot cannot change in the same request even after
+		// writing wp-config.php. Check the wp-config.php file content directly to
+		// detect whether the SiteCheckupPro marker block has disabled the constant.
+		// This is the authoritative source of truth after a successful write.
+		$config_written_false = false;
+		if ( class_exists( 'WPSG_Wp_Config_Manager' ) ) {
+			$config_path = WPSG_Wp_Config_Manager::get_config_path();
+			if ( $config_path && is_readable( $config_path ) ) {
+				$config_content = @file_get_contents( $config_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+				if ( false !== $config_content ) {
+					// Check if our marker block defines WP_DEBUG_DISPLAY as false.
+					if ( preg_match( '/BEGIN SiteCheckupPro-Config[\s\S]*?define\s*\(\s*[\'"]WP_DEBUG_DISPLAY[\'"]\s*,\s*false\s*\)[\s\S]*?END SiteCheckupPro-Config/i', $config_content ) ) {
+						$config_written_false = true;
+					}
+				}
+			}
+		}
+
+		// If we've written false into wp-config.php, treat as disabled even if the
+		// in-memory constant hasn't reloaded yet (requires server to re-serve the page).
+		$is_display_on = false;
+		if ( $config_written_false ) {
+			// The file has been updated — the write succeeded.
+			$is_display_on = false;
+		} else {
+			$is_display_on = ( true === $debug_display_const || '1' === $display_errors_ini || 'on' === strtolower( (string) $display_errors_ini ) );
+		}
 
 		$status  = $is_display_on ? 'attention' : 'done';
 		$message = $is_display_on
@@ -717,12 +744,13 @@ class WPSG_Scanner {
 			: __( 'Front-end debug display is disabled (WP_DEBUG_DISPLAY off), preventing sensitive database leakage.', 'site-checkup-pro' );
 
 		$result = array(
-			'status'         => $status,
-			'is_display_on'  => $is_display_on,
-			'debug_display'  => $debug_display_const,
-			'display_errors' => $display_errors_ini,
-			'message'        => $message,
-			'last_checked'   => current_time( 'mysql' ),
+			'status'              => $status,
+			'is_display_on'       => $is_display_on,
+			'debug_display'       => $debug_display_const,
+			'display_errors'      => $display_errors_ini,
+			'config_written_false' => $config_written_false,
+			'message'             => $message,
+			'last_checked'        => current_time( 'mysql' ),
 		);
 
 		set_transient( $cache_key, $result, 12 * HOUR_IN_SECONDS );
