@@ -44,6 +44,31 @@ class WPSG_Plugin {
 	}
 
 	/**
+	 * Whitelist of options this plugin is permitted to touch.
+	 * Blocks arbitrary option update tampering.
+	 *
+	 * @var array
+	 */
+	public static $allowed_options = array(
+		'wpsg_trusted_baseline',
+		'wpsg_settings',
+		'wpsg_login_slug',
+		'wpsg_last_scan_time',
+		'wpsg_db_version',
+		'wpsg_manual_backup_confirmed_until',
+		'wpsg_block_user_enumeration',
+		'wpsg_login_hardening',
+		'wpsg_trusted_proxies',
+		'wpsg_dismissed_notices',
+		'wpsg_declutter_dashboard',
+		'wpsg_hide_generator',
+		'wpsg_strip_ver',
+		'wpsg_csp_mode',
+		'wpsg_alert_settings',
+		'wpsg_focus_mode',
+	);
+
+	/**
 	 * Initialize core components.
 	 */
 	private function init_components() {
@@ -70,6 +95,31 @@ class WPSG_Plugin {
 		// Initialize Login Renamer (if enabled and safe).
 		if ( class_exists( 'WPSG_Login_Renamer' ) ) {
 			WPSG_Login_Renamer::get_instance();
+		}
+
+		// Initialize Login Guard.
+		if ( class_exists( 'WPSG_Login_Guard' ) ) {
+			WPSG_Login_Guard::get_instance();
+		}
+
+		// Initialize Session Manager.
+		if ( class_exists( 'WPSG_Session_Manager' ) ) {
+			WPSG_Session_Manager::get_instance();
+		}
+
+		// Initialize User Enumeration Guard.
+		if ( class_exists( 'WPSG_Enumeration_Guard' ) ) {
+			WPSG_Enumeration_Guard::get_instance();
+		}
+
+		// Initialize Fingerprint Guard.
+		if ( class_exists( 'WPSG_Fingerprint_Guard' ) ) {
+			WPSG_Fingerprint_Guard::get_instance();
+		}
+
+		// Initialize Notice Inbox & Focus Mode.
+		if ( class_exists( 'WPSG_Notice_Inbox' ) ) {
+			WPSG_Notice_Inbox::get_instance();
 		}
 	}
 

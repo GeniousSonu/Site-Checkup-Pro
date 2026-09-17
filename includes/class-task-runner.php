@@ -2,8 +2,9 @@
 /**
  * Safe Task Execution Engine
  *
- * Enforces capabilities (manage_options), backup gating (24-48h recency),
- * state snapshots, redacted audit logging, and undo operations.
+ * Enforces capabilities (manage_options), mutex locking to prevent concurrent runs (TOCTOU),
+ * re-authentication verification for file modifications, atomic backup gating (24-48h recency),
+ * state snapshot HMAC integrity verification, redacted audit logging, and undo operations.
  *
  * @package SiteCheckupPro
  * @since   1.0.0
@@ -20,12 +21,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WPSG_Task_Runner {
 
 	/**
-	 * Run a task safely.
+	 * Run a task safely following Validate -> Authorize -> Perform -> Verify -> Log -> Recover.
 	 *
-	 * @param string $task_id Task identifier.
-	 * @return array
+	 * @param string      $task_id      Task identifier.
+	 * @param string|null $reauth_token Optional single-use re-auth token.
+	 * @return array Result payload.
 	 */
-	public static function run( $task_id ) {
+	public static function run( $task_id, $reauth_token = null ) {
 		// 1. Strict capability enforcement: Hard-require manage_options.
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return array(
@@ -42,33 +44,64 @@ class WPSG_Task_Runner {
 			);
 		}
 
-		// 2. Backup guard enforcement for file-modifying tasks.
-		if ( $task->requires_backup ) {
-			if ( ! WPSG_Backup_Guard::has_recent_backup() ) {
-				$backup_info = WPSG_Backup_Guard::get_backup_status();
-				return array(
-					'success'         => false,
-					'backup_required' => true,
-					'backup_info'     => $backup_info,
-					'message'         => __( 'A verified backup taken within the last 48 hours is required before running this file-modifying task.', 'site-checkup-pro' ),
-				);
-			}
+		// 2. Concurrency Mutex Lock: Prevent concurrent executions of the same task.
+		$lock_key = 'wpsg_task_lock_' . sanitize_key( $task_id );
+		if ( get_transient( $lock_key ) ) {
+			return array(
+				'success' => false,
+				'message' => __( 'This task is currently being executed by another process. Please wait.', 'site-checkup-pro' ),
+			);
 		}
-
-		// 3. Capture before snapshot.
-		$before_status = $task->get_live_status();
+		set_transient( $lock_key, true, 30 ); // 30-second TTL
 
 		try {
-			// 4. Execute the task run callback.
+			// 3. Re-Authentication requirement for destructive / file-modifying tasks.
+			if ( 'writes_files' === $task->sub_type || ! empty( $task->requires_reauth ) ) {
+				if ( class_exists( 'WPSG_Session_Manager' ) ) {
+					$valid_reauth = WPSG_Session_Manager::validate_and_consume_reauth_token( $reauth_token );
+					if ( ! $valid_reauth ) {
+						return array(
+							'success'         => false,
+							'reauth_required' => true,
+							'message'         => __( 'Administrator password confirmation is required before executing file modifications.', 'site-checkup-pro' ),
+						);
+					}
+				}
+			}
+
+			// 4. Atomic Backup guard enforcement for file-modifying tasks.
+			if ( $task->requires_backup ) {
+				if ( ! WPSG_Backup_Guard::has_recent_backup() ) {
+					$backup_info = WPSG_Backup_Guard::get_backup_status();
+					return array(
+						'success'         => false,
+						'backup_required' => true,
+						'backup_info'     => $backup_info,
+						'message'         => __( 'A verified backup taken within the last 48 hours is required before running this file-modifying task.', 'site-checkup-pro' ),
+					);
+				}
+			}
+
+			// 5. Capture before snapshot and compute HMAC integrity hash.
+			$before_status = $task->get_live_status();
+			$auth_salt     = defined( 'AUTH_SALT' ) ? AUTH_SALT : 'wpsg_salt';
+			$snapshot_hash = hash_hmac( 'sha256', wp_json_encode( $before_status ), $auth_salt );
+
+			// 6. Execute task callback (Perform).
 			$result = $task->run();
 
 			$is_success = ! empty( $result['success'] ) || ( isset( $result['status'] ) && 'done' === $result['status'] );
 			$message    = isset( $result['message'] ) ? $result['message'] : '';
 
-			// 5. Capture after snapshot.
+			// 7. Post-action verification (Verify).
 			$after_status = $task->get_live_status();
+			if ( isset( $after_status['status'] ) && 'done' !== $after_status['status'] && $is_success ) {
+				// Verification failed after action execution!
+				$is_success = false;
+				$message    = ! empty( $after_status['message'] ) ? $after_status['message'] : __( 'Post-action verification failed.', 'site-checkup-pro' );
+			}
 
-			// 6. Record to redacted audit log.
+			// 8. Record to redacted audit log (Log).
 			WPSG_Audit_Log::log(
 				$task_id,
 				'run',
@@ -78,9 +111,14 @@ class WPSG_Task_Runner {
 				$message
 			);
 
-			// 7. Update task status in database.
+			// 9. Update task status in database with snapshot hash.
 			$new_status = $is_success ? 'done' : ( isset( $result['status'] ) ? $result['status'] : 'failed' );
-			self::update_db_status( $task_id, $new_status, $task->automation_level );
+			$metadata   = array(
+				'snapshot_hash' => $snapshot_hash,
+				'before_status' => $before_status,
+				'after_status'  => $after_status,
+			);
+			self::update_db_status( $task_id, $new_status, $task->automation_level, null, null, $metadata );
 
 			return array(
 				'success'      => $is_success,
@@ -95,7 +133,7 @@ class WPSG_Task_Runner {
 			WPSG_Audit_Log::log(
 				$task_id,
 				'run',
-				$before_status,
+				isset( $before_status ) ? $before_status : null,
 				array( 'error' => $e->getMessage() ),
 				'failed',
 				$e->getMessage()
@@ -108,16 +146,20 @@ class WPSG_Task_Runner {
 				'status'  => 'failed',
 				'message' => $e->getMessage(),
 			);
+		} finally {
+			// Always release mutex lock!
+			delete_transient( $lock_key );
 		}
 	}
 
 	/**
-	 * Undo a previously executed task.
+	 * Undo a previously executed task with snapshot integrity & stale check.
 	 *
-	 * @param string $task_id Task identifier.
+	 * @param string      $task_id      Task identifier.
+	 * @param string|null $reauth_token Optional re-auth token.
 	 * @return array
 	 */
-	public static function undo( $task_id ) {
+	public static function undo( $task_id, $reauth_token = null ) {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return array(
 				'success' => false,
@@ -133,9 +175,47 @@ class WPSG_Task_Runner {
 			);
 		}
 
-		$before_status = $task->get_live_status();
+		$lock_key = 'wpsg_task_lock_' . sanitize_key( $task_id );
+		if ( get_transient( $lock_key ) ) {
+			return array(
+				'success' => false,
+				'message' => __( 'This task is currently being modified. Please wait.', 'site-checkup-pro' ),
+			);
+		}
+		set_transient( $lock_key, true, 30 );
 
 		try {
+			// Re-Auth check for destructive undos.
+			if ( 'writes_files' === $task->sub_type || ! empty( $task->requires_reauth ) ) {
+				if ( class_exists( 'WPSG_Session_Manager' ) ) {
+					$valid_reauth = WPSG_Session_Manager::validate_and_consume_reauth_token( $reauth_token );
+					if ( ! $valid_reauth ) {
+						return array(
+							'success'         => false,
+							'reauth_required' => true,
+							'message'         => __( 'Administrator password confirmation is required before undoing file modifications.', 'site-checkup-pro' ),
+						);
+					}
+				}
+			}
+
+			// Stale snapshot & tamper validation.
+			$db_record = self::get_db_record( $task_id );
+			$metadata  = ( $db_record && ! empty( $db_record->metadata ) ) ? json_decode( $db_record->metadata, true ) : null;
+
+			if ( ! empty( $metadata['snapshot_hash'] ) && ! empty( $metadata['before_status'] ) ) {
+				$auth_salt     = defined( 'AUTH_SALT' ) ? AUTH_SALT : 'wpsg_salt';
+				$expected_hash = hash_hmac( 'sha256', wp_json_encode( $metadata['before_status'] ), $auth_salt );
+				if ( ! hash_equals( $expected_hash, $metadata['snapshot_hash'] ) ) {
+					return array(
+						'success' => false,
+						'message' => __( 'Security error: Snapshot integrity check failed (tampered snapshot detected). Undo aborted.', 'site-checkup-pro' ),
+					);
+				}
+			}
+
+			$before_status = $task->get_live_status();
+
 			$result     = $task->undo();
 			$is_success = ! empty( $result['success'] );
 			$message    = isset( $result['message'] ) ? $result['message'] : '';
@@ -168,20 +248,38 @@ class WPSG_Task_Runner {
 				'success' => false,
 				'message' => $e->getMessage(),
 			);
+		} finally {
+			delete_transient( $lock_key );
 		}
+	}
+
+	/**
+	 * Retrieve database status record.
+	 *
+	 * @param string $task_id Task ID.
+	 * @return object|null
+	 */
+	public static function get_db_record( $task_id ) {
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'wpsg_task_status';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		return $wpdb->get_row(
+			$wpdb->prepare( "SELECT * FROM {$table_name} WHERE task_id = %s LIMIT 1", $task_id )
+		);
 	}
 
 	/**
 	 * Update status record in wpsg_task_status table.
 	 *
-	 * @param string $task_id          Task ID.
-	 * @param string $status           Status string (pending, done, failed, skipped, attention).
-	 * @param string $automation_level Automation level (A, B, C, D).
-	 * @param string $note             Optional note.
-	 * @param string $next_reminder_at Optional reminder timestamp.
+	 * @param string      $task_id          Task ID.
+	 * @param string      $status           Status string.
+	 * @param string      $automation_level Automation level.
+	 * @param string|null $note             Optional note.
+	 * @param string|null $next_reminder_at Optional reminder timestamp.
+	 * @param array|null  $metadata         Optional metadata array.
 	 * @return bool
 	 */
-	public static function update_db_status( $task_id, $status, $automation_level = 'A', $note = null, $next_reminder_at = null ) {
+	public static function update_db_status( $task_id, $status, $automation_level = 'A', $note = null, $next_reminder_at = null, $metadata = null ) {
 		global $wpdb;
 
 		$table_name = $wpdb->prefix . 'wpsg_task_status';
@@ -204,10 +302,12 @@ class WPSG_Task_Runner {
 			$data['next_reminder_at'] = $next_reminder_at ? sanitize_text_field( $next_reminder_at ) : null;
 		}
 
-		// Clear cache
+		if ( null !== $metadata ) {
+			$data['metadata'] = wp_json_encode( $metadata );
+		}
+
 		wp_cache_delete( 'wpsg_task_status_' . $task_id, 'site-checkup-pro' );
 
-		// Check if record exists
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$exists = $wpdb->get_var(
 			$wpdb->prepare( "SELECT id FROM {$table_name} WHERE task_id = %s LIMIT 1", $task_id )

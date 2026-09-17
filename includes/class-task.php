@@ -67,6 +67,13 @@ class WPSG_Task {
 	public $requires_backup = false;
 
 	/**
+	 * Does this task require password re-authentication before executing?
+	 *
+	 * @var bool
+	 */
+	public $requires_reauth = false;
+
+	/**
 	 * Can this task be undone?
 	 *
 	 * @var bool
@@ -135,6 +142,7 @@ class WPSG_Task {
 		$this->automation_level = isset( $args['automation_level'] ) ? strtoupper( $args['automation_level'] ) : 'A';
 		$this->sub_type         = isset( $args['sub_type'] ) ? $args['sub_type'] : 'instant';
 		$this->requires_backup  = ! empty( $args['requires_backup'] );
+		$this->requires_reauth  = ! empty( $args['requires_reauth'] );
 		$this->has_undo         = ! empty( $args['has_undo'] );
 		$this->has_diff         = ! empty( $args['has_diff'] );
 		$this->run_callback     = isset( $args['run_callback'] ) ? $args['run_callback'] : null;
@@ -245,6 +253,7 @@ class WPSG_Task {
 			'automation_level' => $this->automation_level,
 			'sub_type'         => $this->sub_type,
 			'requires_backup'  => $this->requires_backup,
+			'requires_reauth'  => $this->requires_reauth,
 			'has_undo'         => $this->has_undo,
 			'has_diff'         => $this->has_diff,
 			'guide_data'       => $this->guide_data,

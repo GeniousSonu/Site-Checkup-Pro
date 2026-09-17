@@ -1,6 +1,7 @@
 <?php
 /**
- * Safe .htaccess Rule Manager with Server Detection & Staging-Safe Health Checks
+ * Safe .htaccess Rule Manager with Central Rule Registry, flock() File Locking,
+ * Server Detection & Staging-Safe Health Checks
  *
  * @package SiteCheckupPro
  * @since   1.0.0
@@ -20,6 +21,237 @@ class WPSG_Htaccess_Manager {
 	 * Prefix for all marker blocks inserted into .htaccess.
 	 */
 	const MARKER_PREFIX = 'SiteCheckupPro-';
+
+	/**
+	 * Central registry of all named .htaccess rules.
+	 * Guarantees a single source of truth and prevents overlapping/clobbering blocks.
+	 *
+	 * @return array
+	 */
+	public static function get_rule_registry() {
+		return array(
+			// 1. Hide PHP Version Header
+			'HidePHPVersion' => array(
+				'title'       => __( 'Hide PHP Version (X-Powered-By)', 'site-checkup-pro' ),
+				'marker'      => 'HidePHPVersion',
+				'rules'       => array(
+					'<IfModule mod_headers.c>',
+					'  Header unset X-Powered-By',
+					'  Header always unset X-Powered-By',
+					'</IfModule>',
+				),
+				'nginx'       => "proxy_hide_header X-Powered-By;\nfastcgi_hide_header X-Powered-By;",
+				'opt_in'      => false,
+			),
+
+			// 2. Clickjacking (X-Frame-Options)
+			'Clickjacking' => array(
+				'title'       => __( 'Clickjacking Protection (X-Frame-Options: SAMEORIGIN)', 'site-checkup-pro' ),
+				'marker'      => 'Clickjacking',
+				'rules'       => array(
+					'<IfModule mod_headers.c>',
+					'  Header always set X-Frame-Options "SAMEORIGIN"',
+					'</IfModule>',
+				),
+				'nginx'       => 'add_header X-Frame-Options "SAMEORIGIN" always;',
+				'opt_in'      => false,
+			),
+
+			// 3. MIME Sniffing (X-Content-Type-Options)
+			'MimeSniffing' => array(
+				'title'       => __( 'MIME-Type Sniffing Protection (nosniff)', 'site-checkup-pro' ),
+				'marker'      => 'MimeSniffing',
+				'rules'       => array(
+					'<IfModule mod_headers.c>',
+					'  Header always set X-Content-Type-Options "nosniff"',
+					'</IfModule>',
+				),
+				'nginx'       => 'add_header X-Content-Type-Options "nosniff" always;',
+				'opt_in'      => false,
+			),
+
+			// 4. HSTS (Strict-Transport-Security)
+			'HSTS' => array(
+				'title'       => __( 'HSTS Header Enforcement', 'site-checkup-pro' ),
+				'marker'      => 'HSTS',
+				'rules'       => array(
+					'<IfModule mod_headers.c>',
+					'  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"',
+					'</IfModule>',
+				),
+				'nginx'       => 'add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;',
+				'opt_in'      => false,
+			),
+
+			// 5. Disable Directory Browsing
+			'DisableIndexes' => array(
+				'title'       => __( 'Disable Directory Browsing (Options -Indexes)', 'site-checkup-pro' ),
+				'marker'      => 'DisableIndexes',
+				'rules'       => array(
+					'Options -Indexes',
+				),
+				'nginx'       => 'autoindex off;',
+				'opt_in'      => false,
+			),
+
+			// 6. Protect System & Sensitive Files (readme, license, sample, htaccess, wp-config)
+			'ProtectSensitiveFiles' => array(
+				'title'       => __( 'Protect Sensitive & System Files', 'site-checkup-pro' ),
+				'marker'      => 'ProtectSensitiveFiles',
+				'rules'       => array(
+					'<FilesMatch "^(readme\.html|license\.txt|wp-config-sample\.php|wp-config\.php|\.htaccess|\.env)">',
+					'  Order Allow,Deny',
+					'  Deny from all',
+					'</FilesMatch>',
+				),
+				'nginx'       => 'location ~* ^/(readme\.html|license\.txt|wp-config-sample\.php|wp-config\.php|\.htaccess|\.env) { deny all; }',
+				'opt_in'      => false,
+			),
+
+			// 7. Block Direct XML-RPC via .htaccess
+			'BlockXMLRPC' => array(
+				'title'       => __( 'Block XML-RPC Access via Web Server', 'site-checkup-pro' ),
+				'marker'      => 'BlockXMLRPC',
+				'rules'       => array(
+					'<Files xmlrpc.php>',
+					'  Order Allow,Deny',
+					'  Deny from all',
+					'</Files>',
+				),
+				'nginx'       => 'location = /xmlrpc.php { deny all; }',
+				'opt_in'      => false,
+			),
+
+			// 8. Block PHP Execution in Uploads Directory
+			'deny_uploads_php' => array(
+				'title'       => __( 'Block PHP Execution in /wp-content/uploads/', 'site-checkup-pro' ),
+				'marker'      => 'DenyUploadsPHP',
+				'rules'       => array(
+					'<IfModule mod_rewrite.c>',
+					'  RewriteEngine On',
+					'  RewriteRule ^wp-content/uploads/.*\.php$ - [F,L]',
+					'</IfModule>',
+				),
+				'nginx'       => 'location ~* ^/wp-content/uploads/.*\.php$ { deny all; }',
+				'opt_in'      => true,
+				'requires_preflight' => true,
+			),
+
+			// 9. Basic Firewall: SQL Injection Pattern
+			'basic_firewall_sqli' => array(
+				'title'       => __( 'Lightweight Firewall: Block SQL Injection Signatures', 'site-checkup-pro' ),
+				'marker'      => 'FirewallSQLi',
+				'rules'       => array(
+					'<IfModule mod_rewrite.c>',
+					'  RewriteEngine On',
+					'  RewriteCond %{QUERY_STRING} (union.*select|insert.*into|drop.*table) [NC]',
+					'  RewriteRule ^ - [F,L]',
+					'</IfModule>',
+				),
+				'nginx'       => 'if ($query_string ~* "(union.*select|insert.*into|drop.*table)") { return 403; }',
+				'opt_in'      => true,
+			),
+
+			// 10. Basic Firewall: XSS Pattern
+			'basic_firewall_xss' => array(
+				'title'       => __( 'Lightweight Firewall: Block Script Injection Signatures', 'site-checkup-pro' ),
+				'marker'      => 'FirewallXSS',
+				'rules'       => array(
+					'<IfModule mod_rewrite.c>',
+					'  RewriteEngine On',
+					'  RewriteCond %{QUERY_STRING} (<script|%3Cscript|javascript:) [NC]',
+					'  RewriteRule ^ - [F,L]',
+					'</IfModule>',
+				),
+				'nginx'       => 'if ($query_string ~* "(<script|%3Cscript|javascript:)") { return 403; }',
+				'opt_in'      => true,
+			),
+
+			// 11. Basic Firewall: Path Traversal
+			'basic_firewall_traversal' => array(
+				'title'       => __( 'Lightweight Firewall: Block Path Traversal (../)', 'site-checkup-pro' ),
+				'marker'      => 'FirewallTraversal',
+				'rules'       => array(
+					'<IfModule mod_rewrite.c>',
+					'  RewriteEngine On',
+					'  RewriteCond %{QUERY_STRING} (\.\./|\.\.\\) [NC]',
+					'  RewriteRule ^ - [F,L]',
+					'</IfModule>',
+				),
+				'nginx'       => 'if ($query_string ~* "(\\.\\./|\\.\\.\\\\)") { return 403; }',
+				'opt_in'      => true,
+			),
+
+			// 12. Basic Firewall: Remote Code Execution / Eval Signatures
+			'basic_firewall_rce' => array(
+				'title'       => __( 'Lightweight Firewall: Block RCE Signatures', 'site-checkup-pro' ),
+				'marker'      => 'FirewallRCE',
+				'rules'       => array(
+					'<IfModule mod_rewrite.c>',
+					'  RewriteEngine On',
+					'  RewriteCond %{QUERY_STRING} (base64_decode|eval\(|system\() [NC]',
+					'  RewriteRule ^ - [F,L]',
+					'</IfModule>',
+				),
+				'nginx'       => 'if ($query_string ~* "(base64_decode|eval\\(|system\\()") { return 403; }',
+				'opt_in'      => true,
+			),
+
+			// 13. Bad Bot Scanners (Explicitly labeled as Noise Reduction)
+			'bad_bots' => array(
+				'title'       => __( 'Noise Reduction: Block Known Automated Scanners User-Agents', 'site-checkup-pro' ),
+				'marker'      => 'BadBotsNoiseReduction',
+				'rules'       => array(
+					'<IfModule mod_rewrite.c>',
+					'  RewriteEngine On',
+					'  RewriteCond %{HTTP_USER_AGENT} (sqlmap|nikto|wpscan|dirbuster|havij|acunetix) [NC]',
+					'  RewriteRule ^ - [F,L]',
+					'</IfModule>',
+				),
+				'nginx'       => 'if ($http_user_agent ~* "(sqlmap|nikto|wpscan|dirbuster|havij|acunetix)") { return 403; }',
+				'opt_in'      => true,
+			),
+
+			// 14. Content-Security-Policy (Report-Only Mode First)
+			'csp_report_only' => array(
+				'title'       => __( 'Content-Security-Policy (Report-Only Mode)', 'site-checkup-pro' ),
+				'marker'      => 'CSPReportOnly',
+				'rules'       => array(
+					'<IfModule mod_headers.c>',
+					'  Header always set Content-Security-Policy-Report-Only "default-src \'self\'; script-src \'self\' \'unsafe-inline\' \'unsafe-eval\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data: https:; font-src \'self\' data:; connect-src \'self\'; report-uri /wp-json/site-checkup-pro/v1/csp-report"',
+					'</IfModule>',
+				),
+				'nginx'       => 'add_header Content-Security-Policy-Report-Only "default-src \'self\'; script-src \'self\' \'unsafe-inline\' \'unsafe-eval\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data: https:; font-src \'self\' data:; connect-src \'self\'; report-uri /wp-json/site-checkup-pro/v1/csp-report" always;',
+				'opt_in'      => true,
+			),
+
+			// 15. Referrer-Policy
+			'referrer_policy' => array(
+				'title'       => __( 'Referrer-Policy: strict-origin-when-cross-origin', 'site-checkup-pro' ),
+				'marker'      => 'ReferrerPolicy',
+				'rules'       => array(
+					'<IfModule mod_headers.c>',
+					'  Header always set Referrer-Policy "strict-origin-when-cross-origin"',
+					'</IfModule>',
+				),
+				'nginx'       => 'add_header Referrer-Policy "strict-origin-when-cross-origin" always;',
+				'opt_in'      => false,
+			),
+
+			// 16. Permissions-Policy
+			'permissions_policy' => array(
+				'title'       => __( 'Permissions-Policy Header', 'site-checkup-pro' ),
+				'marker'      => 'PermissionsPolicy',
+				'rules'       => array(
+					'<IfModule mod_headers.c>',
+					'  Header always set Permissions-Policy "geolocation=(), camera=(), microphone=()"',
+					'</IfModule>',
+				),
+				'nginx'       => 'add_header Permissions-Policy "geolocation=(), camera=(), microphone=()" always;',
+				'opt_in'      => false,
+			),
+		);
+	}
 
 	/**
 	 * Detect if web server is Apache or LiteSpeed (supports .htaccess).
@@ -45,7 +277,7 @@ class WPSG_Htaccess_Manager {
 		// Fallback: check if .htaccess exists and is writable in ABSPATH.
 		$htaccess_file = self::get_htaccess_path();
 		if ( file_exists( $htaccess_file ) && is_writable( $htaccess_file ) ) {
-			return 'apache'; // Assume compatible.
+			return 'apache';
 		}
 
 		return 'unknown';
@@ -83,7 +315,6 @@ class WPSG_Htaccess_Manager {
 			wp_mkdir_p( $dir );
 		}
 
-		// Ensure access-denial guards always exist across Apache, LiteSpeed, Nginx, and IIS.
 		$htaccess_content = "<IfModule !mod_authz_core.c>\nOrder deny,allow\nDeny from all\n</IfModule>\n<IfModule mod_authz_core.c>\nRequire all denied\n</IfModule>\n";
 		if ( ! file_exists( $dir . '.htaccess' ) ) {
 			file_put_contents( $dir . '.htaccess', $htaccess_content );
@@ -123,7 +354,137 @@ class WPSG_Htaccess_Manager {
 	}
 
 	/**
-	 * Insert or update a marker block in .htaccess with automatic backup and health check.
+	 * Enable a named rule from the centralized registry.
+	 *
+	 * @param string $rule_key Key from get_rule_registry().
+	 * @return array Array with 'success' (bool), 'message' (string).
+	 */
+	public static function enable_named_rule( $rule_key ) {
+		$registry = self::get_rule_registry();
+		if ( ! isset( $registry[ $rule_key ] ) ) {
+			return array(
+				'success' => false,
+				'message' => sprintf( __( 'Unknown named rule: %s', 'site-checkup-pro' ), esc_html( $rule_key ) ),
+			);
+		}
+
+		$rule = $registry[ $rule_key ];
+
+		// Pre-flight check for upload PHP execution block
+		if ( ! empty( $rule['requires_preflight'] ) && 'deny_uploads_php' === $rule_key ) {
+			$preflight = self::check_uploads_php_preflight();
+			if ( ! $preflight['safe'] ) {
+				return array(
+					'success'           => false,
+					'requires_warning'  => true,
+					'warning_message'   => $preflight['message'],
+					'message'           => $preflight['message'],
+				);
+			}
+		}
+
+		return self::insert_rule( $rule['marker'], $rule['rules'] );
+	}
+
+	/**
+	 * Disable a named rule from the centralized registry.
+	 *
+	 * @param string $rule_key Key from get_rule_registry().
+	 * @return array Array with 'success' (bool), 'message' (string).
+	 */
+	public static function disable_named_rule( $rule_key ) {
+		$registry = self::get_rule_registry();
+		if ( ! isset( $registry[ $rule_key ] ) ) {
+			return array(
+				'success' => false,
+				'message' => sprintf( __( 'Unknown named rule: %s', 'site-checkup-pro' ), esc_html( $rule_key ) ),
+			);
+		}
+
+		return self::remove_rule( $registry[ $rule_key ]['marker'] );
+	}
+
+	/**
+	 * Check if a named rule is currently active.
+	 *
+	 * @param string $rule_key Key from get_rule_registry().
+	 * @return bool
+	 */
+	public static function has_named_rule( $rule_key ) {
+		$registry = self::get_rule_registry();
+		if ( ! isset( $registry[ $rule_key ] ) ) {
+			return false;
+		}
+
+		return self::has_rule( $registry[ $rule_key ]['marker'] );
+	}
+
+	/**
+	 * Get diff preview for a named rule.
+	 *
+	 * @param string $rule_key Key from get_rule_registry().
+	 * @return array
+	 */
+	public static function get_named_rule_diff( $rule_key ) {
+		$registry = self::get_rule_registry();
+		if ( ! isset( $registry[ $rule_key ] ) ) {
+			return array( 'file' => '.htaccess', 'current' => '', 'insert_block' => '' );
+		}
+
+		return self::get_diff( $registry[ $rule_key ]['marker'], $registry[ $rule_key ]['rules'] );
+	}
+
+	/**
+	 * Pre-flight compatibility check for blocking PHP execution in uploads.
+	 *
+	 * @return array
+	 */
+	public static function check_uploads_php_preflight() {
+		$uploads     = wp_upload_dir();
+		$uploads_dir = $uploads['basedir'];
+		if ( ! is_dir( $uploads_dir ) ) {
+			return array( 'safe' => true, 'found' => array(), 'message' => '' );
+		}
+
+		$found = array();
+		try {
+			$iterator = new RecursiveIteratorIterator(
+				new RecursiveDirectoryIterator( $uploads_dir, RecursiveDirectoryIterator::SKIP_DOTS ),
+				RecursiveIteratorIterator::LEAVES_ONLY
+			);
+
+			$count = 0;
+			foreach ( $iterator as $file ) {
+				if ( ++$count > 500 ) {
+					break; // Bounded inspection.
+				}
+				if ( ! $file->isDir() ) {
+					$ext = strtolower( pathinfo( $file->getFilename(), PATHINFO_EXTENSION ) );
+					if ( in_array( $ext, array( 'php', 'phtml', 'php5', 'phar' ), true ) ) {
+						$found[] = substr( $file->getPathname(), strlen( $uploads_dir ) + 1 );
+					}
+				}
+			}
+		} catch ( Exception $e ) {
+			// Ignore directory read errors gracefully.
+		}
+
+		return array(
+			'safe'    => empty( $found ),
+			'found'   => $found,
+			'message' => ! empty( $found )
+				? sprintf(
+					/* translators: 1: count, 2: sample files */
+					__( 'Compatibility Warning: %1$d existing PHP file(s) found in /uploads/ (%2$s). Blocking execution may break plugins relying on these scripts.', 'site-checkup-pro' ),
+					count( $found ),
+					implode( ', ', array_slice( $found, 0, 3 ) )
+				)
+				: __( 'No PHP files detected in /wp-content/uploads/. Safe to apply rule.', 'site-checkup-pro' ),
+		);
+	}
+
+	/**
+	 * Insert or update a marker block in .htaccess with automatic backup, flock() file lock, and health check.
 	 *
 	 * @param string       $marker Rule name without prefix.
 	 * @param string|array $rules  Lines to insert.
@@ -156,15 +517,29 @@ class WPSG_Htaccess_Manager {
 			);
 		}
 
-		// Ensure rules is array of lines.
 		if ( is_string( $rules ) ) {
 			$rules = explode( "\n", trim( $rules ) );
 		}
 
 		$full_marker = self::MARKER_PREFIX . $marker;
 
-		// 3. Write via native insert_with_markers.
-		$written = insert_with_markers( $htaccess_file, $full_marker, $rules );
+		// 3. Write via native insert_with_markers wrapped in flock() file lock.
+		$lock_file = $htaccess_file . '.lock';
+		$lock_fp   = @fopen( $lock_file, 'w+' );
+		if ( $lock_fp ) {
+			flock( $lock_fp, LOCK_EX );
+		}
+
+		try {
+			$written = insert_with_markers( $htaccess_file, $full_marker, $rules );
+		} finally {
+			if ( $lock_fp ) {
+				flock( $lock_fp, LOCK_UN );
+				fclose( $lock_fp );
+				@unlink( $lock_file );
+			}
+		}
+
 		if ( ! $written ) {
 			return array(
 				'success' => false,
@@ -196,7 +571,7 @@ class WPSG_Htaccess_Manager {
 	}
 
 	/**
-	 * Remove a marker block from .htaccess.
+	 * Remove a marker block from .htaccess with flock() file lock.
 	 *
 	 * @param string $marker Rule name without prefix.
 	 * @return array
@@ -216,8 +591,22 @@ class WPSG_Htaccess_Manager {
 		$backup_path = self::backup_htaccess();
 		$full_marker = self::MARKER_PREFIX . $marker;
 
-		// Passing empty array removes the marker block.
-		$removed = insert_with_markers( $htaccess_file, $full_marker, array() );
+		// 3. Write via native insert_with_markers wrapped in flock() file lock.
+		$lock_file = $htaccess_file . '.lock';
+		$lock_fp   = @fopen( $lock_file, 'w+' );
+		if ( $lock_fp ) {
+			flock( $lock_fp, LOCK_EX );
+		}
+
+		try {
+			$removed = insert_with_markers( $htaccess_file, $full_marker, array() );
+		} finally {
+			if ( $lock_fp ) {
+				flock( $lock_fp, LOCK_UN );
+				fclose( $lock_fp );
+				@unlink( $lock_file );
+			}
+		}
 
 		if ( ! $removed ) {
 			return array(
@@ -288,22 +677,20 @@ class WPSG_Htaccess_Manager {
 	/**
 	 * Perform a staging-safe loopback health check.
 	 *
-	 * Detects HTTP Basic Auth walls (common on staging) and only triggers failure on 5xx or connection errors.
+	 * Targets only the site's configured home_url( '/' ) and verifies against 5xx errors.
 	 *
 	 * @return array Array with 'healthy' (bool), 'status_code' (int), 'message' (string).
 	 */
 	public static function run_health_check() {
 		$home_url = home_url( '/' );
 
-		// Set short timeout and don't verify SSL in local/staging environments.
 		$args = array(
 			'timeout'     => 10,
-			'redirection' => 3,
+			'redirection' => 0,
 			'sslverify'   => false,
 			'user-agent'  => 'SiteCheckupPro-SelfTest/1.0',
 		);
 
-		// If server is currently running HTTP Basic Auth, pass credentials if present.
 		if ( isset( $_SERVER['PHP_AUTH_USER'] ) && isset( $_SERVER['PHP_AUTH_PW'] ) ) {
 			$args['headers'] = array(
 				'Authorization' => 'Basic ' . base64_encode( sanitize_text_field( wp_unslash( $_SERVER['PHP_AUTH_USER'] ) ) . ':' . sanitize_text_field( wp_unslash( $_SERVER['PHP_AUTH_PW'] ) ) ),
@@ -313,7 +700,6 @@ class WPSG_Htaccess_Manager {
 		$response = wp_remote_head( $home_url, $args );
 
 		if ( is_wp_error( $response ) ) {
-			// Fallback to GET if HEAD was method-not-allowed by host.
 			$response = wp_remote_get( $home_url, $args );
 		}
 
@@ -327,8 +713,6 @@ class WPSG_Htaccess_Manager {
 
 		$status_code = (int) wp_remote_retrieve_response_code( $response );
 
-		// 401 Unauthorized or 403 Forbidden is expected on password-protected staging environments.
-		// Only 5xx errors (500, 502, 503, 504) represent server/syntax failures caused by .htaccess.
 		if ( $status_code >= 500 ) {
 			return array(
 				'healthy'     => false,

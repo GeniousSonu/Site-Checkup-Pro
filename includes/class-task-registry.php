@@ -58,12 +58,17 @@ class WPSG_Task_Registry {
 			'icon'  => 'dashicons-search',
 			'desc'  => 'Search console indexing integrity, robots.txt audit, and URL removal tracking.',
 		),
-		'regular_checks'  => array(
+		'regular_checks'      => array(
 			'label' => 'Regular Checks',
 			'icon'  => 'dashicons-calendar-alt',
 			'desc'  => 'Recurring 15-day credential rotations, vault tracking, and staging site protection.',
 		),
-		'report'          => array(
+		'advanced_protection' => array(
+			'label' => 'Advanced Protection',
+			'icon'  => 'dashicons-shield-alt',
+			'desc'  => 'Login throttling, user enumeration defense, session security, and runtime hardening.',
+		),
+		'report'              => array(
 			'label' => 'SOP Report',
 			'icon'  => 'dashicons-clipboard',
 			'desc'  => 'Client-ready SOP coverage summary report and export.',
@@ -789,7 +794,349 @@ class WPSG_Task_Registry {
 		) ) );
 
 		// ==========================================
-		// SECTION 6: CLIENT REPORT
+		// SECTION 6: ADVANCED PROTECTION
+		// ==========================================
+
+		// 6.1 Block User & Author Enumeration
+		$this->register( new WPSG_Task( array(
+			'id'               => 'block_user_enumeration',
+			'section'          => 'advanced_protection',
+			'title'            => __( 'Block User & Author Enumeration', 'site-checkup-pro' ),
+			'description'      => __( 'Restricts unauthenticated access to /wp/v2/users and intercepts ?author= numeric queries to prevent attacker username discovery.', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'instant',
+			'has_undo'         => true,
+			'status_callback'  => function () {
+				$active = get_option( 'wpsg_block_user_enumeration', false );
+				return array(
+					'status'  => $active ? 'done' : 'pending',
+					'message' => $active ? __( 'User & author enumeration blocked for unauthorized visitors.', 'site-checkup-pro' ) : __( 'User enumeration protection is disabled.', 'site-checkup-pro' ),
+				);
+			},
+			'run_callback'     => function () {
+				update_option( 'wpsg_block_user_enumeration', true );
+				return array( 'success' => true, 'message' => __( 'User & author enumeration blocked.', 'site-checkup-pro' ) );
+			},
+			'undo_callback'    => function () {
+				delete_option( 'wpsg_block_user_enumeration' );
+				return array( 'success' => true, 'message' => __( 'User enumeration protection disabled.', 'site-checkup-pro' ) );
+			},
+		) ) );
+
+		// 6.2 Progressive Login Throttling & Honeypot
+		$this->register( new WPSG_Task( array(
+			'id'               => 'login_hardening',
+			'section'          => 'advanced_protection',
+			'title'            => __( 'Login Throttling & Honeypot Protection', 'site-checkup-pro' ),
+			'description'      => __( 'Enforces atomic DB-level progressive lockouts (1m, 15m, 60m), silent honeypots, and generic error masking.', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'instant',
+			'has_undo'         => true,
+			'status_callback'  => function () {
+				$active = get_option( 'wpsg_login_hardening', true );
+				return array(
+					'status'  => $active ? 'done' : 'pending',
+					'message' => $active ? __( 'Progressive login throttling and honeypot active.', 'site-checkup-pro' ) : __( 'Login throttling is disabled.', 'site-checkup-pro' ),
+				);
+			},
+			'run_callback'     => function () {
+				update_option( 'wpsg_login_hardening', true );
+				return array( 'success' => true, 'message' => __( 'Login throttling & honeypot enabled.', 'site-checkup-pro' ) );
+			},
+			'undo_callback'    => function () {
+				delete_option( 'wpsg_login_hardening' );
+				return array( 'success' => true, 'message' => __( 'Login throttling disabled.', 'site-checkup-pro' ) );
+			},
+		) ) );
+
+		// 6.3 Active Session Governance
+		$this->register( new WPSG_Task( array(
+			'id'               => 'session_governance',
+			'section'          => 'advanced_protection',
+			'title'            => __( 'Active Session Management', 'site-checkup-pro' ),
+			'description'      => __( 'Review concurrent logged-in sessions across devices, terminate stale logins, and enforce automatic session invalidation on password updates.', 'site-checkup-pro' ),
+			'automation_level' => 'B',
+			'sub_type'         => 'guided',
+			'guide_data'       => array( 'action' => 'open_sessions_modal' ),
+			'status_callback'  => function () {
+				$sessions = class_exists( 'WPSG_Session_Manager' ) ? WPSG_Session_Manager::get_user_sessions( get_current_user_id() ) : array();
+				$count    = count( $sessions );
+				return array(
+					'status'  => ( $count <= 2 ) ? 'done' : 'attention',
+					'message' => sprintf( __( '%d active session(s) recorded for current administrator.', 'site-checkup-pro' ), $count ),
+				);
+			},
+		) ) );
+
+		// 6.4 Hide WordPress Version & Generator
+		$this->register( new WPSG_Task( array(
+			'id'               => 'hide_wordpress_fingerprint',
+			'section'          => 'advanced_protection',
+			'title'            => __( 'Hide WordPress Version Meta Tag', 'site-checkup-pro' ),
+			'description'      => __( 'Removes the WordPress generator tag from HTML headers and RSS feeds to reduce version fingerprinting.', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'instant',
+			'has_undo'         => true,
+			'status_callback'  => function () {
+				$active = get_option( 'wpsg_hide_generator', false );
+				return array(
+					'status'  => $active ? 'done' : 'pending',
+					'message' => $active ? __( 'WordPress generator tag is removed.', 'site-checkup-pro' ) : __( 'WordPress generator tag is currently public.', 'site-checkup-pro' ),
+				);
+			},
+			'run_callback'     => function () {
+				update_option( 'wpsg_hide_generator', true );
+				return array( 'success' => true, 'message' => __( 'WordPress generator version hidden.', 'site-checkup-pro' ) );
+			},
+			'undo_callback'    => function () {
+				delete_option( 'wpsg_hide_generator' );
+				return array( 'success' => true, 'message' => __( 'WordPress generator tag restored.', 'site-checkup-pro' ) );
+			},
+		) ) );
+
+		// 6.5 Strip Script/Style Version Queries (Opt-In)
+		$this->register( new WPSG_Task( array(
+			'id'               => 'strip_script_versions',
+			'section'          => 'advanced_protection',
+			'title'            => __( 'Remove ?ver= from Enqueued Scripts & Styles', 'site-checkup-pro' ),
+			'description'      => __( 'Strips version query strings from script and stylesheet URLs (Opt-in: may impact browser caching on file updates).', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'instant',
+			'has_undo'         => true,
+			'status_callback'  => function () {
+				$active = get_option( 'wpsg_strip_ver', false );
+				return array(
+					'status'  => $active ? 'done' : 'pending',
+					'message' => $active ? __( 'Version strings stripped from enqueued assets.', 'site-checkup-pro' ) : __( 'Version query strings remain enabled.', 'site-checkup-pro' ),
+				);
+			},
+			'run_callback'     => function () {
+				update_option( 'wpsg_strip_ver', true );
+				return array( 'success' => true, 'message' => __( '?ver= parameters removed from scripts and styles.', 'site-checkup-pro' ) );
+			},
+			'undo_callback'    => function () {
+				delete_option( 'wpsg_strip_ver' );
+				return array( 'success' => true, 'message' => __( 'Asset version parameters restored.', 'site-checkup-pro' ) );
+			},
+		) ) );
+
+		// 6.6 Block PHP Execution in Uploads Directory
+		$this->register( new WPSG_Task( array(
+			'id'               => 'deny_uploads_php',
+			'section'          => 'advanced_protection',
+			'title'            => __( 'Block PHP Execution in /wp-content/uploads/', 'site-checkup-pro' ),
+			'description'      => __( 'Prevents direct execution of PHP scripts in the uploads folder, shutting down web shells uploaded via plugin vulnerabilities.', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'writes_files',
+			'requires_backup'  => true,
+			'requires_reauth'  => true,
+			'has_undo'         => true,
+			'has_diff'         => true,
+			'nginx_snippet'    => "location ~* ^/wp-content/uploads/.*\\.php$ { deny all; }",
+			'status_callback'  => function () {
+				if ( ! WPSG_Htaccess_Manager::supports_htaccess() ) {
+					return array( 'status' => 'not_applicable', 'is_na' => true, 'message' => __( 'Use Nginx configuration directive on Nginx servers.', 'site-checkup-pro' ) );
+				}
+				$has = WPSG_Htaccess_Manager::has_named_rule( 'deny_uploads_php' );
+				return array(
+					'status'  => $has ? 'done' : 'pending',
+					'message' => $has ? __( 'PHP execution blocked in /uploads/.', 'site-checkup-pro' ) : __( 'PHP execution currently allowed in /uploads/.', 'site-checkup-pro' ),
+				);
+			},
+			'diff_callback'    => function () {
+				return WPSG_Htaccess_Manager::get_named_rule_diff( 'deny_uploads_php' );
+			},
+			'run_callback'     => function () {
+				return WPSG_Htaccess_Manager::enable_named_rule( 'deny_uploads_php' );
+			},
+			'undo_callback'    => function () {
+				return WPSG_Htaccess_Manager::disable_named_rule( 'deny_uploads_php' );
+			},
+		) ) );
+
+		// 6.7 Core Checksums Integrity Scan
+		$this->register( new WPSG_Task( array(
+			'id'               => 'core_checksum_integrity',
+			'section'          => 'advanced_protection',
+			'title'            => __( 'WordPress Core Files Checksum Scan', 'site-checkup-pro' ),
+			'description'      => __( 'Compares local WordPress core files against official WordPress.org release checksums (strictly excluding wp-content).', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'instant',
+			'status_callback'  => function () {
+				return class_exists( 'WPSG_Integrity_Monitor' ) ? WPSG_Integrity_Monitor::check_core_checksums() : array( 'status' => 'pending' );
+			},
+			'run_callback'     => function () {
+				return class_exists( 'WPSG_Integrity_Monitor' ) ? WPSG_Integrity_Monitor::check_core_checksums( true ) : array( 'success' => false );
+			},
+		) ) );
+
+		// 6.8 Scan Uploads for Executable PHP Files
+		$this->register( new WPSG_Task( array(
+			'id'               => 'scan_uploads_executables',
+			'section'          => 'advanced_protection',
+			'title'            => __( 'Scan Uploads for Executable Scripts', 'site-checkup-pro' ),
+			'description'      => __( 'Audits /wp-content/uploads/ for suspicious .php, .phtml, or .phar scripts.', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'instant',
+			'status_callback'  => function () {
+				return class_exists( 'WPSG_Integrity_Monitor' ) ? WPSG_Integrity_Monitor::scan_uploads_for_executables() : array( 'status' => 'pending' );
+			},
+			'run_callback'     => function () {
+				return class_exists( 'WPSG_Integrity_Monitor' ) ? WPSG_Integrity_Monitor::scan_uploads_for_executables() : array( 'success' => false );
+			},
+		) ) );
+
+		// 6.9 Lightweight Basic Firewall Rules (Opt-In, Individually Toggleable)
+		$this->register( new WPSG_Task( array(
+			'id'               => 'basic_firewall_rules',
+			'section'          => 'advanced_protection',
+			'title'            => __( 'Lightweight Query String Firewall', 'site-checkup-pro' ),
+			'description'      => __( 'Hardcoded rule set blocking SQL injection, XSS, and traversal signatures in URL query strings (Opt-in; does not replace a network WAF).', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'writes_files',
+			'requires_backup'  => true,
+			'requires_reauth'  => true,
+			'has_undo'         => true,
+			'has_diff'         => true,
+			'nginx_snippet'    => "if (\$query_string ~* \"(union.*select|<script|\\.\\./|base64_decode)\") { return 403; }",
+			'status_callback'  => function () {
+				if ( ! WPSG_Htaccess_Manager::supports_htaccess() ) {
+					return array( 'status' => 'not_applicable', 'is_na' => true, 'message' => __( 'Use Nginx configuration on Nginx servers.', 'site-checkup-pro' ) );
+				}
+				$has = WPSG_Htaccess_Manager::has_named_rule( 'basic_firewall_sqli' );
+				return array(
+					'status'  => $has ? 'done' : 'pending',
+					'message' => $has ? __( 'Lightweight query firewall active.', 'site-checkup-pro' ) : __( 'Query string firewall is disabled.', 'site-checkup-pro' ),
+				);
+			},
+			'diff_callback'    => function () {
+				return WPSG_Htaccess_Manager::get_named_rule_diff( 'basic_firewall_sqli' );
+			},
+			'run_callback'     => function () {
+				WPSG_Htaccess_Manager::enable_named_rule( 'basic_firewall_sqli' );
+				WPSG_Htaccess_Manager::enable_named_rule( 'basic_firewall_xss' );
+				WPSG_Htaccess_Manager::enable_named_rule( 'basic_firewall_traversal' );
+				return WPSG_Htaccess_Manager::enable_named_rule( 'basic_firewall_rce' );
+			},
+			'undo_callback'    => function () {
+				WPSG_Htaccess_Manager::disable_named_rule( 'basic_firewall_sqli' );
+				WPSG_Htaccess_Manager::disable_named_rule( 'basic_firewall_xss' );
+				WPSG_Htaccess_Manager::disable_named_rule( 'basic_firewall_traversal' );
+				return WPSG_Htaccess_Manager::disable_named_rule( 'basic_firewall_rce' );
+			},
+		) ) );
+
+		// 6.10 Bad Bots Noise Reduction
+		$this->register( new WPSG_Task( array(
+			'id'               => 'bad_bots_noise_reduction',
+			'section'          => 'advanced_protection',
+			'title'            => __( 'Noise Reduction: Block Known Vulnerability Scanners', 'site-checkup-pro' ),
+			'description'      => __( 'Blocks requests matching known scanner user agents (sqlmap, nikto, wpscan). Accurately labeled: reduces automated scan log noise.', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'writes_files',
+			'requires_backup'  => true,
+			'requires_reauth'  => true,
+			'has_undo'         => true,
+			'has_diff'         => true,
+			'nginx_snippet'    => "if (\$http_user_agent ~* \"(sqlmap|nikto|wpscan|dirbuster)\") { return 403; }",
+			'status_callback'  => function () {
+				if ( ! WPSG_Htaccess_Manager::supports_htaccess() ) {
+					return array( 'status' => 'not_applicable', 'is_na' => true, 'message' => __( 'Use Nginx configuration on Nginx servers.', 'site-checkup-pro' ) );
+				}
+				$has = WPSG_Htaccess_Manager::has_named_rule( 'bad_bots' );
+				return array(
+					'status'  => $has ? 'done' : 'pending',
+					'message' => $has ? __( 'Scanner noise reduction active.', 'site-checkup-pro' ) : __( 'Scanner user-agent filter disabled.', 'site-checkup-pro' ),
+				);
+			},
+			'diff_callback'    => function () {
+				return WPSG_Htaccess_Manager::get_named_rule_diff( 'bad_bots' );
+			},
+			'run_callback'     => function () {
+				return WPSG_Htaccess_Manager::enable_named_rule( 'bad_bots' );
+			},
+			'undo_callback'    => function () {
+				return WPSG_Htaccess_Manager::disable_named_rule( 'bad_bots' );
+			},
+		) ) );
+
+		// 6.11 Content-Security-Policy (Report-Only Mode)
+		$this->register( new WPSG_Task( array(
+			'id'               => 'security_headers_csp',
+			'section'          => 'advanced_protection',
+			'title'            => __( 'Content-Security-Policy (Report-Only Mode)', 'site-checkup-pro' ),
+			'description'      => __( 'Deploys CSP in safe Report-Only mode to log potential violations without breaking page builders or analytics.', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'instant',
+			'has_undo'         => true,
+			'status_callback'  => function () {
+				$mode = get_option( 'wpsg_csp_mode', '' );
+				return array(
+					'status'  => ( 'report_only' === $mode || 'enforce' === $mode ) ? 'done' : 'pending',
+					'message' => ( 'report_only' === $mode )
+						? __( 'CSP active in Report-Only mode (capturing violations safely).', 'site-checkup-pro' )
+						: ( 'enforce' === $mode ? __( 'CSP active in Enforce mode.', 'site-checkup-pro' ) : __( 'Content-Security-Policy is disabled.', 'site-checkup-pro' ) ),
+				);
+			},
+			'run_callback'     => function () {
+				update_option( 'wpsg_csp_mode', 'report_only' );
+				return array( 'success' => true, 'message' => __( 'CSP enabled in Report-Only mode.', 'site-checkup-pro' ) );
+			},
+			'undo_callback'    => function () {
+				delete_option( 'wpsg_csp_mode' );
+				return array( 'success' => true, 'message' => __( 'Content-Security-Policy disabled.', 'site-checkup-pro' ) );
+			},
+		) ) );
+
+		// 6.12 Admin Notice Focus Mode & Dashboard Declutter
+		$this->register( new WPSG_Task( array(
+			'id'               => 'admin_notice_focus_mode',
+			'section'          => 'advanced_protection',
+			'title'            => __( 'Admin Notice Focus Mode & Dashboard Declutter', 'site-checkup-pro' ),
+			'description'      => __( 'Buffers and sanitizes promotional plugin notices while never suppressing WordPress core updates or security warnings.', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'instant',
+			'has_undo'         => true,
+			'status_callback'  => function () {
+				$active = get_option( 'wpsg_focus_mode', false );
+				return array(
+					'status'  => $active ? 'done' : 'pending',
+					'message' => $active ? __( 'Notice Focus Mode and dashboard declutter active.', 'site-checkup-pro' ) : __( 'Standard WordPress admin notices visible.', 'site-checkup-pro' ),
+				);
+			},
+			'run_callback'     => function () {
+				update_option( 'wpsg_focus_mode', true );
+				update_option( 'wpsg_declutter_dashboard', true );
+				return array( 'success' => true, 'message' => __( 'Focus Mode enabled.', 'site-checkup-pro' ) );
+			},
+			'undo_callback'    => function () {
+				delete_option( 'wpsg_focus_mode' );
+				delete_option( 'wpsg_declutter_dashboard' );
+				return array( 'success' => true, 'message' => __( 'Standard admin notices restored.', 'site-checkup-pro' ) );
+			},
+		) ) );
+
+		// 6.13 Application Password Audit & Governance
+		$this->register( new WPSG_Task( array(
+			'id'               => 'audit_app_passwords',
+			'section'          => 'advanced_protection',
+			'title'            => __( 'Audit & Govern Application Passwords', 'site-checkup-pro' ),
+			'description'      => __( 'Audit all active application passwords across users, surface unused credentials, and revoke with re-authentication.', 'site-checkup-pro' ),
+			'automation_level' => 'B',
+			'sub_type'         => 'guided',
+			'guide_data'       => array( 'action' => 'open_app_passwords_modal' ),
+			'status_callback'  => function () {
+				$passwords = class_exists( 'WPSG_App_Password_Manager' ) ? WPSG_App_Password_Manager::get_all_application_passwords() : array();
+				$count     = count( $passwords );
+				return array(
+					'status'  => ( 0 === $count ) ? 'done' : 'attention',
+					'message' => sprintf( __( '%d application password(s) active on this site.', 'site-checkup-pro' ), $count ),
+				);
+			},
+		) ) );
+
+		// ==========================================
+		// SECTION 7: CLIENT REPORT
 		// ==========================================
 
 		$this->register( new WPSG_Task( array(

@@ -37,6 +37,10 @@ class WPSG_Audit_Log {
 		$sanitized_before = self::sanitize_snapshot( $task_id, $before_snapshot );
 		$sanitized_after  = self::sanitize_snapshot( $task_id, $after_snapshot );
 
+		// Log forging defense: strip newlines and control characters.
+		$clean_message = preg_replace( '/[\r\n\t\x00-\x1F\x7F]+/', ' ', (string) $message );
+		$clean_message = sanitize_text_field( trim( $clean_message ) );
+
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$inserted = $wpdb->insert(
 			$table_name,
@@ -47,10 +51,10 @@ class WPSG_Audit_Log {
 				'before_snapshot' => $sanitized_before ? wp_json_encode( $sanitized_before ) : null,
 				'after_snapshot'  => $sanitized_after ? wp_json_encode( $sanitized_after ) : null,
 				'result'          => 'failed' === $result ? 'failed' : 'success',
-				'message'         => sanitize_text_field( $message ),
+				'message'         => $clean_message,
 				'created_at'      => current_time( 'mysql' ),
 			),
-			array( '%s', '%s', '%d', '%s', '%s', '%s', '%s', '%s' )
+			array( '%s', '%s', '%d', '%s', '%s', '%s', '%s', '%s' ) // 8 fields: task_id, action, user_id, before_snapshot, after_snapshot, result, message, created_at
 		);
 
 		return $inserted ? $wpdb->insert_id : false;
@@ -138,12 +142,21 @@ class WPSG_Audit_Log {
 	 * @param int $offset Offset.
 	 * @return array
 	 */
-	public static function get_logs( $limit = 50, $offset = 0 ) {
+	public static function get_logs( $limit = 50, $offset = 0, $orderby = 'created_at', $order = 'DESC' ) {
 		global $wpdb;
 
 		$table_name = $wpdb->prefix . 'wpsg_audit_log';
 		$limit      = absint( $limit );
 		$offset     = absint( $offset );
+
+		$allowed_orderby = array(
+			'created_at' => 'a.created_at',
+			'task_id'    => 'a.task_id',
+			'action'     => 'a.action',
+			'result'     => 'a.result',
+		);
+		$sort_col = isset( $allowed_orderby[ $orderby ] ) ? $allowed_orderby[ $orderby ] : 'a.created_at';
+		$sort_dir = 'ASC' === strtoupper( $order ) ? 'ASC' : 'DESC';
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$rows = $wpdb->get_results(
@@ -151,7 +164,7 @@ class WPSG_Audit_Log {
 				"SELECT a.*, u.user_login, u.display_name 
 				FROM {$table_name} a 
 				LEFT JOIN {$wpdb->users} u ON a.user_id = u.ID 
-				ORDER BY a.created_at DESC 
+				ORDER BY {$sort_col} {$sort_dir} 
 				LIMIT %d OFFSET %d",
 				$limit,
 				$offset

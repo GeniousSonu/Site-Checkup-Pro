@@ -218,5 +218,10 @@ $backup_status = WPSG_Backup_Guard::get_backup_status();
 	<?php include WPSG_PLUGIN_DIR . 'admin/views/modal-note.php'; ?>
 	<?php include WPSG_PLUGIN_DIR . 'admin/views/modal-login-rename.php'; ?>
 	<?php include WPSG_PLUGIN_DIR . 'admin/views/modal-delete-plugin.php'; ?>
+	<?php include WPSG_PLUGIN_DIR . 'admin/views/modal-reauth.php'; ?>
+	<?php include WPSG_PLUGIN_DIR . 'admin/views/modal-sessions.php'; ?>
+	<?php include WPSG_PLUGIN_DIR . 'admin/views/modal-app-passwords.php'; ?>
+	<?php include WPSG_PLUGIN_DIR . 'admin/views/modal-csp-reports.php'; ?>
 
 </div>
+

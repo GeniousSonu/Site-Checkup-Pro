@@ -116,6 +116,23 @@
 		dom.deletePluginName = document.getElementById('wpsg-delete-plugin-name');
 		dom.deletePluginSlug = document.getElementById('wpsg-delete-plugin-slug');
 		dom.btnConfirmDeletePlugin = document.getElementById('wpsg-btn-confirm-delete-plugin');
+
+		// Advanced Protection & Re-auth Modals
+		dom.modalReauth = document.getElementById('wpsg-modal-reauth');
+		dom.reauthPassword = document.getElementById('wpsg-reauth-password');
+		dom.reauthErrorBox = document.getElementById('wpsg-reauth-error-box');
+		dom.reauthErrorMessage = document.getElementById('wpsg-reauth-error-message');
+		dom.btnReauthSubmit = document.getElementById('wpsg-btn-reauth-submit');
+
+		dom.modalSessions = document.getElementById('wpsg-modal-sessions');
+		dom.sessionsTbody = document.getElementById('wpsg-sessions-tbody');
+		dom.btnDestroyOtherSessions = document.getElementById('wpsg-btn-destroy-other-sessions');
+
+		dom.modalAppPasswords = document.getElementById('wpsg-modal-app-passwords');
+		dom.appPasswordsTbody = document.getElementById('wpsg-app-passwords-tbody');
+
+		dom.modalCspReports = document.getElementById('wpsg-modal-csp-reports');
+		dom.cspTbody = document.getElementById('wpsg-csp-tbody');
 	}
 
 	/**
@@ -264,6 +281,16 @@
 		// Confirm Delete Plugin
 		if (dom.btnConfirmDeletePlugin) {
 			dom.btnConfirmDeletePlugin.addEventListener('click', submitDeletePlugin);
+		}
+
+		// Re-Auth Modal Submit
+		if (dom.btnReauthSubmit) {
+			dom.btnReauthSubmit.addEventListener('click', handleReauthSubmit);
+		}
+
+		// Destroy Other Sessions Button
+		if (dom.btnDestroyOtherSessions) {
+			dom.btnDestroyOtherSessions.addEventListener('click', destroyOtherSessions);
 		}
 	}
 
@@ -469,7 +496,14 @@
 
 		// Level B: Guided
 		else if (task.automation_level === 'B') {
-			if (task.guide_data && task.guide_data.action === 'modal_login_rename') {
+			if (task.id === 'inspect_sessions') {
+				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-primary wpsg-btn-open-sessions"><span class="dashicons dashicons-desktop"></span> Inspect Sessions</button>`;
+			} else if (task.id === 'app_passwords') {
+				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-primary wpsg-btn-open-app-passwords"><span class="dashicons dashicons-admin-network"></span> Review Credentials</button>`;
+			} else if (task.id === 'csp_report_collector') {
+				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary wpsg-btn-open-csp-reports"><span class="dashicons dashicons-shield-alt"></span> View Reports</button> `;
+				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-primary wpsg-btn-run" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-controls-play"></span> Check Header</button>`;
+			} else if (task.guide_data && task.guide_data.action === 'modal_login_rename') {
 				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-primary wpsg-btn-open-login-rename"><span class="dashicons dashicons-admin-network"></span> Change Login URL</button>`;
 			} else if (task.id === 'scaffold_child_theme') {
 				if (task.status === 'done') {
@@ -544,12 +578,27 @@
 				openModal(dom.modalLoginRename);
 			});
 		});
+
+		// Open Sessions Modal Button
+		document.querySelectorAll('.wpsg-btn-open-sessions').forEach(btn => {
+			btn.addEventListener('click', loadSessions);
+		});
+
+		// Open App Passwords Modal Button
+		document.querySelectorAll('.wpsg-btn-open-app-passwords').forEach(btn => {
+			btn.addEventListener('click', loadAppPasswords);
+		});
+
+		// Open CSP Reports Modal Button
+		document.querySelectorAll('.wpsg-btn-open-csp-reports').forEach(btn => {
+			btn.addEventListener('click', loadCspReports);
+		});
 	}
 
 	/**
 	 * Run a single task via REST API
 	 */
-	async function runTask(taskId, btnElement = null) {
+	async function runTask(taskId, btnElement = null, reauthToken = null) {
 		const task = state.tasks.find(t => t.id === taskId);
 		if (!task) return;
 
@@ -560,10 +609,32 @@
 		}
 
 		try {
+			const headers = {};
+			if (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.run_task) {
+				headers['X-WPSG-Nonce'] = window.wpsgData.nonces.run_task;
+			}
+			if (reauthToken) {
+				headers['X-WPSG-Reauth'] = reauthToken;
+			}
+
 			const res = await wp.apiFetch({
 				path: `/site-checkup-pro/v1/tasks/${taskId}/run`,
 				method: 'POST',
+				headers: headers,
+				data: reauthToken ? { reauth_token: reauthToken } : {},
 			});
+
+			// Re-authentication check
+			if (res && res.reauth_required) {
+				if (btnElement) {
+					btnElement.disabled = false;
+					btnElement.innerHTML = '<span class="dashicons dashicons-lock"></span> Password Required';
+				}
+				requireReauth((token) => {
+					runTask(taskId, btnElement, token);
+				});
+				return;
+			}
 
 			if (res.backup_required) {
 				// Backup gate triggered! Show modal
@@ -603,7 +674,7 @@
 	/**
 	 * Undo a task via REST API
 	 */
-	async function undoTask(taskId, btnElement = null) {
+	async function undoTask(taskId, btnElement = null, reauthToken = null) {
 		const task = state.tasks.find(t => t.id === taskId);
 		if (!task) return;
 
@@ -613,10 +684,31 @@
 		}
 
 		try {
+			const headers = {};
+			if (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.undo_task) {
+				headers['X-WPSG-Nonce'] = window.wpsgData.nonces.undo_task;
+			}
+			if (reauthToken) {
+				headers['X-WPSG-Reauth'] = reauthToken;
+			}
+
 			const res = await wp.apiFetch({
 				path: `/site-checkup-pro/v1/tasks/${taskId}/undo`,
 				method: 'POST',
+				headers: headers,
+				data: reauthToken ? { reauth_token: reauthToken } : {},
 			});
+
+			if (res && res.reauth_required) {
+				if (btnElement) {
+					btnElement.disabled = false;
+					btnElement.innerHTML = '<span class="dashicons dashicons-lock"></span> Password Required';
+				}
+				requireReauth((token) => {
+					undoTask(taskId, btnElement, token);
+				});
+				return;
+			}
 
 			task.status = res.status || 'pending';
 			task.live_message = res.live_message || res.message;
@@ -833,6 +925,7 @@
 			await wp.apiFetch({
 				path: `/site-checkup-pro/v1/tasks/${taskId}/status`,
 				method: 'POST',
+				headers: window.wpsgData?.nonces?.update_status ? { 'X-WPSG-Nonce': window.wpsgData.nonces.update_status } : {},
 				data: {
 					status: 'done',
 					note: note,
@@ -870,6 +963,7 @@
 			const res = await wp.apiFetch({
 				path: '/site-checkup-pro/v1/tasks/set-login-slug',
 				method: 'POST',
+				headers: window.wpsgData?.nonces?.set_login_slug ? { 'X-WPSG-Nonce': window.wpsgData.nonces.set_login_slug } : {},
 				data: { slug, confirm },
 			});
 
@@ -902,6 +996,7 @@
 			await wp.apiFetch({
 				path: '/site-checkup-pro/v1/tasks/confirm-backup',
 				method: 'POST',
+				headers: window.wpsgData?.nonces?.confirm_backup ? { 'X-WPSG-Nonce': window.wpsgData.nonces.confirm_backup } : {},
 			});
 
 			alert('Manual backup confirmation recorded. Safe file operations are now unblocked for the next 48 hours.');
@@ -924,12 +1019,257 @@
 			const res = await wp.apiFetch({
 				path: '/site-checkup-pro/v1/tasks/update-baseline',
 				method: 'POST',
+				headers: window.wpsgData?.nonces?.update_baseline ? { 'X-WPSG-Nonce': window.wpsgData.nonces.update_baseline } : {},
 			});
 
 			alert(res.message || 'Baseline updated.');
 			loadTasks();
 		} catch (err) {
 			alert(`Failed to update baseline: ${err.message || 'Error'}`);
+		}
+	}
+
+	/**
+	 * Re-authentication Modal Prompt
+	 */
+	function requireReauth(callback) {
+		state.pendingReauthCallback = callback;
+		if (dom.reauthPassword) dom.reauthPassword.value = '';
+		if (dom.reauthErrorBox) dom.reauthErrorBox.style.display = 'none';
+		openModal(dom.modalReauth);
+		if (dom.reauthPassword) dom.reauthPassword.focus();
+	}
+
+	/**
+	 * Handle Re-authentication Submit
+	 */
+	async function handleReauthSubmit() {
+		const password = dom.reauthPassword ? dom.reauthPassword.value : '';
+		if (!password) {
+			if (dom.reauthErrorBox && dom.reauthErrorMessage) {
+				dom.reauthErrorMessage.textContent = 'Please enter your administrator password.';
+				dom.reauthErrorBox.style.display = 'flex';
+			}
+			return;
+		}
+
+		dom.btnReauthSubmit.disabled = true;
+		dom.btnReauthSubmit.innerHTML = '<span class="wpsg-spinner"></span> Verifying...';
+		if (dom.reauthErrorBox) dom.reauthErrorBox.style.display = 'none';
+
+		try {
+			const res = await wp.apiFetch({
+				path: '/site-checkup-pro/v1/reauth',
+				method: 'POST',
+				headers: window.wpsgData?.nonces?.reauth ? { 'X-WPSG-Nonce': window.wpsgData.nonces.reauth } : {},
+				data: { password },
+			});
+
+			if (res && res.reauth_token) {
+				closeAllModals();
+				const cb = state.pendingReauthCallback;
+				state.pendingReauthCallback = null;
+				if (typeof cb === 'function') {
+					cb(res.reauth_token);
+				}
+			} else {
+				throw new Error(res.message || 'Verification failed.');
+			}
+		} catch (err) {
+			if (dom.reauthErrorBox && dom.reauthErrorMessage) {
+				dom.reauthErrorMessage.textContent = err.message || 'Incorrect password.';
+				dom.reauthErrorBox.style.display = 'flex';
+			}
+		} finally {
+			dom.btnReauthSubmit.disabled = false;
+			dom.btnReauthSubmit.innerHTML = '<span class="dashicons dashicons-unlock"></span> Verify & Proceed';
+		}
+	}
+
+	/**
+	 * Active User Sessions Management
+	 */
+	async function loadSessions() {
+		if (!dom.sessionsTbody) return;
+		openModal(dom.modalSessions);
+		dom.sessionsTbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;"><span class="wpsg-spinner"></span> Loading active sessions...</td></tr>';
+
+		try {
+			const res = await wp.apiFetch({
+				path: '/site-checkup-pro/v1/sessions',
+			});
+
+			const sessions = (res && Array.isArray(res.sessions)) ? res.sessions : [];
+			if (sessions.length === 0) {
+				dom.sessionsTbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">No active sessions found.</td></tr>';
+				return;
+			}
+
+			dom.sessionsTbody.innerHTML = sessions.map(s => `
+				<tr>
+					<td><code>${escapeHtml(s.ip || 'Unknown')}</code></td>
+					<td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(s.ua || '')}">${escapeHtml(s.ua || 'Unknown')}</td>
+					<td>${escapeHtml(s.login_time || '')}</td>
+					<td>
+						${s.is_current ? '<span class="wpsg-chip wpsg-chip-instant">Current Device</span>' : '<span class="wpsg-chip">Remote Device</span>'}
+					</td>
+					<td>
+						${s.is_current ? '<span class="wpsg-text-muted">Active</span>' : `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-danger wpsg-btn-destroy-session" data-verifier="${escapeHtml(s.verifier)}"><span class="dashicons dashicons-no"></span> Terminate</button>`}
+					</td>
+				</tr>
+			`).join('');
+
+			// Bind row terminate buttons
+			dom.sessionsTbody.querySelectorAll('.wpsg-btn-destroy-session').forEach(btn => {
+				btn.addEventListener('click', async () => {
+					const verifier = btn.getAttribute('data-verifier');
+					if (!confirm('Are you sure you want to terminate this remote session?')) return;
+					btn.disabled = true;
+					try {
+						await wp.apiFetch({
+							path: '/site-checkup-pro/v1/sessions/destroy',
+							method: 'POST',
+							headers: window.wpsgData?.nonces?.destroy_session ? { 'X-WPSG-Nonce': window.wpsgData.nonces.destroy_session } : {},
+							data: { verifier },
+						});
+						loadSessions();
+					} catch (err) {
+						alert(`Failed to terminate session: ${err.message || 'Error'}`);
+						btn.disabled = false;
+					}
+				});
+			});
+		} catch (err) {
+			dom.sessionsTbody.innerHTML = `<tr><td colspan="5" class="wpsg-error-state">Failed to load sessions: ${escapeHtml(err.message)}</td></tr>`;
+		}
+	}
+
+	async function destroyOtherSessions() {
+		if (!confirm('Log out all other browser sessions across all devices?')) return;
+		if (dom.btnDestroyOtherSessions) dom.btnDestroyOtherSessions.disabled = true;
+
+		try {
+			await wp.apiFetch({
+				path: '/site-checkup-pro/v1/sessions/destroy-others',
+				method: 'POST',
+				headers: window.wpsgData?.nonces?.destroy_session ? { 'X-WPSG-Nonce': window.wpsgData.nonces.destroy_session } : {},
+			});
+			alert('All other sessions have been logged out.');
+			loadSessions();
+		} catch (err) {
+			alert(`Failed: ${err.message || 'Error'}`);
+		} finally {
+			if (dom.btnDestroyOtherSessions) dom.btnDestroyOtherSessions.disabled = false;
+		}
+	}
+
+	/**
+	 * Application Passwords Governance
+	 */
+	async function loadAppPasswords() {
+		if (!dom.appPasswordsTbody) return;
+		openModal(dom.modalAppPasswords);
+		dom.appPasswordsTbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;"><span class="wpsg-spinner"></span> Loading application passwords...</td></tr>';
+
+		try {
+			const res = await wp.apiFetch({
+				path: '/site-checkup-pro/v1/app-passwords',
+			});
+
+			const passwords = (res && Array.isArray(res.passwords)) ? res.passwords : [];
+			if (passwords.length === 0) {
+				dom.appPasswordsTbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px;">No application passwords currently registered.</td></tr>';
+				return;
+			}
+
+			dom.appPasswordsTbody.innerHTML = passwords.map(p => `
+				<tr>
+					<td><strong>${escapeHtml(p.name)}</strong></td>
+					<td><code>${escapeHtml(p.user_login)}</code></td>
+					<td>${escapeHtml(p.created || '')}</td>
+					<td>${escapeHtml(p.last_used || 'Never')} ${p.last_ip !== 'N/A' ? `(${escapeHtml(p.last_ip)})` : ''}</td>
+					<td>
+						<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-danger wpsg-btn-revoke-app-pass" data-uuid="${escapeHtml(p.uuid)}" data-user-id="${escapeHtml(p.user_id)}">
+							<span class="dashicons dashicons-trash"></span> Revoke
+						</button>
+					</td>
+				</tr>
+			`).join('');
+
+			// Bind revoke buttons with confirmation and reauth
+			dom.appPasswordsTbody.querySelectorAll('.wpsg-btn-revoke-app-pass').forEach(btn => {
+				btn.addEventListener('click', () => {
+					const uuid = btn.getAttribute('data-uuid');
+					const userId = btn.getAttribute('data-user-id');
+					if (!confirm('WARNING: Revoking this application password will permanently break external REST API clients, third-party integrations, or mobile apps using it. Proceed?')) {
+						return;
+					}
+
+					requireReauth(async (token) => {
+						btn.disabled = true;
+						try {
+							const revRes = await wp.apiFetch({
+								path: '/site-checkup-pro/v1/app-passwords/revoke',
+								method: 'POST',
+								headers: {
+									'X-WPSG-Nonce': window.wpsgData?.nonces?.revoke_app_pass || '',
+									'X-WPSG-Reauth': token,
+								},
+								data: {
+									uuid: uuid,
+									user_id: userId,
+									reauth_token: token,
+								},
+							});
+
+							if (revRes && revRes.success) {
+								alert('Application password revoked successfully.');
+								loadAppPasswords();
+							} else {
+								alert(`Failed: ${revRes.message || 'Error'}`);
+								btn.disabled = false;
+							}
+						} catch (err) {
+							alert(`Failed to revoke: ${err.message || 'Error'}`);
+							btn.disabled = false;
+						}
+					});
+				});
+			});
+		} catch (err) {
+			dom.appPasswordsTbody.innerHTML = `<tr><td colspan="5" class="wpsg-error-state">Failed to load application passwords: ${escapeHtml(err.message)}</td></tr>`;
+		}
+	}
+
+	/**
+	 * CSP Reports Viewer
+	 */
+	async function loadCspReports() {
+		if (!dom.cspTbody) return;
+		openModal(dom.modalCspReports);
+		dom.cspTbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;"><span class="wpsg-spinner"></span> Loading CSP violation records...</td></tr>';
+
+		try {
+			const res = await wp.apiFetch({
+				path: '/site-checkup-pro/v1/csp-reports',
+			});
+
+			const reports = (res && Array.isArray(res.reports)) ? res.reports : [];
+			if (reports.length === 0) {
+				dom.cspTbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">No CSP violation reports recorded yet. (Policy running clean).</td></tr>';
+				return;
+			}
+
+			dom.cspTbody.innerHTML = reports.map(r => `
+				<tr>
+					<td style="font-variant-numeric: tabular-nums;">${escapeHtml(r.timestamp)}</td>
+					<td><code>${escapeHtml(r.violated_directive || 'N/A')}</code></td>
+					<td style="word-break: break-all;"><code>${escapeHtml(r.blocked_uri || 'self')}</code></td>
+					<td style="word-break: break-all;">${escapeHtml(r.document_uri || '')}</td>
+				</tr>
+			`).join('');
+		} catch (err) {
+			dom.cspTbody.innerHTML = `<tr><td colspan="4" class="wpsg-error-state">Failed to load CSP reports: ${escapeHtml(err.message)}</td></tr>`;
 		}
 	}
 
@@ -945,6 +1285,8 @@
 			const res = await wp.apiFetch({
 				path: '/site-checkup-pro/v1/audit-log',
 			});
+
+			const logs = (res && Array.isArray(res.logs)) ? res.logs : [];
 
 			if (logs.length === 0) {
 				const emptyImg = (window.wpsgData && window.wpsgData.mediaUrl) ? `${window.wpsgData.mediaUrl}empty-state.svg` : '';

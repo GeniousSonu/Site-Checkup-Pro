@@ -130,13 +130,27 @@ class WPSG_Admin_Menu {
 		);
 
 		wp_localize_script( 'wpsg-admin-js', 'wpsgData', array(
-			'restUrl'         => esc_url_raw( rest_url( 'site-checkup-pro/v1' ) ),
-			'nonce'           => wp_create_nonce( 'wp_rest' ),
-			'homeUrl'         => home_url(),
-			'adminUrl'        => admin_url(),
-			'mediaUrl'        => esc_url_raw( WPSG_PLUGIN_URL . 'media/' ),
-			'serverType'      => WPSG_Htaccess_Manager::get_server_type(),
-			'supportsHtaccess'=> WPSG_Htaccess_Manager::supports_htaccess(),
+			'restUrl'          => esc_url_raw( rest_url( 'site-checkup-pro/v1' ) ),
+			'nonce'            => wp_create_nonce( 'wp_rest' ),
+			'homeUrl'          => home_url(),
+			'adminUrl'         => admin_url(),
+			'mediaUrl'         => esc_url_raw( WPSG_PLUGIN_URL . 'media/' ),
+			'serverType'       => WPSG_Htaccess_Manager::get_server_type(),
+			'supportsHtaccess' => WPSG_Htaccess_Manager::supports_htaccess(),
+			'nonces'           => array(
+				'run_task'        => wp_create_nonce( 'wpsg_run_task' ),
+				'undo_task'       => wp_create_nonce( 'wpsg_undo_task' ),
+				'update_status'   => wp_create_nonce( 'wpsg_update_status' ),
+				'confirm_backup'  => wp_create_nonce( 'wpsg_confirm_backup' ),
+				'update_baseline' => wp_create_nonce( 'wpsg_update_baseline' ),
+				'set_login_slug'  => wp_create_nonce( 'wpsg_set_login_slug' ),
+				'restore_plugin'  => wp_create_nonce( 'wpsg_restore_plugin' ),
+				'reauth'          => wp_create_nonce( 'wpsg_reauth' ),
+				'destroy_session' => wp_create_nonce( 'wpsg_destroy_session' ),
+				'revoke_app_pass' => wp_create_nonce( 'wpsg_revoke_app_pass' ),
+				'dismiss_notice'  => wp_create_nonce( 'wpsg_dismiss_notice' ),
+				'integrity_scan'  => wp_create_nonce( 'wpsg_integrity_scan' ),
+			),
 		) );
 	}
 

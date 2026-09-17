@@ -44,6 +44,7 @@ class WPSG_Scheduler {
 	private function __construct() {
 		add_action( 'wpsg_scheduled_reminders', array( $this, 'run_daily_reminder_check' ) );
 		add_action( 'wpsg_prune_audit_logs', array( $this, 'run_audit_log_pruning' ) );
+		add_action( 'wpsg_prune_rate_limits', array( $this, 'run_rate_limits_pruning' ) );
 		add_action( 'wpsg_daily_integrity_scan', array( $this, 'run_daily_integrity_scan' ) );
 		add_action( 'admin_notices', array( $this, 'render_due_reminder_notices' ) );
 	}
@@ -60,6 +61,10 @@ class WPSG_Scheduler {
 			wp_schedule_event( time() + 7200, 'daily', 'wpsg_prune_audit_logs' );
 		}
 
+		if ( ! wp_next_scheduled( 'wpsg_prune_rate_limits' ) ) {
+			wp_schedule_event( time() + 8400, 'daily', 'wpsg_prune_rate_limits' );
+		}
+
 		if ( ! wp_next_scheduled( 'wpsg_daily_integrity_scan' ) ) {
 			wp_schedule_event( time() + 10800, 'daily', 'wpsg_daily_integrity_scan' );
 		}
@@ -71,6 +76,7 @@ class WPSG_Scheduler {
 	public static function clear_schedules() {
 		wp_clear_scheduled_hook( 'wpsg_scheduled_reminders' );
 		wp_clear_scheduled_hook( 'wpsg_prune_audit_logs' );
+		wp_clear_scheduled_hook( 'wpsg_prune_rate_limits' );
 		wp_clear_scheduled_hook( 'wpsg_daily_integrity_scan' );
 	}
 
@@ -93,6 +99,15 @@ class WPSG_Scheduler {
 	public function run_audit_log_pruning() {
 		if ( class_exists( 'WPSG_Audit_Log' ) ) {
 			WPSG_Audit_Log::prune_old_logs( 365 );
+		}
+	}
+
+	/**
+	 * Daily pruning of expired rate limit and lockout rows.
+	 */
+	public function run_rate_limits_pruning() {
+		if ( class_exists( 'WPSG_Login_Guard' ) ) {
+			WPSG_Login_Guard::prune_old_rate_limits();
 		}
 	}
 

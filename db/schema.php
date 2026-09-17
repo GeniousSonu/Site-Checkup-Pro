@@ -64,6 +64,21 @@ function wpsg_create_database_tables() {
 
 	dbDelta( $sql_audit );
 
+	// Table: Rate Limits (Atomic login/reauth throttling and lockout)
+	$table_rate_limits = $wpdb->prefix . 'wpsg_rate_limits';
+	$sql_rate_limits   = "CREATE TABLE {$table_rate_limits} (
+		rate_key varchar(64) NOT NULL,
+		attempts int unsigned NOT NULL DEFAULT 1,
+		first_attempt datetime NOT NULL,
+		last_attempt datetime NOT NULL,
+		locked_until datetime DEFAULT NULL,
+		PRIMARY KEY  (rate_key),
+		KEY locked_until (locked_until),
+		KEY last_attempt (last_attempt)
+	) {$charset_collate};";
+
+	dbDelta( $sql_rate_limits );
+
 	// Store current schema version in options
 	update_option( 'wpsg_db_version', WPSG_VERSION );
 }
@@ -76,11 +91,12 @@ function wpsg_create_database_tables() {
 function wpsg_drop_database_tables() {
 	global $wpdb;
 
-	$table_status = $wpdb->prefix . 'wpsg_task_status';
-	$table_audit  = $wpdb->prefix . 'wpsg_audit_log';
+	$table_status      = $wpdb->prefix . 'wpsg_task_status';
+	$table_audit       = $wpdb->prefix . 'wpsg_audit_log';
+	$table_rate_limits = $wpdb->prefix . 'wpsg_rate_limits';
 
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
-	$wpdb->query( "DROP TABLE IF EXISTS {$table_status}, {$table_audit};" );
+	$wpdb->query( "DROP TABLE IF EXISTS {$table_status}, {$table_audit}, {$table_rate_limits};" );
 
 	delete_option( 'wpsg_db_version' );
 	delete_option( 'wpsg_trusted_baseline' );

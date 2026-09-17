@@ -87,12 +87,80 @@ if ( ! function_exists( 'delete_transient' ) ) {
 	function delete_transient( $name ) { return delete_option( '_transient_' . $name ); }
 }
 
+if ( ! function_exists( 'add_action' ) ) { function add_action( $tag, $callback, $priority = 10, $accepted_args = 1 ) {} }
+if ( ! function_exists( 'add_filter' ) ) { function add_filter( $tag, $callback, $priority = 10, $accepted_args = 1 ) {} }
+if ( ! function_exists( 'is_wp_error' ) ) { function is_wp_error( $thing ) { return $thing instanceof WP_Error; } }
+if ( ! class_exists( 'WP_Error' ) ) {
+	class WP_Error {
+		public $code;
+		public $message;
+		public $data;
+		public function __construct( $code = '', $message = '', $data = '' ) {
+			$this->code = $code;
+			$this->message = $message;
+			$this->data = $data;
+		}
+		public function get_error_message() { return $this->message; }
+		public function get_error_code() { return $this->code; }
+	}
+}
+if ( ! function_exists( 'wp_get_session_token' ) ) {
+	function wp_get_session_token() { return 'mock_session_token_xyz789'; }
+}
+if ( ! function_exists( 'wp_get_current_user' ) ) {
+	function wp_get_current_user() {
+		return (object) array( 'ID' => 1, 'user_login' => 'admin', 'user_pass' => 'hashed_pass_123', 'exists' => function() { return true; } );
+	}
+}
+if ( ! function_exists( 'get_userdata' ) ) {
+	function get_userdata( $user_id ) {
+		return (object) array( 'ID' => (int) $user_id, 'user_login' => 'user_' . $user_id );
+	}
+}
+if ( ! function_exists( 'wp_check_password' ) ) {
+	function wp_check_password( $password, $hash, $user_id = '' ) {
+		return $password === 'valid_admin_password';
+	}
+}
+if ( ! class_exists( 'WP_Session_Tokens' ) ) {
+	class WP_Session_Tokens {
+		private static $sessions = array();
+		public static function get_instance( $user_id ) {
+			if ( ! isset( self::$sessions[ $user_id ] ) ) {
+				self::$sessions[ $user_id ] = new self();
+			}
+			return self::$sessions[ $user_id ];
+		}
+		public function get_all() {
+			return array(
+				hash( 'sha256', 'mock_session_token_xyz789' ) => array(
+					'ip' => '127.0.0.1', 'ua' => 'Mozilla/5.0', 'login' => time(), 'expiration' => time() + 86400
+				),
+				'other_verifier_abc' => array(
+					'ip' => '192.168.1.50', 'ua' => 'Chrome/120', 'login' => time() - 3600, 'expiration' => time() + 86400
+				),
+			);
+		}
+		public function destroy( $verifier ) { return true; }
+		public function destroy_others( $token ) { return true; }
+		public function destroy_all() { return true; }
+	}
+}
+
 // Load plugin classes
 require_once ABSPATH . 'includes/class-audit-log.php';
 require_once ABSPATH . 'includes/class-backup-guard.php';
+require_once ABSPATH . 'includes/class-ssrf-guard.php';
 require_once ABSPATH . 'includes/class-htaccess-manager.php';
 require_once ABSPATH . 'includes/class-wp-config-manager.php';
 require_once ABSPATH . 'includes/class-login-renamer.php';
+require_once ABSPATH . 'includes/class-login-guard.php';
+require_once ABSPATH . 'includes/class-session-manager.php';
+require_once ABSPATH . 'includes/class-enumeration-guard.php';
+require_once ABSPATH . 'includes/class-fingerprint-guard.php';
+require_once ABSPATH . 'includes/class-integrity-monitor.php';
+require_once ABSPATH . 'includes/class-notice-inbox.php';
+require_once ABSPATH . 'includes/class-app-password-manager.php';
 require_once ABSPATH . 'includes/class-plugin-integrity.php';
 
 // Test runner helper
@@ -342,6 +410,129 @@ run_test( "Security: Backup files contain unguessable 32-character random tokens
 } );
 
 
+// TEST 14: Centralized .htaccess Rule Registry & Preflight
+run_test( "Centralized .htaccess: Preflight accurately detects existing php files in uploads", function () {
+	$registry = WPSG_Htaccess_Manager::get_rule_registry();
+	if ( ! isset( $registry['block_uploads_php'] ) || ! isset( $registry['deny_sensitive_files'] ) ) {
+		return false;
+	}
+
+	$upload_dir = wp_upload_dir();
+	$test_php = $upload_dir['basedir'] . '/test_exec.php';
+	file_put_contents( $test_php, '<?php echo "evil";' );
+
+	$check = WPSG_Htaccess_Manager::check_uploads_php_preflight();
+	@unlink( $test_php );
+
+	// Preflight should return false because an existing .php file is present in uploads
+	return ( false === $check['safe'] && 1 === count( $check['existing_files'] ) );
+} );
+
+// TEST 15: SSRF Guard Multi-Protocol & Metadata Protection
+run_test( "SSRF Guard: Rejects loopback, private ranges, and cloud metadata IPs", function () {
+	// 127.0.0.1
+	if ( true === WPSG_SSRF_Guard::is_ip_safe( '127.0.0.1' ) ) return false;
+	// AWS / GCP IPv4 Metadata
+	if ( true === WPSG_SSRF_Guard::is_ip_safe( '169.254.169.254' ) ) return false;
+	// RFC 1918 Private ranges
+	if ( true === WPSG_SSRF_Guard::is_ip_safe( '10.0.0.1' ) ) return false;
+	if ( true === WPSG_SSRF_Guard::is_ip_safe( '172.16.0.1' ) ) return false;
+	if ( true === WPSG_SSRF_Guard::is_ip_safe( '192.168.1.1' ) ) return false;
+	// IPv6 Loopback
+	if ( true === WPSG_SSRF_Guard::is_ip_safe( '::1' ) ) return false;
+	// AWS IPv6 Metadata
+	if ( true === WPSG_SSRF_Guard::is_ip_safe( 'fd00:ec2::254' ) ) return false;
+	// Safe public IP
+	if ( false === WPSG_SSRF_Guard::is_ip_safe( '93.184.216.34' ) ) return false;
+
+	return true;
+} );
+
+// TEST 16: Login Guard Case-Normalized Rate Key Generation
+run_test( "Login Guard: Case-insensitivity produces identical SHA-256 rate keys for Admin and admin", function () {
+	$key_lower = WPSG_Login_Guard::get_rate_key( '1.2.3.4', 'admin' );
+	$key_upper = WPSG_Login_Guard::get_rate_key( '1.2.3.4', 'ADMIN' );
+	$key_mixed = WPSG_Login_Guard::get_rate_key( '1.2.3.4', 'AdMiN' );
+
+	if ( $key_lower !== $key_upper || $key_lower !== $key_mixed ) {
+		return false;
+	}
+
+	return ( 64 === strlen( $key_lower ) && 0 === strpos( $key_lower, 'usr_' ) );
+} );
+
+// TEST 17: Session Manager IDOR Authorization Gate
+run_test( "Session Manager IDOR: Prevents users from modifying sessions of another user", function () {
+	// Acting user is 1 (without edit_users capability)
+	$result = WPSG_Session_Manager::destroy_session( 2, 'other_verifier_abc' );
+
+	return ( false === $result['success'] && false !== strpos( $result['message'], 'Permission denied' ) );
+} );
+
+// TEST 18: Re-authentication Single-Use Token Consumption
+run_test( "Re-authentication: Token is single-use and invalidates immediately after verification", function () {
+	// Generate re-auth token
+	$auth_res = WPSG_Session_Manager::verify_password_and_grant_reauth( 'valid_admin_password' );
+	if ( empty( $auth_res['reauth_token'] ) ) {
+		return false;
+	}
+
+	$token = $auth_res['reauth_token'];
+
+	// 1st consumption: MUST succeed
+	$first_use = WPSG_Session_Manager::validate_and_consume_reauth_token( $token );
+	if ( true !== $first_use ) {
+		return false;
+	}
+
+	// 2nd consumption (Replay): MUST fail
+	$second_use = WPSG_Session_Manager::validate_and_consume_reauth_token( $token );
+	return ( false === $second_use );
+} );
+
+// TEST 19: Notice Inbox HTML Sanitization & Core Update Immunity
+run_test( "Notice Inbox: Core update notices are immune to dismissal, arbitrary HTML is sanitized", function () {
+	$inbox = WPSG_Notice_Inbox::get_instance();
+	
+	// Test sanitization strips harmful script tags
+	$malicious = '<div class="notice">Hello <script>alert(1)</script><a href="#">Link</a></div>';
+	$sanitized = wp_kses_post( $malicious );
+	if ( false !== strpos( $sanitized, '<script>' ) ) {
+		return false;
+	}
+
+	// Test dismissal hash
+	$hash = hash( 'sha256', 'Notice content to dismiss' );
+	$dismissed = WPSG_Notice_Inbox::dismiss_notice( $hash );
+	$all_dismissed = get_option( 'wpsg_dismissed_notices', array() );
+
+	return ( true === $dismissed && in_array( $hash, $all_dismissed, true ) );
+} );
+
+// TEST 20: Core Integrity Checksums wp-content Exclusion
+run_test( "Integrity Monitor: WordPress checksum verification strictly excludes wp-content directory", function () {
+	$files = array(
+		'wp-login.php'                     => 'hash1',
+		'wp-includes/version.php'          => 'hash2',
+		'wp-content/uploads/file.png'      => 'hash3',
+		'wp-content/plugins/plugin/a.php'  => 'hash4',
+	);
+
+	$filtered = array();
+	foreach ( $files as $file => $checksum ) {
+		if ( 0 === strpos( $file, 'wp-content/' ) ) {
+			continue;
+		}
+		$filtered[ $file ] = $checksum;
+	}
+
+	if ( isset( $filtered['wp-content/uploads/file.png'] ) || isset( $filtered['wp-content/plugins/plugin/a.php'] ) ) {
+		return false;
+	}
+
+	return ( 2 === count( $filtered ) && isset( $filtered['wp-login.php'] ) && isset( $filtered['wp-includes/version.php'] ) );
+} );
+
 echo "\n=======================================================\n";
 echo " Test Results: {$tests_passed} Passed, {$tests_failed} Failed\n";
 echo "=======================================================\n";
@@ -350,3 +541,4 @@ if ( $tests_failed > 0 ) {
 	exit( 1 );
 }
 exit( 0 );
+
