@@ -32,9 +32,16 @@ class WPSG_Report_Generator {
 		$registry = WPSG_Task_Registry::get_instance();
 		$tasks    = $registry->get_all();
 
-		$status_table = $wpdb->prefix . 'wpsg_task_status';
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$db_rows = $wpdb->get_results( "SELECT * FROM {$status_table}", OBJECT_K );
+		$status_table = isset( $wpdb->prefix ) ? $wpdb->prefix . 'wpsg_task_status' : 'wp_wpsg_task_status';
+		$db_rows      = array();
+		if ( isset( $wpdb ) && is_object( $wpdb ) && method_exists( $wpdb, 'get_results' ) ) {
+			$output_type = defined( 'OBJECT_K' ) ? OBJECT_K : 'OBJECT_K';
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$raw = $wpdb->get_results( "SELECT * FROM {$status_table}", $output_type );
+			if ( is_array( $raw ) ) {
+				$db_rows = $raw;
+			}
+		}
 
 		$completed   = array();
 		$attention   = array();
@@ -49,8 +56,26 @@ class WPSG_Report_Generator {
 			}
 
 			$total_count++;
-			$db_record = isset( $db_rows[ $id ] ) ? $db_rows[ $id ] : null;
-			$serialized = $task->to_array( $db_record );
+			$db_record = ( is_array( $db_rows ) && isset( $db_rows[ $id ] ) ) ? $db_rows[ $id ] : null;
+			try {
+				$serialized = $task->to_array( $db_record );
+			} catch ( \Throwable $e ) {
+				$serialized = array(
+					'id'               => $task->id,
+					'section'          => $task->section,
+					'title'            => $task->title,
+					'description'      => $task->description,
+					'automation_level' => $task->automation_level,
+					'sub_type'         => $task->sub_type,
+					'guide_data'       => $task->guide_data,
+					'status'           => 'attention',
+					'last_run_at'      => null,
+					'note'             => '',
+					'next_reminder_at' => null,
+					'live_message'     => 'Notice: ' . $e->getMessage(),
+					'is_na'            => false,
+				);
+			}
 
 			if ( 'done' === $serialized['status'] ) {
 				$done_count++;
@@ -77,11 +102,14 @@ class WPSG_Report_Generator {
 			'notes' => ! empty( $settings['incident_contact_notes'] ) ? $settings['incident_contact_notes'] : '',
 		);
 
+		$site_name = function_exists( 'get_bloginfo' ) ? get_bloginfo( 'name' ) : get_option( 'blogname', 'WordPress Site' );
+		$site_url  = function_exists( 'home_url' ) ? home_url() : get_option( 'siteurl', 'https://example.com' );
+
 		return array(
-			'site_name'        => get_bloginfo( 'name' ),
-			'site_url'         => home_url(),
-			'generated_at'     => current_time( 'F j, Y, g:i a' ),
-			'agency_name'      => ! empty( $settings['agency_name'] ) ? $settings['agency_name'] : get_bloginfo( 'name' ) . ' Security Team',
+			'site_name'        => $site_name,
+			'site_url'         => $site_url,
+			'generated_at'     => function_exists( 'current_time' ) ? current_time( 'F j, Y, g:i a' ) : gmdate( 'F j, Y, g:i a' ),
+			'agency_name'      => ! empty( $settings['agency_name'] ) ? $settings['agency_name'] : $site_name . ' Security Team',
 			'coverage_pct'     => $coverage_pct,
 			'total_tasks'      => $total_count,
 			'done_tasks'       => $done_count,

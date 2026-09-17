@@ -187,18 +187,23 @@ class WPSG_Scanner {
 		}
 
 		// 2. Check for suspicious oversized autoloaded options (> 100 KB).
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$large_autoload = $wpdb->get_results(
-			"SELECT option_name, LENGTH(option_value) AS size_bytes 
-			FROM {$wpdb->options} 
-			WHERE autoload = 'yes' AND LENGTH(option_value) > 102400 
-			ORDER BY size_bytes DESC LIMIT 10"
-		);
-
 		$large_options = array();
-		if ( ! empty( $large_autoload ) ) {
-			foreach ( $large_autoload as $opt ) {
-				$large_options[] = sprintf( '%s (%s KB)', $opt->option_name, round( $opt->size_bytes / 1024 ) );
+		if ( isset( $wpdb ) && is_object( $wpdb ) && method_exists( $wpdb, 'get_results' ) ) {
+			$options_table = isset( $wpdb->options ) ? $wpdb->options : ( isset( $wpdb->prefix ) ? $wpdb->prefix . 'options' : 'wp_options' );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$large_autoload = $wpdb->get_results(
+				"SELECT option_name, LENGTH(option_value) AS size_bytes 
+				FROM {$options_table} 
+				WHERE autoload = 'yes' AND LENGTH(option_value) > 102400 
+				ORDER BY size_bytes DESC LIMIT 10"
+			);
+
+			if ( ! empty( $large_autoload ) && is_array( $large_autoload ) ) {
+				foreach ( $large_autoload as $opt ) {
+					if ( is_object( $opt ) && isset( $opt->option_name, $opt->size_bytes ) ) {
+						$large_options[] = sprintf( '%s (%s KB)', $opt->option_name, round( $opt->size_bytes / 1024 ) );
+					}
+				}
 			}
 		}
 

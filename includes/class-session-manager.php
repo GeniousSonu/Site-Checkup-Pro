@@ -62,22 +62,37 @@ class WPSG_Session_Manager {
 			return array();
 		}
 
-		$manager  = WP_Session_Tokens::get_instance( $user_id );
-		$sessions = $manager->get_all();
-		$current  = function_exists( 'wp_get_session_token' ) ? (string) wp_get_session_token() : '';
+		try {
+			$manager = WP_Session_Tokens::get_instance( $user_id );
+			if ( ! is_object( $manager ) || ! method_exists( $manager, 'get_all' ) ) {
+				return array();
+			}
+			$sessions = $manager->get_all();
+		} catch ( \Throwable $e ) {
+			return array();
+		}
+
+		$current      = function_exists( 'wp_get_session_token' ) ? (string) wp_get_session_token() : '';
 		$current_hash = ( '' !== $current ) ? hash( 'sha256', $current ) : '';
 
 		$clean_list = array();
 		if ( is_array( $sessions ) ) {
 			foreach ( $sessions as $verifier => $session ) {
 				$verifier_str = (string) $verifier;
-				$is_current   = ( '' !== $current_hash && hash_equals( $current_hash, $verifier_str ) );
+				$is_current   = false;
+				if ( '' !== $current_hash && '' !== $verifier_str ) {
+					try {
+						$is_current = hash_equals( $current_hash, $verifier_str );
+					} catch ( \Throwable $e ) {
+						$is_current = false;
+					}
+				}
 
 				$clean_list[] = array(
 					'verifier'   => $verifier_str,
 					'is_current' => $is_current,
-					'ip'         => ( is_array( $session ) && ! empty( $session['ip'] ) ) ? $session['ip'] : 'Unknown',
-					'ua'         => ( is_array( $session ) && ! empty( $session['ua'] ) ) ? $session['ua'] : 'Unknown',
+					'ip'         => ( is_array( $session ) && ! empty( $session['ip'] ) ) ? sanitize_text_field( (string) $session['ip'] ) : 'Unknown',
+					'ua'         => ( is_array( $session ) && ! empty( $session['ua'] ) ) ? sanitize_text_field( (string) $session['ua'] ) : 'Unknown',
 					'login_time' => ( is_array( $session ) && ! empty( $session['login'] ) ) ? gmdate( 'Y-m-d H:i:s', absint( $session['login'] ) ) : '',
 					'expires'    => ( is_array( $session ) && ! empty( $session['expiration'] ) ) ? gmdate( 'Y-m-d H:i:s', absint( $session['expiration'] ) ) : '',
 				);

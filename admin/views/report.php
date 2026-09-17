@@ -15,7 +15,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$data = WPSG_Report_Generator::get_report_data();
+try {
+	$data = WPSG_Report_Generator::get_report_data();
+} catch ( \Throwable $e ) {
+	$data = array(
+		'site_name'        => get_bloginfo( 'name' ),
+		'site_url'         => home_url(),
+		'generated_at'     => current_time( 'F j, Y, g:i a' ),
+		'agency_name'      => get_bloginfo( 'name' ) . ' Security Team',
+		'coverage_pct'     => 0,
+		'total_tasks'      => 0,
+		'done_tasks'       => 0,
+		'completed'        => array(),
+		'manual_done'      => array(),
+		'attention'        => array(),
+		'pending'          => array(),
+		'audit_logs'       => array(),
+		'incident_contact' => array( 'name' => '', 'email' => '', 'phone' => '', 'notes' => '' ),
+	);
+}
 ?>
 
 <div class="wrap wpsg-wrap wpsg-report-container" id="wpsg-report-app">

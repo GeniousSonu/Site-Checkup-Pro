@@ -165,20 +165,41 @@ class WPSG_Admin_Menu {
 	 * Render main checklist dashboard.
 	 */
 	public function render_dashboard() {
-		include WPSG_PLUGIN_DIR . 'admin/views/dashboard.php';
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'site-checkup-pro' ) );
+		}
+		try {
+			include WPSG_PLUGIN_DIR . 'admin/views/dashboard.php';
+		} catch ( \Throwable $e ) {
+			echo '<div class="notice notice-error"><p>' . esc_html( sprintf( __( 'Site Checkup Pro encountered an unexpected error: %s', 'site-checkup-pro' ), $e->getMessage() ) ) . '</p></div>';
+		}
 	}
 
 	/**
 	 * Render audit log view.
 	 */
 	public function render_audit_log() {
-		include WPSG_PLUGIN_DIR . 'admin/views/dashboard.php';
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'site-checkup-pro' ) );
+		}
+		try {
+			include WPSG_PLUGIN_DIR . 'admin/views/dashboard.php';
+		} catch ( \Throwable $e ) {
+			echo '<div class="notice notice-error"><p>' . esc_html( sprintf( __( 'Site Checkup Pro encountered an unexpected error: %s', 'site-checkup-pro' ), $e->getMessage() ) ) . '</p></div>';
+		}
 	}
 
 	/**
 	 * Render report view.
 	 */
 	public function render_report() {
-		include WPSG_PLUGIN_DIR . 'admin/views/report.php';
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'site-checkup-pro' ) );
+		}
+		try {
+			include WPSG_PLUGIN_DIR . 'admin/views/report.php';
+		} catch ( \Throwable $e ) {
+			echo '<div class="notice notice-error"><p>' . esc_html( sprintf( __( 'Site Checkup Pro encountered an unexpected error generating the report: %s', 'site-checkup-pro' ), $e->getMessage() ) ) . '</p></div>';
+		}
 	}
 }

@@ -87,16 +87,25 @@ if ( ! function_exists( 'wp_generate_password' ) ) {
 		return bin2hex( random_bytes( (int) ( $length / 2 ) ) );
 	}
 }
+if ( ! defined( 'OBJECT_K' ) ) { define( 'OBJECT_K', 'OBJECT_K' ); }
+if ( ! defined( 'OBJECT' ) ) { define( 'OBJECT', 'OBJECT' ); }
+if ( ! defined( 'ARRAY_A' ) ) { define( 'ARRAY_A', 'ARRAY_A' ); }
 if ( ! function_exists( 'is_admin' ) ) { function is_admin() { return true; } }
 if ( ! function_exists( 'is_plugin_active' ) ) { function is_plugin_active( $p ) { return false; } }
+if ( ! function_exists( 'get_bloginfo' ) ) { function get_bloginfo( $show = '' ) { return 'Site Checkup Pro Test'; } }
+if ( ! function_exists( 'get_plugins' ) ) { function get_plugins() { return array(); } }
 
 // Mock $wpdb
 if ( ! class_exists( 'Mock_WPDB' ) ) {
 	class Mock_WPDB {
-		public $prefix = 'wp_';
+		public $prefix    = 'wp_';
+		public $users     = 'wp_users';
+		public $options   = 'wp_options';
+		public $insert_id = 1;
 		public function prepare( $query, ...$args ) { return $query; }
 		public function get_row( $query ) { return null; }
 		public function get_var( $query ) { return null; }
+		public function get_results( $query = '', $output = OBJECT ) { return array(); }
 		public function query( $query ) { return true; }
 		public function insert( $table, $data ) { return true; }
 		public function update( $table, $data, $where ) { return true; }
@@ -272,6 +281,7 @@ require_once ABSPATH . 'includes/class-compatibility-guard.php';
 require_once ABSPATH . 'includes/class-update-checker.php';
 require_once ABSPATH . 'includes/class-task.php';
 require_once ABSPATH . 'includes/class-task-registry.php';
+require_once ABSPATH . 'includes/class-report-generator.php';
 
 // Test runner helper
 $tests_passed = 0;
@@ -901,6 +911,37 @@ run_test( "Guideline 8 Separation: WordPress.org release build strictly excludes
 	$selfhosted_has_it = file_exists( $selfhosted_file );
 
 	return ( $wporg_clean && $selfhosted_has_it );
+} );
+
+// TEST 33: Session Manager Type Safety & Report Generation Resilience
+run_test( "Type Safety: Session manager and report generator handle numeric/integer tokens cleanly", function () {
+	// 1. Test get_user_sessions handles edge cases (0, non-existent, numeric verifiers)
+	$zero_user = WPSG_Session_Manager::get_user_sessions( 0 );
+	if ( ! is_array( $zero_user ) || ! empty( $zero_user ) ) {
+		return false;
+	}
+
+	// 2. Test report generator data retrieval
+	$report_data = WPSG_Report_Generator::get_report_data();
+	if ( ! is_array( $report_data ) || ! isset( $report_data['coverage_pct'] ) || ! isset( $report_data['completed'] ) ) {
+		return false;
+	}
+
+	// 3. Test task live status error handling
+	$faulty_task = new WPSG_Task( array(
+		'id'               => 'faulty_test_task',
+		'section'          => 'hardening',
+		'title'            => 'Faulty Task',
+		'description'      => 'Throws error',
+		'automation_level' => 'A',
+		'sub_type'         => 'instant',
+		'status_callback'  => function() {
+			throw new Exception( 'Simulated runtime error' );
+		},
+	) );
+	$status = $faulty_task->get_live_status();
+
+	return ( 'attention' === $status['status'] && false !== strpos( $status['message'], 'Simulated runtime error' ) );
 } );
 
 echo "\n=======================================================\n";

@@ -362,9 +362,16 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 		$registry = WPSG_Task_Registry::get_instance();
 		$tasks    = $registry->get_all();
 
-		$status_table = $wpdb->prefix . 'wpsg_task_status';
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$db_rows = $wpdb->get_results( "SELECT * FROM {$status_table}", OBJECT_K );
+		$status_table = isset( $wpdb->prefix ) ? $wpdb->prefix . 'wpsg_task_status' : 'wp_wpsg_task_status';
+		$db_rows      = array();
+		if ( isset( $wpdb ) && is_object( $wpdb ) && method_exists( $wpdb, 'get_results' ) ) {
+			$output_type = defined( 'OBJECT_K' ) ? OBJECT_K : 'OBJECT_K';
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$raw = $wpdb->get_results( "SELECT * FROM {$status_table}", $output_type );
+			if ( is_array( $raw ) ) {
+				$db_rows = $raw;
+			}
+		}
 
 		$serialized_tasks = array();
 		$safe_instant_ids = array();

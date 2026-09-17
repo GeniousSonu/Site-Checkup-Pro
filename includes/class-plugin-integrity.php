@@ -52,10 +52,12 @@ class WPSG_Plugin_Integrity {
 	 */
 	public static function detect_unwanted_plugins() {
 		if ( ! function_exists( 'get_plugins' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			if ( defined( 'ABSPATH' ) && file_exists( ABSPATH . 'wp-admin/includes/plugin.php' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
 		}
 
-		$all_plugins = get_plugins();
+		$all_plugins = function_exists( 'get_plugins' ) ? get_plugins() : array();
 		$found       = array();
 
 		foreach ( $all_plugins as $plugin_path => $plugin_meta ) {
@@ -341,11 +343,17 @@ class WPSG_Plugin_Integrity {
 		}
 
 		if ( ! function_exists( 'get_plugins' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			if ( defined( 'ABSPATH' ) && file_exists( ABSPATH . 'wp-admin/includes/plugin.php' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
 		}
-		require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+		if ( ! function_exists( 'plugins_api' ) ) {
+			if ( defined( 'ABSPATH' ) && file_exists( ABSPATH . 'wp-admin/includes/plugin-install.php' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+			}
+		}
 
-		$all_plugins = get_plugins();
+		$all_plugins = function_exists( 'get_plugins' ) ? get_plugins() : array();
 		$closed      = array();
 		$total       = 0;
 

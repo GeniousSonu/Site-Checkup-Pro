@@ -33,6 +33,10 @@ class WPSG_Audit_Log {
 	public static function log( $task_id, $action, $before_snapshot = null, $after_snapshot = null, $result = 'success', $message = '' ) {
 		global $wpdb;
 
+		if ( ! isset( $wpdb ) || ! is_object( $wpdb ) || ! method_exists( $wpdb, 'insert' ) ) {
+			return false;
+		}
+
 		$table_name = $wpdb->prefix . 'wpsg_audit_log';
 		$user_id    = get_current_user_id();
 
@@ -60,7 +64,7 @@ class WPSG_Audit_Log {
 			array( '%s', '%s', '%d', '%s', '%s', '%s', '%s', '%s' ) // 8 fields: task_id, action, user_id, before_snapshot, after_snapshot, result, message, created_at
 		);
 
-		return $inserted ? $wpdb->insert_id : false;
+		return $inserted ? ( isset( $wpdb->insert_id ) ? $wpdb->insert_id : true ) : false;
 	}
 
 	/**
@@ -148,6 +152,10 @@ class WPSG_Audit_Log {
 	public static function get_logs( $limit = 50, $offset = 0, $orderby = 'created_at', $order = 'DESC' ) {
 		global $wpdb;
 
+		if ( ! isset( $wpdb ) || ! is_object( $wpdb ) || ! method_exists( $wpdb, 'get_results' ) || ! method_exists( $wpdb, 'prepare' ) ) {
+			return array();
+		}
+
 		$table_name = $wpdb->prefix . 'wpsg_audit_log';
 		$limit      = absint( $limit );
 		$offset     = absint( $offset );
@@ -185,6 +193,10 @@ class WPSG_Audit_Log {
 	 */
 	public static function prune_old_logs( $days = 365 ) {
 		global $wpdb;
+
+		if ( ! isset( $wpdb ) || ! is_object( $wpdb ) || ! method_exists( $wpdb, 'query' ) || ! method_exists( $wpdb, 'prepare' ) ) {
+			return 0;
+		}
 
 		$table_name = $wpdb->prefix . 'wpsg_audit_log';
 		$days       = absint( $days );

@@ -212,9 +212,9 @@ class WPSG_Task_Runner {
 			$metadata  = ( $db_record && ! empty( $db_record->metadata ) ) ? json_decode( $db_record->metadata, true ) : null;
 
 			if ( ! empty( $metadata['snapshot_hash'] ) && ! empty( $metadata['before_status'] ) ) {
-				$auth_salt     = defined( 'AUTH_SALT' ) ? AUTH_SALT : 'wpsg_salt';
-				$expected_hash = hash_hmac( 'sha256', wp_json_encode( $metadata['before_status'] ), $auth_salt );
-				if ( ! hash_equals( $expected_hash, $metadata['snapshot_hash'] ) ) {
+				$auth_salt     = defined( 'AUTH_SALT' ) ? (string) AUTH_SALT : 'wpsg_salt';
+				$expected_hash = hash_hmac( 'sha256', (string) wp_json_encode( $metadata['before_status'] ), $auth_salt );
+				if ( ! hash_equals( (string) $expected_hash, (string) $metadata['snapshot_hash'] ) ) {
 					return array(
 						'success' => false,
 						'message' => __( 'Security error: Snapshot integrity check failed (tampered snapshot detected). Undo aborted.', 'site-checkup-pro' ),
