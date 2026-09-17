@@ -195,7 +195,15 @@ class WPSG_Task {
 	 */
 	public function get_live_status() {
 		if ( is_callable( $this->status_callback ) ) {
-			return call_user_func( $this->status_callback );
+			try {
+				$res = call_user_func( $this->status_callback );
+				return is_array( $res ) ? $res : array( 'status' => 'pending', 'message' => '' );
+			} catch ( \Throwable $e ) {
+				return array(
+					'status'  => 'attention',
+					'message' => sprintf( __( 'Check encountered an environmental notice: %s', 'site-checkup-pro' ), $e->getMessage() ),
+				);
+			}
 		}
 
 		return array(

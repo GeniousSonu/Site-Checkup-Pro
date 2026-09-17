@@ -378,7 +378,25 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 
 			$total_count++;
 			$db_record = isset( $db_rows[ $id ] ) ? $db_rows[ $id ] : null;
-			$task_data = $task->to_array( $db_record );
+			try {
+				$task_data = $task->to_array( $db_record );
+			} catch ( \Throwable $e ) {
+				$task_data = array(
+					'id'               => $task->id,
+					'section'          => $task->section,
+					'title'            => $task->title,
+					'description'      => $task->description,
+					'automation_level' => $task->automation_level,
+					'sub_type'         => $task->sub_type,
+					'guide_data'       => $task->guide_data,
+					'status'           => 'attention',
+					'last_run_at'      => null,
+					'note'             => '',
+					'next_reminder_at' => null,
+					'live_message'     => 'Evaluation notice: ' . $e->getMessage(),
+					'is_na'            => false,
+				);
+			}
 
 			$serialized_tasks[] = $task_data;
 

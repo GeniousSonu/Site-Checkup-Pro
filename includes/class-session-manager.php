@@ -58,24 +58,30 @@ class WPSG_Session_Manager {
 	 */
 	public static function get_user_sessions( $user_id ) {
 		$user_id = absint( $user_id );
-		if ( ! class_exists( 'WP_Session_Tokens' ) ) {
+		if ( ! $user_id || ! class_exists( 'WP_Session_Tokens' ) ) {
 			return array();
 		}
 
 		$manager  = WP_Session_Tokens::get_instance( $user_id );
 		$sessions = $manager->get_all();
-		$current  = function_exists( 'wp_get_session_token' ) ? wp_get_session_token() : '';
+		$current  = function_exists( 'wp_get_session_token' ) ? (string) wp_get_session_token() : '';
+		$current_hash = ( '' !== $current ) ? hash( 'sha256', $current ) : '';
 
 		$clean_list = array();
-		foreach ( $sessions as $verifier => $session ) {
-			$clean_list[] = array(
-				'verifier'   => $verifier,
-				'is_current' => ( $current && hash_equals( hash( 'sha256', $current ), $verifier ) ),
-				'ip'         => ! empty( $session['ip'] ) ? $session['ip'] : 'Unknown',
-				'ua'         => ! empty( $session['ua'] ) ? $session['ua'] : 'Unknown',
-				'login_time' => ! empty( $session['login'] ) ? gmdate( 'Y-m-d H:i:s', $session['login'] ) : '',
-				'expires'    => ! empty( $session['expiration'] ) ? gmdate( 'Y-m-d H:i:s', $session['expiration'] ) : '',
-			);
+		if ( is_array( $sessions ) ) {
+			foreach ( $sessions as $verifier => $session ) {
+				$verifier_str = (string) $verifier;
+				$is_current   = ( '' !== $current_hash && hash_equals( $current_hash, $verifier_str ) );
+
+				$clean_list[] = array(
+					'verifier'   => $verifier_str,
+					'is_current' => $is_current,
+					'ip'         => ( is_array( $session ) && ! empty( $session['ip'] ) ) ? $session['ip'] : 'Unknown',
+					'ua'         => ( is_array( $session ) && ! empty( $session['ua'] ) ) ? $session['ua'] : 'Unknown',
+					'login_time' => ( is_array( $session ) && ! empty( $session['login'] ) ) ? gmdate( 'Y-m-d H:i:s', absint( $session['login'] ) ) : '',
+					'expires'    => ( is_array( $session ) && ! empty( $session['expiration'] ) ) ? gmdate( 'Y-m-d H:i:s', absint( $session['expiration'] ) ) : '',
+				);
+			}
 		}
 
 		return $clean_list;
@@ -297,7 +303,7 @@ class WPSG_Session_Manager {
 		$transient_key = 'wpsg_reauth_' . $current_user_id . '_' . substr( $token_hash, 0, 32 );
 		$stored_hash   = get_transient( $transient_key );
 
-		if ( ! $stored_hash || ! hash_equals( $stored_hash, $token_hash ) ) {
+		if ( empty( $stored_hash ) || ! hash_equals( (string) $stored_hash, (string) $token_hash ) ) {
 			return false;
 		}
 
