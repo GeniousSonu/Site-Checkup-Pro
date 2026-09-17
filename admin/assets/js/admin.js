@@ -22,9 +22,10 @@
 		serverType: 'apache',
 		supportsHtaccess: true,
 		backupStatus: {},
-		activeTab: 'all',
+		activeTab: 'overview',
 		filterLevel: '',
 		filterStatus: '',
+		searchQuery: '',
 		batchRunning: false,
 		batchQueue: [],
 		batchTotal: 0,
@@ -52,6 +53,22 @@
 		dom.app = document.getElementById('wpsg-app');
 		if (!dom.app) return;
 
+		// Panels
+		dom.panelOverview = document.getElementById('wpsg-panel-overview');
+		dom.panelTasks = document.getElementById('wpsg-panel-tasks');
+		dom.panelFeatures = document.getElementById('wpsg-panel-features');
+		dom.panelAudit = document.getElementById('wpsg-panel-audit');
+		dom.panelSettings = document.getElementById('wpsg-panel-settings');
+
+		// Section Banner
+		dom.currentSecIcon = document.getElementById('wpsg-current-sec-icon');
+		dom.currentSecTitle = document.getElementById('wpsg-current-sec-title');
+		dom.currentSecDesc = document.getElementById('wpsg-current-sec-desc');
+		dom.currentSecBadge = document.getElementById('wpsg-current-sec-badge');
+		dom.btnRunSection = document.getElementById('wpsg-btn-run-section');
+		dom.searchTasks = document.getElementById('wpsg-search-tasks');
+
+		// Task Table & Audit
 		dom.tbody = document.getElementById('wpsg-tasks-tbody');
 		dom.tableWrapper = document.getElementById('wpsg-tasks-table-wrapper');
 		dom.auditView = document.getElementById('wpsg-audit-view');
@@ -79,6 +96,21 @@
 		dom.filterLevel = document.getElementById('wpsg-filter-level');
 		dom.filterStatus = document.getElementById('wpsg-filter-status');
 		dom.tabs = document.querySelectorAll('.wpsg-tab');
+
+		// Quick Action buttons on Overview
+		dom.btnQuickLoginUrl = document.getElementById('wpsg-btn-quick-login-url');
+		dom.btnQuickSessions = document.getElementById('wpsg-btn-quick-sessions');
+
+		// Features Panel Controls
+		dom.featLoginSlug = document.getElementById('wpsg-feat-login-slug');
+		dom.btnSaveFeatLogin = document.getElementById('wpsg-btn-save-feature-login');
+		dom.btnResetFeatLogin = document.getElementById('wpsg-btn-reset-feature-login');
+		dom.btnFeatViewSessions = document.getElementById('wpsg-btn-feat-view-sessions');
+		dom.btnFeatDestroySessions = document.getElementById('wpsg-btn-feat-destroy-sessions');
+		dom.btnFeatAppPasswords = document.getElementById('wpsg-btn-feat-app-passwords');
+		dom.btnFeatCspReports = document.getElementById('wpsg-btn-feat-csp-reports');
+		dom.btnFeatUpdateBaseline = document.getElementById('wpsg-btn-feat-update-baseline');
+		dom.btnTriggerSettingsModal = document.getElementById('wpsg-btn-trigger-settings-modal');
 
 		// Modals
 		dom.modalDiff = document.getElementById('wpsg-modal-diff');
@@ -160,15 +192,88 @@
 	function bindEvents() {
 		if (!dom.app) return;
 
-		// Tab Switching
-		dom.tabs.forEach(tab => {
-			tab.addEventListener('click', () => {
-				dom.tabs.forEach(t => t.classList.remove('active'));
-				tab.classList.add('active');
-				state.activeTab = tab.getAttribute('data-tab');
-				renderViews();
+		// Tab Switching (Sidebar and top navigation)
+		document.querySelectorAll('.wpsg-tab').forEach(tab => {
+			tab.addEventListener('click', (e) => {
+				e.preventDefault();
+				const targetTab = tab.getAttribute('data-tab');
+				if (targetTab) {
+					switchTab(targetTab);
+				}
 			});
 		});
+
+		// Overview Category Card Clicks
+		document.querySelectorAll('[data-open-tab]').forEach(btn => {
+			btn.addEventListener('click', (e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				const targetTab = btn.getAttribute('data-open-tab');
+				if (targetTab) {
+					switchTab(targetTab);
+				}
+			});
+		});
+
+		document.querySelectorAll('.wpsg-category-card').forEach(card => {
+			card.addEventListener('click', (e) => {
+				if (e.target.closest('button') || e.target.closest('a')) return;
+				const targetSection = card.getAttribute('data-section-target');
+				if (targetSection) {
+					switchTab(targetSection);
+				}
+			});
+		});
+
+		// Task Search
+		if (dom.searchTasks) {
+			dom.searchTasks.addEventListener('input', (e) => {
+				state.searchQuery = e.target.value.trim();
+				renderTasksTable();
+			});
+		}
+
+		// Run Section Batch Button
+		if (dom.btnRunSection) {
+			dom.btnRunSection.addEventListener('click', runCurrentSectionBatch);
+		}
+
+		// Quick Buttons in Overview
+		if (dom.btnQuickLoginUrl) {
+			dom.btnQuickLoginUrl.addEventListener('click', () => {
+				switchTab('features');
+				if (dom.featLoginSlug) dom.featLoginSlug.focus();
+			});
+		}
+		if (dom.btnQuickSessions) {
+			dom.btnQuickSessions.addEventListener('click', openSessionsModal);
+		}
+
+		// Features Panel Event Listeners
+		if (dom.btnSaveFeatLogin) {
+			dom.btnSaveFeatLogin.addEventListener('click', saveFeatureLoginSlug);
+		}
+		if (dom.btnResetFeatLogin) {
+			dom.btnResetFeatLogin.addEventListener('click', resetFeatureLoginSlug);
+		}
+		if (dom.btnFeatViewSessions) {
+			dom.btnFeatViewSessions.addEventListener('click', openSessionsModal);
+		}
+		if (dom.btnFeatDestroySessions) {
+			dom.btnFeatDestroySessions.addEventListener('click', destroyOtherSessions);
+		}
+		if (dom.btnFeatAppPasswords) {
+			dom.btnFeatAppPasswords.addEventListener('click', openAppPasswordsModal);
+		}
+		if (dom.btnFeatCspReports) {
+			dom.btnFeatCspReports.addEventListener('click', openCspReportsModal);
+		}
+		if (dom.btnFeatUpdateBaseline) {
+			dom.btnFeatUpdateBaseline.addEventListener('click', updateBaseline);
+		}
+		if (dom.btnTriggerSettingsModal) {
+			dom.btnTriggerSettingsModal.addEventListener('click', openSettingsModal);
+		}
 
 		// Filters
 		if (dom.filterLevel) {
@@ -357,6 +462,203 @@
 	}
 
 	/**
+	 * Switch active tab and render appropriate panel
+	 */
+	function switchTab(tabId) {
+		state.activeTab = tabId;
+
+		// Update active class on all tab buttons
+		document.querySelectorAll('.wpsg-tab').forEach(t => {
+			if (t.getAttribute('data-tab') === tabId) {
+				t.classList.add('active');
+			} else {
+				t.classList.remove('active');
+			}
+		});
+
+		renderViews();
+	}
+
+	/**
+	 * Update overview category card stats & sidebar counts
+	 */
+	function updateOverviewStats() {
+		// Update sidebar Overview badge
+		const overviewBadge = document.getElementById('wpsg-badge-overview-pct');
+		if (overviewBadge) {
+			overviewBadge.textContent = `${state.sopCoveragePct}%`;
+		}
+
+		// Update each section card and sidebar badge
+		const sectionKeys = ['security_update', 'general_check', 'hardening', 'advanced_protection', 'regular_checks', 'seo_sop'];
+		sectionKeys.forEach(key => {
+			const tasks = state.tasks.filter(t => t.section === key);
+			const total = tasks.length;
+			const done = tasks.filter(t => t.status === 'done').length;
+			const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+			// Card elements
+			const bar = document.getElementById(`wpsg-cat-bar-${key}`);
+			if (bar) bar.style.width = `${pct}%`;
+
+			const txt = document.getElementById(`wpsg-cat-txt-${key}`);
+			if (txt) txt.textContent = `${done} / ${total} Completed`;
+
+			const stat = document.getElementById(`wpsg-cat-stat-${key}`);
+			if (stat) stat.textContent = `${total} checks`;
+
+			// Sidebar badge
+			const sidebarBadgeMap = {
+				'security_update': 'wpsg-badge-sec-update',
+				'general_check': 'wpsg-badge-gen-check',
+				'hardening': 'wpsg-badge-hardening',
+				'advanced_protection': 'wpsg-badge-adv-prot',
+				'regular_checks': 'wpsg-badge-reg-checks',
+				'seo_sop': 'wpsg-badge-seo',
+			};
+			const sbBadge = document.getElementById(sidebarBadgeMap[key]);
+			if (sbBadge) {
+				sbBadge.textContent = `${done}/${total}`;
+			}
+		});
+
+		const allBadge = document.getElementById('wpsg-badge-all');
+		if (allBadge) {
+			allBadge.textContent = `${state.doneCount}/${state.totalCount}`;
+		}
+	}
+
+	/**
+	 * Update task section hero banner
+	 */
+	function updateSectionBanner() {
+		const sec = state.sections[state.activeTab];
+		let title = 'All Checks';
+		let iconClass = 'dashicons-list-view';
+		let desc = 'Complete system standard operating procedures and hardening checks.';
+
+		if (sec) {
+			title = sec.label;
+			iconClass = sec.icon || 'dashicons-shield';
+			desc = sec.desc || '';
+		}
+
+		if (dom.currentSecTitle) dom.currentSecTitle.textContent = title;
+		if (dom.currentSecDesc) dom.currentSecDesc.textContent = desc;
+		if (dom.currentSecIcon) {
+			dom.currentSecIcon.className = `dashicons ${iconClass}`;
+		}
+
+		const secTasks = state.activeTab === 'all' ? state.tasks : state.tasks.filter(t => t.section === state.activeTab);
+		const secTotal = secTasks.length;
+		const secDone = secTasks.filter(t => t.status === 'done').length;
+		const secPct = secTotal > 0 ? Math.round((secDone / secTotal) * 100) : 0;
+
+		if (dom.currentSecBadge) {
+			dom.currentSecBadge.textContent = `${secDone} / ${secTotal} Passed (${secPct}%)`;
+		}
+
+		if (dom.btnRunSection) {
+			dom.btnRunSection.innerHTML = `<span class="dashicons dashicons-controls-play"></span> Run Safe Checks in ${escapeHtml(title)}`;
+		}
+	}
+
+	/**
+	 * Run batch on safe tasks within the active section
+	 */
+	function runCurrentSectionBatch() {
+		if (state.batchRunning) return;
+
+		let targetTasks = [];
+		if (state.activeTab === 'all') {
+			targetTasks = state.tasks.filter(t => t.automation_level === 'A' && t.status !== 'done');
+		} else {
+			targetTasks = state.tasks.filter(t => t.section === state.activeTab && t.automation_level === 'A' && t.status !== 'done');
+		}
+
+		if (targetTasks.length === 0) {
+			alert('All automated safe checks in this section are already completed!');
+			return;
+		}
+
+		state.batchQueue = targetTasks.map(t => t.id);
+		state.batchTotal = state.batchQueue.length;
+		state.batchIndex = 0;
+		state.batchRunning = true;
+
+		if (dom.batchBanner) dom.batchBanner.style.display = 'flex';
+		if (dom.batchProgress) dom.batchProgress.style.backgroundColor = 'var(--wpsg-brand)';
+		if (dom.btnBatchRun) dom.btnBatchRun.disabled = true;
+		if (dom.btnRunSection) dom.btnRunSection.disabled = true;
+
+		processNextBatchTask();
+	}
+
+	/**
+	 * Save custom login URL from Features panel
+	 */
+	async function saveFeatureLoginSlug() {
+		if (!dom.featLoginSlug) return;
+		const slug = dom.featLoginSlug.value.trim();
+		if (!slug) {
+			alert('Please enter a login URL slug.');
+			return;
+		}
+
+		if (!confirm(`Are you sure you want to change your WordPress login URL to:\n${window.wpsgData?.homeUrl || ''}/${slug}/\n\nMake sure to remember this URL before proceeding!`)) {
+			return;
+		}
+
+		try {
+			dom.btnSaveFeatLogin.disabled = true;
+			const res = await wp.apiFetch({
+				path: '/site-checkup-pro/v1/tasks/set-login-slug',
+				method: 'POST',
+				headers: window.wpsgData?.nonces?.set_login_slug ? { 'X-WPSG-Nonce': window.wpsgData.nonces.set_login_slug } : {},
+				data: { slug, confirm: 'CHANGE' },
+			});
+
+			if (res.success) {
+				alert(res.message);
+				window.location.reload();
+			} else {
+				alert(`Failed: ${res.message}`);
+				dom.btnSaveFeatLogin.disabled = false;
+			}
+		} catch (err) {
+			alert(`Error: ${err.message || 'Could not change login URL'}`);
+			dom.btnSaveFeatLogin.disabled = false;
+		}
+	}
+
+	/**
+	 * Reset custom login URL back to default
+	 */
+	async function resetFeatureLoginSlug() {
+		if (!confirm('Revert back to standard WordPress /wp-login.php?')) {
+			return;
+		}
+
+		try {
+			const res = await wp.apiFetch({
+				path: '/site-checkup-pro/v1/tasks/set-login-slug',
+				method: 'POST',
+				headers: window.wpsgData?.nonces?.set_login_slug ? { 'X-WPSG-Nonce': window.wpsgData.nonces.set_login_slug } : {},
+				data: { slug: '', confirm: 'CHANGE' },
+			});
+
+			if (res.success) {
+				alert(res.message);
+				window.location.reload();
+			} else {
+				alert(`Failed: ${res.message}`);
+			}
+		} catch (err) {
+			alert(`Error: ${err.message || 'Could not reset login URL'}`);
+		}
+	}
+
+	/**
 	 * Update KPI summary cards
 	 */
 	function updateKpis() {
@@ -368,19 +670,35 @@
 		// Count scheduled reminders
 		const reminderCount = state.tasks.filter(t => t.next_reminder_at).length;
 		if (dom.kpiReminders) dom.kpiReminders.textContent = reminderCount;
+
+		updateOverviewStats();
 	}
 
 	/**
 	 * Render views depending on active tab
 	 */
 	function renderViews() {
-		if (state.activeTab === 'audit_trail') {
-			if (dom.tableWrapper) dom.tableWrapper.style.display = 'none';
-			if (dom.auditView) dom.auditView.style.display = 'block';
+		// Hide all panels first
+		if (dom.panelOverview) dom.panelOverview.style.display = 'none';
+		if (dom.panelTasks) dom.panelTasks.style.display = 'none';
+		if (dom.panelFeatures) dom.panelFeatures.style.display = 'none';
+		if (dom.panelAudit) dom.panelAudit.style.display = 'none';
+		if (dom.panelSettings) dom.panelSettings.style.display = 'none';
+
+		if (state.activeTab === 'overview') {
+			if (dom.panelOverview) dom.panelOverview.style.display = 'block';
+			updateOverviewStats();
+		} else if (state.activeTab === 'features') {
+			if (dom.panelFeatures) dom.panelFeatures.style.display = 'block';
+		} else if (state.activeTab === 'audit_trail') {
+			if (dom.panelAudit) dom.panelAudit.style.display = 'block';
 			loadAuditLogs();
+		} else if (state.activeTab === 'settings') {
+			if (dom.panelSettings) dom.panelSettings.style.display = 'block';
 		} else {
-			if (dom.tableWrapper) dom.tableWrapper.style.display = 'block';
-			if (dom.auditView) dom.auditView.style.display = 'none';
+			// Specific task section or 'all'
+			if (dom.panelTasks) dom.panelTasks.style.display = 'block';
+			updateSectionBanner();
 			renderTasksTable();
 		}
 	}
@@ -393,8 +711,18 @@
 
 		let filtered = state.tasks;
 
+		// 0. Filter by Search Query
+		if (state.searchQuery) {
+			const q = state.searchQuery.toLowerCase();
+			filtered = filtered.filter(t =>
+				(t.title && t.title.toLowerCase().includes(q)) ||
+				(t.description && t.description.toLowerCase().includes(q)) ||
+				(t.id && t.id.toLowerCase().includes(q))
+			);
+		}
+
 		// 1. Filter by Section tab
-		if (state.activeTab !== 'all' && state.activeTab !== 'audit_trail') {
+		if (state.activeTab !== 'all' && state.activeTab !== 'audit_trail' && state.activeTab !== 'overview' && state.activeTab !== 'features') {
 			filtered = filtered.filter(t => t.section === state.activeTab);
 		}
 
@@ -422,7 +750,7 @@
 						<div class="wpsg-empty-state">
 							${emptyImg ? `<img src="${emptyImg}" width="120" height="85" alt="" />` : '<span class="dashicons dashicons-search"></span>'}
 							<h4>No checklist tasks found</h4>
-							<p>No tasks match the active filters. Try switching section tabs or clearing status filters.</p>
+							<p>No tasks match the active filters or search query. Try switching categories or clearing search.</p>
 						</div>
 					</td>
 				</tr>

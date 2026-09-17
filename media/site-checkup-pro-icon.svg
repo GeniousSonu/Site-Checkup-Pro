@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Site Checkup Pro mark</title>
+  <desc id="desc">An open inspection ring with an integrated verification check.</desc>
+
+  <!-- Transparent canvas: no rounded square, no background -->
+  <path
+    d="M128 24
+       A104 104 0 1 0 224 128"
+    fill="none"
+    stroke="#2563EB"
+    stroke-width="30"
+    stroke-linecap="round"/>
+
+  <path
+    d="M76 137
+       L113 174
+       L181 95"
+    fill="none"
+    stroke="#14B8A6"
+    stroke-width="30"
+    stroke-linecap="round"
+    stroke-linejoin="round"/>
+
+  <circle cx="224" cy="128" r="15" fill="#2563EB"/>
+</svg>

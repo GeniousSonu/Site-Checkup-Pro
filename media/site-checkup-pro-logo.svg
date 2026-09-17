@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" role="img" aria-labelledby="title desc">
+  <title id="title">Site Checkup Pro logo</title>
+  <desc id="desc">A clean geometric verification mark with the Site Checkup Pro wordmark.</desc>
+
+  <!-- Symbol -->
+  <g transform="translate(40 40)">
+    <!-- Open inspection ring: deliberately not a shield or rounded square -->
+    <path
+      d="M120 18
+         A102 102 0 1 0 203 150"
+      fill="none"
+      stroke="#2563EB"
+      stroke-width="28"
+      stroke-linecap="round"/>
+
+    <!-- Integrated check / verification stroke -->
+    <path
+      d="M82 158
+         L118 194
+         L178 122"
+      fill="none"
+      stroke="#14B8A6"
+      stroke-width="28"
+      stroke-linecap="round"
+      stroke-linejoin="round"/>
+
+    <!-- Small precision node -->
+    <circle cx="203" cy="150" r="14" fill="#2563EB"/>
+  </g>
+
+  <!-- Wordmark -->
+  <g transform="translate(300 0)">
+    <text
+      x="0"
+      y="173"
+      font-family="Inter, Geist, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+      font-size="82"
+      font-weight="600"
+      letter-spacing="-2.4"
+      fill="#111827">Site Checkup</text>
+
+    <text
+      x="690"
+      y="173"
+      font-family="Inter, Geist, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+      font-size="82"
+      font-weight="500"
+      letter-spacing="-2.4"
+      fill="#64748B">Pro</text>
+  </g>
+</svg>

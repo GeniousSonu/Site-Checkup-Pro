@@ -392,6 +392,17 @@ run_test( "Backup Guard: 48h recency threshold enforcement", function () {
 	return ( true === $status_confirmed );
 } );
 
+// TEST 7a: Login Renamer: Custom slug rewrites wp-login.php in legitimate redirect
+run_test( "Login Renamer: Custom slug rewrites wp-login.php in legitimate redirect", function () {
+	update_option( WPSG_Login_Renamer::SLUG_OPTION, 'custom-portal' );
+	$renamer = WPSG_Login_Renamer::get_instance();
+	$_SERVER['REQUEST_URI'] = '/custom-portal/';
+	$rewritten = $renamer->filter_redirect( 'https://example.com/wp-login.php?loggedout=true', 302 );
+	$has_slug = ( false !== strpos( $rewritten, 'custom-portal/' ) );
+	unset( $_SERVER['REQUEST_URI'] );
+	return $has_slug;
+} );
+
 // TEST 7: Login Renamer Emergency Recovery Constant (WPSG_DISABLE_LOGIN_RENAME)
 run_test( "Login Renamer: Recovery constant WPSG_DISABLE_LOGIN_RENAME deactivates custom login slug", function () {
 	update_option( WPSG_Login_Renamer::SLUG_OPTION, 'secret-login-slug' );

@@ -67,11 +67,104 @@ class WPSG_Login_Renamer {
 		}
 
 		// Register rewrites and interceptors.
+		// Priority 0: block /wp-admin early, before WP's own redirect to wp-login.php fires.
+		add_action( 'init', array( $this, 'block_wp_admin_redirect' ), 0 );
+		add_action( 'auth_redirect', array( $this, 'handle_auth_redirect' ), 0 );
 		add_action( 'init', array( $this, 'intercept_custom_login' ), 1 );
 		add_action( 'login_init', array( $this, 'block_default_wp_login' ), 1 );
 		add_filter( 'site_url', array( $this, 'filter_login_url' ), 10, 3 );
 		add_filter( 'network_site_url', array( $this, 'filter_login_url' ), 10, 3 );
 		add_filter( 'wp_redirect', array( $this, 'filter_redirect' ), 10, 2 );
+	}
+
+	/**
+	 * Block /wp-admin path for unauthenticated visitors when login URL is renamed.
+	 *
+	 * WordPress natively redirects /wp-admin -> wp-login.php?redirect_to=/wp-admin/
+	 * for unauthenticated users. This fires BEFORE the login_init hook so the
+	 * existing block_default_wp_login() can't catch it.
+	 *
+	 * This method runs at init priority 0 and hard-404s any /wp-admin request that:
+	 * - Is NOT an authenticated user session, AND
+	 * - Is NOT wp-admin/admin-ajax.php or admin-post.php, AND
+	 * - Is NOT a WP-Cron request, AND
+	 * - Is NOT a REST API request (/wp-json/)
+	 *
+	 * This means bots and scanners that probe /wp-admin get a 404 instead of being
+	 * redirected to a login form (even a renamed one). The custom login URL is the
+	 * ONLY way to reach the login page.
+	 */
+	public function block_wp_admin_redirect() {
+		// Only act when custom slug is set.
+		$slug = self::get_login_slug();
+		if ( empty( $slug ) ) {
+			return;
+		}
+
+		// Logged-in users can access /wp-admin normally.
+		if ( is_user_logged_in() ) {
+			return;
+		}
+
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+		$path        = trim( (string) wp_parse_url( $request_uri, PHP_URL_PATH ), '/' );
+
+		// Strip subdirectory prefix if WordPress is installed in a subfolder.
+		$site_path = trim( (string) wp_parse_url( site_url(), PHP_URL_PATH ), '/' );
+		if ( ! empty( $site_path ) && 0 === strpos( $path, $site_path ) ) {
+			$path = trim( (string) substr( $path, strlen( $site_path ) ), '/' );
+		}
+
+		// Only block paths starting with wp-admin.
+		if ( 0 !== strpos( $path, 'wp-admin' ) ) {
+			return;
+		}
+
+		// Whitelist: admin-ajax.php and admin-post.php must remain accessible for front-end AJAX and form submissions.
+		if ( false !== strpos( $path, 'admin-ajax.php' ) || false !== strpos( $path, 'admin-post.php' ) ) {
+			return;
+		}
+
+		// Whitelist: WP-Cron requests (CLI or scheduled, checked by DOING_CRON).
+		if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
+			return;
+		}
+
+		// Whitelist: REST API — /wp-json/ is not under wp-admin but guard anyway.
+		if ( 0 === strpos( $path, 'wp-json' ) ) {
+			return;
+		}
+
+		// Serve a hard 404 with no cache headers.
+		// Do NOT redirect to the custom login URL — that would reveal it to bots.
+		status_header( 404 );
+		nocache_headers();
+		header( 'X-Robots-Tag: noindex, nofollow' );
+
+		// Try the theme's 404 template first; fall back to a minimal HTML page.
+		$template = get_404_template();
+		if ( $template && file_exists( $template ) ) {
+			// Load WordPress environment properly for the template.
+			global $wp_query;
+			if ( is_object( $wp_query ) ) {
+				$wp_query->set_404();
+			}
+			include $template;
+		} else {
+			echo '<!DOCTYPE html><html><head><title>404 Not Found</title><meta name="robots" content="noindex,nofollow"></head>';
+			echo '<body><h1>Not Found</h1><p>The requested URL was not found on this server.</p></body></html>';
+		}
+		exit;
+	}
+
+	/**
+	 * Intercept auth_redirect to prevent redirecting unauthenticated users to login URL.
+	 */
+	public function handle_auth_redirect() {
+		$slug = self::get_login_slug();
+		if ( ! empty( $slug ) && ! is_user_logged_in() ) {
+			$this->block_wp_admin_redirect();
+		}
 	}
 
 	/**
@@ -273,6 +366,12 @@ class WPSG_Login_Renamer {
 		if ( false !== strpos( $location, 'wp-login.php' ) ) {
 			$slug = self::get_login_slug();
 			if ( ! empty( $slug ) ) {
+				// Prevent leak: if an unauthenticated request from wp-admin is being redirected,
+				// do not leak the secret custom login slug in the Location header. Block with 404 immediately.
+				$req_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+				if ( ! is_user_logged_in() && false !== strpos( $req_uri, 'wp-admin' ) ) {
+					$this->block_wp_admin_redirect();
+				}
 				$location = str_replace( 'wp-login.php', $slug . '/', $location );
 			}
 		}
