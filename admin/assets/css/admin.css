@@ -619,6 +619,25 @@
 .wpsg-status-pending .wpsg-status-dot { background: var(--wpsg-text-muted); }
 .wpsg-status-pending { color: var(--wpsg-text-secondary); }
 
+.wpsg-status-unverified .wpsg-status-dot { background: #f59e0b; }
+.wpsg-status-unverified { color: #d97706; font-weight: 500; }
+
+.wpsg-btn-outline {
+	background: transparent;
+	color: var(--wpsg-brand);
+	border-color: var(--wpsg-brand-border);
+}
+.wpsg-btn-outline:hover {
+	background: var(--wpsg-brand-subtle);
+	border-color: var(--wpsg-brand);
+	color: var(--wpsg-brand);
+}
+
+.wpsg-evidence-notice {
+	color: #d97706 !important;
+	font-weight: 500;
+}
+
 /* Completed Row De-emphasis */
 .wpsg-row-completed td {
 	color: var(--wpsg-text-secondary);

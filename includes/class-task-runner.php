@@ -105,48 +105,65 @@ class WPSG_Task_Runner {
 			$message    = isset( $result['message'] ) ? $result['message'] : '';
 
 			// 7. Post-action verification (Verify).
-			//
-			// For runtime-filter instant tasks (disable_xmlrpc, restrict_rest_api,
-			// toggle_auto_updates), the status_callback reads the task's DB row via
-			// is_task_active(). That row is only written in step 9 AFTER this verify
-			// step — so the verify would always see 'pending' and falsely mark the task
-			// as 'failed'. Fix: for instant tasks where the run_callback returned an
-			// explicit 'success: true' (i.e. action tasks, not scanner tasks), write a
-			// temporary 'done' row BEFORE reading live status so is_task_active() returns
-			// true. Scanner tasks return 'status: attention' (not 'success: true'), so
-			// they skip this pre-write.
-			//
-			// For writes_files tasks (HSTS with no-SSL guard, wp_debug_display where the
-			// PHP constant can't change in the same process), trust the run_callback result
-			// if it explicitly returned 'success: true' — do not demote to 'failed' just
-			// because the live re-check reads an environmental guard or in-memory constant.
-			$run_returned_success_flag = ! empty( $result['success'] );
-			if ( $is_success && $run_returned_success_flag && 'instant' === $task->sub_type ) {
-				// Pre-write so is_task_active() returns true during the verify re-check.
-				// update_db_status() handles cache invalidation for wpsg_task_status_{task_id}.
-				self::update_db_status( $task_id, 'done', $task->automation_level );
+			$new_status    = 'pending';
+			$verified_live = false;
+
+			// If the task has an independent HTTP-level verifier available, execute it:
+			$http_verification = class_exists( 'WPSG_HTTP_Verifier' )
+				? WPSG_HTTP_Verifier::verify_task( $task_id, true )
+				: array( 'verified' => false, 'status' => 'pending', 'message' => '' );
+
+			if ( ! empty( $http_verification['message'] ) && 'No HTTP verification procedure defined for this task.' !== $http_verification['message'] ) {
+				// This is an HTTP-verifiable task!
+				if ( ! empty( $http_verification['verified'] ) ) {
+					$new_status    = 'done'; // Applied & Verified
+					$verified_live = true;
+					$message       = $http_verification['message'];
+				} elseif ( $is_success ) {
+					// Write / apply action succeeded, but live verification could NOT confirm enforcement!
+					// Must be Applied, Not Verified (applied_unverified). NEVER falsely show 'done'!
+					$new_status = 'applied_unverified';
+					$message    = $http_verification['message'];
+				} else {
+					$new_status = 'failed';
+				}
+			} else {
+				// Non-HTTP verifiable task (e.g. instant scanners, runtime filter tasks)
+				if ( $is_success && $run_returned_success_flag && 'instant' === $task->sub_type ) {
+					self::update_db_status( $task_id, 'done', $task->automation_level );
+				}
+
+				$after_status = $task->get_live_status();
+
+				if ( $is_success ) {
+					$live_st = isset( $after_status['status'] ) ? $after_status['status'] : 'done';
+					if ( 'done' === $live_st ) {
+						$new_status    = 'done';
+						$verified_live = true;
+					} elseif ( 'instant' === $task->sub_type && 'attention' === $live_st ) {
+						$new_status = 'attention'; // Scanner found issues
+					} elseif ( 'writes_files' === $task->sub_type ) {
+						// File write succeeded but live check not confirmed
+						$new_status = 'applied_unverified';
+					} else {
+						$new_status = $live_st;
+					}
+					if ( ! empty( $after_status['message'] ) ) {
+						$message = $after_status['message'];
+					}
+				} else {
+					$new_status = isset( $result['status'] ) ? $result['status'] : 'failed';
+					if ( ! in_array( $new_status, array( 'attention', 'pending', 'failed', 'not_applicable' ), true ) ) {
+						$new_status = 'failed';
+					}
+				}
 			}
 
-			$after_status = $task->get_live_status();
-
-			if ( isset( $after_status['status'] ) && 'done' !== $after_status['status'] && $is_success ) {
-				// Accept 'attention' as a valid result for:
-				// 1. Scanner (instant) tasks — scan ran, found issues. Not a failure.
-				// 2. writes_files tasks — write succeeded but env condition (no SSL,
-				//    in-memory PHP constant) prevents immediate 'done'. Mark done; the
-				//    guard will reflect correctly once the environment changes.
-				if ( 'attention' === $after_status['status'] &&
-				     ( 'instant' === $task->sub_type || 'writes_files' === $task->sub_type ) ) {
-					// For writes_files: force 'done' (write confirmed). For instant: keep 'attention'.
-					if ( 'writes_files' === $task->sub_type ) {
-						$after_status['status'] = 'done';
-					}
-					// else: leave after_status['status'] as 'attention' — new_status step will handle it.
-				} else {
-					// Verification genuinely failed after action execution.
-					$is_success = false;
-					$message    = ! empty( $after_status['message'] ) ? $after_status['message'] : __( 'Post-action verification failed.', 'site-checkup-pro' );
-				}
+			if ( ! isset( $after_status ) ) {
+				$after_status = array(
+					'status'  => $new_status,
+					'message' => $message,
+				);
 			}
 
 			// 8. Record to redacted audit log (Log).
@@ -155,23 +172,11 @@ class WPSG_Task_Runner {
 				'run',
 				$before_status,
 				$after_status,
-				$is_success ? 'success' : 'failed',
+				( 'done' === $new_status || 'attention' === $new_status || 'applied_unverified' === $new_status ) ? 'success' : 'failed',
 				$message
 			);
 
 			// 9. Update task status in database with snapshot hash.
-			// For instant tasks that return 'attention', store 'attention' (not 'done') so
-			// the UI shows the actual check result. For action tasks (success: true), use 'done'.
-			if ( $is_success ) {
-				$live_status = isset( $after_status['status'] ) ? $after_status['status'] : 'done';
-				// Preserve 'attention' for scanner tasks; default to 'done' for action tasks.
-				$new_status = ( 'instant' === $task->sub_type && 'attention' === $live_status ) ? 'attention' : 'done';
-			} else {
-				$new_status = isset( $result['status'] ) ? $result['status'] : 'failed';
-				if ( ! in_array( $new_status, array( 'attention', 'pending', 'failed', 'not_applicable' ), true ) ) {
-					$new_status = 'failed';
-				}
-			}
 			$metadata   = array(
 				'snapshot_hash' => $snapshot_hash,
 				'before_status' => $before_status,
@@ -179,17 +184,17 @@ class WPSG_Task_Runner {
 			);
 			self::update_db_status( $task_id, $new_status, $task->automation_level, null, null, $metadata );
 
-			if ( $is_success ) {
+			if ( 'done' === $new_status ) {
 				$completed_count = (int) get_option( 'wpsg_completed_tasks_count', 0 ) + 1;
 				update_option( 'wpsg_completed_tasks_count', $completed_count );
 			}
 
 			return array(
-				'success'      => $is_success,
+				'success'      => ( 'done' === $new_status || 'attention' === $new_status || 'applied_unverified' === $new_status ),
 				'task_id'      => $task_id,
 				'status'       => $new_status,
 				'message'      => $message,
-				'live_message' => isset( $after_status['message'] ) ? $after_status['message'] : $message,
+				'live_message' => $message,
 				'has_undo'     => $task->has_undo,
 			);
 

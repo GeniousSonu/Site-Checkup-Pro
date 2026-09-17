@@ -87,6 +87,23 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			),
 		) );
 
+		// 3b. Verify Single Task (Standing "Check Now" Action)
+		register_rest_route( $this->namespace, '/tasks/(?P<id>[a-zA-Z0-9_-]+)/verify', array(
+			'methods'             => WP_REST_Server::CREATABLE,
+			'callback'            => array( $this, 'verify_task' ),
+			'permission_callback' => array( $this, 'check_permissions' ),
+			'args'                => array(
+				'id' => array( 'sanitize_callback' => 'sanitize_key', 'required' => true ),
+			),
+		) );
+
+		// 3c. Diagnostic Probe for Fresh Runtime Evaluation
+		register_rest_route( $this->namespace, '/diagnostic-probe', array(
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => array( $this, 'get_diagnostic_probe' ),
+			'permission_callback' => array( $this, 'check_probe_permissions' ),
+		) );
+
 		// 4. Get Diff Preview for Task
 		register_rest_route( $this->namespace, '/tasks/(?P<id>[a-zA-Z0-9_-]+)/diff', array(
 			'methods'             => WP_REST_Server::READABLE,
@@ -498,6 +515,84 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 		$result = WPSG_Task_Runner::undo( $task_id, $reauth_token );
 
 		return rest_ensure_response( $result );
+	}
+
+	/**
+	 * Verify an individual task on-demand (Standing "Check Now" action).
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function verify_task( $request ) {
+		$task_id = $request->get_param( 'id' );
+		$task    = WPSG_Task_Registry::get_instance()->get( $task_id );
+
+		if ( ! $task ) {
+			return new WP_Error( 'not_found', __( 'Task not found.', 'site-checkup-pro' ), array( 'status' => 404 ) );
+		}
+
+		$verification = class_exists( 'WPSG_HTTP_Verifier' )
+			? WPSG_HTTP_Verifier::verify_task( $task_id, true )
+			: array( 'verified' => false, 'status' => 'pending', 'message' => '' );
+
+		$new_status = ! empty( $verification['verified'] ) ? 'done' : ( ! empty( $verification['status'] ) ? $verification['status'] : 'applied_unverified' );
+
+		// Update database status
+		WPSG_Task_Runner::update_db_status(
+			$task_id,
+			$new_status,
+			$task->automation_level,
+			null,
+			null,
+			array( 'verification' => $verification )
+		);
+
+		return rest_ensure_response( array(
+			'success'      => ! empty( $verification['verified'] ),
+			'task_id'      => $task_id,
+			'status'       => $new_status,
+			'message'      => ! empty( $verification['message'] ) ? $verification['message'] : '',
+			'live_message' => ! empty( $verification['message'] ) ? $verification['message'] : '',
+			'verified'     => ! empty( $verification['verified'] ),
+		) );
+	}
+
+	/**
+	 * Permission check for diagnostic probe endpoint.
+	 *
+	 * Allows administrator users OR requests carrying a valid internal self-verification token.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool|WP_Error
+	 */
+	public function check_probe_permissions( $request ) {
+		if ( current_user_can( 'manage_options' ) ) {
+			return true;
+		}
+
+		if ( class_exists( 'WPSG_HTTP_Verifier' ) && WPSG_HTTP_Verifier::is_self_verification_request() ) {
+			return true;
+		}
+
+		return new WP_Error( 'rest_forbidden', __( 'Access denied.', 'site-checkup-pro' ), array( 'status' => 403 ) );
+	}
+
+	/**
+	 * Fresh-process runtime diagnostic probe for PHP constants and login URL renames.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
+	 */
+	public function get_diagnostic_probe( $request ) {
+		return rest_ensure_response( array(
+			'success'   => true,
+			'constants' => array(
+				'DISALLOW_FILE_EDIT' => defined( 'DISALLOW_FILE_EDIT' ) && DISALLOW_FILE_EDIT,
+				'WP_DEBUG_DISPLAY'   => defined( 'WP_DEBUG_DISPLAY' ) && ! WP_DEBUG_DISPLAY,
+			),
+			'login_slug' => get_option( 'wpsg_login_slug', '' ),
+			'timestamp'  => time(),
+		) );
 	}
 
 	/**
@@ -1013,6 +1108,17 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 				'incident_contact_phone'    => isset( $settings['incident_contact_phone'] ) ? $settings['incident_contact_phone'] : '',
 				'incident_contact_notes'    => isset( $settings['incident_contact_notes'] ) ? $settings['incident_contact_notes'] : '',
 				'agency_name'               => isset( $settings['agency_name'] ) ? $settings['agency_name'] : '',
+				// Hosting Panel Integration (Tier 1)
+				'hosting_panel_detected'    => class_exists( 'WPSG_Hosting_Panel_Bridge' ) ? WPSG_Hosting_Panel_Bridge::detect_panel() : array(),
+				'hosting_panel_type'        => isset( $settings['hosting_panel_type'] ) ? $settings['hosting_panel_type'] : 'auto',
+				'hosting_panel_url'         => isset( $settings['hosting_panel_url'] ) ? $settings['hosting_panel_url'] : '',
+				'has_hosting_panel_key'     => ! empty( $settings['hosting_panel_key_enc'] ),
+				'hosting_panel_has_token'   => ! empty( $settings['hosting_panel_key_enc'] ),
+				'hosting_panel_key_masked'  => ! empty( $settings['hosting_panel_key_enc'] ) ? '••••••••' : '',
+				'hosting_panel_optin'       => ! empty( $settings['hosting_panel_optin'] ),
+				'supports_htaccess'         => class_exists( 'WPSG_Htaccess_Manager' ) ? WPSG_Htaccess_Manager::supports_htaccess() : false,
+				'has_nginx_tier1'           => class_exists( 'WPSG_Htaccess_Manager' ) ? WPSG_Htaccess_Manager::has_nginx_tier1() : false,
+				'has_nginx_tier2'           => class_exists( 'WPSG_Htaccess_Manager' ) ? WPSG_Htaccess_Manager::has_nginx_tier2() : false,
 			),
 		) );
 	}
@@ -1038,6 +1144,9 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			},
 			'incident_contact_notes' => function( $v ) { return sanitize_textarea_field( trim( (string) $v ) ); },
 			'agency_name'            => function( $v ) { return sanitize_text_field( trim( (string) $v ) ); },
+			'hosting_panel_type'     => function( $v ) { return sanitize_key( trim( (string) $v ) ); },
+			'hosting_panel_url'      => function( $v ) { return esc_url_raw( trim( (string) $v ) ); },
+			'hosting_panel_optin'    => function( $v ) { return ! empty( $v ) ? 1 : 0; },
 		);
 
 		$params = $request->get_json_params();
@@ -1057,6 +1166,23 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 					continue;
 				}
 				$current_settings[ $key ] = call_user_func( $sanitizer, $params[ $key ] );
+			}
+		}
+
+		// Handle hosting panel API key encrypted storage
+		$token_input = null;
+		if ( array_key_exists( 'hosting_panel_token', $params ) ) {
+			$token_input = (string) $params['hosting_panel_token'];
+		} elseif ( array_key_exists( 'hosting_panel_api_key', $params ) ) {
+			$token_input = (string) $params['hosting_panel_api_key'];
+		}
+
+		if ( null !== $token_input ) {
+			$raw_panel_key = trim( $token_input );
+			if ( '' !== $raw_panel_key && false === strpos( $raw_panel_key, '•' ) ) {
+				$current_settings['hosting_panel_key_enc'] = WPSG_Encryption::encrypt( $raw_panel_key );
+			} elseif ( '' === $raw_panel_key ) {
+				unset( $current_settings['hosting_panel_key_enc'] );
 			}
 		}
 

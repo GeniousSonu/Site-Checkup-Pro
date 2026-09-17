@@ -53,6 +53,56 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</div>
 			</div>
 
+			<!-- Hosting Control Panel Bridge (Tier 1 Directives) -->
+			<div class="wpsg-form-section" style="margin-bottom: 20px; padding-top: 16px; border-top: 1px solid var(--wpsg-border);">
+				<h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: var(--wpsg-text-primary);">
+					<?php esc_html_e( 'Hosting Control Panel Bridge (Nginx Tier 1)', 'site-checkup-pro' ); ?>
+				</h4>
+				<p style="margin: 0 0 10px 0; font-size: 12px; color: var(--wpsg-text-secondary);">
+					<?php esc_html_e( 'For sites hosted on Nginx, connect your control panel API to apply security directives automatically. Credentials are encrypted at rest with HKDF + AES-256-GCM / libsodium.', 'site-checkup-pro' ); ?>
+				</p>
+				<div id="wpsg-panel-detection-info" style="margin-bottom: 10px; font-size: 12px; color: var(--wpsg-text-secondary); padding: 8px 12px; background: var(--wpsg-bg); border-radius: 6px; border: 1px solid var(--wpsg-border); display: none;"></div>
+				<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
+					<div>
+						<label for="wpsg-setting-panel-type" style="display: block; font-size: 12px; font-weight: 500; margin-bottom: 4px;">
+							<?php esc_html_e( 'Control Panel Type', 'site-checkup-pro' ); ?>
+						</label>
+						<select id="wpsg-setting-panel-type" class="wpsg-select" style="width: 100%;">
+							<option value=""><?php esc_html_e( 'None / Not Applicable', 'site-checkup-pro' ); ?></option>
+							<option value="cpanel"><?php esc_html_e( 'cPanel (UAPI)', 'site-checkup-pro' ); ?></option>
+							<option value="plesk"><?php esc_html_e( 'Plesk (REST API)', 'site-checkup-pro' ); ?></option>
+							<option value="cloudpanel"><?php esc_html_e( 'CloudPanel (v2 API)', 'site-checkup-pro' ); ?></option>
+							<option value="runcloud"><?php esc_html_e( 'RunCloud (API)', 'site-checkup-pro' ); ?></option>
+							<option value="cyberpanel"><?php esc_html_e( 'CyberPanel (REST API)', 'site-checkup-pro' ); ?></option>
+						</select>
+					</div>
+					<div>
+						<label for="wpsg-setting-panel-url" style="display: block; font-size: 12px; font-weight: 500; margin-bottom: 4px;">
+							<?php esc_html_e( 'Panel URL / Port', 'site-checkup-pro' ); ?>
+						</label>
+						<input type="url" id="wpsg-setting-panel-url" class="wpsg-input" placeholder="https://cp.server.com:8443" style="width: 100%;" />
+					</div>
+				</div>
+				<div class="wpsg-input-group" style="margin-bottom: 10px;">
+					<label for="wpsg-setting-panel-token" style="display: block; font-size: 12px; font-weight: 500; margin-bottom: 4px;">
+						<?php esc_html_e( 'API Token / Secret Key', 'site-checkup-pro' ); ?>
+					</label>
+					<input type="password" id="wpsg-setting-panel-token" class="wpsg-input" placeholder="<?php esc_attr_e( 'Paste panel API token (stored encrypted)', 'site-checkup-pro' ); ?>" style="width: 100%;" autocomplete="off" />
+					<p id="wpsg-panel-masked-status" style="margin: 4px 0 0 0; font-size: 11px; color: var(--wpsg-text-muted);"></p>
+				</div>
+				<div style="padding: 10px; background: var(--wpsg-bg); border: 1px solid var(--wpsg-border); border-radius: 6px;">
+					<label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px; font-weight: 500; cursor: pointer;">
+						<input type="checkbox" id="wpsg-setting-panel-optin" style="margin-top: 2px;" />
+						<span>
+							<strong><?php esc_html_e( 'Authorize API Directive Application (Explicit Consent)', 'site-checkup-pro' ); ?></strong><br />
+							<span style="font-weight: 400; color: var(--wpsg-text-secondary); font-size: 11px;">
+								<?php esc_html_e( 'Per WordPress.org Guideline 7, authorizing this panel bridge allows Site Checkup Pro to transmit authenticated Nginx directive configurations to the specified control panel API endpoint. Token is never logged or exported.', 'site-checkup-pro' ); ?>
+							</span>
+						</span>
+					</label>
+				</div>
+			</div>
+
 			<!-- Webhook Notification Settings -->
 			<div class="wpsg-form-section" style="margin-bottom: 20px; padding-top: 16px; border-top: 1px solid var(--wpsg-border);">
 				<h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: var(--wpsg-text-primary);">

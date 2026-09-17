@@ -115,6 +115,11 @@ class WPSG_Login_Guard {
 	 * @return WP_User|WP_Error
 	 */
 	public function preflight_lockout_check( $user, $username, $password ) {
+		// Exclude internal self-verification probes
+		if ( class_exists( 'WPSG_HTTP_Verifier' ) && WPSG_HTTP_Verifier::is_self_verification_request() ) {
+			return $user;
+		}
+
 		if ( empty( $username ) ) {
 			return $user;
 		}
@@ -161,6 +166,11 @@ class WPSG_Login_Guard {
 	 * @param WP_Error $error    Failure error object.
 	 */
 	public function on_login_failed( $username, $error = null ) {
+		// Exclude internal self-verification probes from recording failures
+		if ( class_exists( 'WPSG_HTTP_Verifier' ) && WPSG_HTTP_Verifier::is_self_verification_request() ) {
+			return;
+		}
+
 		if ( empty( $username ) ) {
 			$username = isset( $_POST['log'] ) ? sanitize_text_field( wp_unslash( $_POST['log'] ) ) : 'unknown';
 		}
@@ -448,6 +458,10 @@ class WPSG_Login_Guard {
 	 * @return WP_User|WP_Error
 	 */
 	public function validate_login_honeypot( $user ) {
+		if ( class_exists( 'WPSG_HTTP_Verifier' ) && WPSG_HTTP_Verifier::is_self_verification_request() ) {
+			return $user;
+		}
+
 		if ( ! empty( $_POST['wpsg_hp_field'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			// Bot filled honeypot! Terminate silently without error message.
 			status_header( 200 );

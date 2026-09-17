@@ -245,9 +245,30 @@ class WPSG_Task {
 		$live_message     = isset( $live['message'] ) ? $live['message'] : '';
 		$is_na            = isset( $live['is_na'] ) ? (bool) $live['is_na'] : false;
 
-		// If manual task was marked done in database
-		if ( $db_status && 'done' === $db_status->status && ( ! isset( $live['status'] ) || 'pending' === $live['status'] ) ) {
-			$status = 'done';
+		$supports_htaccess = class_exists( 'WPSG_Htaccess_Manager' ) ? WPSG_Htaccess_Manager::supports_htaccess() : true;
+		$has_nginx_tier1   = class_exists( 'WPSG_Htaccess_Manager' ) ? WPSG_Htaccess_Manager::has_nginx_tier1() : false;
+		$has_nginx_tier2   = class_exists( 'WPSG_Htaccess_Manager' ) ? WPSG_Htaccess_Manager::has_nginx_tier2() : false;
+
+		$can_apply_automated = true;
+		if ( ! $supports_htaccess && ! empty( $this->nginx_snippet ) ) {
+			if ( $has_nginx_tier1 || $has_nginx_tier2 ) {
+				$can_apply_automated = true;
+				$is_na               = false;
+			} else {
+				$can_apply_automated = false;
+				$is_na               = false;
+				if ( empty( $live_message ) || 'not_applicable' === $status ) {
+					$live_message = __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'site-checkup-pro' );
+				}
+				if ( 'not_applicable' === $status || 'pending' === $status ) {
+					$status = ( $db_status && in_array( $db_status->status, array( 'done', 'applied_unverified' ), true ) ) ? $db_status->status : 'pending';
+				}
+			}
+		}
+
+		// Support applied_unverified from database or live verification
+		if ( $db_status && 'applied_unverified' === $db_status->status && 'done' !== $status ) {
+			$status = 'applied_unverified';
 		}
 
 		// Overdue reminder check (e.g. 15-day credential rotation or 6-month GSC review)
@@ -256,25 +277,32 @@ class WPSG_Task {
 			$live_message = sprintf( __( 'Overdue reminder: scheduled review was due on %s.', 'site-checkup-pro' ), $next_reminder_at );
 		}
 
+		$can_verify = ( 'writes_files' === $this->sub_type || ! empty( $this->nginx_snippet ) || in_array( $this->id, array( 'block_user_enumeration', 'hide_wordpress_fingerprint', 'security_headers_csp', 'security_txt_check', 'login_url_rename', 'disable_file_edit', 'wp_debug_display_check' ), true ) );
+
 		return array(
-			'id'               => $this->id,
-			'section'          => $this->section,
-			'title'            => $this->title,
-			'description'      => $this->description,
-			'automation_level' => $this->automation_level,
-			'sub_type'         => $this->sub_type,
-			'requires_backup'  => $this->requires_backup,
-			'requires_reauth'  => $this->requires_reauth,
-			'has_undo'         => $this->has_undo,
-			'has_diff'         => $this->has_diff,
-			'guide_data'       => $this->guide_data,
-			'nginx_snippet'    => $this->nginx_snippet,
-			'status'           => $is_na ? 'not_applicable' : $status,
-			'live_message'     => $live_message,
-			'is_na'            => $is_na,
-			'last_run_at'      => $last_run_at,
-			'note'             => $note,
-			'next_reminder_at' => $next_reminder_at,
+			'id'                  => $this->id,
+			'section'             => $this->section,
+			'title'               => $this->title,
+			'description'         => $this->description,
+			'automation_level'    => $this->automation_level,
+			'sub_type'            => $this->sub_type,
+			'requires_backup'     => $this->requires_backup,
+			'requires_reauth'     => $this->requires_reauth,
+			'has_undo'            => $this->has_undo,
+			'has_diff'            => $this->has_diff,
+			'guide_data'          => $this->guide_data,
+			'nginx_snippet'       => $this->nginx_snippet,
+			'status'              => $is_na ? 'not_applicable' : $status,
+			'live_message'        => $live_message,
+			'is_na'               => $is_na,
+			'last_run_at'         => $last_run_at,
+			'note'                => $note,
+			'next_reminder_at'    => $next_reminder_at,
+			'can_verify'          => $can_verify,
+			'can_apply_automated' => $can_apply_automated,
+			'supports_htaccess'   => $supports_htaccess,
+			'has_nginx_tier1'     => $has_nginx_tier1,
+			'has_nginx_tier2'     => $has_nginx_tier2,
 		);
 	}
 }

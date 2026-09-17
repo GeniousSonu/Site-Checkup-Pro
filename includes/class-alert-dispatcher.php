@@ -30,6 +30,11 @@ class WPSG_Alert_Dispatcher {
 	 * @return bool True if dispatched.
 	 */
 	public static function dispatch( $event_type, $message, array $context = array() ) {
+		// Exclude internal self-verification probes from triggering alert notifications.
+		if ( class_exists( 'WPSG_HTTP_Verifier' ) && WPSG_HTTP_Verifier::is_self_verification_request() ) {
+			return false;
+		}
+
 		// Throttle identical alerts to at most 1 every 15 minutes to prevent alert storms.
 		$throttle_key = 'wpsg_alert_throt_' . sanitize_key( $event_type );
 		if ( get_transient( $throttle_key ) ) {

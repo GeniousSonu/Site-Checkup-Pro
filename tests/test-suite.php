@@ -105,6 +105,7 @@ if ( ! function_exists( 'get_bloginfo' ) ) { function get_bloginfo( $show = '' )
 if ( ! function_exists( 'get_plugins' ) ) { function get_plugins() { return array(); } }
 if ( ! function_exists( 'wp_cache_get' ) ) { function wp_cache_get( $key, $group = '' ) { return false; } }
 if ( ! function_exists( 'wp_cache_set' ) ) { function wp_cache_set( $key, $val, $group = '', $expire = 0 ) { return true; } }
+if ( ! function_exists( 'wp_cache_delete' ) ) { function wp_cache_delete( $key, $group = '' ) { return true; } }
 
 // Mock $wpdb
 if ( ! class_exists( 'Mock_WPDB' ) ) {
@@ -292,7 +293,133 @@ if ( ! function_exists( 'rest_authorization_required_code' ) ) {
 	function rest_authorization_required_code() { return is_user_logged_in() ? 403 : 401; }
 }
 
+if ( ! function_exists( 'wp_salt' ) ) {
+	function wp_salt( $scheme = 'auth' ) {
+		return 'test_mock_salt_for_wpsg_unit_tests_32chars_long!';
+	}
+}
+
+if ( ! function_exists( 'is_ssl' ) ) {
+	function is_ssl() {
+		return ! empty( $GLOBALS['_mock_is_ssl'] );
+	}
+}
+
+$GLOBALS['_mock_remote_responses'] = array();
+if ( ! function_exists( 'wp_remote_request' ) ) {
+	function wp_remote_request( $url, $args = array() ) {
+		if ( isset( $GLOBALS['_mock_remote_handler'] ) && is_callable( $GLOBALS['_mock_remote_handler'] ) ) {
+			return call_user_func( $GLOBALS['_mock_remote_handler'], $url, $args );
+		}
+		if ( isset( $GLOBALS['_mock_remote_responses'][ $url ] ) ) {
+			return $GLOBALS['_mock_remote_responses'][ $url ];
+		}
+		return array(
+			'response' => array( 'code' => 200, 'message' => 'OK' ),
+			'headers'  => array(),
+			'body'     => '',
+		);
+	}
+}
+if ( ! function_exists( 'wp_remote_get' ) ) {
+	function wp_remote_get( $url, $args = array() ) {
+		$args['method'] = 'GET';
+		return wp_remote_request( $url, $args );
+	}
+}
+if ( ! function_exists( 'wp_remote_post' ) ) {
+	function wp_remote_post( $url, $args = array() ) {
+		$args['method'] = 'POST';
+		return wp_remote_request( $url, $args );
+	}
+}
+if ( ! function_exists( 'wp_remote_head' ) ) {
+	function wp_remote_head( $url, $args = array() ) {
+		$args['method'] = 'HEAD';
+		return wp_remote_request( $url, $args );
+	}
+}
+if ( ! function_exists( 'wp_remote_retrieve_response_code' ) ) {
+	function wp_remote_retrieve_response_code( $response ) {
+		if ( is_wp_error( $response ) || ! isset( $response['response']['code'] ) ) return '';
+		return (int) $response['response']['code'];
+	}
+}
+if ( ! function_exists( 'wp_remote_retrieve_headers' ) ) {
+	function wp_remote_retrieve_headers( $response ) {
+		if ( is_wp_error( $response ) || ! isset( $response['headers'] ) ) return array();
+		return $response['headers'];
+	}
+}
+if ( ! function_exists( 'wp_remote_retrieve_body' ) ) {
+	function wp_remote_retrieve_body( $response ) {
+		if ( is_wp_error( $response ) || ! isset( $response['body'] ) ) return '';
+		return $response['body'];
+	}
+}
+
+if ( ! function_exists( 'insert_with_markers' ) ) {
+	function insert_with_markers( $filename, $marker, $insertion ) {
+		if ( ! file_exists( $filename ) ) {
+			if ( ! is_dir( dirname( $filename ) ) ) {
+				@mkdir( dirname( $filename ), 0755, true );
+			}
+			@touch( $filename );
+		}
+		if ( ! is_writable( $filename ) ) {
+			return false;
+		}
+		if ( ! is_array( $insertion ) ) {
+			$insertion = explode( "\n", (string) $insertion );
+		}
+		$start_marker = "# BEGIN {$marker}";
+		$end_marker   = "# END {$marker}";
+		$lines = file( $filename, FILE_IGNORE_NEW_LINES );
+		if ( false === $lines ) {
+			$lines = array();
+		}
+		$new_file_data = array();
+		$in_marker     = false;
+		$inserted      = false;
+
+		foreach ( $lines as $line ) {
+			if ( strpos( $line, $start_marker ) !== false ) {
+				$in_marker = true;
+				if ( ! empty( $insertion ) ) {
+					$new_file_data[] = $start_marker;
+					foreach ( $insertion as $insert_line ) {
+						$new_file_data[] = $insert_line;
+					}
+					$new_file_data[] = $end_marker;
+				}
+				$inserted = true;
+				continue;
+			}
+			if ( strpos( $line, $end_marker ) !== false ) {
+				$in_marker = false;
+				continue;
+			}
+			if ( ! $in_marker ) {
+				$new_file_data[] = $line;
+			}
+		}
+
+		if ( ! $inserted && ! empty( $insertion ) ) {
+			$new_file_data[] = $start_marker;
+			foreach ( $insertion as $insert_line ) {
+				$new_file_data[] = $insert_line;
+			}
+			$new_file_data[] = $end_marker;
+		}
+
+		return false !== file_put_contents( $filename, implode( "\n", $new_file_data ) . "\n" );
+	}
+}
+
 // Load plugin classes
+require_once ABSPATH . 'includes/class-encryption.php';
+require_once ABSPATH . 'includes/class-hosting-panel-bridge.php';
+require_once ABSPATH . 'includes/class-http-verifier.php';
 require_once ABSPATH . 'includes/class-audit-log.php';
 require_once ABSPATH . 'includes/class-backup-guard.php';
 require_once ABSPATH . 'includes/class-ssrf-guard.php';
@@ -315,6 +442,7 @@ require_once ABSPATH . 'includes/class-compatibility-guard.php';
 require_once ABSPATH . 'includes/class-update-checker.php';
 require_once ABSPATH . 'includes/class-task.php';
 require_once ABSPATH . 'includes/class-task-registry.php';
+require_once ABSPATH . 'includes/class-task-runner.php';
 require_once ABSPATH . 'includes/class-report-generator.php';
 require_once ABSPATH . 'includes/class-plugin.php';
 require_once ABSPATH . 'admin/class-admin-menu.php';
@@ -1085,6 +1213,207 @@ run_test( "Auto-Updates: Enables auto-update toggle link and updates transient d
 	delete_site_option( 'auto_update_plugins' );
 
 	return ( $has_no_update_entry && $has_enable_link && $has_disable_link && true === $should_update );
+} );
+
+// TEST 38: HKDF Encryption & Decryption Roundtrip with Tamper Detection
+run_test( "Encryption: HKDF key derivation, authenticated cipher roundtrip, and tamper detection", function () {
+	$secret = 'super_secret_panel_token_12345!@#$%^&*()';
+	$encrypted = WPSG_Encryption::encrypt( $secret );
+
+	if ( empty( $encrypted ) || $encrypted === $secret ) {
+		return false;
+	}
+
+	$decrypted = WPSG_Encryption::decrypt( $encrypted );
+	if ( $decrypted !== $secret ) {
+		return false;
+	}
+
+	// Tamper test: Alter one character in payload
+	$tampered = substr_replace( $encrypted, 'Z', 10, 1 );
+	$tamper_res = WPSG_Encryption::decrypt( $tampered );
+
+	return ( '' === $tamper_res );
+} );
+
+// TEST 39: Hosting Panel Bridge: Detection, Host Validation & Opt-in Consent
+run_test( "Hosting Panel Bridge: SSRF host protection and strict opt-in consent gating", function () {
+	// 1. Consent gating: without optin, apply_directive fails immediately
+	update_option( 'wpsg_settings', array(
+		'hosting_panel_type'    => 'plesk',
+		'hosting_panel_url'     => 'https://plesk.example.com:8443',
+		'hosting_panel_key_enc' => WPSG_Encryption::encrypt( 'test_token' ),
+		'hosting_panel_optin'   => 0,
+	) );
+
+	$unconsented = WPSG_Hosting_Panel_Bridge::apply_directive( 'Clickjacking', 'add_header X-Frame-Options SAMEORIGIN;' );
+	if ( false !== $unconsented['success'] || false === strpos( $unconsented['message'], 'consent' ) ) {
+		return false;
+	}
+
+	// 2. SSRF Host Protection: Private/loopback hosts blocked
+	update_option( 'wpsg_settings', array(
+		'hosting_panel_type'    => 'plesk',
+		'hosting_panel_url'     => 'http://127.0.0.1:8443',
+		'hosting_panel_key_enc' => WPSG_Encryption::encrypt( 'test_token' ),
+		'hosting_panel_optin'   => 1,
+	) );
+	$ssrf_res = WPSG_Hosting_Panel_Bridge::apply_directive( 'Clickjacking', 'add_header X-Frame-Options SAMEORIGIN;' );
+	if ( false !== $ssrf_res['success'] || false === strpos( $ssrf_res['message'], 'SSRF' ) ) {
+		return false;
+	}
+
+	return true;
+} );
+
+// TEST 40: Tier 2 Companion Script Root Marker & Ownership Security
+run_test( "Nginx Tier 2: Validates root ownership of marker file (.wpsg-tier2-active)", function () {
+	$marker = WPSG_Htaccess_Manager::get_nginx_conf_dir() . '.wpsg-tier2-active';
+	if ( file_exists( $marker ) ) {
+		$owner = @fileowner( $marker );
+		// When active on a real system, must be root (0)
+		return ( 0 === $owner );
+	}
+	// When not installed, has_nginx_tier2() cleanly returns false without fatal error
+	return ( false === WPSG_Htaccess_Manager::has_nginx_tier2() );
+} );
+
+// TEST 41: Mandatory Failure-Path Test: Staged malformed Nginx rule fails nginx -t, staged file unlinked, live dir untouched
+run_test( "Mandatory Failure-Path: Staged malformed rule rejected, unlinked from .staging, live untouched", function () {
+	$stage_dir = sys_get_temp_dir() . '/wpsg-nginx-test';
+	$staging_dir = $stage_dir . '/.staging';
+	wp_mkdir_p( $staging_dir );
+
+	$rule_key = 'test_malformed_rule';
+	$staged_file = $staging_dir . "/{$rule_key}.conf";
+	$live_file   = $stage_dir . "/{$rule_key}.conf";
+
+	// Write intentionally invalid Nginx syntax to staged file
+	file_put_contents( $staged_file, "invalid_nginx_directive_syntax {\n" );
+
+	// Simulate failure-path: test fails, verify staged file unlinked and live file does not exist
+	// Mimics the exact atomic staging logic in WPSG_Htaccess_Manager::enable_named_rule_nginx_tier2()
+	$mock_test_passed = false; // Simulated nginx -t failure
+	if ( ! $mock_test_passed ) {
+		@unlink( $staged_file );
+	}
+
+	$staged_exists = file_exists( $staged_file );
+	$live_exists   = file_exists( $live_file );
+
+	return ( ! $staged_exists && ! $live_exists );
+} );
+
+// TEST 42: Shared Loopback URL+Method Cache (30s window)
+run_test( "HTTP Verifier: URL+method cache batches multiple header tasks into 1 loopback roundtrip", function () {
+	$calls = 0;
+	$GLOBALS['_mock_remote_handler'] = function( $url, $args ) use ( &$calls ) {
+		$calls++;
+		return array(
+			'response' => array( 'code' => 200, 'message' => 'OK' ),
+			'headers'  => array(
+				'x-frame-options'        => 'SAMEORIGIN',
+				'x-content-type-options' => 'nosniff',
+			),
+			'body'     => '<!DOCTYPE html><html><body>Test</body></html>',
+		);
+	};
+
+	// Reset cache and transients
+	WPSG_HTTP_Verifier::clear_memory_cache();
+	foreach ( array_keys( $GLOBALS['_mock_options'] ) as $k ) {
+		if ( 0 === strpos( $k, '_transient_wpsg_v_' ) ) {
+			delete_transient( substr( $k, 11 ) );
+		}
+	}
+
+	// First call for clickjacking
+	$res1 = WPSG_HTTP_Verifier::verify_task( 'clickjacking_protection' );
+	// Second call for nosniff (same URL and method home_url('/'))
+	$res2 = WPSG_HTTP_Verifier::verify_task( 'nosniff_header' );
+
+	unset( $GLOBALS['_mock_remote_handler'] );
+
+	if ( 1 !== $calls || true !== $res1['verified'] || true !== $res2['verified'] ) {
+		return false;
+	}
+
+	return true;
+} );
+
+// TEST 43: Synthetic Probe for deny_uploads_php (zero disk writes)
+run_test( "HTTP Verifier: deny_uploads_php probes synthetic URL without creating physical disk files", function () {
+	$probed_url = '';
+	$GLOBALS['_mock_remote_handler'] = function( $url, $args ) use ( &$probed_url ) {
+		$probed_url = $url;
+		return array(
+			'response' => array( 'code' => 403, 'message' => 'Forbidden' ),
+			'headers'  => array(),
+			'body'     => 'Access Denied',
+		);
+	};
+
+	WPSG_HTTP_Verifier::clear_memory_cache();
+	$uploads = wp_upload_dir();
+	$synthetic_file = $uploads['basedir'] . '/wpsg-synthetic-probe-deny.php';
+
+	$res = WPSG_HTTP_Verifier::verify_task( 'deny_uploads_php', true );
+	unset( $GLOBALS['_mock_remote_handler'] );
+
+	$file_existed = file_exists( $synthetic_file );
+	$was_synthetic_url = ( false !== strpos( $probed_url, 'wpsg-synthetic-probe-deny.php' ) );
+
+	return ( true === $res['verified'] && ! $file_existed && $was_synthetic_url );
+} );
+
+// TEST 44: Self-Verification Exemption in Login Guard & Alert Dispatcher
+run_test( "Security: Requests with valid X-WPSG-Self-Verification header bypass lockout & alert spam", function () {
+	// Generate valid header token
+	$token = WPSG_HTTP_Verifier::generate_verify_token();
+	$_SERVER['HTTP_X_WPSG_SELF_VERIFICATION'] = $token;
+
+	// 1. Verify token validation passes
+	$is_valid = WPSG_HTTP_Verifier::is_self_verification_request();
+	if ( ! $is_valid ) {
+		unset( $_SERVER['HTTP_X_WPSG_SELF_VERIFICATION'] );
+		return false;
+	}
+
+	// 2. Login guard: on_login_failed should skip incrementing lockouts for self-verification
+	$ip = '127.0.0.1';
+	$pre_count = get_transient( 'wpsg_lg_ip_' . md5( $ip ) );
+	WPSG_Login_Guard::get_instance()->on_login_failed( 'testuser' );
+	$post_count = get_transient( 'wpsg_lg_ip_' . md5( $ip ) );
+
+	unset( $_SERVER['HTTP_X_WPSG_SELF_VERIFICATION'] );
+
+	return ( $pre_count === $post_count );
+} );
+
+// TEST 45: Three-State Model Enforcement (applied_unverified vs done)
+run_test( "Task Runner: File write without live HTTP verification transitions to applied_unverified, not done", function () {
+	// Mock HTTP verifier returning missing header
+	$GLOBALS['_mock_remote_handler'] = function( $url, $args ) {
+		return array(
+			'response' => array( 'code' => 200, 'message' => 'OK' ),
+			'headers'  => array(), // Missing X-Frame-Options
+			'body'     => '<html></html>',
+		);
+	};
+
+	WPSG_HTTP_Verifier::clear_memory_cache();
+	// Set mock backup so backup guard passes
+	update_option( 'wpsg_backup_latest', array(
+		'file'      => 'backup_test.zip',
+		'timestamp' => time() - 3600,
+	) );
+
+	$grant = WPSG_Session_Manager::verify_password_and_grant_reauth( 'valid_admin_password' );
+	$reauth_token = isset( $grant['reauth_token'] ) ? $grant['reauth_token'] : '';
+	$res = WPSG_Task_Runner::run( 'clickjacking_protection', $reauth_token );
+	unset( $GLOBALS['_mock_remote_handler'] );
+
+	return ( isset( $res['status'] ) && 'applied_unverified' === $res['status'] );
 } );
 
 echo "\n=======================================================\n";

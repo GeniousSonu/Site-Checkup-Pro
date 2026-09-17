@@ -290,6 +290,12 @@
 		dom.btnSaveSettings = document.getElementById('wpsg-btn-save-settings');
 		dom.settingPatchstackKey = document.getElementById('wpsg-setting-patchstack-key');
 		dom.settingPatchstackOptin = document.getElementById('wpsg-setting-patchstack-optin');
+		dom.panelDetectionInfo = document.getElementById('wpsg-panel-detection-info');
+		dom.settingPanelType = document.getElementById('wpsg-setting-panel-type');
+		dom.settingPanelUrl = document.getElementById('wpsg-setting-panel-url');
+		dom.settingPanelToken = document.getElementById('wpsg-setting-panel-token');
+		dom.panelMaskedStatus = document.getElementById('wpsg-panel-masked-status');
+		dom.settingPanelOptin = document.getElementById('wpsg-setting-panel-optin');
 		dom.settingWebhookUrl = document.getElementById('wpsg-setting-webhook-url');
 		dom.settingWebhookOptin = document.getElementById('wpsg-setting-webhook-optin');
 		dom.patchstackMaskedStatus = document.getElementById('wpsg-patchstack-masked-status');
@@ -341,6 +347,15 @@
 			if (closeBtn) {
 				e.preventDefault();
 				closeAllModals();
+				return;
+			}
+
+			// Table Row Actions: Verify Button ("Check Now")
+			const verifyBtn = e.target.closest('.wpsg-btn-verify');
+			if (verifyBtn) {
+				e.preventDefault();
+				const id = verifyBtn.getAttribute('data-id');
+				if (id) verifyTask(id, verifyBtn);
 				return;
 			}
 
@@ -968,6 +983,7 @@
 		const actionButtons = getActionButtonsHtml(task);
 		const lastRunText = task.last_run_at ? formatDate(task.last_run_at) : '<span class="wpsg-text-muted">Not checked yet</span>';
 		const rowClass = `wpsg-task-row ${task.status === 'done' ? 'wpsg-row-completed' : ''}`;
+		const isManualNginx = !state.supportsHtaccess && task.nginx_snippet && !task.has_nginx_tier1 && !task.has_nginx_tier2 && task.status !== 'done';
 
 		return `
 			<tr data-task-id="${escapeHtml(task.id)}" class="${rowClass}">
@@ -977,6 +993,7 @@
 					<div class="wpsg-task-cell">
 						<span class="wpsg-task-title">${escapeHtml(task.title)}</span>
 						<span class="wpsg-task-desc">${escapeHtml(task.description)}</span>
+						${isManualNginx ? `<div class="wpsg-task-evidence wpsg-evidence-notice"><span class="dashicons dashicons-warning" style="font-size:12px;width:12px;height:12px;margin-top:1px;"></span> <span>Cannot be applied automatically on this hosting setup — manual step required.</span></div>` : ''}
 						${task.live_message ? `<div class="wpsg-task-evidence"><span class="dashicons dashicons-info" style="font-size:12px;width:12px;height:12px;margin-top:1px;"></span> <span>${escapeHtml(task.live_message)}</span></div>` : ''}
 						${task.note ? `<div class="wpsg-task-evidence"><span class="dashicons dashicons-edit" style="font-size:12px;width:12px;height:12px;margin-top:1px;"></span> <span>Note: ${escapeHtml(task.note)}</span></div>` : ''}
 					</div>
@@ -994,6 +1011,8 @@
 		switch (status) {
 			case 'done':
 				return '<span class="wpsg-status-indicator wpsg-status-done"><span class="wpsg-status-dot"></span> Completed</span>';
+			case 'applied_unverified':
+				return '<span class="wpsg-status-indicator wpsg-status-unverified" title="Directive applied to server/config, but independent HTTP check has not verified live response"><span class="wpsg-status-dot"></span> Applied (Unverified)</span>';
 			case 'attention':
 				return '<span class="wpsg-status-indicator wpsg-status-attention"><span class="wpsg-status-dot"></span> Action Needed</span>';
 			case 'failed':
@@ -1031,9 +1050,22 @@
 	function getActionButtonsHtml(task) {
 		let html = '<div class="wpsg-action-group">';
 
-		// If server is Nginx and task is .htaccess-only rule
-		if (!state.supportsHtaccess && task.nginx_snippet && task.is_na) {
-			html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary wpsg-btn-view-nginx" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-networking"></span> Nginx Snippet</button>`;
+		const verifiableTasks = [
+			'clickjacking_protection', 'nosniff_header', 'hsts_header', 'hide_php_version',
+			'disable_directory_listing', 'protect_sensitive_files', 'block_xmlrpc_htaccess',
+			'deny_uploads_php', 'basic_firewall_rules', 'bad_bots_noise_reduction',
+			'hide_wordpress_fingerprint', 'security_headers_csp', 'security_txt_check',
+			'login_url_rename', 'disable_file_edit', 'wp_debug_display_check',
+			'block_user_enumeration'
+		];
+		const canVerify = task.can_verify || verifiableTasks.indexOf(task.id) !== -1;
+
+		// If server is Nginx and directive cannot be automated (lacks Tier 1 and Tier 2)
+		if (!state.supportsHtaccess && task.nginx_snippet && !task.has_nginx_tier1 && !task.has_nginx_tier2) {
+			html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary wpsg-btn-view-nginx" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-networking"></span> Nginx Snippet</button> `;
+			if (canVerify) {
+				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-outline wpsg-btn-verify" data-id="${escapeHtml(task.id)}" title="Run live HTTP verification"><span class="dashicons dashicons-update"></span> Check Now</button>`;
+			}
 			html += '</div>';
 			return html;
 		}
@@ -1045,10 +1077,14 @@
 			}
 
 			if (task.status === 'done' && task.has_undo) {
-				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary wpsg-btn-undo" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-undo"></span> Undo</button>`;
+				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary wpsg-btn-undo" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-undo"></span> Undo</button> `;
 			} else {
-				const runLabel = task.status === 'done' ? 'Re-run' : 'Run';
-				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-primary wpsg-btn-run" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-controls-play"></span> ${runLabel}</button>`;
+				const runLabel = (task.status === 'done' || task.status === 'applied_unverified') ? 'Re-run' : 'Run';
+				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-primary wpsg-btn-run" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-controls-play"></span> ${runLabel}</button> `;
+			}
+
+			if (canVerify) {
+				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-outline wpsg-btn-verify" data-id="${escapeHtml(task.id)}" title="Run live HTTP verification"><span class="dashicons dashicons-update"></span> Check Now</button>`;
 			}
 		}
 
@@ -1062,7 +1098,10 @@
 				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary wpsg-btn-open-csp-reports"><span class="dashicons dashicons-shield-alt"></span> View Reports</button> `;
 				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-primary wpsg-btn-run" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-controls-play"></span> Check Header</button>`;
 			} else if (task.guide_data && task.guide_data.action === 'modal_login_rename') {
-				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-primary wpsg-btn-open-login-rename"><span class="dashicons dashicons-admin-network"></span> Change Login URL</button>`;
+				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-primary wpsg-btn-open-login-rename"><span class="dashicons dashicons-admin-network"></span> Change Login URL</button> `;
+				if (canVerify) {
+					html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-outline wpsg-btn-verify" data-id="${escapeHtml(task.id)}" title="Run live HTTP verification"><span class="dashicons dashicons-update"></span> Check Now</button>`;
+				}
 			} else if (task.id === 'scaffold_child_theme') {
 				if (task.status === 'done') {
 					html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary wpsg-btn-undo" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-undo"></span> Undo</button>`;
@@ -1220,6 +1259,48 @@
 			console.error(`Undo failed for ${taskId}:`, err);
 			alert(`Undo failed: ${err.message || 'Unknown error'}`);
 			if (btnElement) btnElement.disabled = false;
+		}
+	}
+
+	/**
+	 * Verify a task via independent live HTTP verification REST API
+	 */
+	async function verifyTask(taskId, btnElement = null) {
+		const task = state.tasks.find(t => t.id === taskId);
+		if (!task) return;
+
+		let origHtml = '';
+		if (btnElement) {
+			origHtml = btnElement.innerHTML;
+			btnElement.disabled = true;
+			btnElement.innerHTML = '<span class="wpsg-spinner"></span> Checking...';
+		}
+
+		try {
+			const res = await apiCall({
+				path: `/site-checkup-pro/v1/tasks/${taskId}/verify`,
+				method: 'POST',
+				data: { force_fresh: true },
+			});
+
+			task.status = res.status || (res.verified ? 'done' : 'applied_unverified');
+			task.live_message = res.message || (res.verified ? 'Enforcement verified live.' : 'Verification check could not confirm enforcement.');
+			task.last_run_at = new Date().toISOString();
+
+			state.doneCount = state.tasks.filter(t => t.status === 'done').length;
+			state.sopCoveragePct = Math.round((state.doneCount / state.totalCount) * 100);
+
+			updateKpis();
+			renderTasksTable();
+		} catch (err) {
+			console.error(`Verification check failed for ${taskId}:`, err);
+			task.live_message = `Verification error: ${err.message || 'Check failed'}`;
+			renderTasksTable();
+		} finally {
+			if (btnElement) {
+				btnElement.disabled = false;
+				btnElement.innerHTML = origHtml;
+			}
 		}
 	}
 
@@ -1854,6 +1935,33 @@
 						: 'No API key set (default checks active).';
 				}
 				if (dom.settingPatchstackOptin) dom.settingPatchstackOptin.checked = !!res.settings.patchstack_optin;
+
+				// Hosting Panel Bridge
+				if (dom.settingPanelType) dom.settingPanelType.value = res.settings.hosting_panel_type || '';
+				if (dom.settingPanelUrl) dom.settingPanelUrl.value = res.settings.hosting_panel_url || '';
+				if (dom.settingPanelToken) dom.settingPanelToken.value = '';
+				if (dom.panelMaskedStatus) {
+					dom.panelMaskedStatus.textContent = res.settings.hosting_panel_has_token
+						? 'Token configured & encrypted at rest with HKDF + AES-256-GCM / libsodium.'
+						: 'No API token configured.';
+				}
+				if (dom.settingPanelOptin) dom.settingPanelOptin.checked = !!res.settings.hosting_panel_optin;
+				if (dom.panelDetectionInfo) {
+					let info = '';
+					if (res.settings.detected_panel) {
+						info += `Auto-detected server environment: <strong>${escapeHtml(res.settings.detected_panel)}</strong>. `;
+					}
+					if (res.settings.nginx_tier === 'tier2') {
+						info += '<span style="color:#10b981;font-weight:600;">&bull; Tier 2 Companion Script Active</span>';
+					} else if (res.settings.nginx_tier === 'tier1') {
+						info += '<span style="color:#10b981;font-weight:600;">&bull; Tier 1 Control Panel Bridge Active</span>';
+					} else {
+						info += '<span style="color:#d97706;font-weight:500;">&bull; Direct file-write mode / Manual Nginx</span>';
+					}
+					dom.panelDetectionInfo.innerHTML = info;
+					dom.panelDetectionInfo.style.display = 'block';
+				}
+
 				if (dom.settingWebhookUrl) dom.settingWebhookUrl.value = res.settings.webhook_url || '';
 				if (dom.settingWebhookOptin) dom.settingWebhookOptin.checked = !!res.settings.webhook_optin;
 				if (dom.settingIncidentName) dom.settingIncidentName.value = res.settings.incident_contact_name || '';
@@ -1880,6 +1988,15 @@
 			payload.patchstack_api_key = dom.settingPatchstackKey.value.trim();
 		}
 		if (dom.settingPatchstackOptin) payload.patchstack_optin = dom.settingPatchstackOptin.checked ? 1 : 0;
+
+		// Hosting Panel Bridge
+		if (dom.settingPanelType) payload.hosting_panel_type = dom.settingPanelType.value;
+		if (dom.settingPanelUrl) payload.hosting_panel_url = dom.settingPanelUrl.value.trim();
+		if (dom.settingPanelToken && dom.settingPanelToken.value.trim()) {
+			payload.hosting_panel_token = dom.settingPanelToken.value.trim();
+		}
+		if (dom.settingPanelOptin) payload.hosting_panel_optin = dom.settingPanelOptin.checked ? 1 : 0;
+
 		if (dom.settingWebhookUrl) payload.webhook_url = dom.settingWebhookUrl.value.trim();
 		if (dom.settingWebhookOptin) payload.webhook_optin = dom.settingWebhookOptin.checked ? 1 : 0;
 		if (dom.settingIncidentName) payload.incident_contact_name = dom.settingIncidentName.value.trim();

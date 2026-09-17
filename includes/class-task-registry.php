@@ -443,20 +443,27 @@ class WPSG_Task_Registry {
 			'has_diff'         => true,
 			'nginx_snippet'    => $php_version_nginx,
 			'status_callback'  => function () {
-				if ( ! WPSG_Htaccess_Manager::supports_htaccess() ) {
-					return array( 'status' => 'not_applicable', 'is_na' => true, 'message' => __( 'Running on Nginx. Use Nginx snippet.', 'site-checkup-pro' ) );
+				$http = class_exists( 'WPSG_HTTP_Verifier' ) ? WPSG_HTTP_Verifier::verify_task( 'hide_php_version' ) : array( 'verified' => false );
+				if ( ! empty( $http['verified'] ) ) {
+					return array( 'status' => 'done', 'message' => $http['message'] );
 				}
-				$has = WPSG_Htaccess_Manager::has_rule( 'HidePHPVersion' );
-				return array( 'status' => $has ? 'done' : 'pending', 'message' => $has ? __( 'Header unset rule active in .htaccess.', 'site-checkup-pro' ) : '' );
+				$has = WPSG_Htaccess_Manager::has_named_rule( 'HidePHPVersion' );
+				if ( $has ) {
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'site-checkup-pro' ) );
+				}
+				if ( ! WPSG_Htaccess_Manager::supports_htaccess() && ! WPSG_Htaccess_Manager::has_nginx_tier1() && ! WPSG_Htaccess_Manager::has_nginx_tier2() ) {
+					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'site-checkup-pro' ) );
+				}
+				return array( 'status' => 'pending', 'message' => '' );
 			},
-			'diff_callback'    => function () use ( $php_version_rules ) {
-				return WPSG_Htaccess_Manager::get_diff( 'HidePHPVersion', $php_version_rules );
+			'diff_callback'    => function () {
+				return WPSG_Htaccess_Manager::get_named_rule_diff( 'HidePHPVersion' );
 			},
-			'run_callback'     => function () use ( $php_version_rules ) {
-				return WPSG_Htaccess_Manager::insert_rule( 'HidePHPVersion', $php_version_rules );
+			'run_callback'     => function () {
+				return WPSG_Htaccess_Manager::enable_named_rule( 'HidePHPVersion' );
 			},
 			'undo_callback'    => function () {
-				return WPSG_Htaccess_Manager::remove_rule( 'HidePHPVersion' );
+				return WPSG_Htaccess_Manager::disable_named_rule( 'HidePHPVersion' );
 			},
 		) ) );
 
@@ -476,20 +483,27 @@ class WPSG_Task_Registry {
 			'has_diff'         => true,
 			'nginx_snippet'    => $clickjack_nginx,
 			'status_callback'  => function () {
-				if ( ! WPSG_Htaccess_Manager::supports_htaccess() ) {
-					return array( 'status' => 'not_applicable', 'is_na' => true, 'message' => __( 'Running on Nginx. Use Nginx snippet.', 'site-checkup-pro' ) );
+				$http = class_exists( 'WPSG_HTTP_Verifier' ) ? WPSG_HTTP_Verifier::verify_task( 'clickjacking_protection' ) : array( 'verified' => false );
+				if ( ! empty( $http['verified'] ) ) {
+					return array( 'status' => 'done', 'message' => $http['message'] );
 				}
-				$has = WPSG_Htaccess_Manager::has_rule( 'Clickjacking' );
-				return array( 'status' => $has ? 'done' : 'pending', 'message' => $has ? __( 'X-Frame-Options SAMEORIGIN active in .htaccess.', 'site-checkup-pro' ) : '' );
+				$has = WPSG_Htaccess_Manager::has_named_rule( 'Clickjacking' );
+				if ( $has ) {
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'site-checkup-pro' ) );
+				}
+				if ( ! WPSG_Htaccess_Manager::supports_htaccess() && ! WPSG_Htaccess_Manager::has_nginx_tier1() && ! WPSG_Htaccess_Manager::has_nginx_tier2() ) {
+					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'site-checkup-pro' ) );
+				}
+				return array( 'status' => 'pending', 'message' => '' );
 			},
-			'diff_callback'    => function () use ( $clickjack_rules ) {
-				return WPSG_Htaccess_Manager::get_diff( 'Clickjacking', $clickjack_rules );
+			'diff_callback'    => function () {
+				return WPSG_Htaccess_Manager::get_named_rule_diff( 'Clickjacking' );
 			},
-			'run_callback'     => function () use ( $clickjack_rules ) {
-				return WPSG_Htaccess_Manager::insert_rule( 'Clickjacking', $clickjack_rules );
+			'run_callback'     => function () {
+				return WPSG_Htaccess_Manager::enable_named_rule( 'Clickjacking' );
 			},
 			'undo_callback'    => function () {
-				return WPSG_Htaccess_Manager::remove_rule( 'Clickjacking' );
+				return WPSG_Htaccess_Manager::disable_named_rule( 'Clickjacking' );
 			},
 		) ) );
 
@@ -509,26 +523,33 @@ class WPSG_Task_Registry {
 			'has_diff'         => true,
 			'nginx_snippet'    => $nosniff_nginx,
 			'status_callback'  => function () {
-				if ( ! WPSG_Htaccess_Manager::supports_htaccess() ) {
-					return array( 'status' => 'not_applicable', 'is_na' => true, 'message' => __( 'Running on Nginx. Use Nginx snippet.', 'site-checkup-pro' ) );
+				$http = class_exists( 'WPSG_HTTP_Verifier' ) ? WPSG_HTTP_Verifier::verify_task( 'nosniff_header' ) : array( 'verified' => false );
+				if ( ! empty( $http['verified'] ) ) {
+					return array( 'status' => 'done', 'message' => $http['message'] );
 				}
-				$has = WPSG_Htaccess_Manager::has_rule( 'MimeSniffing' );
-				return array( 'status' => $has ? 'done' : 'pending', 'message' => $has ? __( 'X-Content-Type-Options nosniff active.', 'site-checkup-pro' ) : '' );
+				$has = WPSG_Htaccess_Manager::has_named_rule( 'MimeSniffing' );
+				if ( $has ) {
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'site-checkup-pro' ) );
+				}
+				if ( ! WPSG_Htaccess_Manager::supports_htaccess() && ! WPSG_Htaccess_Manager::has_nginx_tier1() && ! WPSG_Htaccess_Manager::has_nginx_tier2() ) {
+					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'site-checkup-pro' ) );
+				}
+				return array( 'status' => 'pending', 'message' => '' );
 			},
-			'diff_callback'    => function () use ( $nosniff_rules ) {
-				return WPSG_Htaccess_Manager::get_diff( 'MimeSniffing', $nosniff_rules );
+			'diff_callback'    => function () {
+				return WPSG_Htaccess_Manager::get_named_rule_diff( 'MimeSniffing' );
 			},
-			'run_callback'     => function () use ( $nosniff_rules ) {
-				return WPSG_Htaccess_Manager::insert_rule( 'MimeSniffing', $nosniff_rules );
+			'run_callback'     => function () {
+				return WPSG_Htaccess_Manager::enable_named_rule( 'MimeSniffing' );
 			},
 			'undo_callback'    => function () {
-				return WPSG_Htaccess_Manager::remove_rule( 'MimeSniffing' );
+				return WPSG_Htaccess_Manager::disable_named_rule( 'MimeSniffing' );
 			},
 		) ) );
 
 		// 3.6 Strict Transport Security (HSTS)
-		$hsts_rules = "<IfModule mod_headers.c>\nHeader always set Strict-Transport-Security \"max-age=31536000; includeSubDomains; preload\"\n</IfModule>";
-		$hsts_nginx = 'add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;';
+		$hsts_rules = "<IfModule mod_headers.c>\nHeader always set Strict-Transport-Security \"max-age=300; includeSubDomains\"\n</IfModule>";
+		$hsts_nginx = 'add_header Strict-Transport-Security "max-age=300; includeSubDomains" always;';
 
 		$this->register( new WPSG_Task( array(
 			'id'               => 'hsts_header',
@@ -542,24 +563,30 @@ class WPSG_Task_Registry {
 			'has_diff'         => true,
 			'nginx_snippet'    => $hsts_nginx,
 			'status_callback'  => function () {
-				if ( ! WPSG_Htaccess_Manager::supports_htaccess() ) {
-					return array( 'status' => 'not_applicable', 'is_na' => true, 'message' => __( 'Running on Nginx. Use Nginx snippet.', 'site-checkup-pro' ) );
+				if ( ! is_ssl() ) {
+					return array( 'status' => 'attention', 'message' => __( 'HSTS requires active SSL/HTTPS. Enable HTTPS to activate HSTS enforcement.', 'site-checkup-pro' ) );
 				}
-				$has = WPSG_Htaccess_Manager::has_rule( 'HSTS' );
-				if ( $has && ! is_ssl() ) {
-					// Rule written but no SSL yet — environmental condition, not a write failure.
-					return array( 'status' => 'attention', 'message' => __( 'HSTS rule is written to .htaccess but SSL is not yet active. Enable HTTPS to activate HSTS enforcement.', 'site-checkup-pro' ) );
+				$http = class_exists( 'WPSG_HTTP_Verifier' ) ? WPSG_HTTP_Verifier::verify_task( 'hsts_header' ) : array( 'verified' => false );
+				if ( ! empty( $http['verified'] ) ) {
+					return array( 'status' => 'done', 'message' => $http['message'] );
 				}
-				return array( 'status' => $has ? 'done' : 'pending', 'message' => $has ? __( 'HSTS header active in .htaccess.', 'site-checkup-pro' ) : '' );
+				$has = WPSG_Htaccess_Manager::has_named_rule( 'HSTS' );
+				if ( $has ) {
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'site-checkup-pro' ) );
+				}
+				if ( ! WPSG_Htaccess_Manager::supports_htaccess() && ! WPSG_Htaccess_Manager::has_nginx_tier1() && ! WPSG_Htaccess_Manager::has_nginx_tier2() ) {
+					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'site-checkup-pro' ) );
+				}
+				return array( 'status' => 'pending', 'message' => '' );
 			},
-			'diff_callback'    => function () use ( $hsts_rules ) {
-				return WPSG_Htaccess_Manager::get_diff( 'HSTS', $hsts_rules );
+			'diff_callback'    => function () {
+				return WPSG_Htaccess_Manager::get_named_rule_diff( 'HSTS' );
 			},
-			'run_callback'     => function () use ( $hsts_rules ) {
-				return WPSG_Htaccess_Manager::insert_rule( 'HSTS', $hsts_rules );
+			'run_callback'     => function () {
+				return WPSG_Htaccess_Manager::enable_named_rule( 'HSTS' );
 			},
 			'undo_callback'    => function () {
-				return WPSG_Htaccess_Manager::remove_rule( 'HSTS' );
+				return WPSG_Htaccess_Manager::disable_named_rule( 'HSTS' );
 			},
 		) ) );
 
@@ -579,20 +606,27 @@ class WPSG_Task_Registry {
 			'has_diff'         => true,
 			'nginx_snippet'    => $indexes_nginx,
 			'status_callback'  => function () {
-				if ( ! WPSG_Htaccess_Manager::supports_htaccess() ) {
-					return array( 'status' => 'not_applicable', 'is_na' => true, 'message' => __( 'Running on Nginx. Use Nginx snippet.', 'site-checkup-pro' ) );
+				$http = class_exists( 'WPSG_HTTP_Verifier' ) ? WPSG_HTTP_Verifier::verify_task( 'disable_directory_listing' ) : array( 'verified' => false );
+				if ( ! empty( $http['verified'] ) ) {
+					return array( 'status' => 'done', 'message' => $http['message'] );
 				}
-				$has = WPSG_Htaccess_Manager::has_rule( 'DisableIndexes' );
-				return array( 'status' => $has ? 'done' : 'pending', 'message' => $has ? __( 'Options -Indexes active in .htaccess.', 'site-checkup-pro' ) : '' );
+				$has = WPSG_Htaccess_Manager::has_named_rule( 'DisableIndexes' );
+				if ( $has ) {
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'site-checkup-pro' ) );
+				}
+				if ( ! WPSG_Htaccess_Manager::supports_htaccess() && ! WPSG_Htaccess_Manager::has_nginx_tier1() && ! WPSG_Htaccess_Manager::has_nginx_tier2() ) {
+					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'site-checkup-pro' ) );
+				}
+				return array( 'status' => 'pending', 'message' => '' );
 			},
-			'diff_callback'    => function () use ( $indexes_rules ) {
-				return WPSG_Htaccess_Manager::get_diff( 'DisableIndexes', $indexes_rules );
+			'diff_callback'    => function () {
+				return WPSG_Htaccess_Manager::get_named_rule_diff( 'DisableIndexes' );
 			},
-			'run_callback'     => function () use ( $indexes_rules ) {
-				return WPSG_Htaccess_Manager::insert_rule( 'DisableIndexes', $indexes_rules );
+			'run_callback'     => function () {
+				return WPSG_Htaccess_Manager::enable_named_rule( 'DisableIndexes' );
 			},
 			'undo_callback'    => function () {
-				return WPSG_Htaccess_Manager::remove_rule( 'DisableIndexes' );
+				return WPSG_Htaccess_Manager::disable_named_rule( 'DisableIndexes' );
 			},
 		) ) );
 
@@ -612,20 +646,27 @@ class WPSG_Task_Registry {
 			'has_diff'         => true,
 			'nginx_snippet'    => $sensitive_nginx,
 			'status_callback'  => function () {
-				if ( ! WPSG_Htaccess_Manager::supports_htaccess() ) {
-					return array( 'status' => 'not_applicable', 'is_na' => true, 'message' => __( 'Running on Nginx. Use Nginx snippet.', 'site-checkup-pro' ) );
+				$http = class_exists( 'WPSG_HTTP_Verifier' ) ? WPSG_HTTP_Verifier::verify_task( 'protect_sensitive_files' ) : array( 'verified' => false );
+				if ( ! empty( $http['verified'] ) ) {
+					return array( 'status' => 'done', 'message' => $http['message'] );
 				}
-				$has = WPSG_Htaccess_Manager::has_rule( 'ProtectSensitiveFiles' );
-				return array( 'status' => $has ? 'done' : 'pending', 'message' => $has ? __( 'Sensitive files blocked in .htaccess.', 'site-checkup-pro' ) : '' );
+				$has = WPSG_Htaccess_Manager::has_named_rule( 'ProtectSensitiveFiles' );
+				if ( $has ) {
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'site-checkup-pro' ) );
+				}
+				if ( ! WPSG_Htaccess_Manager::supports_htaccess() && ! WPSG_Htaccess_Manager::has_nginx_tier1() && ! WPSG_Htaccess_Manager::has_nginx_tier2() ) {
+					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'site-checkup-pro' ) );
+				}
+				return array( 'status' => 'pending', 'message' => '' );
 			},
-			'diff_callback'    => function () use ( $sensitive_rules ) {
-				return WPSG_Htaccess_Manager::get_diff( 'ProtectSensitiveFiles', $sensitive_rules );
+			'diff_callback'    => function () {
+				return WPSG_Htaccess_Manager::get_named_rule_diff( 'ProtectSensitiveFiles' );
 			},
-			'run_callback'     => function () use ( $sensitive_rules ) {
-				return WPSG_Htaccess_Manager::insert_rule( 'ProtectSensitiveFiles', $sensitive_rules );
+			'run_callback'     => function () {
+				return WPSG_Htaccess_Manager::enable_named_rule( 'ProtectSensitiveFiles' );
 			},
 			'undo_callback'    => function () {
-				return WPSG_Htaccess_Manager::remove_rule( 'ProtectSensitiveFiles' );
+				return WPSG_Htaccess_Manager::disable_named_rule( 'ProtectSensitiveFiles' );
 			},
 		) ) );
 
@@ -645,20 +686,27 @@ class WPSG_Task_Registry {
 			'has_diff'         => true,
 			'nginx_snippet'    => $xmlrpc_nginx,
 			'status_callback'  => function () {
-				if ( ! WPSG_Htaccess_Manager::supports_htaccess() ) {
-					return array( 'status' => 'not_applicable', 'is_na' => true, 'message' => __( 'Running on Nginx. Use Nginx snippet.', 'site-checkup-pro' ) );
+				$http = class_exists( 'WPSG_HTTP_Verifier' ) ? WPSG_HTTP_Verifier::verify_task( 'block_xmlrpc_htaccess' ) : array( 'verified' => false );
+				if ( ! empty( $http['verified'] ) ) {
+					return array( 'status' => 'done', 'message' => $http['message'] );
 				}
-				$has = WPSG_Htaccess_Manager::has_rule( 'BlockXMLRPC' );
-				return array( 'status' => $has ? 'done' : 'pending', 'message' => $has ? __( 'xmlrpc.php blocked at server level.', 'site-checkup-pro' ) : '' );
+				$has = WPSG_Htaccess_Manager::has_named_rule( 'BlockXMLRPC' );
+				if ( $has ) {
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'site-checkup-pro' ) );
+				}
+				if ( ! WPSG_Htaccess_Manager::supports_htaccess() && ! WPSG_Htaccess_Manager::has_nginx_tier1() && ! WPSG_Htaccess_Manager::has_nginx_tier2() ) {
+					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'site-checkup-pro' ) );
+				}
+				return array( 'status' => 'pending', 'message' => '' );
 			},
-			'diff_callback'    => function () use ( $xmlrpc_htaccess ) {
-				return WPSG_Htaccess_Manager::get_diff( 'BlockXMLRPC', $xmlrpc_htaccess );
+			'diff_callback'    => function () {
+				return WPSG_Htaccess_Manager::get_named_rule_diff( 'BlockXMLRPC' );
 			},
-			'run_callback'     => function () use ( $xmlrpc_htaccess ) {
-				return WPSG_Htaccess_Manager::insert_rule( 'BlockXMLRPC', $xmlrpc_htaccess );
+			'run_callback'     => function () {
+				return WPSG_Htaccess_Manager::enable_named_rule( 'BlockXMLRPC' );
 			},
 			'undo_callback'    => function () {
-				return WPSG_Htaccess_Manager::remove_rule( 'BlockXMLRPC' );
+				return WPSG_Htaccess_Manager::disable_named_rule( 'BlockXMLRPC' );
 			},
 		) ) );
 
@@ -674,10 +722,17 @@ class WPSG_Task_Registry {
 			'has_undo'         => true,
 			'has_diff'         => true,
 			'status_callback'  => function () {
+				$http = class_exists( 'WPSG_HTTP_Verifier' ) ? WPSG_HTTP_Verifier::verify_task( 'disable_file_edit' ) : array( 'verified' => false );
+				if ( ! empty( $http['verified'] ) ) {
+					return array( 'status' => 'done', 'message' => $http['message'] );
+				}
 				$disallow = defined( 'DISALLOW_FILE_EDIT' ) && DISALLOW_FILE_EDIT;
+				if ( $disallow ) {
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Constant defined, awaiting fresh process verification.', 'site-checkup-pro' ) );
+				}
 				return array(
-					'status'  => $disallow ? 'done' : 'pending',
-					'message' => $disallow ? __( 'DISALLOW_FILE_EDIT is defined as true.', 'site-checkup-pro' ) : __( 'File editing is currently enabled in wp-admin.', 'site-checkup-pro' ),
+					'status'  => 'pending',
+					'message' => __( 'File editing is currently enabled in wp-admin.', 'site-checkup-pro' ),
 				);
 			},
 			'diff_callback'    => function () {
@@ -728,9 +783,13 @@ class WPSG_Task_Registry {
 				}
 				$slug = WPSG_Login_Renamer::get_login_slug();
 				if ( ! empty( $slug ) ) {
+					$http = class_exists( 'WPSG_HTTP_Verifier' ) ? WPSG_HTTP_Verifier::verify_task( 'login_url_rename' ) : array( 'verified' => false );
+					if ( ! empty( $http['verified'] ) ) {
+						return array( 'status' => 'done', 'message' => $http['message'] );
+					}
 					return array(
-						'status'  => 'done',
-						'message' => sprintf( __( 'Custom login URL active: /%s/', 'site-checkup-pro' ), $slug ),
+						'status'  => 'applied_unverified',
+						'message' => sprintf( __( 'Custom login URL set (/%s/), but live probe could not verify redirection yet.', 'site-checkup-pro' ), $slug ),
 					);
 				}
 				$conflict = WPSG_Login_Renamer::get_conflicting_plugin();
@@ -762,7 +821,17 @@ class WPSG_Task_Registry {
 			'requires_backup'  => true,
 			'has_undo'         => true,
 			'has_diff'         => true,
-			'status_callback'  => array( 'WPSG_Scanner', 'check_wp_debug_display' ),
+			'status_callback'  => function () {
+				$http = class_exists( 'WPSG_HTTP_Verifier' ) ? WPSG_HTTP_Verifier::verify_task( 'wp_debug_display_check' ) : array( 'verified' => false );
+				if ( ! empty( $http['verified'] ) ) {
+					return array( 'status' => 'done', 'message' => $http['message'] );
+				}
+				$raw = WPSG_Scanner::check_wp_debug_display();
+				if ( isset( $raw['status'] ) && 'done' === $raw['status'] ) {
+					return array( 'status' => 'applied_unverified', 'message' => __( 'WP_DEBUG_DISPLAY set to false in wp-config.php, awaiting fresh process verification.', 'site-checkup-pro' ) );
+				}
+				return $raw;
+			},
 			'diff_callback'    => function () {
 				return WPSG_Wp_Config_Manager::get_diff_preview( array( 'WP_DEBUG_DISPLAY' => false ) );
 			},
@@ -786,7 +855,17 @@ class WPSG_Task_Registry {
 			'automation_level' => 'A',
 			'sub_type'         => 'writes_files',
 			'has_undo'         => true,
-			'status_callback'  => array( 'WPSG_Security_Txt', 'check_status' ),
+			'status_callback'  => function () {
+				$raw = WPSG_Security_Txt::check_status();
+				if ( isset( $raw['status'] ) && 'done' === $raw['status'] ) {
+					$http = class_exists( 'WPSG_HTTP_Verifier' ) ? WPSG_HTTP_Verifier::verify_task( 'security_txt_check' ) : array( 'verified' => false );
+					if ( ! empty( $http['verified'] ) ) {
+						return array( 'status' => 'done', 'message' => $http['message'] );
+					}
+					return array( 'status' => 'applied_unverified', 'message' => __( 'security.txt exists on disk, but live HTTP request did not confirm 200 OK at /.well-known/security.txt.', 'site-checkup-pro' ) );
+				}
+				return $raw;
+			},
 			'run_callback'     => array( 'WPSG_Security_Txt', 'generate' ),
 			'undo_callback'    => array( 'WPSG_Security_Txt', 'undo' ),
 		) ) );
@@ -975,9 +1054,16 @@ class WPSG_Task_Registry {
 			'has_undo'         => true,
 			'status_callback'  => function () {
 				$active = get_option( 'wpsg_block_user_enumeration', false );
+				if ( $active ) {
+					$http = class_exists( 'WPSG_HTTP_Verifier' ) ? WPSG_HTTP_Verifier::verify_task( 'block_user_enumeration' ) : array( 'verified' => false );
+					if ( ! empty( $http['verified'] ) ) {
+						return array( 'status' => 'done', 'message' => $http['message'] );
+					}
+					return array( 'status' => 'applied_unverified', 'message' => __( 'User enumeration protection enabled in settings, but live probe was not blocked.', 'site-checkup-pro' ) );
+				}
 				return array(
-					'status'  => $active ? 'done' : 'pending',
-					'message' => $active ? __( 'User & author enumeration blocked for unauthorized visitors.', 'site-checkup-pro' ) : __( 'User enumeration protection is disabled.', 'site-checkup-pro' ),
+					'status'  => 'pending',
+					'message' => __( 'User enumeration protection is disabled.', 'site-checkup-pro' ),
 				);
 			},
 			'run_callback'     => function () {
@@ -1046,9 +1132,16 @@ class WPSG_Task_Registry {
 			'has_undo'         => true,
 			'status_callback'  => function () {
 				$active = get_option( 'wpsg_hide_generator', false );
+				if ( $active ) {
+					$http = class_exists( 'WPSG_HTTP_Verifier' ) ? WPSG_HTTP_Verifier::verify_task( 'hide_wordpress_fingerprint' ) : array( 'verified' => false );
+					if ( ! empty( $http['verified'] ) ) {
+						return array( 'status' => 'done', 'message' => $http['message'] );
+					}
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Generator tag suppression enabled, but live HTML probe still detected WordPress version string.', 'site-checkup-pro' ) );
+				}
 				return array(
-					'status'  => $active ? 'done' : 'pending',
-					'message' => $active ? __( 'WordPress generator tag is removed.', 'site-checkup-pro' ) : __( 'WordPress generator tag is currently public.', 'site-checkup-pro' ),
+					'status'  => 'pending',
+					'message' => __( 'WordPress generator tag is currently public.', 'site-checkup-pro' ),
 				);
 			},
 			'run_callback'     => function () {
@@ -1101,13 +1194,20 @@ class WPSG_Task_Registry {
 			'has_diff'         => true,
 			'nginx_snippet'    => "location ~* ^/wp-content/uploads/.*\\.php$ { deny all; }",
 			'status_callback'  => function () {
-				if ( ! WPSG_Htaccess_Manager::supports_htaccess() ) {
-					return array( 'status' => 'not_applicable', 'is_na' => true, 'message' => __( 'Use Nginx configuration directive on Nginx servers.', 'site-checkup-pro' ) );
+				$http = class_exists( 'WPSG_HTTP_Verifier' ) ? WPSG_HTTP_Verifier::verify_task( 'deny_uploads_php' ) : array( 'verified' => false );
+				if ( ! empty( $http['verified'] ) ) {
+					return array( 'status' => 'done', 'message' => $http['message'] );
 				}
 				$has = WPSG_Htaccess_Manager::has_named_rule( 'deny_uploads_php' );
+				if ( $has ) {
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'site-checkup-pro' ) );
+				}
+				if ( ! WPSG_Htaccess_Manager::supports_htaccess() && ! WPSG_Htaccess_Manager::has_nginx_tier1() && ! WPSG_Htaccess_Manager::has_nginx_tier2() ) {
+					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'site-checkup-pro' ) );
+				}
 				return array(
-					'status'  => $has ? 'done' : 'pending',
-					'message' => $has ? __( 'PHP execution blocked in /uploads/.', 'site-checkup-pro' ) : __( 'PHP execution currently allowed in /uploads/.', 'site-checkup-pro' ),
+					'status'  => 'pending',
+					'message' => __( 'PHP execution currently allowed in /uploads/.', 'site-checkup-pro' ),
 				);
 			},
 			'diff_callback'    => function () {
@@ -1167,13 +1267,20 @@ class WPSG_Task_Registry {
 			'has_diff'         => true,
 			'nginx_snippet'    => "if (\$query_string ~* \"(union.*select|<script|\\.\\./|base64_decode)\") { return 403; }",
 			'status_callback'  => function () {
-				if ( ! WPSG_Htaccess_Manager::supports_htaccess() ) {
-					return array( 'status' => 'not_applicable', 'is_na' => true, 'message' => __( 'Use Nginx configuration on Nginx servers.', 'site-checkup-pro' ) );
+				$http = class_exists( 'WPSG_HTTP_Verifier' ) ? WPSG_HTTP_Verifier::verify_task( 'basic_firewall_rules' ) : array( 'verified' => false );
+				if ( ! empty( $http['verified'] ) ) {
+					return array( 'status' => 'done', 'message' => $http['message'] );
 				}
 				$has = WPSG_Htaccess_Manager::has_named_rule( 'basic_firewall_sqli' );
+				if ( $has ) {
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'site-checkup-pro' ) );
+				}
+				if ( ! WPSG_Htaccess_Manager::supports_htaccess() && ! WPSG_Htaccess_Manager::has_nginx_tier1() && ! WPSG_Htaccess_Manager::has_nginx_tier2() ) {
+					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'site-checkup-pro' ) );
+				}
 				return array(
-					'status'  => $has ? 'done' : 'pending',
-					'message' => $has ? __( 'Lightweight query firewall active.', 'site-checkup-pro' ) : __( 'Query string firewall is disabled.', 'site-checkup-pro' ),
+					'status'  => 'pending',
+					'message' => __( 'Query string firewall is disabled.', 'site-checkup-pro' ),
 				);
 			},
 			'diff_callback'    => function () {
@@ -1207,13 +1314,20 @@ class WPSG_Task_Registry {
 			'has_diff'         => true,
 			'nginx_snippet'    => "if (\$http_user_agent ~* \"(sqlmap|nikto|wpscan|dirbuster)\") { return 403; }",
 			'status_callback'  => function () {
-				if ( ! WPSG_Htaccess_Manager::supports_htaccess() ) {
-					return array( 'status' => 'not_applicable', 'is_na' => true, 'message' => __( 'Use Nginx configuration on Nginx servers.', 'site-checkup-pro' ) );
+				$http = class_exists( 'WPSG_HTTP_Verifier' ) ? WPSG_HTTP_Verifier::verify_task( 'bad_bots_noise_reduction' ) : array( 'verified' => false );
+				if ( ! empty( $http['verified'] ) ) {
+					return array( 'status' => 'done', 'message' => $http['message'] );
 				}
 				$has = WPSG_Htaccess_Manager::has_named_rule( 'bad_bots' );
+				if ( $has ) {
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'site-checkup-pro' ) );
+				}
+				if ( ! WPSG_Htaccess_Manager::supports_htaccess() && ! WPSG_Htaccess_Manager::has_nginx_tier1() && ! WPSG_Htaccess_Manager::has_nginx_tier2() ) {
+					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'site-checkup-pro' ) );
+				}
 				return array(
-					'status'  => $has ? 'done' : 'pending',
-					'message' => $has ? __( 'Scanner noise reduction active.', 'site-checkup-pro' ) : __( 'Scanner user-agent filter disabled.', 'site-checkup-pro' ),
+					'status'  => 'pending',
+					'message' => __( 'Scanner user-agent filter disabled.', 'site-checkup-pro' ),
 				);
 			},
 			'diff_callback'    => function () {
@@ -1238,11 +1352,16 @@ class WPSG_Task_Registry {
 			'has_undo'         => true,
 			'status_callback'  => function () {
 				$mode = get_option( 'wpsg_csp_mode', '' );
+				if ( 'report_only' === $mode || 'enforce' === $mode ) {
+					$http = class_exists( 'WPSG_HTTP_Verifier' ) ? WPSG_HTTP_Verifier::verify_task( 'security_headers_csp' ) : array( 'verified' => false );
+					if ( ! empty( $http['verified'] ) ) {
+						return array( 'status' => 'done', 'message' => $http['message'] );
+					}
+					return array( 'status' => 'applied_unverified', 'message' => __( 'CSP enabled in settings, but live HTTP header could not be verified on front-end.', 'site-checkup-pro' ) );
+				}
 				return array(
-					'status'  => ( 'report_only' === $mode || 'enforce' === $mode ) ? 'done' : 'pending',
-					'message' => ( 'report_only' === $mode )
-						? __( 'CSP active in Report-Only mode (capturing violations safely).', 'site-checkup-pro' )
-						: ( 'enforce' === $mode ? __( 'CSP active in Enforce mode.', 'site-checkup-pro' ) : __( 'Content-Security-Policy is disabled.', 'site-checkup-pro' ) ),
+					'status'  => 'pending',
+					'message' => __( 'Content-Security-Policy is disabled.', 'site-checkup-pro' ),
 				);
 			},
 			'run_callback'     => function () {
