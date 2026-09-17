@@ -1,11 +1,14 @@
 <?php
 /**
- * User Enumeration Protection & Author Archive Guard
+* User Enumeration Protection & Author Archive Guard
  *
  * Blocks REST /wp/v2/users and ?author= numeric enumeration for unauthenticated visitors,
  * while preserving list_users capability for authenticated administrators.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

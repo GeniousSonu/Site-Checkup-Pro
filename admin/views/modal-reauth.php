@@ -1,12 +1,15 @@
 <?php
 /**
- * Modal: Session Re-Authentication Prompt
+* Modal: Session Re-Authentication Prompt
  *
  * Prompts administrator for their account password before executing
  * sensitive operations (file modifications, credential revocations).
  * Bound to current user session token and strictly single-use.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

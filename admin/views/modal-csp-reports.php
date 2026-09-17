@@ -1,10 +1,13 @@
 <?php
 /**
- * Modal: CSP Violation Reports
+* Modal: CSP Violation Reports
  *
  * Displays recorded Content-Security-Policy Report-Only violation events.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

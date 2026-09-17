@@ -1,0 +1,2625 @@
+# Copyright (C) 2026 SK Sahinur Islam
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Site Checkup Pro 1.0.0\n"
+"Report-Msgid-Bugs-To: https://github.com/GeniousSonu/site-checkup-pro/issues\n"
+"POT-Creation-Date: 2026-09-17 09:44+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2026-YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: SK Sahinur Islam <https://www.genioussonu.me/>\n"
+"Language-Team: English <support@genioussonu.me>\n"
+"X-Generator: Site Checkup Pro POT Generator\n"
+"X-Domain: site-checkup-pro\n"
+
+#: includes/class-scanner.php:289
+msgid "%1$d mu-plugin(s) active. New/unrecognized files found since baseline: %2$s"
+msgstr ""
+
+#: admin/views/report.php:57
+msgid "%1$d of %2$d tasks complete"
+msgstr ""
+
+#: includes/class-vulnerability-checker.php:116
+msgid "%1$d plugin(s) scanned. Free database check completed. Note: Supply an optional Patchstack API key in Settings for deep live CVE database cross-referencing. (%2$d unverified/custom items)"
+msgstr ""
+
+#: includes/class-task-registry.php:1029
+msgid "%d active session(s) recorded for current administrator."
+msgstr ""
+
+#: includes/class-task-registry.php:1296
+msgid "%d application password(s) active on this site."
+msgstr ""
+
+#: includes/class-scanner.php:301
+msgid "%d mu-plugin(s) active and verified against baseline."
+msgstr ""
+
+#: includes/class-scanner.php:575
+msgid "%d permission anomaly(s) detected across monitored files and directories."
+msgstr ""
+
+#: admin/views/dashboard.php:133
+msgid ".htaccess active"
+msgstr ""
+
+#: admin/views/modal-diff.php:33
+msgid "1. Target Configuration"
+msgstr ""
+
+#: admin/views/modal-diff.php:46
+msgid "100% reversible via One-Click Undo or .bak restore"
+msgstr ""
+
+#: admin/views/dashboard.php:175
+msgid "15-day credentials & 6-month reviews."
+msgstr ""
+
+#: admin/views/modal-diff.php:37
+msgid "2. Modification Method"
+msgstr ""
+
+#: admin/views/modal-diff.php:41
+msgid "3. Safety Net"
+msgstr ""
+
+#: admin/views/modal-diff.php:45
+msgid "4. Reversibility"
+msgstr ""
+
+#: includes/class-task-registry.php:849
+msgid "6-Month GSC URL Removal Review"
+msgstr ""
+
+#: includes/class-task-registry.php:1078
+msgid "?ver= parameters removed from scripts and styles."
+msgstr ""
+
+#: includes/class-security-txt.php:88
+msgid "A /.well-known/security.txt file exists but does not contain a valid Contact: directive."
+msgstr ""
+
+#: includes/class-task-runner.php:83
+msgid "A verified backup taken within the last 48 hours is required before running this file-modifying task."
+msgstr ""
+
+#: includes/class-login-guard.php:148
+msgid "Account temporarily protected due to suspicious activity. Please wait %d minute(s)."
+msgstr ""
+
+#: admin/views/dashboard.php:224
+#: admin/views/dashboard.php:245
+#: admin/views/modal-sessions.php:48
+#: admin/views/modal-app-passwords.php:47
+msgid "Action"
+msgstr ""
+
+#: admin/views/dashboard.php:208
+msgid "Action Needed"
+msgstr ""
+
+#: admin/views/modal-login-rename.php:93
+msgid "Activate Custom Login URL"
+msgstr ""
+
+#: includes/class-scanner.php:403
+msgid "Active"
+msgstr ""
+
+#: admin/views/report.php:120
+msgid "Active & Verified"
+msgstr ""
+
+#: admin/views/report.php:99
+msgid "Active Security Controls & Hardening Applied"
+msgstr ""
+
+#: includes/class-task-registry.php:1019
+msgid "Active Session Management"
+msgstr ""
+
+#: admin/views/modal-sessions.php:25
+msgid "Active User Sessions"
+msgstr ""
+
+#: admin/views/dashboard.php:174
+msgid "Active cadence reminders"
+msgstr ""
+
+#: includes/class-child-theme.php:54
+msgid "Active theme \"%s\" is not a child theme. Modifications to parent theme will be overwritten during updates."
+msgstr ""
+
+#: includes/class-enumeration-guard.php:88
+msgid "Active theme contains an author.php template (designed for public author profiles)."
+msgstr ""
+
+#: includes/class-child-theme.php:71
+msgid "Active theme is already a child theme."
+msgstr ""
+
+#: includes/class-task-registry.php:355
+msgid "Actively probes server support for legacy TLS 1.0 and 1.1 protocols and verifies intermediate certificate chain completeness."
+msgstr ""
+
+#: includes/class-task-registry.php:669
+msgid "Adds DISALLOW_FILE_EDIT to wp-config.php so compromised admin accounts cannot inject PHP via the dashboard editor."
+msgstr ""
+
+#: includes/class-task-registry.php:1258
+msgid "Admin Notice Focus Mode & Dashboard Declutter"
+msgstr ""
+
+#: includes/class-session-manager.php:132
+msgid "Admin user #%1$d terminated a remote session for user \"%2$s\"."
+msgstr ""
+
+#: admin/views/report.php:212
+msgid "Administrator"
+msgstr ""
+
+#: includes/class-task-runner.php:69
+msgid "Administrator password confirmation is required before executing file modifications."
+msgstr ""
+
+#: includes/class-task-runner.php:204
+msgid "Administrator password confirmation is required before undoing file modifications."
+msgstr ""
+
+#: admin/views/modal-settings.php:88
+msgid "Agency / Preparer Name (Client Reports)"
+msgstr ""
+
+#: admin/views/report.php:78
+msgid "Agency Security Desk"
+msgstr ""
+
+#: includes/class-vulnerability-checker.php:123
+msgid "Alert: %d known vulnerability/CVE advisory detected across installed extensions!"
+msgstr ""
+
+#: includes/class-integrity-monitor.php:109
+msgid "All %d WordPress core files verified and matched official WordPress.org checksums."
+msgstr ""
+
+#: includes/class-scanner.php:150
+msgid "All %d administrator accounts match the verified baseline."
+msgstr ""
+
+#: includes/class-plugin-integrity.php:390
+msgid "All %d installed public plugins are active and verified on WordPress.org."
+msgstr ""
+
+#: includes/class-wp-config-manager.php:220
+msgid "All 8 WordPress security salts rotated successfully."
+msgstr ""
+
+#: admin/views/dashboard.php:183
+msgid "All Checks"
+msgstr ""
+
+#: admin/views/dashboard.php:197
+msgid "All Levels"
+msgstr ""
+
+#: admin/views/dashboard.php:205
+msgid "All Statuses"
+msgstr ""
+
+#: admin/views/modal-sessions.php:33
+msgid "All devices and browser sessions currently authenticated to your WordPress account."
+msgstr ""
+
+#: includes/class-session-manager.php:178
+msgid "All other sessions have been logged out."
+msgstr ""
+
+#: admin/views/modal-app-passwords.php:43
+msgid "Application / Label"
+msgstr ""
+
+#: admin/views/modal-app-passwords.php:34
+msgid "Application Credentials Review:"
+msgstr ""
+
+#: admin/views/modal-app-passwords.php:25
+msgid "Application Passwords Governance"
+msgstr ""
+
+#: includes/class-app-password-manager.php:93
+msgid "Application Passwords not supported on this WordPress installation."
+msgstr ""
+
+#: includes/class-app-password-manager.php:107
+msgid "Application password %s revoked."
+msgstr ""
+
+#: includes/class-app-password-manager.php:113
+msgid "Application password revoked successfully."
+msgstr ""
+
+#: admin/views/modal-app-passwords.php:35
+msgid "Application passwords allow external systems, scripts, and mobile apps to authenticate via the WordPress REST API without exposing your master account password. Stale or unused credentials should be revoked immediately."
+msgstr ""
+
+#: admin/views/modal-diff.php:67
+msgid "Apply Hardening Rule"
+msgstr ""
+
+#: admin/views/modal-delete-plugin.php:71
+msgid "Archive to ZIP & Delete Plugin"
+msgstr ""
+
+#: includes/class-task-registry.php:1082
+msgid "Asset version parameters restored."
+msgstr ""
+
+#: admin/views/report.php:185
+msgid "Attention"
+msgstr ""
+
+#: includes/class-task-registry.php:1286
+msgid "Audit & Govern Application Passwords"
+msgstr ""
+
+#: admin/class-admin-menu.php:86
+msgid "Audit Log"
+msgstr ""
+
+#: includes/class-task-registry.php:247
+msgid "Audit Must-Use (mu-plugins) Directory"
+msgstr ""
+
+#: admin/views/modal-note.php:53
+msgid "Audit Notes / Vault Reference:"
+msgstr ""
+
+#: admin/views/report.php:141
+msgid "Audit Process"
+msgstr ""
+
+#: admin/views/dashboard.php:191
+msgid "Audit Trail"
+msgstr ""
+
+#: includes/class-task-registry.php:1287
+msgid "Audit all active application passwords across users, surface unused credentials, and revoke with re-authentication."
+msgstr ""
+
+#: includes/class-task-registry.php:836
+msgid "Audit indexing coverage, security actions, and sitemaps directly in Google Search Console and Bing Webmaster Tools."
+msgstr ""
+
+#: includes/class-task-registry.php:798
+msgid "Audit robots.txt Directives"
+msgstr ""
+
+#: includes/class-task-registry.php:1141
+msgid "Audits /wp-content/uploads/ for suspicious .php, .phtml, or .phar scripts."
+msgstr ""
+
+#: includes/class-task-registry.php:212
+msgid "Audits PHP version (>= 8.1), WordPress core release, and SSL certificate expiration window."
+msgstr ""
+
+#: includes/class-task-registry.php:313
+msgid "Audits key files and directories against strict permission baselines (wp-config.php <= 0640, root files <= 0644, directories <= 0755) and flags world-writable bits."
+msgstr ""
+
+#: includes/class-task-registry.php:327
+msgid "Audits php.ini to detect if dangerous execution functions (exec, shell_exec, system, passthru) are disabled and whether open_basedir is active."
+msgstr ""
+
+#: rest-api/class-rest-controller.php:517
+msgid "Automated Level A and guided Level B tasks cannot be manually marked done. They must be executed or verified through their respective procedures."
+msgstr ""
+
+#: admin/views/modal-delete-plugin.php:62
+msgid "Automated ZIP Protection Active:"
+msgstr ""
+
+#: admin/views/modal-diff.php:58
+msgid "Automatic Rollback Active:"
+msgstr ""
+
+#: includes/class-task-registry.php:148
+msgid "Automatic updates are blocked via runtime filters."
+msgstr ""
+
+#: includes/class-task-registry.php:148
+msgid "Automatic updates are currently allowed."
+msgstr ""
+
+#: includes/class-task-registry.php:152
+msgid "Automatic updates disabled."
+msgstr ""
+
+#: includes/class-task-registry.php:155
+msgid "Automatic updates enabled."
+msgstr ""
+
+#: admin/views/report.php:25
+msgid "Back to Dashboard"
+msgstr ""
+
+#: includes/class-backup-guard.php:122
+msgid "BackWPup is active. Please verify a recent backup has run."
+msgstr ""
+
+#: admin/views/dashboard.php:160
+msgid "Backup > 48h required"
+msgstr ""
+
+#: admin/views/modal-backup.php:44
+msgid "Backup Plugin"
+msgstr ""
+
+#: admin/views/dashboard.php:147
+#: admin/views/modal-delete-plugin.php:50
+msgid "Backup Protection"
+msgstr ""
+
+#: admin/views/modal-login-rename.php:64
+msgid "Backup Requirement"
+msgstr ""
+
+#: includes/class-scanner.php:114
+msgid "Baseline initialized with %d recognized administrator(s)."
+msgstr ""
+
+#: rest-api/class-rest-controller.php:591
+msgid "Baseline updated successfully."
+msgstr ""
+
+#: admin/views/modal-delete-plugin.php:63
+msgid "Before deletion, the entire plugin directory will be archived into a compressed ZIP file under wp-content/uploads/wpsg-backups/plugins/. You can undo and restore the plugin anytime."
+msgstr ""
+
+#: includes/class-htaccess-manager.php:130
+#: includes/class-task-registry.php:1090
+msgid "Block PHP Execution in /wp-content/uploads/"
+msgstr ""
+
+#: includes/class-task-registry.php:967
+msgid "Block User & Author Enumeration"
+msgstr ""
+
+#: includes/class-htaccess-manager.php:116
+msgid "Block XML-RPC Access via Web Server"
+msgstr ""
+
+#: includes/class-task-registry.php:638
+msgid "Block xmlrpc.php at Server Level"
+msgstr ""
+
+#: admin/views/modal-csp-reports.php:40
+msgid "Blocked URI"
+msgstr ""
+
+#: includes/class-task-registry.php:1197
+msgid "Blocks requests matching known scanner user agents (sqlmap, nikto, wpscan). Accurately labeled: reduces automated scan log noise."
+msgstr ""
+
+#: includes/class-task-registry.php:606
+msgid "Blocks web access to .env, .git, .bak, readme.html, and wp-config.php directly at the web server layer."
+msgstr ""
+
+#: admin/views/modal-sessions.php:45
+msgid "Browser / Client"
+msgstr ""
+
+#: includes/integrations/class-wordfence-bridge.php:87
+msgid "Brute Force Protection"
+msgstr ""
+
+#: includes/class-task-registry.php:1259
+msgid "Buffers and sanitizes promotional plugin notices while never suppressing WordPress core updates or security warnings."
+msgstr ""
+
+#: includes/class-task-registry.php:1241
+msgid "CSP active in Enforce mode."
+msgstr ""
+
+#: includes/class-task-registry.php:1240
+msgid "CSP active in Report-Only mode (capturing violations safely)."
+msgstr ""
+
+#: includes/class-task-registry.php:1246
+msgid "CSP enabled in Report-Only mode."
+msgstr ""
+
+#: rest-api/class-rest-controller.php:839
+msgid "CSP report payload exceeds 10KB size limit."
+msgstr ""
+
+#: admin/views/modal-diff.php:65
+#: admin/views/modal-delete-plugin.php:69
+#: admin/views/modal-login-rename.php:91
+#: admin/views/modal-backup.php:68
+#: admin/views/modal-reauth.php:57
+#: admin/views/modal-settings.php:99
+#: admin/views/modal-note.php:69
+msgid "Cancel"
+msgstr ""
+
+#: includes/class-login-renamer.php:146
+msgid "Cannot activate built-in login renamer: conflicting security plugin detected (%s). Please use that plugin to manage login URLs."
+msgstr ""
+
+#: includes/class-child-theme.php:156
+msgid "Cannot delete child theme because it is currently the active theme."
+msgstr ""
+
+#: includes/class-plugin-integrity.php:285
+msgid "Cannot resolve plugins directory."
+msgstr ""
+
+#: includes/class-task-registry.php:748
+msgid "Change Login URL"
+msgstr ""
+
+#: admin/views/modal-login-rename.php:25
+msgid "Change WordPress Login URL"
+msgstr ""
+
+#: admin/views/dashboard.php:285
+msgid "Changelog"
+msgstr ""
+
+#: admin/views/dashboard.php:222
+msgid "Check / Procedure"
+msgstr ""
+
+#: admin/class-admin-menu.php:76
+msgid "Check-up Dashboard"
+msgstr ""
+
+#: includes/class-task-registry.php:236
+msgid "Checks for siteurl/home URL hijacking and flags oversized autoloaded options (>100KB) that cause database slowdowns or malware persistence."
+msgstr ""
+
+#: includes/class-task-registry.php:285
+msgid "Checks installed public plugins against the WordPress.org API to detect plugins removed for security vulnerabilities. Cached 24h."
+msgstr ""
+
+#: includes/class-task-registry.php:341
+msgid "Checks whether database tables use the default \"wp_\" prefix or a custom prefix to resist automated SQL injection scripts."
+msgstr ""
+
+#: includes/class-child-theme.php:131
+msgid "Child theme \"%1$s\" successfully created! You can now activate it under <a href=\"%2$s\">Appearance &rarr; Themes</a>."
+msgstr ""
+
+#: includes/class-child-theme.php:40
+msgid "Child theme is active: \"%1$s\" (Parent: %2$s)."
+msgstr ""
+
+#: admin/views/modal-note.php:42
+msgid "Click Generate below..."
+msgstr ""
+
+#: includes/class-task-registry.php:470
+msgid "Clickjacking Protection (X-Frame-Options)"
+msgstr ""
+
+#: includes/class-htaccess-manager.php:52
+msgid "Clickjacking Protection (X-Frame-Options: SAMEORIGIN)"
+msgstr ""
+
+#: admin/class-admin-menu.php:95
+msgid "Client Report"
+msgstr ""
+
+#: includes/class-task-registry.php:1308
+msgid "Client SOP Coverage Report"
+msgstr ""
+
+#: admin/views/modal-diff.php:26
+#: admin/views/modal-sessions.php:27
+#: admin/views/modal-sessions.php:64
+#: admin/views/modal-delete-plugin.php:26
+#: admin/views/modal-login-rename.php:27
+#: admin/views/modal-app-passwords.php:27
+#: admin/views/modal-app-passwords.php:63
+#: admin/views/modal-csp-reports.php:26
+#: admin/views/modal-csp-reports.php:57
+#: admin/views/modal-reauth.php:28
+#: admin/views/modal-nginx.php:47
+msgid "Close"
+msgstr ""
+
+#: admin/views/modal-backup.php:26
+#: admin/views/modal-nginx.php:26
+#: admin/views/modal-note.php:27
+msgid "Close dialog"
+msgstr ""
+
+#: admin/views/modal-settings.php:24
+msgid "Close settings dialog"
+msgstr ""
+
+#: includes/class-task-registry.php:224
+msgid "Compares administrator users against the accepted baseline snapshot taken at activation. Alerts on any newly created or altered admin."
+msgstr ""
+
+#: includes/class-task-registry.php:1125
+msgid "Compares local WordPress core files against official WordPress.org release checksums (strictly excluding wp-content)."
+msgstr ""
+
+#: includes/class-htaccess-manager.php:488
+msgid "Compatibility Warning: %1$d existing PHP file(s) found in /uploads/ (%2$s). Blocking execution may break plugins relying on these scripts."
+msgstr ""
+
+#: admin/views/dashboard.php:207
+msgid "Completed"
+msgstr ""
+
+#: includes/class-task-registry.php:184
+msgid "Configure 2FA"
+msgstr ""
+
+#: admin/views/dashboard.php:47
+msgid "Configure API keys and incident response contacts"
+msgstr ""
+
+#: includes/class-task-registry.php:169
+msgid "Configure Wordfence"
+msgstr ""
+
+#: admin/views/modal-reauth.php:26
+msgid "Confirm Administrator Password"
+msgstr ""
+
+#: admin/views/dashboard.php:42
+#: admin/views/modal-backup.php:61
+msgid "Confirm Host Backup"
+msgstr ""
+
+#: admin/views/modal-delete-plugin.php:24
+msgid "Confirm Safe Plugin Removal"
+msgstr ""
+
+#: admin/views/dashboard.php:41
+msgid "Confirm that a host/cPanel backup was verified within 48h"
+msgstr ""
+
+#: includes/class-login-renamer.php:136
+msgid "Confirmation token mismatch. You must type \"CHANGE\" to confirm altering the login URL."
+msgstr ""
+
+#: admin/views/modal-settings.php:57
+msgid "Contact Person / Role"
+msgstr ""
+
+#: includes/class-htaccess-manager.php:220
+#: includes/class-task-registry.php:1230
+msgid "Content-Security-Policy (Report-Only Mode)"
+msgstr ""
+
+#: admin/views/modal-csp-reports.php:24
+msgid "Content-Security-Policy Reports (Report-Only Mode)"
+msgstr ""
+
+#: includes/class-task-registry.php:1250
+msgid "Content-Security-Policy disabled."
+msgstr ""
+
+#: includes/class-task-registry.php:1241
+msgid "Content-Security-Policy is disabled."
+msgstr ""
+
+#: admin/views/modal-note.php:47
+msgid "Copy"
+msgstr ""
+
+#: admin/views/modal-nginx.php:49
+msgid "Copy Directive"
+msgstr ""
+
+#: includes/class-scanner.php:218
+msgid "Core URLs match baseline. Note: %d oversized autoloaded options found (>100KB): %s"
+msgstr ""
+
+#: includes/class-integrity-monitor.php:60
+msgid "Could not connect to WordPress.org checksums API."
+msgstr ""
+
+#: includes/class-plugin-integrity.php:218
+msgid "Could not create a safety zip backup of the plugin directory. Deletion aborted."
+msgstr ""
+
+#: includes/class-htaccess-manager.php:526
+msgid "Could not create safety backup of .htaccess before writing."
+msgstr ""
+
+#: includes/class-wp-config-manager.php:115
+#: includes/class-wp-config-manager.php:178
+msgid "Could not create safety backup of wp-config.php."
+msgstr ""
+
+#: includes/class-security-txt.php:111
+msgid "Could not determine the web server document root."
+msgstr ""
+
+#: includes/class-ssrf-guard.php:86
+msgid "Could not resolve domain name to any valid IP address."
+msgstr ""
+
+#: includes/class-app-password-manager.php:119
+msgid "Could not revoke specified application password."
+msgstr ""
+
+#: admin/views/modal-app-passwords.php:45
+msgid "Created"
+msgstr ""
+
+#: includes/class-scanner.php:126
+msgid "Created after baseline snapshot"
+msgstr ""
+
+#: admin/views/modal-note.php:36
+msgid "Credential Generator:"
+msgstr ""
+
+#: admin/views/dashboard.php:209
+msgid "Critical / Failed"
+msgstr ""
+
+#: includes/class-integrity-monitor.php:180
+msgid "Critical Alert: %1$d unauthorized executable PHP script(s) found in /wp-content/uploads/: %2$s"
+msgstr ""
+
+#: includes/class-scanner.php:521
+msgid "Critical: %1$s is world-writable (%2$s). Target baseline is 0644."
+msgstr ""
+
+#: includes/class-scanner.php:356
+msgid "Critical: %d exposed backup/sensitive file(s) found in webroot: %s"
+msgstr ""
+
+#: includes/class-scanner.php:490
+msgid "Critical: wp-config.php is world-writable (%s). Permissions must be 0640 or 0600."
+msgstr ""
+
+#: includes/class-task-registry.php:194
+msgid "Cross-references installed plugins and themes against the Patchstack vulnerability database with match-confidence scoring. Cached 24h."
+msgstr ""
+
+#: admin/views/modal-reauth.php:43
+msgid "Current Password"
+msgstr ""
+
+#: includes/class-task-registry.php:298
+msgid "Custom Child Theme Setup"
+msgstr ""
+
+#: rest-api/class-rest-controller.php:619
+msgid "Custom login URL activated: /%s/"
+msgstr ""
+
+#: includes/class-task-registry.php:732
+msgid "Custom login URL active: /%s/"
+msgstr ""
+
+#: includes/class-login-renamer.php:184
+msgid "Custom login URL disabled. Default wp-login.php restored."
+msgstr ""
+
+#: includes/class-task-registry.php:679
+msgid "DISALLOW_FILE_EDIT is defined as true."
+msgstr ""
+
+#: includes/class-scanner.php:919
+msgid "DMARC policy active."
+msgstr ""
+
+#: includes/class-scanner.php:625
+msgid "Dangerous shell execution functions are active in php.ini: %s."
+msgstr ""
+
+#: admin/class-admin-menu.php:77
+msgid "Dashboard"
+msgstr ""
+
+#: includes/class-task-registry.php:340
+msgid "Database Table Prefix Detection"
+msgstr ""
+
+#: includes/class-scanner.php:676
+msgid "Database prefix is customized (\"%s\"), offering resistance to automated generic table targeting."
+msgstr ""
+
+#: includes/class-scanner.php:675
+msgid "Database tables use the default prefix \"%s\". A customized prefix reduces automated SQLi payload targeting."
+msgstr ""
+
+#: admin/views/report.php:210
+msgid "Date/Time"
+msgstr ""
+
+#: admin/views/modal-login-rename.php:57
+msgid "Default /wp-login.php and /wp-admin requests will be intercepted and redirected away."
+msgstr ""
+
+#: includes/class-task-registry.php:1231
+msgid "Deploys CSP in safe Report-Only mode to log potential violations without breaking page builders or analytics."
+msgstr ""
+
+#: admin/views/modal-settings.php:51
+msgid "Designate escalation contacts and protocols in the event of an after-hours breach or emergency lockout. Surfaced on client audit reports."
+msgstr ""
+
+#: includes/class-ssrf-guard.php:96
+msgid "Destination resolved to forbidden private, loopback, or metadata IP: %s"
+msgstr ""
+
+#: includes/class-task-registry.php:271
+msgid "Detect & Quarantine Risky Plugins"
+msgstr ""
+
+#: includes/class-task-registry.php:223
+msgid "Detect Rogue / Unrecognized Admins"
+msgstr ""
+
+#: includes/class-task-registry.php:272
+msgid "Detects leftover migration tools (Better Search Replace, File Manager, Duplicate Page). Deleting zips the plugin first to enable real Undo."
+msgstr ""
+
+#: admin/views/dashboard.php:273
+msgid "Developed by"
+msgstr ""
+
+#: admin/views/modal-sessions.php:44
+msgid "Device / IP"
+msgstr ""
+
+#: admin/views/modal-csp-reports.php:39
+msgid "Directive"
+msgstr ""
+
+#: includes/class-scanner.php:556
+msgid "Directory %1$s has relaxed/world-writable permissions (%2$s). Baseline must be 0755 or stricter."
+msgstr ""
+
+#: includes/class-child-theme.php:84
+msgid "Directory %s already exists in /wp-content/themes/."
+msgstr ""
+
+#: includes/class-task-registry.php:139
+msgid "Disable Automatic Updates"
+msgstr ""
+
+#: includes/class-task-registry.php:572
+msgid "Disable Directory Browsing (Indexes)"
+msgstr ""
+
+#: includes/class-htaccess-manager.php:91
+msgid "Disable Directory Browsing (Options -Indexes)"
+msgstr ""
+
+#: includes/class-task-registry.php:757
+msgid "Disable Front-End Debug Output (WP_DEBUG_DISPLAY)"
+msgstr ""
+
+#: includes/class-task-registry.php:668
+msgid "Disable Theme & Plugin Editor (wp-config.php)"
+msgstr ""
+
+#: includes/class-task-registry.php:386
+msgid "Disable XML-RPC (Runtime Filter)"
+msgstr ""
+
+#: includes/class-task-registry.php:387
+msgid "Disables XML-RPC pingbacks and brute-force vectors via WordPress core filters and removes discovery link headers."
+msgstr ""
+
+#: admin/views/dashboard.php:100
+msgid "Dismiss permanently"
+msgstr ""
+
+#: includes/class-login-guard.php:265
+msgid "Distributed brute-force attack detected on username \"%s\" (50+ failed attempts). Account temporarily protected."
+msgstr ""
+
+#: admin/views/modal-login-rename.php:79
+msgid "Do not use predictable names such as admin, wp-admin, login, or dashboard."
+msgstr ""
+
+#: admin/views/dashboard.php:279
+msgid "Docs"
+msgstr ""
+
+#: admin/views/modal-csp-reports.php:41
+msgid "Document URI"
+msgstr ""
+
+#: includes/class-security-txt.php:130
+msgid "Document root %s is not writable to create /.well-known/."
+msgstr ""
+
+#: includes/class-task-registry.php:368
+msgid "Domain Email Authentication (SPF & DMARC)"
+msgstr ""
+
+#: includes/class-scanner.php:926
+msgid "Domain email health for %1$s: %2$s (Note: Custom DKIM selectors cannot be discovered via domain scanning. If mail is handled via third-party relays like SendGrid or Google Workspace, confirm their DNS records are configured.)"
+msgstr ""
+
+#: includes/class-task-registry.php:933
+msgid "Domain, SSL & Hosting Expiry Audit (90d)"
+msgstr ""
+
+#: includes/class-task-registry.php:639
+msgid "Drops requests to xmlrpc.php before WordPress PHP boots, preventing DDoS amplification attacks."
+msgstr ""
+
+#: admin/views/modal-note.php:54
+msgid "E.g., \"Updated in 1Password vault by Alex on Sep 16\"."
+msgstr ""
+
+#: admin/views/modal-delete-plugin.php:47
+msgid "Eliminates attack surface from unmaintained code."
+msgstr ""
+
+#: includes/integrations/class-wordfence-bridge.php:92
+msgid "Email Alert Monitoring"
+msgstr ""
+
+#: includes/class-scanner.php:129
+msgid "Email address was changed"
+msgstr ""
+
+#: admin/views/modal-settings.php:63
+msgid "Emergency Email"
+msgstr ""
+
+#: admin/views/report.php:81
+msgid "Emergency Email:"
+msgstr ""
+
+#: admin/views/report.php:73
+msgid "Emergency Incident Response Escalation Sheet"
+msgstr ""
+
+#: admin/views/modal-login-rename.php:47
+msgid "Emergency Lockout Recovery Safeguard:"
+msgstr ""
+
+#: admin/views/modal-settings.php:71
+msgid "Emergency Phone / Pager"
+msgstr ""
+
+#: admin/views/report.php:85
+msgid "Emergency Phone / Slack:"
+msgstr ""
+
+#: includes/class-ssrf-guard.php:35
+msgid "Empty or non-string URL specified."
+msgstr ""
+
+#: includes/class-task-registry.php:178
+msgid "Enforce Two-Factor Authentication (2FA)"
+msgstr ""
+
+#: includes/integrations/class-wordfence-bridge.php:88
+msgid "Enforce max 5 login failures and lock out immediately."
+msgstr ""
+
+#: includes/class-task-registry.php:537
+msgid "Enforces HTTPS communication with browsers, protecting against man-in-the-middle SSL-strip attacks."
+msgstr ""
+
+#: includes/class-task-registry.php:994
+msgid "Enforces atomic DB-level progressive lockouts (1m, 15m, 60m), silent honeypots, and generic error masking."
+msgstr ""
+
+#: admin/views/modal-login-rename.php:65
+msgid "Ensure FTP/SSH credentials are noted in your password vault prior to updating."
+msgstr ""
+
+#: includes/integrations/class-wordfence-bridge.php:93
+msgid "Ensure alert emails route to designated agency monitoring inbox."
+msgstr ""
+
+#: includes/class-task-registry.php:884
+msgid "Ensure staging and development environments are shielded by HTTP Basic Auth (Directory Privacy) to prevent indexing and bot probing."
+msgstr ""
+
+#: includes/class-task-registry.php:179
+msgid "Ensures an active 2FA plugin is installed and mandatory for all administrator accounts."
+msgstr ""
+
+#: includes/class-task-registry.php:799
+msgid "Ensures search engines are not accidentally disallowed from crawling the site and that sensitive admin endpoints are disallowed."
+msgstr ""
+
+#: admin/views/modal-settings.php:34
+msgid "Enter your Patchstack API key for continuous live cross-referencing of installed plugins against active security advisories. An optional free-tier key can be obtained from Patchstack."
+msgstr ""
+
+#: admin/views/modal-reauth.php:50
+msgid "Enter your password..."
+msgstr ""
+
+#: admin/views/dashboard.php:126
+msgid "Environment"
+msgstr ""
+
+#: includes/class-task-registry.php:211
+msgid "Environment Audit (PHP, WP, SSL)"
+msgstr ""
+
+#: includes/class-login-guard.php:432
+msgid "Error:"
+msgstr ""
+
+#: admin/views/dashboard.php:120
+msgid "Factual checklist coverage; not a penetration test."
+msgstr ""
+
+#: includes/class-login-guard.php:283
+msgid "Failed login recorded for user \"%1$s\" from %2$s."
+msgstr ""
+
+#: includes/class-child-theme.php:93
+msgid "Failed to create child theme directory. Check filesystem permissions."
+msgstr ""
+
+#: includes/class-plugin-integrity.php:324
+msgid "Failed to extract plugin zip archive."
+msgstr ""
+
+#: includes/class-htaccess-manager.php:624
+msgid "Failed to remove rule from .htaccess."
+msgstr ""
+
+#: includes/class-security-txt.php:180
+msgid "Failed to write security.txt to /.well-known/ directory."
+msgstr ""
+
+#: includes/class-htaccess-manager.php:556
+msgid "Failed to write to .htaccess. Please verify file permissions."
+msgstr ""
+
+#: includes/class-wp-config-manager.php:149
+msgid "Failed to write updated constants to wp-config.php. Rolled back."
+msgstr ""
+
+#: includes/class-wp-config-manager.php:214
+msgid "Failed to write updated salts. Restored from backup."
+msgstr ""
+
+#: includes/class-task-registry.php:312
+msgid "File Permissions Audit (wp-config 640, 644/755)"
+msgstr ""
+
+#: includes/class-task-registry.php:679
+msgid "File editing is currently enabled in wp-admin."
+msgstr ""
+
+#: includes/class-scanner.php:572
+msgid "File permissions verified against strict baselines (wp-config <= 0640, files 0644, directories 0755)."
+msgstr ""
+
+#: admin/views/dashboard.php:196
+msgid "Filter by automation level"
+msgstr ""
+
+#: admin/views/dashboard.php:204
+msgid "Filter by status"
+msgstr ""
+
+#: includes/class-task-registry.php:1273
+msgid "Focus Mode enabled."
+msgstr ""
+
+#: admin/views/modal-login-rename.php:36
+msgid "For maximum compatibility with third-party SSO, WooCommerce, and membership plugins, we recommend using the audited WPS Hide Login plugin."
+msgstr ""
+
+#: includes/class-plugin-integrity.php:86
+msgid "Found %1$d unwanted migration/management plugin(s) installed: %2$s. It is recommended to remove these after use."
+msgstr ""
+
+#: includes/class-scanner.php:712
+msgid "Front-end debug display is disabled (WP_DEBUG_DISPLAY off), preventing sensitive database leakage."
+msgstr ""
+
+#: admin/views/modal-delete-plugin.php:55
+msgid "Full 1-click restoration from archive available anytime."
+msgstr ""
+
+#: admin/views/modal-delete-plugin.php:51
+msgid "Full ZIP archive automatically saved before deletion."
+msgstr ""
+
+#: admin/views/modal-note.php:44
+msgid "Generate"
+msgstr ""
+
+#: includes/class-task-registry.php:1309
+msgid "Generate a print-ready client audit report summarizing completed hardening, active protections, and outstanding items."
+msgstr ""
+
+#: admin/views/modal-note.php:38
+msgid "Generate a secure 24-character password to update in cPanel and store in your vault:"
+msgstr ""
+
+#: admin/views/report.php:45
+msgid "Generated On:"
+msgstr ""
+
+#: admin/views/report.php:240
+msgid "Generated by Site Checkup Pro on %1$s for %2$s."
+msgstr ""
+
+#: includes/class-task-registry.php:698
+msgid "Generates 8 fresh 64-char crypto salts in wp-config.php, immediately invalidating all active browser cookies and sessions."
+msgstr ""
+
+#: includes/class-task-registry.php:835
+msgid "Google Search Console & Bing Review"
+msgstr ""
+
+#: includes/class-task-registry.php:850
+msgid "Google Search Console temporary URL removals expire after 6 months. Track submitted removals and schedule rechecks."
+msgstr ""
+
+#: includes/class-htaccess-manager.php:78
+msgid "HSTS Header Enforcement"
+msgstr ""
+
+#: includes/class-task-registry.php:552
+msgid "HSTS header active in .htaccess."
+msgstr ""
+
+#: includes/class-task-registry.php:899
+msgid "HTTP Basic Auth protection is active."
+msgstr ""
+
+#: includes/class-task-registry.php:536
+msgid "HTTP Strict Transport Security (HSTS)"
+msgstr ""
+
+#: includes/class-task-registry.php:1157
+msgid "Hardcoded rule set blocking SQL injection, XSS, and traversal signatures in URL query strings (Opt-in; does not replace a network WAF)."
+msgstr ""
+
+#: includes/class-task-registry.php:450
+msgid "Header unset rule active in .htaccess."
+msgstr ""
+
+#: admin/views/dashboard.php:277
+msgid "Help and documentation links"
+msgstr ""
+
+#: includes/class-htaccess-manager.php:38
+#: includes/class-task-registry.php:437
+msgid "Hide PHP Version (X-Powered-By)"
+msgstr ""
+
+#: includes/class-task-registry.php:1038
+msgid "Hide WordPress Version Meta Tag"
+msgstr ""
+
+#: includes/class-task-registry.php:718
+msgid "Hides wp-login.php behind a custom slug. Bridges to WPS Hide Login if present. Recovery is exclusively via WPSG_DISABLE_LOGIN_RENAME in wp-config.php."
+msgstr ""
+
+#: includes/class-integrity-monitor.php:170
+msgid "High-Severity Alert: %d executable PHP script(s) discovered inside /wp-content/uploads/!"
+msgstr ""
+
+#: admin/views/modal-backup.php:55
+msgid "Host Snapshot"
+msgstr ""
+
+#: admin/views/dashboard.php:98
+msgid "I Already Did"
+msgstr ""
+
+#: includes/class-login-guard.php:282
+msgid "IP %1$s locked out for %2$d seconds after %3$d failed login attempts."
+msgstr ""
+
+#: admin/views/modal-diff.php:59
+msgid "If this rule triggers a 5xx server error, the plugin will immediately roll back to the safety backup."
+msgstr ""
+
+#: admin/views/modal-backup.php:57
+msgid "If you have taken a host/cPanel backup in the last 48h, confirm it."
+msgstr ""
+
+#: includes/class-scanner.php:403
+msgid "Inactive"
+msgstr ""
+
+#: admin/views/modal-settings.php:78
+msgid "Incident Protocol & Vault Reference"
+msgstr ""
+
+#: admin/views/report.php:91
+msgid "Incident Protocol:"
+msgstr ""
+
+#: includes/class-task-registry.php:943
+msgid "Incident Response Emergency Contact Sheet"
+msgstr ""
+
+#: admin/views/modal-settings.php:48
+msgid "Incident Response Emergency Contacts"
+msgstr ""
+
+#: includes/class-task-registry.php:953
+msgid "Incident contact configured: %s"
+msgstr ""
+
+#: includes/class-scanner.php:823
+msgid "Incomplete certificate chain detected (missing intermediate CA certificate). May cause trust errors on mobile/older clients."
+msgstr ""
+
+#: includes/class-session-manager.php:254
+msgid "Incorrect administrator password."
+msgstr ""
+
+#: includes/class-task-registry.php:369
+msgid "Informational DNS query verifying SPF and DMARC records for the sending domain to prevent email spoofing and spam folder placement."
+msgstr ""
+
+#: includes/class-scanner.php:817
+msgid "Insecure legacy protocols (%s) are still accepted by the server. Disable TLS 1.0 and 1.1 at the server/CDN level."
+msgstr ""
+
+#: includes/class-task-registry.php:248
+msgid "Inspects wp-content/mu-plugins for unauthorized PHP scripts that execute automatically outside standard plugin controls."
+msgstr ""
+
+#: admin/views/modal-login-rename.php:38
+msgid "Install WPS Hide Login"
+msgstr ""
+
+#: admin/views/modal-login-rename.php:69
+msgid "Instant reversal in settings or via wp-config.php emergency constant override."
+msgstr ""
+
+#: includes/class-integrity-monitor.php:110
+msgid "Integrity Alert: %1$d modified core file(s) and %2$d missing file(s) detected!"
+msgstr ""
+
+#: rest-api/class-rest-controller.php:848
+msgid "Invalid JSON payload."
+msgstr ""
+
+#: includes/class-integrity-monitor.php:69
+msgid "Invalid checksum data received from WordPress.org."
+msgstr ""
+
+#: rest-api/class-rest-controller.php:345
+msgid "Invalid or expired security token for this action."
+msgstr ""
+
+#: includes/class-login-guard.php:432
+msgid "Invalid username or password."
+msgstr ""
+
+#: admin/views/report.php:174
+msgid "Item"
+msgstr ""
+
+#: admin/views/modal-app-passwords.php:46
+msgid "Last Used"
+msgstr ""
+
+#: admin/views/dashboard.php:223
+msgid "Last Verified"
+msgstr ""
+
+#: admin/views/dashboard.php:95
+msgid "Leave a 5-Star Review"
+msgstr ""
+
+#: admin/views/dashboard.php:221
+msgid "Level"
+msgstr ""
+
+#: admin/views/dashboard.php:199
+msgid "Level A: Config / File Writers"
+msgstr ""
+
+#: admin/views/dashboard.php:198
+msgid "Level A: Safe / Instant"
+msgstr ""
+
+#: admin/views/dashboard.php:200
+msgid "Level B: Guided Actions"
+msgstr ""
+
+#: admin/views/dashboard.php:201
+msgid "Level C: Manual / Reminders"
+msgstr ""
+
+#: includes/class-htaccess-manager.php:175
+msgid "Lightweight Firewall: Block Path Traversal (../)"
+msgstr ""
+
+#: includes/class-htaccess-manager.php:190
+msgid "Lightweight Firewall: Block RCE Signatures"
+msgstr ""
+
+#: includes/class-htaccess-manager.php:145
+msgid "Lightweight Firewall: Block SQL Injection Signatures"
+msgstr ""
+
+#: includes/class-htaccess-manager.php:160
+msgid "Lightweight Firewall: Block Script Injection Signatures"
+msgstr ""
+
+#: includes/class-task-registry.php:1156
+msgid "Lightweight Query String Firewall"
+msgstr ""
+
+#: includes/class-task-registry.php:1172
+msgid "Lightweight query firewall active."
+msgstr ""
+
+#: admin/views/modal-csp-reports.php:47
+msgid "Loading CSP violation records..."
+msgstr ""
+
+#: admin/views/modal-sessions.php:54
+msgid "Loading active sessions..."
+msgstr ""
+
+#: admin/views/modal-app-passwords.php:53
+msgid "Loading application passwords..."
+msgstr ""
+
+#: admin/views/dashboard.php:231
+msgid "Loading checklist tasks and live status..."
+msgstr ""
+
+#: admin/views/modal-sessions.php:36
+msgid "Log Out All Other Sessions"
+msgstr ""
+
+#: includes/class-task-registry.php:993
+msgid "Login Throttling & Honeypot Protection"
+msgstr ""
+
+#: admin/views/modal-sessions.php:46
+msgid "Login Time"
+msgstr ""
+
+#: includes/class-task-registry.php:744
+msgid "Login URL is currently default (/wp-login.php)."
+msgstr ""
+
+#: includes/class-login-renamer.php:168
+msgid "Login URL successfully changed to: %s. In case of emergency, define(\"WPSG_DISABLE_LOGIN_RENAME\", true); in wp-config.php to restore default login."
+msgstr ""
+
+#: includes/class-task-registry.php:1007
+msgid "Login throttling & honeypot enabled."
+msgstr ""
+
+#: includes/class-task-registry.php:1011
+msgid "Login throttling disabled."
+msgstr ""
+
+#: includes/class-task-registry.php:1002
+msgid "Login throttling is disabled."
+msgstr ""
+
+#: admin/views/dashboard.php:80
+msgid "Loving Site Checkup Pro? Help us grow with a 5-star review!"
+msgstr ""
+
+#: includes/class-task-registry.php:503
+msgid "MIME Sniffing (X-Content-Type-Options)"
+msgstr ""
+
+#: includes/class-htaccess-manager.php:65
+msgid "MIME-Type Sniffing Protection (nosniff)"
+msgstr ""
+
+#: includes/class-ssrf-guard.php:40
+msgid "Malformed URL or missing host/scheme."
+msgstr ""
+
+#: includes/class-task-registry.php:739
+msgid "Managed via %s."
+msgstr ""
+
+#: includes/class-task-registry.php:725
+msgid "Managed via WPS Hide Login."
+msgstr ""
+
+#: admin/views/modal-note.php:25
+msgid "Manual Audit & Notes"
+msgstr ""
+
+#: admin/views/report.php:135
+msgid "Manual Audit Cycles & Credential Rotations"
+msgstr ""
+
+#: includes/class-backup-guard.php:133
+msgid "Manual Host/cPanel Backup"
+msgstr ""
+
+#: rest-api/class-rest-controller.php:536
+msgid "Manual SOP checklist item updated."
+msgstr ""
+
+#: includes/class-task-registry.php:904
+msgid "Manual audit required: verify Directory Privacy in cPanel."
+msgstr ""
+
+#: rest-api/class-rest-controller.php:562
+msgid "Manual backup confirmation recorded."
+msgstr ""
+
+#: includes/class-task-registry.php:131
+msgid "Manual host/cPanel backup confirmed for the next 48 hours."
+msgstr ""
+
+#: admin/views/modal-note.php:71
+msgid "Mark Done & Save"
+msgstr ""
+
+#: admin/views/dashboard.php:101
+msgid "Maybe Later"
+msgstr ""
+
+#: includes/class-security-txt.php:78
+msgid "Missing /.well-known/security.txt. Generating one provides a standardized contact channel for responsible vulnerability disclosure."
+msgstr ""
+
+#: includes/class-enumeration-guard.php:93
+msgid "Multiple authors detected (%d registered authors). Multi-author blogs usually expect public author archive pages."
+msgstr ""
+
+#: includes/class-app-password-manager.php:54
+msgid "N/A"
+msgstr ""
+
+#: admin/views/report.php:187
+msgid "N/A (Nginx)"
+msgstr ""
+
+#: includes/class-app-password-manager.php:53
+msgid "Never"
+msgstr ""
+
+#: admin/views/modal-login-rename.php:74
+msgid "New Secret Login Slug:"
+msgstr ""
+
+#: admin/views/modal-nginx.php:24
+msgid "Nginx Directive Equivalent"
+msgstr ""
+
+#: admin/views/dashboard.php:137
+msgid "Nginx Directives Mode"
+msgstr ""
+
+#: admin/views/modal-nginx.php:34
+msgid "Nginx ignores .htaccess files. To apply this rule, paste the directive below into your server block or send it to your hosting provider."
+msgstr ""
+
+#: includes/class-scanner.php:921
+msgid "No DMARC policy found."
+msgstr ""
+
+#: includes/class-htaccess-manager.php:492
+msgid "No PHP files detected in /wp-content/uploads/. Safe to apply rule."
+msgstr ""
+
+#: includes/class-scanner.php:915
+msgid "No SPF record detected on root domain."
+msgstr ""
+
+#: includes/integrations/class-2fa-bridge.php:90
+msgid "No active Two-Factor Authentication plugin detected. Enforcing 2FA for administrators is strongly recommended in the SOP."
+msgstr ""
+
+#: includes/class-backup-guard.php:150
+msgid "No active backup plugin or recent host backup detected within the last 48 hours."
+msgstr ""
+
+#: admin/views/report.php:218
+msgid "No audit entries recorded yet."
+msgstr ""
+
+#: admin/views/report.php:112
+msgid "No automated hardening tasks marked as complete."
+msgstr ""
+
+#: includes/class-task-registry.php:954
+msgid "No emergency incident contact details recorded. Update in Settings."
+msgstr ""
+
+#: includes/class-scanner.php:366
+msgid "No exposed backup files, database dumps, or .env files found in webroot."
+msgstr ""
+
+#: includes/class-plugin-integrity.php:96
+msgid "No leftover or risky development plugins detected from the denylist."
+msgstr ""
+
+#: includes/class-scanner.php:270
+msgid "No mu-plugins installed in wp-content/mu-plugins."
+msgstr ""
+
+#: includes/class-task-registry.php:121
+msgid "No recent backup found within the last 48 hours."
+msgstr ""
+
+#: admin/views/modal-note.php:60
+msgid "No reminder"
+msgstr ""
+
+#: includes/class-task.php:171
+msgid "No run callback registered for this task."
+msgstr ""
+
+#: includes/class-child-theme.php:148
+msgid "No scaffolded child theme found to remove."
+msgstr ""
+
+#: includes/integrations/class-backup-bridge.php:55
+msgid "No supported backup plugin detected to trigger automatic backup."
+msgstr ""
+
+#: includes/class-task.php:187
+msgid "No undo callback registered for this task."
+msgstr ""
+
+#: includes/class-wp-config-manager.php:106
+msgid "No valid security constants specified."
+msgstr ""
+
+#: includes/class-plugin-integrity.php:267
+msgid "No valid zip backup found to restore this plugin."
+msgstr ""
+
+#: admin/views/modal-backup.php:39
+msgid "No verified backup found within the 48-hour recency window."
+msgstr ""
+
+#: includes/class-htaccess-manager.php:205
+msgid "Noise Reduction: Block Known Automated Scanners User-Agents"
+msgstr ""
+
+#: includes/class-task-registry.php:1196
+msgid "Noise Reduction: Block Known Vulnerability Scanners"
+msgstr ""
+
+#: admin/views/dashboard.php:210
+msgid "Not Applicable"
+msgstr ""
+
+#: includes/class-htaccess-manager.php:511
+msgid "Not applicable on this server (%s). Your web server does not process .htaccess rules."
+msgstr ""
+
+#: includes/class-htaccess-manager.php:593
+msgid "Not applicable on this server."
+msgstr ""
+
+#: admin/views/report.php:142
+msgid "Notes & Vault Reference"
+msgstr ""
+
+#: admin/views/report.php:65
+msgid "Notice & Disclaimer:"
+msgstr ""
+
+#: includes/class-task-registry.php:1267
+msgid "Notice Focus Mode and dashboard declutter active."
+msgstr ""
+
+#: admin/views/report.php:86
+msgid "On-call escalation pager"
+msgstr ""
+
+#: includes/class-ssrf-guard.php:45
+msgid "Only HTTP and HTTPS protocols are permitted."
+msgstr ""
+
+#: admin/views/modal-backup.php:50
+msgid "Open Backup Plugin"
+msgstr ""
+
+#: admin/views/modal-backup.php:46
+msgid "Open your installed backup plugin and take a snapshot now."
+msgstr ""
+
+#: includes/integrations/class-wordfence-bridge.php:83
+msgid "Optimize WAF to Extended Protection (user.ini/php.ini setup)."
+msgstr ""
+
+#: includes/class-task-registry.php:585
+msgid "Options -Indexes active in .htaccess."
+msgstr ""
+
+#: includes/class-task.php:248
+msgid "Overdue reminder: scheduled review was due on %s."
+msgstr ""
+
+#: admin/views/modal-app-passwords.php:44
+msgid "Owner User"
+msgstr ""
+
+#: includes/class-scanner.php:386
+msgid "PHP %s has reached end-of-life. Upgrade to PHP 8.1+ recommended."
+msgstr ""
+
+#: includes/class-scanner.php:384
+msgid "PHP %s is critically outdated and unsupported."
+msgstr ""
+
+#: admin/views/dashboard.php:141
+msgid "PHP %s runtime."
+msgstr ""
+
+#: includes/class-task-registry.php:326
+msgid "PHP Security Restrictions (disable_functions & open_basedir)"
+msgstr ""
+
+#: includes/class-task-registry.php:1106
+msgid "PHP execution blocked in /uploads/."
+msgstr ""
+
+#: includes/class-task-registry.php:1106
+msgid "PHP execution currently allowed in /uploads/."
+msgstr ""
+
+#: includes/class-login-renamer.php:237
+msgid "Page not found."
+msgstr ""
+
+#: rest-api/class-rest-controller.php:688
+msgid "Password is required."
+msgstr ""
+
+#: includes/class-session-manager.php:273
+msgid "Password verified successfully."
+msgstr ""
+
+#: admin/views/modal-settings.php:40
+msgid "Paste API key or leave blank for default check"
+msgstr ""
+
+#: admin/views/modal-settings.php:38
+msgid "Patchstack API Token"
+msgstr ""
+
+#: admin/views/modal-settings.php:31
+msgid "Patchstack Vulnerability Intelligence API"
+msgstr ""
+
+#: admin/views/dashboard.php:206
+#: admin/views/report.php:189
+msgid "Pending"
+msgstr ""
+
+#: admin/views/report.php:168
+msgid "Pending Checklist Items & Recommendations"
+msgstr ""
+
+#: includes/class-session-manager.php:159
+msgid "Permission denied."
+msgstr ""
+
+#: includes/class-task-runner.php:38
+#: includes/class-task-runner.php:174
+#: includes/class-app-password-manager.php:75
+msgid "Permission denied. Administrator capabilities required."
+msgstr ""
+
+#: includes/class-session-manager.php:100
+msgid "Permission denied. You cannot modify sessions for other users."
+msgstr ""
+
+#: includes/class-htaccess-manager.php:246
+msgid "Permissions-Policy Header"
+msgstr ""
+
+#: includes/class-task-registry.php:816
+msgid "Physical robots.txt is blocking crawlers with \"Disallow: /\"."
+msgstr ""
+
+#: includes/class-login-renamer.php:156
+msgid "Please specify a valid, unique custom slug (cannot use default WordPress reserved paths)."
+msgstr ""
+
+#: includes/integrations/class-backup-bridge.php:47
+msgid "Please trigger a full backup via %s before continuing."
+msgstr ""
+
+#: includes/class-plugin-integrity.php:316
+msgid "Plugin %s has been restored from zip backup."
+msgstr ""
+
+#: includes/class-plugin-integrity.php:248
+msgid "Plugin %s was backed up to zip and safely deleted."
+msgstr ""
+
+#: admin/views/modal-delete-plugin.php:43
+msgid "Plugin directory removed from wp-content/plugins/."
+msgstr ""
+
+#: rest-api/class-rest-controller.php:1032
+msgid "Plugin settings updated successfully."
+msgstr ""
+
+#: includes/class-task-runner.php:104
+msgid "Post-action verification failed."
+msgstr ""
+
+#: admin/views/modal-diff.php:24
+msgid "Pre-Execution Diff Preview"
+msgstr ""
+
+#: admin/views/modal-diff.php:42
+msgid "Pre-write timestamped backup + loopback self-test"
+msgstr ""
+
+#: admin/views/report.php:45
+msgid "Prepared By:"
+msgstr ""
+
+#: includes/class-task-registry.php:504
+msgid "Prevents browsers from MIME-sniffing a response away from the declared content-type."
+msgstr ""
+
+#: includes/class-task-registry.php:758
+msgid "Prevents database errors and PHP warnings from displaying on the front-end to site visitors by setting WP_DEBUG_DISPLAY to false in wp-config.php."
+msgstr ""
+
+#: includes/class-task-registry.php:1091
+msgid "Prevents direct execution of PHP scripts in the uploads folder, shutting down web shells uploaded via plugin vulnerabilities."
+msgstr ""
+
+#: includes/class-task-registry.php:471
+msgid "Prevents the site from being loaded inside unauthorized iframes to protect against clickjacking attacks."
+msgstr ""
+
+#: includes/class-task-registry.php:411
+msgid "Prevents unauthenticated visitors and bots from enumerating usernames via the /wp/v2/users REST route."
+msgstr ""
+
+#: includes/class-task-registry.php:140
+msgid "Prevents unverified background core, plugin, and theme updates from breaking client customizations. Agency manages updates manually."
+msgstr ""
+
+#: includes/class-task-registry.php:573
+msgid "Prevents visitors from viewing directory file listings in folders without an index file (e.g., /wp-content/uploads/)."
+msgstr ""
+
+#: includes/class-security-txt.php:214
+msgid "Previous security.txt restored from backup."
+msgstr ""
+
+#: admin/views/report.php:77
+msgid "Primary Contact:"
+msgstr ""
+
+#: admin/views/report.php:29
+msgid "Print / Save as PDF"
+msgstr ""
+
+#: admin/views/dashboard.php:288
+msgid "Privacy Policy"
+msgstr ""
+
+#: admin/views/dashboard.php:60
+msgid "Processing safe verification tasks..."
+msgstr ""
+
+#: includes/class-task-registry.php:1002
+msgid "Progressive login throttling and honeypot active."
+msgstr ""
+
+#: admin/views/modal-diff.php:50
+msgid "Proposed Configuration Block:"
+msgstr ""
+
+#: includes/class-htaccess-manager.php:102
+msgid "Protect Sensitive & System Files"
+msgstr ""
+
+#: includes/class-task-registry.php:605
+msgid "Protect Sensitive System Files"
+msgstr ""
+
+#: admin/views/report.php:106
+msgid "Protection Description"
+msgstr ""
+
+#: admin/views/dashboard.php:164
+msgid "Protects all file-modifying tasks."
+msgstr ""
+
+#: includes/class-task-registry.php:923
+msgid "Quarterly Backup Restore Test (90d)"
+msgstr ""
+
+#: includes/class-task-registry.php:934
+msgid "Quarterly review of domain registration, auto-renewal status, SSL certificate validity, and hosting plan limits."
+msgstr ""
+
+#: includes/class-task-registry.php:1172
+msgid "Query string firewall is disabled."
+msgstr ""
+
+#: includes/class-task-registry.php:419
+msgid "REST user enumeration is publicly accessible."
+msgstr ""
+
+#: includes/class-task-registry.php:419
+msgid "REST user enumeration restricted for visitors."
+msgstr ""
+
+#: includes/class-task-registry.php:423
+msgid "REST user route restriction activated."
+msgstr ""
+
+#: includes/class-task-registry.php:426
+msgid "REST user route restriction deactivated."
+msgstr ""
+
+#: includes/class-security-txt.php:96
+msgid "RFC 9116 security disclosure file is present at /.well-known/security.txt and correctly formatted."
+msgstr ""
+
+#: includes/class-security-txt.php:189
+msgid "RFC 9116 security.txt successfully generated at /.well-known/security.txt."
+msgstr ""
+
+#: includes/class-app-password-manager.php:85
+msgid "Re-authentication required: please confirm your password to revoke credentials."
+msgstr ""
+
+#: admin/views/modal-backup.php:24
+msgid "Recent Backup Verification Required"
+msgstr ""
+
+#: admin/views/report.php:204
+msgid "Recent Hardening Activity Log"
+msgstr ""
+
+#: includes/class-task-registry.php:127
+msgid "Recent backup verified (%s)."
+msgstr ""
+
+#: admin/views/report.php:176
+msgid "Recommended Action"
+msgstr ""
+
+#: admin/views/modal-login-rename.php:35
+msgid "Recommended Industry Standard:"
+msgstr ""
+
+#: includes/class-task-registry.php:944
+msgid "Record emergency contact details and escalation protocols in the event of a security incident. Surfaced on client reports."
+msgstr ""
+
+#: includes/class-htaccess-manager.php:233
+msgid "Referrer-Policy: strict-origin-when-cross-origin"
+msgstr ""
+
+#: admin/views/modal-note.php:61
+msgid "Remind in 15 days (SOP standard for credentials)"
+msgstr ""
+
+#: admin/views/modal-note.php:62
+msgid "Remind in 30 days"
+msgstr ""
+
+#: admin/views/modal-note.php:63
+msgid "Remind in 6 months (GSC URL removal review)"
+msgstr ""
+
+#: includes/class-task-registry.php:1064
+msgid "Remove ?ver= from Enqueued Scripts & Styles"
+msgstr ""
+
+#: includes/class-plugin-integrity.php:373
+msgid "Removed or closed on WordPress.org"
+msgstr ""
+
+#: includes/class-task-registry.php:1039
+msgid "Removes the WordPress generator tag from HTML headers and RSS feeds to reduce version fingerprinting."
+msgstr ""
+
+#: includes/class-task-registry.php:717
+msgid "Rename wp-admin Login URL"
+msgstr ""
+
+#: includes/class-task-registry.php:410
+msgid "Restrict REST API User Enumeration"
+msgstr ""
+
+#: includes/class-task-registry.php:968
+msgid "Restricts unauthenticated access to /wp/v2/users and intercepts ?author= numeric queries to prevent attacker username discovery."
+msgstr ""
+
+#: admin/views/dashboard.php:247
+#: admin/views/report.php:213
+msgid "Result"
+msgstr ""
+
+#: admin/views/modal-delete-plugin.php:54
+#: admin/views/modal-login-rename.php:68
+msgid "Reversibility"
+msgstr ""
+
+#: includes/class-task-registry.php:1020
+msgid "Review concurrent logged-in sessions across devices, terminate stale logins, and enforce automatic session invalidation on password updates."
+msgstr ""
+
+#: rest-api/class-rest-controller.php:1088
+msgid "Review prompt dismissed."
+msgstr ""
+
+#: includes/class-task-registry.php:873
+msgid "Rotate WordPress Admin Password (15d)"
+msgstr ""
+
+#: includes/class-task-registry.php:697
+msgid "Rotate WordPress Security Salts & Keys"
+msgstr ""
+
+#: includes/class-task-registry.php:863
+msgid "Rotate cPanel / Hosting Credentials (15d)"
+msgstr ""
+
+#: includes/class-task-registry.php:864
+msgid "Rotate cPanel, FTP, and hosting passwords every 15 days in adherence to the agency security policy. Update vault."
+msgstr ""
+
+#: includes/class-task-registry.php:874
+msgid "Rotate main administrator credentials every 15 days, notify client if necessary, and store in secure team vault."
+msgstr ""
+
+#: includes/class-htaccess-manager.php:579
+msgid "Rule applied and verified successfully."
+msgstr ""
+
+#: includes/class-htaccess-manager.php:640
+msgid "Rule removed successfully."
+msgstr ""
+
+#: admin/views/dashboard.php:51
+msgid "Run All Safe Tasks"
+msgstr ""
+
+#: includes/class-task-registry.php:447
+#: includes/class-task-registry.php:480
+#: includes/class-task-registry.php:513
+#: includes/class-task-registry.php:549
+#: includes/class-task-registry.php:582
+#: includes/class-task-registry.php:615
+#: includes/class-task-registry.php:648
+msgid "Running on Nginx. Use Nginx snippet."
+msgstr ""
+
+#: admin/views/dashboard.php:112
+#: admin/views/report.php:55
+msgid "SOP Coverage"
+msgstr ""
+
+#: admin/class-admin-menu.php:94
+msgid "SOP Coverage Report"
+msgstr ""
+
+#: admin/views/dashboard.php:36
+msgid "SOP Security Hardening & Audit Orchestrator"
+msgstr ""
+
+#: admin/views/report.php:51
+msgid "SOP Verified"
+msgstr ""
+
+#: includes/class-scanner.php:913
+msgid "SPF record found."
+msgstr ""
+
+#: includes/class-scanner.php:394
+msgid "SSL certificate expires in %d day(s)!"
+msgstr ""
+
+#: includes/class-scanner.php:827
+msgid "SSL certificate expires in %d day(s)."
+msgstr ""
+
+#: admin/views/modal-backup.php:33
+msgid "Safety Enforcement Gate:"
+msgstr ""
+
+#: includes/class-task-registry.php:705
+msgid "Salts can be rotated on demand. Invalidates all active login sessions."
+msgstr ""
+
+#: admin/views/modal-settings.php:102
+msgid "Save Settings"
+msgstr ""
+
+#: includes/class-child-theme.php:179
+msgid "Scaffolded child theme files removed."
+msgstr ""
+
+#: includes/class-task-registry.php:284
+msgid "Scan Closed / Abandoned Plugins (WP.org)"
+msgstr ""
+
+#: includes/class-task-registry.php:259
+msgid "Scan Exposed Backups & Dumps in Webroot"
+msgstr ""
+
+#: includes/class-task-registry.php:1140
+msgid "Scan Uploads for Executable Scripts"
+msgstr ""
+
+#: includes/class-task-registry.php:193
+msgid "Scan Vulnerability Database (Patchstack CVE)"
+msgstr ""
+
+#: includes/class-task-registry.php:1212
+msgid "Scanner noise reduction active."
+msgstr ""
+
+#: includes/class-task-registry.php:1212
+msgid "Scanner user-agent filter disabled."
+msgstr ""
+
+#: includes/class-task-registry.php:260
+msgid "Scans for public database dumps (*.sql), .env files, and wp-config backups accidentally left in the public webroot."
+msgstr ""
+
+#: admin/views/modal-note.php:58
+msgid "Schedule Next Review / Rotation:"
+msgstr ""
+
+#: admin/views/dashboard.php:170
+msgid "Scheduled Checks"
+msgstr ""
+
+#: includes/class-task-registry.php:822
+msgid "Search engine indexing permitted. No crawl-blocking directives found."
+msgstr ""
+
+#: includes/class-task-registry.php:807
+msgid "Search engine visibility is disabled in Settings &rarr; Reading (Disallow: /)."
+msgstr ""
+
+#: admin/class-admin-menu.php:85
+msgid "Security Audit Log"
+msgstr ""
+
+#: admin/views/report.php:42
+msgid "Security Check-up & SOP Hardening Report"
+msgstr ""
+
+#: includes/class-task-registry.php:780
+msgid "Security Disclosure Policy (security.txt)"
+msgstr ""
+
+#: admin/views/report.php:105
+msgid "Security Item"
+msgstr ""
+
+#: rest-api/class-rest-controller.php:586
+msgid "Security baseline snapshot updated with current administrators and options."
+msgstr ""
+
+#: includes/class-wp-config-manager.php:155
+msgid "Security constants updated successfully in wp-config.php."
+msgstr ""
+
+#: includes/class-security-txt.php:141
+msgid "Security error: Destination directory resolves outside of the approved document root."
+msgstr ""
+
+#: includes/class-child-theme.php:166
+msgid "Security error: Invalid child theme directory location."
+msgstr ""
+
+#: includes/class-plugin-integrity.php:209
+msgid "Security error: Invalid plugin file path."
+msgstr ""
+
+#: includes/class-plugin-integrity.php:298
+msgid "Security error: Malicious path traversal entries detected in zip archive."
+msgstr ""
+
+#: includes/class-task-runner.php:220
+msgid "Security error: Snapshot integrity check failed (tampered snapshot detected). Undo aborted."
+msgstr ""
+
+#: rest-api/class-rest-controller.php:1074
+msgid "Security.txt module unavailable."
+msgstr ""
+
+#: includes/class-htaccess-manager.php:634
+msgid "Self-test failed after rule removal. Rolled back."
+msgstr ""
+
+#: includes/class-htaccess-manager.php:571
+msgid "Self-test failed: %s. Rule was automatically rolled back to prevent site downtime."
+msgstr ""
+
+#: includes/class-task-registry.php:618
+msgid "Sensitive files blocked in .htaccess."
+msgstr ""
+
+#: admin/views/modal-nginx.php:39
+msgid "Server Block Directive:"
+msgstr ""
+
+#: includes/class-scanner.php:636
+msgid "Server php.ini restrictions verified: critical execution functions disabled and open_basedir active."
+msgstr ""
+
+#: rest-api/class-rest-controller.php:692
+msgid "Session manager is not available."
+msgstr ""
+
+#: includes/class-session-manager.php:142
+msgid "Session terminated successfully."
+msgstr ""
+
+#: rest-api/class-rest-controller.php:744
+msgid "Session verifier required."
+msgstr ""
+
+#: admin/views/dashboard.php:48
+msgid "Settings"
+msgstr ""
+
+#: includes/class-enumeration-guard.php:103
+msgid "Single-author / business site detected. Safe to block author enumeration."
+msgstr ""
+
+#: admin/class-admin-menu.php:66
+msgid "Site Checkup"
+msgstr ""
+
+#: admin/views/dashboard.php:33
+#: admin/class-admin-menu.php:65
+msgid "Site Checkup Pro"
+msgstr ""
+
+#: site-checkup-pro.php:125
+msgid "Site Checkup Pro (Multisite Notice)"
+msgstr ""
+
+#: includes/class-scheduler.php:168
+msgid "Site Checkup Pro Alert"
+msgstr ""
+
+#: admin/views/modal-settings.php:22
+msgid "Site Checkup Pro Settings"
+msgstr ""
+
+#: site-checkup-pro.php:108
+msgid "Site Checkup Pro requires PHP 7.4 or higher. Please upgrade your PHP version."
+msgstr ""
+
+#: includes/class-task-registry.php:546
+msgid "Site is not SSL enabled. HSTS requires HTTPS."
+msgstr ""
+
+#: includes/class-scanner.php:748
+msgid "Site is not running over HTTPS. SSL/TLS depth inspection requires an active SSL connection."
+msgstr ""
+
+#: includes/class-scanner.php:392
+msgid "Site is not running over HTTPS/SSL."
+msgstr ""
+
+#: includes/class-session-manager.php:119
+msgid "Specified session not found for this user account."
+msgstr ""
+
+#: includes/class-task-registry.php:894
+msgid "Staging domain detected without HTTP Basic Auth wall."
+msgstr ""
+
+#: includes/class-task-registry.php:1267
+msgid "Standard WordPress admin notices visible."
+msgstr ""
+
+#: admin/views/modal-diff.php:38
+msgid "Standard WordPress insert_with_markers delimiters"
+msgstr ""
+
+#: includes/class-task-registry.php:1278
+msgid "Standard admin notices restored."
+msgstr ""
+
+#: admin/views/dashboard.php:220
+#: admin/views/modal-sessions.php:47
+#: admin/views/report.php:143
+#: admin/views/report.php:175
+msgid "Status"
+msgstr ""
+
+#: admin/views/dashboard.php:66
+msgid "Stop"
+msgstr ""
+
+#: admin/views/modal-login-rename.php:61
+msgid "Stops 99% of automated credential stuffing bots targeting the standard WordPress endpoint."
+msgstr ""
+
+#: includes/class-task-registry.php:438
+msgid "Strips the X-Powered-By server response header. Prioritizes Header unset for modern PHP-FPM servers."
+msgstr ""
+
+#: includes/class-task-registry.php:1065
+msgid "Strips version query strings from script and stylesheet URLs (Opt-in: may impact browser caching on file updates)."
+msgstr ""
+
+#: admin/views/dashboard.php:282
+msgid "Support"
+msgstr ""
+
+#: admin/views/dashboard.php:108
+msgid "System Status Overview"
+msgstr ""
+
+#: includes/class-task-registry.php:354
+msgid "TLS Protocol & Certificate Chain Depth Probe"
+msgstr ""
+
+#: includes/class-scanner.php:834
+msgid "TLS configuration verified: Strong protocols active (%2$s), complete certificate chain (%1$d certs)."
+msgstr ""
+
+#: admin/views/report.php:44
+msgid "Target Website:"
+msgstr ""
+
+#: includes/class-ssrf-guard.php:53
+msgid "Target host is a reserved or internal address."
+msgstr ""
+
+#: admin/views/modal-diff.php:34
+msgid "Target: .htaccess"
+msgstr ""
+
+#: admin/views/report.php:211
+msgid "Task Action"
+msgstr ""
+
+#: admin/views/dashboard.php:244
+msgid "Task ID"
+msgstr ""
+
+#: includes/class-task-runner.php:46
+msgid "Task not found in registry."
+msgstr ""
+
+#: rest-api/class-rest-controller.php:480
+#: rest-api/class-rest-controller.php:510
+msgid "Task not found."
+msgstr ""
+
+#: admin/views/dashboard.php:248
+msgid "Technical Log Message (Redacted)"
+msgstr ""
+
+#: includes/class-security-txt.php:123
+msgid "The directory %s is not writable by the web server."
+msgstr ""
+
+#: includes/class-wp-config-manager.php:241
+msgid "The following configuration block will be inserted into wp-config.php."
+msgstr ""
+
+#: admin/views/modal-csp-reports.php:31
+msgid "The policy is currently running in Report-Only mode. No resources are blocked. Violations triggered by scripts, styles, or plugins are captured below for review before enforcement."
+msgstr ""
+
+#: admin/views/modal-backup.php:34
+msgid "The task you selected modifies critical files (.htaccess or wp-config.php). To protect against unexpected server errors, a verified backup within the last 48 hours is required."
+msgstr ""
+
+#: admin/views/report.php:66
+msgid "This document reports checklist adherence to the agency standard operating procedure (SOP) for WordPress security hardening. It reflects configured protections, server rules, and maintenance processes at the time of report generation. It is not an absolute guarantee against zero-day exploits or targeted penetration attempts."
+msgstr ""
+
+#: admin/views/modal-reauth.php:33
+msgid "This operation modifies core server configurations or active credentials. Please confirm your administrator password to proceed."
+msgstr ""
+
+#: includes/class-task-runner.php:182
+msgid "This task does not support undo operations."
+msgstr ""
+
+#: includes/class-task-runner.php:55
+msgid "This task is currently being executed by another process. Please wait."
+msgstr ""
+
+#: includes/class-task-runner.php:190
+msgid "This task is currently being modified. Please wait."
+msgstr ""
+
+#: admin/views/modal-csp-reports.php:38
+msgid "Time"
+msgstr ""
+
+#: admin/views/dashboard.php:243
+msgid "Timestamp"
+msgstr ""
+
+#: includes/class-session-manager.php:237
+msgid "Too many failed attempts. Please try again in %d minute(s)."
+msgstr ""
+
+#: includes/class-login-guard.php:132
+msgid "Too many failed login attempts. Please wait %d minute(s) before trying again."
+msgstr ""
+
+#: rest-api/class-rest-controller.php:827
+msgid "Too many reports from this IP."
+msgstr ""
+
+#: rest-api/class-rest-controller.php:429
+msgid "Too many task execution requests. Please pause a moment."
+msgstr ""
+
+#: admin/views/dashboard.php:45
+msgid "Trust Baseline"
+msgstr ""
+
+#: includes/integrations/class-2fa-bridge.php:79
+msgid "Two-Factor Authentication is active via %s."
+msgstr ""
+
+#: admin/views/modal-login-rename.php:84
+msgid "Type \"CHANGE\" to confirm you have noted the recovery constant:"
+msgstr ""
+
+#: includes/class-htaccess-manager.php:370
+#: includes/class-htaccess-manager.php:403
+msgid "Unknown named rule: %s"
+msgstr ""
+
+#: includes/class-task-registry.php:924
+msgid "Untested backups are worthless. Conduct a quarterly rehearsal restoring a database and file backup to a staging environment."
+msgstr ""
+
+#: admin/views/dashboard.php:151
+msgid "Unverified"
+msgstr ""
+
+#: includes/class-vulnerability-checker.php:92
+msgid "Unverified: Custom or renamed plugin directory. Cannot verify against public CVE database."
+msgstr ""
+
+#: admin/views/dashboard.php:44
+msgid "Update trusted administrator and database baseline"
+msgstr ""
+
+#: includes/class-backup-guard.php:75
+msgid "UpdraftPlus is active, but no completed backups were found."
+msgstr ""
+
+#: includes/class-integrity-monitor.php:139
+msgid "Uploads directory does not exist."
+msgstr ""
+
+#: includes/class-task-registry.php:1101
+msgid "Use Nginx configuration directive on Nginx servers."
+msgstr ""
+
+#: includes/class-task-registry.php:1167
+#: includes/class-task-registry.php:1207
+msgid "Use Nginx configuration on Nginx servers."
+msgstr ""
+
+#: admin/views/dashboard.php:246
+msgid "User"
+msgstr ""
+
+#: includes/class-task-registry.php:976
+msgid "User & author enumeration blocked for unauthorized visitors."
+msgstr ""
+
+#: includes/class-task-registry.php:981
+msgid "User & author enumeration blocked."
+msgstr ""
+
+#: includes/class-task-registry.php:985
+msgid "User enumeration protection disabled."
+msgstr ""
+
+#: includes/class-task-registry.php:976
+msgid "User enumeration protection is disabled."
+msgstr ""
+
+#: includes/class-plugin.php:189
+msgid "User enumeration via REST API is disabled for unauthenticated visitors."
+msgstr ""
+
+#: includes/class-session-manager.php:224
+msgid "User session not found."
+msgstr ""
+
+#: includes/class-scanner.php:403
+msgid "Valid (%d days remaining)"
+msgstr ""
+
+#: admin/views/report.php:107
+msgid "Verification Status"
+msgstr ""
+
+#: admin/views/report.php:153
+msgid "Verified"
+msgstr ""
+
+#: includes/class-vulnerability-checker.php:129
+msgid "Verified %1$d plugins against Patchstack CVE database with zero known vulnerabilities (%2$d low-confidence/custom extensions excluded)."
+msgstr ""
+
+#: admin/views/dashboard.php:156
+msgid "Verified (%s hrs ago)"
+msgstr ""
+
+#: admin/views/report.php:150
+msgid "Verified per agency SOP."
+msgstr ""
+
+#: includes/class-task-registry.php:120
+msgid "Verified recent backup (%1$s, %2$s hours ago)."
+msgstr ""
+
+#: includes/class-task-registry.php:164
+msgid "Verifies Wordfence WAF status, brute-force lockout rules, and alert preferences against the agency SOP."
+msgstr ""
+
+#: includes/class-task-registry.php:781
+msgid "Verifies and generates RFC 9116 responsible disclosure contact information at /.well-known/security.txt inside the document root."
+msgstr ""
+
+#: includes/class-task-registry.php:299
+msgid "Verifies if a child theme is active. Generates a clean child theme without third-party online generators."
+msgstr ""
+
+#: includes/class-task-registry.php:112
+msgid "Verifies that a full database & file backup exists within the last 24–48 hours (UpdraftPlus, WPvivid, or host snapshot)."
+msgstr ""
+
+#: admin/views/modal-reauth.php:61
+msgid "Verify & Proceed"
+msgstr ""
+
+#: includes/class-task-registry.php:111
+msgid "Verify Recent Site Backup"
+msgstr ""
+
+#: includes/class-task-registry.php:883
+msgid "Verify Staging Site Auth Protection"
+msgstr ""
+
+#: includes/class-task-registry.php:914
+msgid "Verify security alert notifications from Wordfence route to designated agency monitoring inbox."
+msgstr ""
+
+#: site-checkup-pro.php:126
+msgid "Version 1.0 of Site Checkup Pro is configured for single-site audits. Network-wide operations are restricted to Super Administrators."
+msgstr ""
+
+#: includes/class-task-registry.php:1073
+msgid "Version query strings remain enabled."
+msgstr ""
+
+#: includes/class-task-registry.php:1073
+msgid "Version strings stripped from enqueued assets."
+msgstr ""
+
+#: includes/class-scheduler.php:175
+msgid "View Check-up Dashboard"
+msgstr ""
+
+#: rest-api/class-rest-controller.php:1045
+#: rest-api/class-rest-controller.php:1059
+msgid "Vulnerability module unavailable."
+msgstr ""
+
+#: includes/class-scanner.php:711
+msgid "WP_DEBUG_DISPLAY or display_errors is enabled, exposing database errors and stack traces to visitors."
+msgstr ""
+
+#: includes/class-session-manager.php:108
+#: includes/class-session-manager.php:164
+msgid "WP_Session_Tokens not available."
+msgstr ""
+
+#: includes/class-backup-guard.php:110
+msgid "WPvivid is active, but no completed backups were found."
+msgstr ""
+
+#: includes/class-plugin-integrity.php:395
+msgid "Warning: %d plugin(s) appear to be removed or closed on WordPress.org."
+msgstr ""
+
+#: includes/class-scanner.php:139
+msgid "Warning: %d untrusted administrator account(s) detected since last baseline!"
+msgstr ""
+
+#: includes/class-scanner.php:529
+msgid "Warning: File %1$s has executable/relaxed permissions (%2$s). Target baseline is 0644."
+msgstr ""
+
+#: includes/class-scanner.php:497
+msgid "Warning: wp-config.php permissions (%s) exceed recommended baseline (0640 or 0600)."
+msgstr ""
+
+#: includes/integrations/class-wordfence-bridge.php:82
+msgid "Web Application Firewall (WAF)"
+msgstr ""
+
+#: admin/views/modal-nginx.php:33
+msgid "Web Server: Nginx"
+msgstr ""
+
+#: admin/views/modal-delete-plugin.php:42
+#: admin/views/modal-login-rename.php:56
+msgid "What Will Change"
+msgstr ""
+
+#: admin/views/modal-delete-plugin.php:46
+#: admin/views/modal-login-rename.php:60
+msgid "Why It Matters"
+msgstr ""
+
+#: includes/class-scanner.php:400
+msgid "WordPress %1$s, PHP %2$s. SSL: %3$s."
+msgstr ""
+
+#: includes/class-task-registry.php:1124
+msgid "WordPress Core Files Checksum Scan"
+msgstr ""
+
+#: includes/class-task-registry.php:1047
+msgid "WordPress generator tag is currently public."
+msgstr ""
+
+#: includes/class-task-registry.php:1047
+msgid "WordPress generator tag is removed."
+msgstr ""
+
+#: includes/class-task-registry.php:1056
+msgid "WordPress generator tag restored."
+msgstr ""
+
+#: includes/class-task-registry.php:1052
+msgid "WordPress generator version hidden."
+msgstr ""
+
+#: includes/class-task-registry.php:913
+msgid "Wordfence Email Alert Routing"
+msgstr ""
+
+#: includes/class-task-registry.php:163
+msgid "Wordfence Firewall & Scanner"
+msgstr ""
+
+#: includes/integrations/class-wordfence-bridge.php:109
+msgid "Wordfence is active (%s). Review agency recommended settings."
+msgstr ""
+
+#: includes/integrations/class-wordfence-bridge.php:59
+msgid "Wordfence is not active. Install and activate it to enable web application firewall and malware scanning."
+msgstr ""
+
+#: includes/class-task-registry.php:516
+msgid "X-Content-Type-Options nosniff active."
+msgstr ""
+
+#: includes/class-task-registry.php:483
+msgid "X-Frame-Options SAMEORIGIN active in .htaccess."
+msgstr ""
+
+#: includes/class-task-registry.php:402
+msgid "XML-RPC filter deactivated."
+msgstr ""
+
+#: includes/class-task-registry.php:395
+msgid "XML-RPC is currently enabled."
+msgstr ""
+
+#: includes/class-task-registry.php:395
+msgid "XML-RPC is disabled via core filters."
+msgstr ""
+
+#: includes/class-task-registry.php:399
+msgid "XML-RPC runtime filter activated."
+msgstr ""
+
+#: admin/views/modal-delete-plugin.php:31
+msgid "You are about to remove an obsolete development, migration, or unused plugin from this installation."
+msgstr ""
+
+#: rest-api/class-rest-controller.php:716
+msgid "You cannot inspect sessions for other users."
+msgstr ""
+
+#: rest-api/class-rest-controller.php:322
+msgid "You do not have administrative permissions to access Site Checkup Pro."
+msgstr ""
+
+#: includes/class-scheduler.php:171
+msgid "You have %d recurring security task(s) or password rotations due today."
+msgstr ""
+
+#: admin/views/dashboard.php:86
+msgid "You have successfully run %d security hardening and audit checks. If this plugin saves you time and secures your sites, leaving a quick review on WordPress.org helps us immensely!"
+msgstr ""
+
+#: includes/class-integrity-monitor.php:179
+msgid "Zero executable PHP/phar scripts discovered in /wp-content/uploads/."
+msgstr ""
+
+#: admin/views/modal-login-rename.php:48
+msgid "Zero query-string backdoors are permitted. If you ever lose access to your custom slug, add this recovery constant to wp-config.php via SSH or FTP:"
+msgstr ""
+
+#: includes/class-plugin-integrity.php:274
+msgid "ZipArchive extension is required for restoration."
+msgstr ""
+
+#: admin/views/modal-settings.php:80
+msgid "e.g. Contact 24/7 hosting desk, access 1Password Emergency Vault for root credentials."
+msgstr ""
+
+#: includes/class-scanner.php:183
+msgid "home URL changed from %1$s to %2$s"
+msgstr ""
+
+#: includes/class-scanner.php:631
+msgid "open_basedir is not configured in php.ini, allowing filesystem traversal outside site root if a breach occurs."
+msgstr ""
+
+#: includes/class-security-txt.php:204
+msgid "security.txt file does not exist."
+msgstr ""
+
+#: includes/class-security-txt.php:221
+msgid "security.txt file was removed."
+msgstr ""
+
+#: includes/class-scanner.php:227
+msgid "siteurl and home match baseline. No suspicious autoload bloat detected."
+msgstr ""
+
+#: includes/class-scanner.php:174
+msgid "siteurl changed from %1$s to %2$s"
+msgstr ""
+
+#: includes/class-wp-config-manager.php:90
+msgid "wp-config.php is not writable or could not be located."
+msgstr ""
+
+#: includes/class-wp-config-manager.php:169
+msgid "wp-config.php is not writable."
+msgstr ""
+
+#: includes/class-task-registry.php:235
+msgid "wp_options Integrity & Autoload Scan"
+msgstr ""
+
+#: includes/class-task-registry.php:651
+msgid "xmlrpc.php blocked at server level."
+msgstr ""
+
+#: includes/integrations/class-backup-bridge.php:48
+msgid "your backup plugin"
+msgstr ""

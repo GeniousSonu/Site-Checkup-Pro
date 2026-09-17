@@ -1,10 +1,13 @@
 <?php
 /**
- * Modal: Nginx Directive View
+* Modal: Nginx Directive View
  *
  * Displays equivalent Nginx configuration for hosts running Nginx web servers.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

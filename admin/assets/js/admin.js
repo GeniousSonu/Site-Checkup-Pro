@@ -42,6 +42,7 @@
 		cacheDom();
 		bindEvents();
 		loadTasks();
+		initReviewPrompt();
 	}
 
 	/**
@@ -133,6 +134,21 @@
 
 		dom.modalCspReports = document.getElementById('wpsg-modal-csp-reports');
 		dom.cspTbody = document.getElementById('wpsg-csp-tbody');
+
+		// Settings Modal
+		dom.btnOpenSettings = document.getElementById('wpsg-btn-open-settings');
+		dom.modalSettings = document.getElementById('wpsg-modal-settings');
+		dom.btnCloseSettings = document.getElementById('wpsg-btn-close-settings');
+		dom.btnCancelSettings = document.getElementById('wpsg-btn-cancel-settings');
+		dom.btnSaveSettings = document.getElementById('wpsg-btn-save-settings');
+		dom.settingPatchstackKey = document.getElementById('wpsg-setting-patchstack-key');
+		dom.patchstackMaskedStatus = document.getElementById('wpsg-patchstack-masked-status');
+		dom.settingIncidentName = document.getElementById('wpsg-setting-incident-name');
+		dom.settingIncidentEmail = document.getElementById('wpsg-setting-incident-email');
+		dom.settingIncidentPhone = document.getElementById('wpsg-setting-incident-phone');
+		dom.settingIncidentNotes = document.getElementById('wpsg-setting-incident-notes');
+		dom.settingAgencyName = document.getElementById('wpsg-setting-agency-name');
+		dom.settingsSaveStatus = document.getElementById('wpsg-settings-save-status');
 	}
 
 	/**
@@ -291,6 +307,20 @@
 		// Destroy Other Sessions Button
 		if (dom.btnDestroyOtherSessions) {
 			dom.btnDestroyOtherSessions.addEventListener('click', destroyOtherSessions);
+		}
+
+		// Settings Modal Events
+		if (dom.btnOpenSettings) {
+			dom.btnOpenSettings.addEventListener('click', openSettingsModal);
+		}
+		if (dom.btnCloseSettings) {
+			dom.btnCloseSettings.addEventListener('click', closeAllModals);
+		}
+		if (dom.btnCancelSettings) {
+			dom.btnCancelSettings.addEventListener('click', closeAllModals);
+		}
+		if (dom.btnSaveSettings) {
+			dom.btnSaveSettings.addEventListener('click', saveSettings);
 		}
 	}
 
@@ -1331,12 +1361,78 @@
 	}
 
 	function closeAllModals() {
-		document.querySelectorAll('.wpsg-modal-overlay').forEach(m => {
+		document.querySelectorAll('.wpsg-modal-overlay, .wpsg-modal-backdrop').forEach(m => {
 			m.style.display = 'none';
 		});
 		state.pendingActionTask = null;
 		if (dom.inputLoginConfirm) dom.inputLoginConfirm.value = '';
 		if (dom.btnConfirmLoginRename) dom.btnConfirmLoginRename.disabled = true;
+	}
+
+	/**
+	 * Settings Modal Operations
+	 */
+	async function openSettingsModal() {
+		if (!dom.modalSettings) return;
+		openModal(dom.modalSettings);
+		if (dom.settingsSaveStatus) dom.settingsSaveStatus.textContent = 'Loading settings...';
+		try {
+			const res = await wp.apiFetch({ path: '/site-checkup-pro/v1/settings' });
+			if (res && res.settings) {
+				if (dom.settingPatchstackKey) dom.settingPatchstackKey.value = '';
+				if (dom.patchstackMaskedStatus) {
+					dom.patchstackMaskedStatus.textContent = res.settings.has_patchstack_key
+						? `Current Key: ${res.settings.patchstack_api_key_masked}`
+						: 'No API key set (default checks active).';
+				}
+				if (dom.settingIncidentName) dom.settingIncidentName.value = res.settings.incident_contact_name || '';
+				if (dom.settingIncidentEmail) dom.settingIncidentEmail.value = res.settings.incident_contact_email || '';
+				if (dom.settingIncidentPhone) dom.settingIncidentPhone.value = res.settings.incident_contact_phone || '';
+				if (dom.settingIncidentNotes) dom.settingIncidentNotes.value = res.settings.incident_contact_notes || '';
+				if (dom.settingAgencyName) dom.settingAgencyName.value = res.settings.agency_name || '';
+				if (dom.settingsSaveStatus) dom.settingsSaveStatus.textContent = '';
+			}
+		} catch (e) {
+			if (dom.settingsSaveStatus) dom.settingsSaveStatus.textContent = 'Error loading settings.';
+		}
+	}
+
+	async function saveSettings() {
+		if (!dom.btnSaveSettings) return;
+		const orig = dom.btnSaveSettings.innerHTML;
+		dom.btnSaveSettings.disabled = true;
+		dom.btnSaveSettings.innerHTML = '<span class="wpsg-spinner" aria-hidden="true"></span> Saving...';
+		if (dom.settingsSaveStatus) dom.settingsSaveStatus.textContent = '';
+
+		const payload = {};
+		if (dom.settingPatchstackKey && dom.settingPatchstackKey.value.trim()) {
+			payload.patchstack_api_key = dom.settingPatchstackKey.value.trim();
+		}
+		if (dom.settingIncidentName) payload.incident_contact_name = dom.settingIncidentName.value.trim();
+		if (dom.settingIncidentEmail) payload.incident_contact_email = dom.settingIncidentEmail.value.trim();
+		if (dom.settingIncidentPhone) payload.incident_contact_phone = dom.settingIncidentPhone.value.trim();
+		if (dom.settingIncidentNotes) payload.incident_contact_notes = dom.settingIncidentNotes.value.trim();
+		if (dom.settingAgencyName) payload.agency_name = dom.settingAgencyName.value.trim();
+
+		try {
+			const res = await wp.apiFetch({
+				path: '/site-checkup-pro/v1/settings',
+				method: 'POST',
+				data: payload,
+			});
+			if (res && res.success) {
+				if (dom.settingsSaveStatus) dom.settingsSaveStatus.textContent = 'Settings saved!';
+				setTimeout(() => {
+					closeAllModals();
+					loadTasks();
+				}, 600);
+			}
+		} catch (e) {
+			if (dom.settingsSaveStatus) dom.settingsSaveStatus.textContent = e.message || 'Failed to save settings.';
+		} finally {
+			dom.btnSaveSettings.disabled = false;
+			dom.btnSaveSettings.innerHTML = orig;
+		}
 	}
 
 	/**
@@ -1358,6 +1454,39 @@
 			return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 		} catch (e) {
 			return dateStr;
+		}
+	}
+
+	function initReviewPrompt() {
+		const promptEl = document.getElementById('wpsg-review-prompt');
+		if (!promptEl) return;
+
+		const dismissHandler = async () => {
+			promptEl.style.display = 'none';
+			try {
+				await fetch(`${apiBase}/review-prompt/dismiss`, {
+					method: 'POST',
+					headers: { 'X-WP-Nonce': nonce },
+				});
+			} catch (e) {
+				console.error('Failed to dismiss review prompt:', e);
+			}
+		};
+
+		const btnNow = document.getElementById('wpsg-btn-review-now');
+		const btnAlready = document.getElementById('wpsg-btn-review-already');
+		const btnDismiss = document.getElementById('wpsg-btn-review-dismiss');
+
+		if (btnNow) {
+			btnNow.addEventListener('click', () => {
+				setTimeout(dismissHandler, 500);
+			});
+		}
+		if (btnAlready) {
+			btnAlready.addEventListener('click', dismissHandler);
+		}
+		if (btnDismiss) {
+			btnDismiss.addEventListener('click', dismissHandler);
 		}
 	}
 

@@ -1,10 +1,13 @@
 <?php
 /**
- * Event-Driven Alert Dispatcher & Webhook Router
+* Event-Driven Alert Dispatcher & Webhook Router
  *
  * Dispatches notifications for security events via wp_mail and SSRF-hardened webhooks.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

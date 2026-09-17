@@ -4,7 +4,9 @@
  *
  * Registers all checklist tasks from the agency Security Check-up SOP.
  *
- * @package SiteCheckupPro
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 
@@ -184,6 +186,20 @@ class WPSG_Task_Registry {
 			),
 		) ) );
 
+		// 1.5 Vulnerability Intelligence (Patchstack CVE Database)
+		$this->register( new WPSG_Task( array(
+			'id'               => 'vulnerability_database_check',
+			'section'          => 'security_update',
+			'title'            => __( 'Scan Vulnerability Database (Patchstack CVE)', 'site-checkup-pro' ),
+			'description'      => __( 'Cross-references installed plugins and themes against the Patchstack vulnerability database with match-confidence scoring. Cached 24h.', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'instant',
+			'status_callback'  => array( 'WPSG_Vulnerability_Checker', 'get_vulnerability_status' ),
+			'run_callback'     => function () {
+				return WPSG_Vulnerability_Checker::get_vulnerability_status( true );
+			},
+		) ) );
+
 		// ==========================================
 		// SECTION 2: GENERAL CHECK
 		// ==========================================
@@ -287,6 +303,76 @@ class WPSG_Task_Registry {
 			'status_callback'  => array( 'WPSG_Child_Theme', 'get_status' ),
 			'run_callback'     => array( 'WPSG_Child_Theme', 'scaffold' ),
 			'undo_callback'    => array( 'WPSG_Child_Theme', 'undo' ),
+		) ) );
+
+		// 2.9 File Permissions Audit (wp-config <= 0640, 0644/0755)
+		$this->register( new WPSG_Task( array(
+			'id'               => 'file_permissions_audit',
+			'section'          => 'general_check',
+			'title'            => __( 'File Permissions Audit (wp-config 640, 644/755)', 'site-checkup-pro' ),
+			'description'      => __( 'Audits key files and directories against strict permission baselines (wp-config.php <= 0640, root files <= 0644, directories <= 0755) and flags world-writable bits.', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'instant',
+			'status_callback'  => array( 'WPSG_Scanner', 'audit_file_permissions' ),
+			'run_callback'     => function () {
+				return WPSG_Scanner::audit_file_permissions( true );
+			},
+		) ) );
+
+		// 2.10 PHP Security Restrictions (disable_functions & open_basedir)
+		$this->register( new WPSG_Task( array(
+			'id'               => 'php_server_restrictions',
+			'section'          => 'general_check',
+			'title'            => __( 'PHP Security Restrictions (disable_functions & open_basedir)', 'site-checkup-pro' ),
+			'description'      => __( 'Audits php.ini to detect if dangerous execution functions (exec, shell_exec, system, passthru) are disabled and whether open_basedir is active.', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'instant',
+			'status_callback'  => array( 'WPSG_Scanner', 'check_php_server_restrictions' ),
+			'run_callback'     => function () {
+				return WPSG_Scanner::check_php_server_restrictions( true );
+			},
+		) ) );
+
+		// 2.11 Database Table Prefix Detection
+		$this->register( new WPSG_Task( array(
+			'id'               => 'db_prefix_check',
+			'section'          => 'general_check',
+			'title'            => __( 'Database Table Prefix Detection', 'site-checkup-pro' ),
+			'description'      => __( 'Checks whether database tables use the default "wp_" prefix or a custom prefix to resist automated SQL injection scripts.', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'instant',
+			'status_callback'  => array( 'WPSG_Scanner', 'check_db_prefix' ),
+			'run_callback'     => function () {
+				return WPSG_Scanner::check_db_prefix( true );
+			},
+		) ) );
+
+		// 2.12 TLS Protocol & Certificate Chain Depth Probe
+		$this->register( new WPSG_Task( array(
+			'id'               => 'tls_cert_depth_check',
+			'section'          => 'general_check',
+			'title'            => __( 'TLS Protocol & Certificate Chain Depth Probe', 'site-checkup-pro' ),
+			'description'      => __( 'Actively probes server support for legacy TLS 1.0 and 1.1 protocols and verifies intermediate certificate chain completeness.', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'instant',
+			'status_callback'  => array( 'WPSG_Scanner', 'check_tls_and_cert_depth' ),
+			'run_callback'     => function () {
+				return WPSG_Scanner::check_tls_and_cert_depth( true );
+			},
+		) ) );
+
+		// 2.13 Domain Email Authentication (SPF & DMARC)
+		$this->register( new WPSG_Task( array(
+			'id'               => 'email_domain_auth_check',
+			'section'          => 'general_check',
+			'title'            => __( 'Domain Email Authentication (SPF & DMARC)', 'site-checkup-pro' ),
+			'description'      => __( 'Informational DNS query verifying SPF and DMARC records for the sending domain to prevent email spoofing and spam folder placement.', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'instant',
+			'status_callback'  => array( 'WPSG_Scanner', 'check_domain_email_auth' ),
+			'run_callback'     => function () {
+				return WPSG_Scanner::check_domain_email_auth( true );
+			},
 		) ) );
 
 		// ==========================================
@@ -664,6 +750,43 @@ class WPSG_Task_Registry {
 			),
 		) ) );
 
+		// 3.13 Disable Front-End Debug Output (WP_DEBUG_DISPLAY)
+		$this->register( new WPSG_Task( array(
+			'id'               => 'wp_debug_display_check',
+			'section'          => 'hardening',
+			'title'            => __( 'Disable Front-End Debug Output (WP_DEBUG_DISPLAY)', 'site-checkup-pro' ),
+			'description'      => __( 'Prevents database errors and PHP warnings from displaying on the front-end to site visitors by setting WP_DEBUG_DISPLAY to false in wp-config.php.', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'writes_files',
+			'requires_backup'  => true,
+			'has_undo'         => true,
+			'has_diff'         => true,
+			'status_callback'  => array( 'WPSG_Scanner', 'check_wp_debug_display' ),
+			'diff_callback'    => function () {
+				return WPSG_Wp_Config_Manager::get_diff_preview( array( 'WP_DEBUG_DISPLAY' => false ) );
+			},
+			'run_callback'     => function () {
+				return WPSG_Wp_Config_Manager::update_constants( array( 'WP_DEBUG_DISPLAY' => false ) );
+			},
+			'undo_callback'    => function () {
+				return WPSG_Wp_Config_Manager::update_constants( array( 'WP_DEBUG_DISPLAY' => true ) );
+			},
+		) ) );
+
+		// 3.14 Security Disclosure Policy (security.txt)
+		$this->register( new WPSG_Task( array(
+			'id'               => 'security_txt_check',
+			'section'          => 'hardening',
+			'title'            => __( 'Security Disclosure Policy (security.txt)', 'site-checkup-pro' ),
+			'description'      => __( 'Verifies and generates RFC 9116 responsible disclosure contact information at /.well-known/security.txt inside the document root.', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'writes_files',
+			'has_undo'         => true,
+			'status_callback'  => array( 'WPSG_Security_Txt', 'check_status' ),
+			'run_callback'     => array( 'WPSG_Security_Txt', 'generate' ),
+			'undo_callback'    => array( 'WPSG_Security_Txt', 'undo' ),
+		) ) );
+
 		// ==========================================
 		// SECTION 4: SEO SOP
 		// ==========================================
@@ -791,6 +914,46 @@ class WPSG_Task_Registry {
 			'description'      => __( 'Verify security alert notifications from Wordfence route to designated agency monitoring inbox.', 'site-checkup-pro' ),
 			'automation_level' => 'C',
 			'sub_type'         => 'manual',
+		) ) );
+
+		// 5.5 Quarterly Backup Restore Test
+		$this->register( new WPSG_Task( array(
+			'id'               => 'backup_restore_test',
+			'section'          => 'regular_checks',
+			'title'            => __( 'Quarterly Backup Restore Test (90d)', 'site-checkup-pro' ),
+			'description'      => __( 'Untested backups are worthless. Conduct a quarterly rehearsal restoring a database and file backup to a staging environment.', 'site-checkup-pro' ),
+			'automation_level' => 'C',
+			'sub_type'         => 'manual',
+		) ) );
+
+		// 5.6 Domain, SSL & Hosting Expiry Audit
+		$this->register( new WPSG_Task( array(
+			'id'               => 'domain_ssl_hosting_expiry',
+			'section'          => 'regular_checks',
+			'title'            => __( 'Domain, SSL & Hosting Expiry Audit (90d)', 'site-checkup-pro' ),
+			'description'      => __( 'Quarterly review of domain registration, auto-renewal status, SSL certificate validity, and hosting plan limits.', 'site-checkup-pro' ),
+			'automation_level' => 'C',
+			'sub_type'         => 'manual',
+		) ) );
+
+		// 5.7 Incident Response Contact Sheet
+		$this->register( new WPSG_Task( array(
+			'id'               => 'incident_response_contact',
+			'section'          => 'regular_checks',
+			'title'            => __( 'Incident Response Emergency Contact Sheet', 'site-checkup-pro' ),
+			'description'      => __( 'Record emergency contact details and escalation protocols in the event of a security incident. Surfaced on client reports.', 'site-checkup-pro' ),
+			'automation_level' => 'C',
+			'sub_type'         => 'manual',
+			'status_callback'  => function () {
+				$s = get_option( 'wpsg_settings', array() );
+				$has_contact = ! empty( $s['incident_contact_email'] ) || ! empty( $s['incident_contact_phone'] );
+				return array(
+					'status'  => $has_contact ? 'done' : 'attention',
+					'message' => $has_contact
+						? sprintf( __( 'Incident contact configured: %s', 'site-checkup-pro' ), esc_html( ! empty( $s['incident_contact_name'] ) ? $s['incident_contact_name'] : $s['incident_contact_email'] ) )
+						: __( 'No emergency incident contact details recorded. Update in Settings.', 'site-checkup-pro' ),
+				);
+			},
 		) ) );
 
 		// ==========================================
@@ -1147,6 +1310,15 @@ class WPSG_Task_Registry {
 			'automation_level' => 'D',
 			'sub_type'         => 'report',
 		) ) );
+
+		/**
+		 * Fires after all built-in tasks are registered.
+		 * Allows a future Pro add-on plugin (or custom agency integration)
+		 * to register additional tasks dynamically via $registry->register().
+		 *
+		 * @param WPSG_Task_Registry $this Task registry instance.
+		 */
+		do_action( 'wpsg_register_tasks', $this );
 	}
 
 	/**

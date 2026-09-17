@@ -1,0 +1,26 @@
+{
+  "name": "Site Checkup Pro",
+  "slug": "site-checkup-pro",
+  "version": "1.0.0",
+  "homepage": "https://www.genioussonu.me/plugin/site-checkup-pro/",
+  "download_url": "https://github.com/GeniousSonu/site-checkup-pro/releases/latest/download/site-checkup-pro.zip",
+  "requires": "5.8",
+  "tested": "6.7",
+  "requires_php": "7.4",
+  "last_updated": "2026-09-17",
+  "author": "<a href=\"https://www.genioussonu.me/\">SK Sahinur Islam</a>",
+  "author_homepage": "https://www.genioussonu.me/",
+  "sections": {
+    "description": "Complete security audit, site hardening checklist, and vulnerability scanner for WordPress. One-click safe hardening, login protection, and client reports.",
+    "changelog": "<h4>1.0.0</h4><ul><li>Initial public release.</li><li>56 security audit and hardening checklist tasks.</li><li>Multi-protocol TLS probe and certificate depth analysis.</li><li>Strict file permissions audit and RFC 9116 security.txt generator.</li><li>Patchstack vulnerability database intelligence.</li></ul>",
+    "installation": "<ol><li>Upload the <code>site-checkup-pro.zip</code> file via Plugins &rarr; Add New &rarr; Upload Plugin.</li><li>Activate the plugin.</li><li>Open the <strong>Site Checkup</strong> menu in your WordPress dashboard.</li></ol>"
+  },
+  "banners": {
+    "low": "https://www.genioussonu.me/plugin/site-checkup-pro/assets/banner-772x250.png",
+    "high": "https://www.genioussonu.me/plugin/site-checkup-pro/assets/banner-1544x500.png"
+  },
+  "icons": {
+    "1x": "https://www.genioussonu.me/plugin/site-checkup-pro/assets/icon-128x128.png",
+    "2x": "https://www.genioussonu.me/plugin/site-checkup-pro/assets/icon-256x256.png"
+  }
+}

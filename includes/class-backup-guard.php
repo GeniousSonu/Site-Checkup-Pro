@@ -1,10 +1,13 @@
 <?php
 /**
- * Backup Guard & Recency Verifier
+* Backup Guard & Recency Verifier
  *
  * Enforces a 24-48 hour recency check before executing high-risk or file-modifying tasks.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

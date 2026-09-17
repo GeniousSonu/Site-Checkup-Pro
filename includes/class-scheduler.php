@@ -1,11 +1,14 @@
 <?php
 /**
- * WP-Cron Scheduler & Reminder Manager
+* WP-Cron Scheduler & Reminder Manager
  *
  * Handles 15-day credential rotations, 6-month GSC reminders, 12-month audit log pruning,
  * and dashboard notification notices.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

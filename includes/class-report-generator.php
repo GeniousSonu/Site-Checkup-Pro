@@ -3,9 +3,11 @@
  * Client-Facing SOP Coverage Report Generator
  *
  * Generates an executive audit report of SOP checklist completion,
- * hardened security controls, and pending maintenance tasks.
+ * hardened security controls, pending maintenance tasks, and incident response contacts.
  *
- * @package SiteCheckupPro
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 
@@ -68,19 +70,27 @@ class WPSG_Report_Generator {
 		$recent_logs  = WPSG_Audit_Log::get_logs( 25 );
 		$settings     = get_option( 'wpsg_settings', array() );
 
+		$incident_contact = array(
+			'name'  => ! empty( $settings['incident_contact_name'] ) ? $settings['incident_contact_name'] : '',
+			'email' => ! empty( $settings['incident_contact_email'] ) ? $settings['incident_contact_email'] : '',
+			'phone' => ! empty( $settings['incident_contact_phone'] ) ? $settings['incident_contact_phone'] : '',
+			'notes' => ! empty( $settings['incident_contact_notes'] ) ? $settings['incident_contact_notes'] : '',
+		);
+
 		return array(
-			'site_name'     => get_bloginfo( 'name' ),
-			'site_url'      => home_url(),
-			'generated_at'  => current_time( 'F j, Y, g:i a' ),
-			'agency_name'   => ! empty( $settings['agency_name'] ) ? $settings['agency_name'] : get_bloginfo( 'name' ) . ' Security Team',
-			'coverage_pct'  => $coverage_pct,
-			'total_tasks'   => $total_count,
-			'done_tasks'    => $done_count,
-			'completed'     => $completed,
-			'manual_done'   => $manual_done,
-			'attention'     => $attention,
-			'pending'       => $pending,
-			'audit_logs'    => $recent_logs,
+			'site_name'        => get_bloginfo( 'name' ),
+			'site_url'         => home_url(),
+			'generated_at'     => current_time( 'F j, Y, g:i a' ),
+			'agency_name'      => ! empty( $settings['agency_name'] ) ? $settings['agency_name'] : get_bloginfo( 'name' ) . ' Security Team',
+			'coverage_pct'     => $coverage_pct,
+			'total_tasks'      => $total_count,
+			'done_tasks'       => $done_count,
+			'completed'        => $completed,
+			'manual_done'      => $manual_done,
+			'attention'        => $attention,
+			'pending'          => $pending,
+			'audit_logs'       => $recent_logs,
+			'incident_contact' => $incident_contact,
 		);
 	}
 }

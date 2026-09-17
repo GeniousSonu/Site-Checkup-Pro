@@ -1,12 +1,15 @@
 <?php
 /**
- * Login Guard, Progressive Throttling & Honeypot Protection
+* Login Guard, Progressive Throttling & Honeypot Protection
  *
  * Implements atomic DB-level lockout counting, trusted-proxy header validation,
  * case-normalized SHA-256 rate keys, generic login error masking, honeypots,
  * and secondary global per-username brute-force defense.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 
@@ -296,6 +299,9 @@ class WPSG_Login_Guard {
 	 */
 	public static function check_lockout( $rate_key ) {
 		global $wpdb;
+		if ( empty( $wpdb ) || ! is_object( $wpdb ) ) {
+			return array( 'is_locked' => false, 'remaining_seconds' => 0 );
+		}
 
 		$table_name = $wpdb->prefix . 'wpsg_rate_limits';
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching

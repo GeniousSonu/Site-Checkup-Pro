@@ -1,11 +1,14 @@
 <?php
 /**
- * Server-Side Request Forgery (SSRF) & DNS Rebinding Guard
+* Server-Side Request Forgery (SSRF) & DNS Rebinding Guard
  *
  * Provides strict multi-IP IPv4/IPv6 validation, cloud-metadata protection,
  * CURLOPT_RESOLVE IP pinning, and redirect blocking.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

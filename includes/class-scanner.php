@@ -1,11 +1,13 @@
 <?php
 /**
- * Scanner with Baseline Drift Detection
+ * Scanner with Baseline Drift Detection & Server Auditing
  *
- * Checks for rogue admins, wp_options tampering, mu-plugins, exposed backup files, and system health.
- * Alerts only on drift from an accepted baseline.
+ * Checks for rogue admins, wp_options tampering, mu-plugins, exposed backup files,
+ * file permissions (640 wp-config), PHP restrictions, DB prefix, TLS depth, and domain email health.
  *
- * @package SiteCheckupPro
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 
@@ -452,5 +454,493 @@ class WPSG_Scanner {
 
 		$days = (int) round( ( $cert['validTo_time_t'] - time() ) / 86400 );
 		return max( 0, $days );
+	}
+
+	/**
+	 * Audit file and directory permissions against strict security baselines.
+	 * Strict baseline: wp-config.php <= 0640 (or 0600), other root files <= 0644, directories <= 0755.
+	 * Strictly flags any world-writable bit (& 0002).
+	 *
+	 * @param bool $force_refresh Whether to bypass transient cache.
+	 * @return array
+	 */
+	public static function audit_file_permissions( $force_refresh = false ) {
+		$cache_key = 'wpsg_file_perms_cache';
+		if ( ! $force_refresh ) {
+			$cached = get_transient( $cache_key );
+			if ( false !== $cached && is_array( $cached ) ) {
+				return $cached;
+			}
+		}
+
+		$webroot = ABSPATH;
+		$issues  = array();
+
+		// 1. Audit wp-config.php (Strict baseline: 0640 or 0600)
+		$config_path = WPSG_Wp_Config_Manager::get_config_path();
+		if ( $config_path && file_exists( $config_path ) ) {
+			$perms       = fileperms( $config_path ) & 0777;
+			$perms_octal = sprintf( '%04o', $perms );
+
+			if ( ( $perms & 0002 ) !== 0 ) {
+				$issues[] = array(
+					'path'     => 'wp-config.php',
+					'perms'    => $perms_octal,
+					'severity' => 'critical',
+					'message'  => sprintf( __( 'Critical: wp-config.php is world-writable (%s). Permissions must be 0640 or 0600.', 'site-checkup-pro' ), $perms_octal ),
+				);
+			} elseif ( $perms > 0640 ) {
+				$issues[] = array(
+					'path'     => 'wp-config.php',
+					'perms'    => $perms_octal,
+					'severity' => 'attention',
+					'message'  => sprintf( __( 'Warning: wp-config.php permissions (%s) exceed recommended baseline (0640 or 0600).', 'site-checkup-pro' ), $perms_octal ),
+				);
+			}
+		}
+
+		// 2. Audit Key Root Files (Baseline: <= 0644; flag 0755/0777 or world-writable)
+		$root_files = array(
+			'.htaccess'       => WPSG_Htaccess_Manager::get_htaccess_path(),
+			'index.php'       => $webroot . 'index.php',
+			'wp-login.php'    => $webroot . 'wp-login.php',
+			'wp-cron.php'     => $webroot . 'wp-cron.php',
+			'wp-settings.php' => $webroot . 'wp-settings.php',
+		);
+
+		foreach ( $root_files as $name => $path ) {
+			if ( file_exists( $path ) ) {
+				$perms       = fileperms( $path ) & 0777;
+				$perms_octal = sprintf( '%04o', $perms );
+
+				if ( ( $perms & 0002 ) !== 0 ) {
+					$issues[] = array(
+						'path'     => $name,
+						'perms'    => $perms_octal,
+						'severity' => 'critical',
+						'message'  => sprintf( __( 'Critical: %1$s is world-writable (%2$s). Target baseline is 0644.', 'site-checkup-pro' ), $name, $perms_octal ),
+					);
+				} elseif ( ( $perms & 0111 ) !== 0 || $perms > 0644 ) {
+					// Flag execution bit on root files or permissions above 0644 (e.g. 0755 on files)
+					$issues[] = array(
+						'path'     => $name,
+						'perms'    => $perms_octal,
+						'severity' => 'attention',
+						'message'  => sprintf( __( 'Warning: File %1$s has executable/relaxed permissions (%2$s). Target baseline is 0644.', 'site-checkup-pro' ), $name, $perms_octal ),
+					);
+				}
+			}
+		}
+
+		// 3. Audit Key Directories (Baseline: <= 0755; flag 0777 or world-writable)
+		$uploads   = wp_upload_dir();
+		$dirs_to_check = array(
+			'wp-content'         => WP_CONTENT_DIR,
+			'wp-content/plugins' => WP_PLUGIN_DIR,
+			'wp-content/themes'  => get_theme_root(),
+			'wp-content/uploads' => $uploads['basedir'],
+			'wp-admin'           => $webroot . 'wp-admin',
+			'wp-includes'        => $webroot . WPINC,
+		);
+
+		foreach ( $dirs_to_check as $label => $dir_path ) {
+			if ( is_dir( $dir_path ) ) {
+				$perms       = fileperms( $dir_path ) & 0777;
+				$perms_octal = sprintf( '%04o', $perms );
+
+				if ( ( $perms & 0002 ) !== 0 || $perms > 0755 ) {
+					$issues[] = array(
+						'path'     => $label,
+						'perms'    => $perms_octal,
+						'severity' => ( ( $perms & 0002 ) !== 0 ) ? 'critical' : 'attention',
+						'message'  => sprintf( __( 'Directory %1$s has relaxed/world-writable permissions (%2$s). Baseline must be 0755 or stricter.', 'site-checkup-pro' ), $label, $perms_octal ),
+					);
+				}
+			}
+		}
+
+		$has_critical = false;
+		foreach ( $issues as $issue ) {
+			if ( 'critical' === $issue['severity'] ) {
+				$has_critical = true;
+				break;
+			}
+		}
+
+		$status = empty( $issues ) ? 'done' : ( $has_critical ? 'failed' : 'attention' );
+		$msg    = empty( $issues )
+			? __( 'File permissions verified against strict baselines (wp-config <= 0640, files 0644, directories 0755).', 'site-checkup-pro' )
+			: sprintf(
+				/* translators: %d: issue count */
+				__( '%d permission anomaly(s) detected across monitored files and directories.', 'site-checkup-pro' ),
+				count( $issues )
+			);
+
+		$result = array(
+			'status'       => $status,
+			'issues'       => $issues,
+			'message'      => $msg,
+			'last_checked' => current_time( 'mysql' ),
+		);
+
+		set_transient( $cache_key, $result, 12 * HOUR_IN_SECONDS );
+		return $result;
+	}
+
+	/**
+	 * Detect hosting PHP restrictions (disable_functions and open_basedir).
+	 * Report-only Level A check.
+	 *
+	 * @param bool $force_refresh Whether to bypass transient cache.
+	 * @return array
+	 */
+	public static function check_php_server_restrictions( $force_refresh = false ) {
+		$cache_key = 'wpsg_php_restrictions_cache';
+		if ( ! $force_refresh ) {
+			$cached = get_transient( $cache_key );
+			if ( false !== $cached && is_array( $cached ) ) {
+				return $cached;
+			}
+		}
+
+		$disabled_str = (string) ini_get( 'disable_functions' );
+		$disabled_arr = array_filter( array_map( 'trim', explode( ',', $disabled_str ) ) );
+
+		$dangerous_functions = array( 'exec', 'shell_exec', 'passthru', 'system', 'proc_open', 'popen' );
+		$unprotected         = array();
+
+		foreach ( $dangerous_functions as $func ) {
+			if ( ! in_array( $func, $disabled_arr, true ) ) {
+				$unprotected[] = $func;
+			}
+		}
+
+		$open_basedir = ini_get( 'open_basedir' );
+		$is_obd_set   = ! empty( $open_basedir );
+
+		$warnings = array();
+		if ( ! empty( $unprotected ) ) {
+			$warnings[] = sprintf(
+				/* translators: %s: list of dangerous functions */
+				__( 'Dangerous shell execution functions are active in php.ini: %s.', 'site-checkup-pro' ),
+				implode( ', ', $unprotected )
+			);
+		}
+
+		if ( ! $is_obd_set ) {
+			$warnings[] = __( 'open_basedir is not configured in php.ini, allowing filesystem traversal outside site root if a breach occurs.', 'site-checkup-pro' );
+		}
+
+		$status = empty( $warnings ) ? 'done' : 'attention';
+		$msg    = empty( $warnings )
+			? __( 'Server php.ini restrictions verified: critical execution functions disabled and open_basedir active.', 'site-checkup-pro' )
+			: implode( ' ', $warnings );
+
+		$result = array(
+			'status'             => $status,
+			'disabled_functions' => $disabled_arr,
+			'unprotected'        => $unprotected,
+			'open_basedir_set'   => $is_obd_set,
+			'open_basedir_value' => $open_basedir,
+			'message'            => $msg,
+			'last_checked'       => current_time( 'mysql' ),
+		);
+
+		set_transient( $cache_key, $result, 24 * HOUR_IN_SECONDS );
+		return $result;
+	}
+
+	/**
+	 * Check database table prefix (flag if still using default wp_).
+	 * Report-only Level A check.
+	 *
+	 * @param bool $force_refresh Whether to bypass transient cache.
+	 * @return array
+	 */
+	public static function check_db_prefix( $force_refresh = false ) {
+		$cache_key = 'wpsg_db_prefix_cache';
+		if ( ! $force_refresh ) {
+			$cached = get_transient( $cache_key );
+			if ( false !== $cached && is_array( $cached ) ) {
+				return $cached;
+			}
+		}
+
+		global $wpdb;
+		$prefix     = $wpdb->prefix;
+		$is_default = ( 'wp_' === $prefix );
+
+		$status  = $is_default ? 'attention' : 'done';
+		$message = $is_default
+			? sprintf( __( 'Database tables use the default prefix "%s". A customized prefix reduces automated SQLi payload targeting.', 'site-checkup-pro' ), $prefix )
+			: sprintf( __( 'Database prefix is customized ("%s"), offering resistance to automated generic table targeting.', 'site-checkup-pro' ), $prefix );
+
+		$result = array(
+			'status'       => $status,
+			'prefix'       => $prefix,
+			'is_default'   => $is_default,
+			'message'      => $message,
+			'last_checked' => current_time( 'mysql' ),
+		);
+
+		set_transient( $cache_key, $result, 24 * HOUR_IN_SECONDS );
+		return $result;
+	}
+
+	/**
+	 * Check front-end database and PHP error display (WP_DEBUG_DISPLAY).
+	 *
+	 * @param bool $force_refresh Whether to bypass transient cache.
+	 * @return array
+	 */
+	public static function check_wp_debug_display( $force_refresh = false ) {
+		$cache_key = 'wpsg_debug_display_cache';
+		if ( ! $force_refresh ) {
+			$cached = get_transient( $cache_key );
+			if ( false !== $cached && is_array( $cached ) ) {
+				return $cached;
+			}
+		}
+
+		$debug_display_const = defined( 'WP_DEBUG_DISPLAY' ) ? WP_DEBUG_DISPLAY : null;
+		$display_errors_ini  = ini_get( 'display_errors' );
+		$is_display_on       = ( true === $debug_display_const || '1' === $display_errors_ini || 'on' === strtolower( (string) $display_errors_ini ) );
+
+		$status  = $is_display_on ? 'attention' : 'done';
+		$message = $is_display_on
+			? __( 'WP_DEBUG_DISPLAY or display_errors is enabled, exposing database errors and stack traces to visitors.', 'site-checkup-pro' )
+			: __( 'Front-end debug display is disabled (WP_DEBUG_DISPLAY off), preventing sensitive database leakage.', 'site-checkup-pro' );
+
+		$result = array(
+			'status'         => $status,
+			'is_display_on'  => $is_display_on,
+			'debug_display'  => $debug_display_const,
+			'display_errors' => $display_errors_ini,
+			'message'        => $message,
+			'last_checked'   => current_time( 'mysql' ),
+		);
+
+		set_transient( $cache_key, $result, 12 * HOUR_IN_SECONDS );
+		return $result;
+	}
+
+	/**
+	 * Deep TLS Protocol & Certificate Chain Depth Probe.
+	 * Attempts separate connections forcing each protocol to detect if weak TLS 1.0 or 1.1 are still accepted.
+	 * Also validates intermediate certificate presence in the peer cert chain.
+	 *
+	 * @param bool $force_refresh Whether to bypass transient cache.
+	 * @return array
+	 */
+	public static function check_tls_and_cert_depth( $force_refresh = false ) {
+		$cache_key = 'wpsg_tls_depth_cache';
+		if ( ! $force_refresh ) {
+			$cached = get_transient( $cache_key );
+			if ( false !== $cached && is_array( $cached ) ) {
+				return $cached;
+			}
+		}
+
+		$host = wp_parse_url( home_url(), PHP_URL_HOST );
+		if ( ! $host || ! is_ssl() ) {
+			$result = array(
+				'status'       => 'failed',
+				'message'      => __( 'Site is not running over HTTPS. SSL/TLS depth inspection requires an active SSL connection.', 'site-checkup-pro' ),
+				'last_checked' => current_time( 'mysql' ),
+			);
+			set_transient( $cache_key, $result, 12 * HOUR_IN_SECONDS );
+			return $result;
+		}
+
+		// 1. Inspect Certificate Chain Completeness
+		$context = stream_context_create( array(
+			'ssl' => array(
+				'capture_peer_cert'       => true,
+				'capture_peer_cert_chain' => true,
+				'verify_peer'             => false,
+				'verify_peer_name'        => false,
+			),
+		) );
+
+		$client = @stream_socket_client( 'ssl://' . $host . ':443', $errno, $errstr, 5, STREAM_CLIENT_CONNECT, $context );
+		$chain_count = 0;
+		$cert_days   = false;
+
+		if ( $client ) {
+			$params = stream_context_get_params( $client );
+			fclose( $client );
+
+			if ( ! empty( $params['options']['ssl']['peer_certificate_chain'] ) && is_array( $params['options']['ssl']['peer_certificate_chain'] ) ) {
+				$chain_count = count( $params['options']['ssl']['peer_certificate_chain'] );
+			}
+
+			if ( ! empty( $params['options']['ssl']['peer_certificate'] ) ) {
+				$cert = openssl_x509_parse( $params['options']['ssl']['peer_certificate'] );
+				if ( isset( $cert['validTo_time_t'] ) ) {
+					$cert_days = max( 0, (int) round( ( $cert['validTo_time_t'] - time() ) / 86400 ) );
+				}
+			}
+		}
+
+		// 2. Multi-Protocol Separate Connection Probes
+		$protocol_methods = array();
+		if ( defined( 'STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT' ) ) {
+			$protocol_methods['TLSv1.0'] = STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT;
+		}
+		if ( defined( 'STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT' ) ) {
+			$protocol_methods['TLSv1.1'] = STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT;
+		}
+		if ( defined( 'STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT' ) ) {
+			$protocol_methods['TLSv1.2'] = STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT;
+		}
+		if ( defined( 'STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT' ) ) {
+			$protocol_methods['TLSv1.3'] = STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT;
+		}
+
+		$accepted_protocols = array();
+		foreach ( $protocol_methods as $label => $crypto_flag ) {
+			$tcp_client = @stream_socket_client( 'tcp://' . $host . ':443', $err_no, $err_str, 3, STREAM_CLIENT_CONNECT );
+			if ( $tcp_client ) {
+				stream_set_timeout( $tcp_client, 3 );
+				$crypto_ok = @stream_socket_enable_crypto( $tcp_client, true, $crypto_flag );
+				if ( true === $crypto_ok ) {
+					$accepted_protocols[] = $label;
+				}
+				fclose( $tcp_client );
+			}
+		}
+
+		$issues = array();
+		if ( in_array( 'TLSv1.0', $accepted_protocols, true ) || in_array( 'TLSv1.1', $accepted_protocols, true ) ) {
+			$issues[] = sprintf(
+				/* translators: %s: accepted weak protocols */
+				__( 'Insecure legacy protocols (%s) are still accepted by the server. Disable TLS 1.0 and 1.1 at the server/CDN level.', 'site-checkup-pro' ),
+				implode( ', ', array_intersect( $accepted_protocols, array( 'TLSv1.0', 'TLSv1.1' ) ) )
+			);
+		}
+
+		if ( $chain_count === 1 ) {
+			$issues[] = __( 'Incomplete certificate chain detected (missing intermediate CA certificate). May cause trust errors on mobile/older clients.', 'site-checkup-pro' );
+		}
+
+		if ( false !== $cert_days && $cert_days <= 14 ) {
+			$issues[] = sprintf( __( 'SSL certificate expires in %d day(s).', 'site-checkup-pro' ), $cert_days );
+		}
+
+		$status = empty( $issues ) ? 'done' : 'attention';
+		$msg    = empty( $issues )
+			? sprintf(
+				/* translators: 1: days remaining, 2: accepted protocols */
+				__( 'TLS configuration verified: Strong protocols active (%2$s), complete certificate chain (%1$d certs).', 'site-checkup-pro' ),
+				$chain_count,
+				implode( ', ', $accepted_protocols )
+			)
+			: implode( ' ', $issues );
+
+		$result = array(
+			'status'             => $status,
+			'accepted_protocols' => $accepted_protocols,
+			'chain_count'        => $chain_count,
+			'cert_days'          => $cert_days,
+			'message'            => $msg,
+			'last_checked'       => current_time( 'mysql' ),
+		);
+
+		set_transient( $cache_key, $result, 12 * HOUR_IN_SECONDS );
+		return $result;
+	}
+
+	/**
+	 * Informational domain email authentication check (SPF, DKIM, DMARC).
+	 * Label: Informational / best-effort (never false red failure).
+	 *
+	 * @param bool $force_refresh Whether to bypass transient cache.
+	 * @return array
+	 */
+	public static function check_domain_email_auth( $force_refresh = false ) {
+		$cache_key = 'wpsg_email_auth_cache';
+		if ( ! $force_refresh ) {
+			$cached = get_transient( $cache_key );
+			if ( false !== $cached && is_array( $cached ) ) {
+				return $cached;
+			}
+		}
+
+		$host = wp_parse_url( home_url(), PHP_URL_HOST );
+		if ( ! $host ) {
+			$admin_email = get_option( 'admin_email' );
+			$parts       = explode( '@', (string) $admin_email );
+			$host        = isset( $parts[1] ) ? $parts[1] : '';
+		}
+
+		// Strip www. prefix for root domain DNS inspection
+		$domain = preg_replace( '/^www\./i', '', strtolower( (string) $host ) );
+
+		$has_spf   = false;
+		$has_dmarc = false;
+		$spf_rec   = '';
+		$dmarc_rec = '';
+
+		if ( ! empty( $domain ) && function_exists( 'dns_get_record' ) ) {
+			// Query domain TXT records for SPF
+			$txt_records = @dns_get_record( $domain, DNS_TXT );
+			if ( is_array( $txt_records ) ) {
+				foreach ( $txt_records as $rec ) {
+					if ( ! empty( $rec['txt'] ) && 0 === strpos( strtolower( trim( $rec['txt'] ) ), 'v=spf1' ) ) {
+						$has_spf = true;
+						$spf_rec = $rec['txt'];
+						break;
+					}
+				}
+			}
+
+			// Query _dmarc.{domain} for DMARC
+			$dmarc_records = @dns_get_record( '_dmarc.' . $domain, DNS_TXT );
+			if ( is_array( $dmarc_records ) ) {
+				foreach ( $dmarc_records as $rec ) {
+					if ( ! empty( $rec['txt'] ) && 0 === strpos( strtolower( trim( $rec['txt'] ) ), 'v=dmarc1' ) ) {
+						$has_dmarc = true;
+						$dmarc_rec = $rec['txt'];
+						break;
+					}
+				}
+			}
+		}
+
+		// Informational status determination
+		$notes = array();
+		if ( $has_spf ) {
+			$notes[] = __( 'SPF record found.', 'site-checkup-pro' );
+		} else {
+			$notes[] = __( 'No SPF record detected on root domain.', 'site-checkup-pro' );
+		}
+
+		if ( $has_dmarc ) {
+			$notes[] = __( 'DMARC policy active.', 'site-checkup-pro' );
+		} else {
+			$notes[] = __( 'No DMARC policy found.', 'site-checkup-pro' );
+		}
+
+		$msg = sprintf(
+			/* translators: 1: domain, 2: notes */
+			__( 'Domain email health for %1$s: %2$s (Note: Custom DKIM selectors cannot be discovered via domain scanning. If mail is handled via third-party relays like SendGrid or Google Workspace, confirm their DNS records are configured.)', 'site-checkup-pro' ),
+			$domain,
+			implode( ' ', $notes )
+		);
+
+		$result = array(
+			'status'       => 'attention', // Informational advisory state, not a failed badge
+			'is_info_only' => true,
+			'domain'       => $domain,
+			'has_spf'      => $has_spf,
+			'spf_record'   => $spf_rec,
+			'has_dmarc'    => $has_dmarc,
+			'dmarc_record' => $dmarc_rec,
+			'message'      => $msg,
+			'last_checked' => current_time( 'mysql' ),
+		);
+
+		set_transient( $cache_key, $result, 24 * HOUR_IN_SECONDS );
+		return $result;
 	}
 }

@@ -1,10 +1,13 @@
 <?php
 /**
- * Backup Plugin Integration Bridge
+* Backup Plugin Integration Bridge
  *
  * Provides status and safe triggers for established backup solutions.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

@@ -1,11 +1,14 @@
 <?php
 /**
- * Core & Uploads Integrity Monitor
+* Core & Uploads Integrity Monitor
  *
  * Scans WordPress core files against official WordPress.org checksums (strictly excluding wp-content)
  * and detects dangerous executable PHP files inside /wp-content/uploads/.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

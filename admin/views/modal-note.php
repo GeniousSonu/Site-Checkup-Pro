@@ -1,11 +1,14 @@
 <?php
 /**
- * Modal: Note & Schedule Reminder (Level C)
+* Modal: Note & Schedule Reminder (Level C)
  *
  * Captures manual checklist notes, configures 15-day / 6-month reminders,
  * and includes a cryptographic password generator.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

@@ -1,10 +1,13 @@
 <?php
 /**
- * Child Theme Scaffolder
+* Child Theme Scaffolder
  *
  * Scaffolds a proper child theme according to WordPress standards without online generators.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

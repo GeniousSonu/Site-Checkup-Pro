@@ -4,7 +4,9 @@
  *
  * Built with an architectural, calm layout inspired by Linear, Stripe, and Cloudflare.
  *
- * @package SiteCheckupPro
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 
@@ -42,6 +44,9 @@ $backup_status = WPSG_Backup_Guard::get_backup_status();
 			<button type="button" class="wpsg-btn wpsg-btn-secondary" id="wpsg-btn-update-baseline" title="<?php esc_attr_e( 'Update trusted administrator and database baseline', 'site-checkup-pro' ); ?>">
 				<span class="dashicons dashicons-saved"></span> <?php esc_html_e( 'Trust Baseline', 'site-checkup-pro' ); ?>
 			</button>
+			<button type="button" class="wpsg-btn wpsg-btn-secondary" id="wpsg-btn-open-settings" title="<?php esc_attr_e( 'Configure API keys and incident response contacts', 'site-checkup-pro' ); ?>">
+				<span class="dashicons dashicons-admin-generic"></span> <?php esc_html_e( 'Settings', 'site-checkup-pro' ); ?>
+			</button>
 			<button type="button" class="wpsg-btn wpsg-btn-primary" id="wpsg-btn-batch-run">
 				<span class="dashicons dashicons-controls-play"></span> <?php esc_html_e( 'Run All Safe Tasks', 'site-checkup-pro' ); ?>
 			</button>
@@ -60,6 +65,44 @@ $backup_status = WPSG_Backup_Guard::get_backup_status();
 		</div>
 		<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-subtle" id="wpsg-batch-cancel"><?php esc_html_e( 'Stop', 'site-checkup-pro' ); ?></button>
 	</div>
+
+	<!-- In-Plugin Milestone Review Prompt (Shown once after milestone, dismissible) -->
+	<?php
+	$wpsg_review_dismissed = get_option( 'wpsg_review_prompt_dismissed', false );
+	$wpsg_tasks_done       = (int) get_option( 'wpsg_completed_tasks_count', 0 );
+	if ( ! $wpsg_review_dismissed && $wpsg_tasks_done >= 3 ) :
+	?>
+	<div class="wpsg-review-prompt" id="wpsg-review-prompt" style="margin: 20px 0; padding: 18px 24px; background: var(--wpsg-surface); border: 1px solid var(--wpsg-brand); border-left: 4px solid var(--wpsg-brand); border-radius: var(--wpsg-radius-md); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;">
+		<div style="display: flex; align-items: center; gap: 14px;">
+			<span class="dashicons dashicons-star-filled" style="font-size: 28px; width: 28px; height: 28px; color: #f59e0b;" aria-hidden="true"></span>
+			<div>
+				<h3 style="margin: 0 0 4px; font-size: 14px; font-weight: 600; color: var(--wpsg-text);">
+					<?php esc_html_e( 'Loving Site Checkup Pro? Help us grow with a 5-star review!', 'site-checkup-pro' ); ?>
+				</h3>
+				<p style="margin: 0; font-size: 13px; color: var(--wpsg-text-secondary);">
+					<?php
+					printf(
+						/* translators: %d: number of completed security tasks */
+						esc_html__( 'You have successfully run %d security hardening and audit checks. If this plugin saves you time and secures your sites, leaving a quick review on WordPress.org helps us immensely!', 'site-checkup-pro' ),
+						$wpsg_tasks_done
+					);
+					?>
+				</p>
+			</div>
+		</div>
+		<div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+			<a href="https://wordpress.org/support/plugin/site-checkup-pro/reviews/#new-post" target="_blank" rel="noopener noreferrer" class="wpsg-btn wpsg-btn-primary" id="wpsg-btn-review-now">
+				<span class="dashicons dashicons-external"></span> <?php esc_html_e( 'Leave a 5-Star Review', 'site-checkup-pro' ); ?>
+			</a>
+			<button type="button" class="wpsg-btn wpsg-btn-secondary" id="wpsg-btn-review-already">
+				<?php esc_html_e( 'I Already Did', 'site-checkup-pro' ); ?>
+			</button>
+			<button type="button" class="wpsg-btn wpsg-btn-subtle" id="wpsg-btn-review-dismiss" title="<?php esc_attr_e( 'Dismiss permanently', 'site-checkup-pro' ); ?>">
+				<?php esc_html_e( 'Maybe Later', 'site-checkup-pro' ); ?>
+			</button>
+		</div>
+	</div>
+	<?php endif; ?>
 
 	<!-- Factual KPI Metric Strip -->
 	<section class="wpsg-kpi-strip" aria-label="<?php esc_attr_e( 'System Status Overview', 'site-checkup-pro' ); ?>">
@@ -222,6 +265,31 @@ $backup_status = WPSG_Backup_Guard::get_backup_status();
 	<?php include WPSG_PLUGIN_DIR . 'admin/views/modal-sessions.php'; ?>
 	<?php include WPSG_PLUGIN_DIR . 'admin/views/modal-app-passwords.php'; ?>
 	<?php include WPSG_PLUGIN_DIR . 'admin/views/modal-csp-reports.php'; ?>
+	<?php include WPSG_PLUGIN_DIR . 'admin/views/modal-settings.php'; ?>
+
+	<!-- Settings Screen Footer / Resource Block -->
+	<footer class="wpsg-dashboard-footer" style="margin-top: 32px; padding: 18px 24px; background: var(--wpsg-surface); border: 1px solid var(--wpsg-border); border-radius: var(--wpsg-radius-md); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; font-size: 13px;">
+		<div class="wpsg-footer-attribution" style="color: var(--wpsg-text-secondary);">
+			<span><?php esc_html_e( 'Developed by', 'site-checkup-pro' ); ?> <strong><a href="https://www.genioussonu.me/" target="_blank" rel="noopener noreferrer" style="color: var(--wpsg-brand); text-decoration: none;">SK Sahinur Islam</a></strong></span>
+			<span style="margin: 0 8px; color: var(--wpsg-border);">&bull;</span>
+			<span class="wpsg-footer-version">Site Checkup Pro v<?php echo esc_html( WPSG_VERSION ); ?></span>
+		</div>
+		<nav class="wpsg-footer-links" style="display: flex; gap: 16px;" aria-label="<?php esc_attr_e( 'Help and documentation links', 'site-checkup-pro' ); ?>">
+			<a href="https://www.genioussonu.me/plugin/site-checkup-pro/docs/" target="_blank" rel="noopener noreferrer" style="color: var(--wpsg-text-secondary); text-decoration: none;">
+				<span class="dashicons dashicons-book" style="font-size: 16px; vertical-align: text-bottom;"></span> <?php esc_html_e( 'Docs', 'site-checkup-pro' ); ?>
+			</a>
+			<a href="https://www.genioussonu.me/plugin/site-checkup-pro/support/" target="_blank" rel="noopener noreferrer" style="color: var(--wpsg-text-secondary); text-decoration: none;">
+				<span class="dashicons dashicons-sos" style="font-size: 16px; vertical-align: text-bottom;"></span> <?php esc_html_e( 'Support', 'site-checkup-pro' ); ?>
+			</a>
+			<a href="https://www.genioussonu.me/plugin/site-checkup-pro/changelog/" target="_blank" rel="noopener noreferrer" style="color: var(--wpsg-text-secondary); text-decoration: none;">
+				<span class="dashicons dashicons-backup" style="font-size: 16px; vertical-align: text-bottom;"></span> <?php esc_html_e( 'Changelog', 'site-checkup-pro' ); ?>
+			</a>
+			<a href="https://www.genioussonu.me/plugin/site-checkup-pro/privacy-policy/" target="_blank" rel="noopener noreferrer" style="color: var(--wpsg-text-secondary); text-decoration: none;">
+				<span class="dashicons dashicons-shield" style="font-size: 16px; vertical-align: text-bottom;"></span> <?php esc_html_e( 'Privacy Policy', 'site-checkup-pro' ); ?>
+			</a>
+		</nav>
+	</footer>
 
 </div>
+
 

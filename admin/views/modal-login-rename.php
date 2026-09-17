@@ -1,11 +1,14 @@
 <?php
 /**
- * Modal: Rename Login URL
+* Modal: Rename Login URL
  *
  * Configures custom login URL with conflict checks, emergency recovery instructions,
  * and mandatory typed 'CHANGE' confirmation.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

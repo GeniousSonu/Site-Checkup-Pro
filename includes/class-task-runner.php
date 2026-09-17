@@ -1,12 +1,15 @@
 <?php
 /**
- * Safe Task Execution Engine
+* Safe Task Execution Engine
  *
  * Enforces capabilities (manage_options), mutex locking to prevent concurrent runs (TOCTOU),
  * re-authentication verification for file modifications, atomic backup gating (24-48h recency),
  * state snapshot HMAC integrity verification, redacted audit logging, and undo operations.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 
@@ -119,6 +122,11 @@ class WPSG_Task_Runner {
 				'after_status'  => $after_status,
 			);
 			self::update_db_status( $task_id, $new_status, $task->automation_level, null, null, $metadata );
+
+			if ( $is_success ) {
+				$completed_count = (int) get_option( 'wpsg_completed_tasks_count', 0 ) + 1;
+				update_option( 'wpsg_completed_tasks_count', $completed_count );
+			}
 
 			return array(
 				'success'      => $is_success,

@@ -1,11 +1,14 @@
 <?php
 /**
- * Admin Notice Inbox & Focus Mode Declutter
+* Admin Notice Inbox & Focus Mode Declutter
  *
  * Buffers admin notices with strict wp_kses_post() sanitization, prevents stored XSS,
  * protects core update/security notices from dismissal, and declutters dashboard widgets.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

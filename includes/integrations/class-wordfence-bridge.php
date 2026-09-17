@@ -1,11 +1,14 @@
 <?php
 /**
- * Wordfence Security Integration Bridge
+* Wordfence Security Integration Bridge
  *
  * Checks Wordfence installation and configuration status and provides deep links.
  * Complies with WordPress.org guidelines: no remote code execution or proprietary config writes.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

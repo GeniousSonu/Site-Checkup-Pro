@@ -1,8 +1,11 @@
 <?php
 /**
- * Main Plugin Orchestrator Class
+* Main Plugin Orchestrator Class
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 
@@ -120,6 +123,11 @@ class WPSG_Plugin {
 		// Initialize Notice Inbox & Focus Mode.
 		if ( class_exists( 'WPSG_Notice_Inbox' ) ) {
 			WPSG_Notice_Inbox::get_instance();
+		}
+
+		// Initialize Self-Hosted Update Checker.
+		if ( is_admin() && class_exists( 'WPSG_Update_Checker' ) && defined( 'WPSG_PLUGIN_FILE' ) ) {
+			new WPSG_Update_Checker( WPSG_PLUGIN_FILE, WPSG_VERSION );
 		}
 	}
 

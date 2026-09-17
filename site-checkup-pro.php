@@ -1,19 +1,22 @@
 <?php
 /**
  * Plugin Name:       Site Checkup Pro
- * Plugin URI:        https://sitecheckuppro.com/
- * Description:       SOP-driven security checklist & hardening orchestrator. Automates safe hardening tasks, guides semi-automated steps, tracks manual audits with reminders, and generates client-facing audit reports.
+ * Plugin URI:        https://www.genioussonu.me/plugin/site-checkup-pro/
+ * Description:       Complete security audit, site hardening checklist, and vulnerability scanner for WordPress. One-click safe hardening, login protection, and client reports.
  * Version:           1.0.0
  * Requires at least: 5.8
  * Requires PHP:      7.4
- * Author:            Site Checkup Pro Team
- * Author URI:        https://sitecheckuppro.com/
- * License:           GPL v2 or later
+ * Author:            SK Sahinur Islam
+ * Author URI:        https://www.genioussonu.me/
+ * License:           GPLv2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       site-checkup-pro
  * Domain Path:       /languages
  *
- * @package SiteCheckupPro
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/site-checkup-pro
+ * @since   1.0.0
  */
 
 // Exit if accessed directly.

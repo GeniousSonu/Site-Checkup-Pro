@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Site Checkup Pro — WordPress Security Audit & Site Hardening Checklist</title>
+  <meta name="description" content="Complete security audit, site hardening checklist, and vulnerability scanner for WordPress. One-click safe hardening, login protection, and client reports." />
+  <link rel="canonical" href="https://www.genioussonu.me/plugin/site-checkup-pro/" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --brand: #4f46e5;
+      --brand-hover: #4338ca;
+      --brand-light: #eef2ff;
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #10b981;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Navigation */
+    header.nav {
+      padding: 24px 0;
+      border-bottom: 1px solid var(--surface-border);
+    }
+    .nav-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-badge {
+      background: var(--brand);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* Hero Section */
+    .hero {
+      padding: 80px 0 60px;
+      text-align: center;
+    }
+    .hero-badge-strip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(79, 70, 229, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      color: #a5b4fc;
+      margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-size: 46px;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      line-height: 1.15;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p.lead {
+      font-size: 18px;
+      color: var(--text-muted);
+      max-width: 760px;
+      margin: 0 auto 36px;
+    }
+    .cta-group {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 28px;
+      border-radius: var(--radius);
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--brand);
+      color: white;
+      box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
+    }
+    .btn-primary:hover {
+      background: var(--brand-hover);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--surface-border);
+    }
+    .btn-secondary:hover {
+      background: #273549;
+    }
+
+    /* Meta Badges */
+    .specs-strip {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: var(--text-muted);
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .spec-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .spec-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    /* Grid Sections */
+    .section {
+      padding: 60px 0;
+    }
+    .section-title {
+      text-align: center;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 40px;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+    }
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      padding: 28px;
+    }
+    .feature-card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    .feature-card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Steps */
+    .steps-card {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      padding: 36px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .step-list {
+      list-style: none;
+      counter-reset: step-counter;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .step-list li {
+      counter-increment: step-counter;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      font-size: 15px;
+    }
+    .step-list li::before {
+      content: counter(step-counter);
+      background: var(--brand);
+      color: white;
+      font-weight: 700;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 13px;
+    }
+
+    /* Footer */
+    footer {
+      padding: 40px 0;
+      border-top: 1px solid var(--surface-border);
+      margin-top: 60px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .footer-links {
+      display: flex;
+      gap: 20px;
+    }
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+    .footer-links a:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <header class="nav">
+    <div class="container nav-inner">
+      <a href="https://www.genioussonu.me/plugin/site-checkup-pro/" class="logo">
+        Site Checkup Pro
+        <span class="logo-badge">v1.0.0</span>
+      </a>
+      <nav class="nav-links">
+        <a href="https://www.genioussonu.me/plugin/site-checkup-pro/docs/">Documentation</a>
+        <a href="https://www.genioussonu.me/plugin/site-checkup-pro/support/">Support</a>
+        <a href="https://www.genioussonu.me/plugin/site-checkup-pro/changelog/">Changelog</a>
+        <a href="https://github.com/GeniousSonu/site-checkup-pro" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge-strip">
+        <span>🛡️</span> Open-Source WordPress Hardening Orchestrator
+      </div>
+      <h1>WordPress Security Audit &amp;<br />Site Hardening Checklist</h1>
+      <p class="lead">
+        Complete security audit, site hardening checklist, and vulnerability scanner for WordPress. One-click safe hardening, login protection, and executive client reports.
+      </p>
+
+      <div class="cta-group">
+        <a href="https://github.com/GeniousSonu/site-checkup-pro/releases/latest/download/site-checkup-pro.zip" class="btn btn-primary">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+          Download v1.0.0 (.zip)
+        </a>
+        <a href="https://github.com/GeniousSonu/site-checkup-pro" target="_blank" rel="noopener" class="btn btn-secondary">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"></path></svg>
+          View Source on GitHub
+        </a>
+      </div>
+
+      <div class="specs-strip">
+        <div class="spec-item"><span class="spec-dot"></span> WordPress 5.8 - 6.7 Tested</div>
+        <div class="spec-item"><span class="spec-dot"></span> PHP 7.4 - 8.3 Supported</div>
+        <div class="spec-item"><span class="spec-dot"></span> GPLv2 Open Source</div>
+        <div class="spec-item"><span class="spec-dot"></span> Zero Upsell Bloat</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Sourced from readme.txt -->
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">Built for Real Agency Workflows</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h3>⚡ Level A: Safe Automated Hardening</h3>
+          <p>One-click verified fixes for XML-RPC, user enumeration, server headers, MIME sniffing, HSTS, front-end debug display, and strict 640 file permissions on wp-config.php.</p>
+        </div>
+        <div class="feature-card">
+          <h3>🌉 Level B: Guided Plugin Bridges</h3>
+          <p>Deep integration bridges to Wordfence, WPS Hide Login, and 2FA. Generates standard RFC 9116 /.well-known/security.txt responsible disclosure files.</p>
+        </div>
+        <div class="feature-card">
+          <h3>⏰ Level C: Cadence &amp; Routine Tracking</h3>
+          <p>Automated dashboard reminders for 15-day credential rotation, 90-day quarterly backup restore rehearsals, and search console URL removal audits.</p>
+        </div>
+        <div class="feature-card">
+          <h3>📊 Level D: Executive Client Reports</h3>
+          <p>Print-ready HTML/PDF audit summaries detailing SOP coverage percentages, active security controls, incident response escalation contacts, and tamper-proof logs.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Installation Steps -->
+  <section class="section" style="background: rgba(30, 41, 59, 0.5);">
+    <div class="container">
+      <h2 class="section-title">Quick 60-Second Installation</h2>
+      <div class="steps-card">
+        <ol class="step-list">
+          <li>
+            <div>
+              <strong>Download the release zip:</strong> Click the Download button above to grab the official <code>site-checkup-pro.zip</code>.
+            </div>
+          </li>
+          <li>
+            <div>
+              <strong>Upload to WordPress:</strong> Go to your WordPress admin and open <strong>Plugins &rarr; Add New &rarr; Upload Plugin</strong>.
+            </div>
+          </li>
+          <li>
+            <div>
+              <strong>Install &amp; Activate:</strong> Select the zip file, click <strong>Install Now</strong>, and then click <strong>Activate Plugin</strong>.
+            </div>
+          </li>
+          <li>
+            <div>
+              <strong>Run your check-up:</strong> Open the new <strong>Site Checkup</strong> menu in your dashboard and click <strong>Run All Safe Tasks</strong>.
+            </div>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container footer-inner">
+      <div>
+        &copy; 2026 <strong>Site Checkup Pro</strong>. Built by <a href="https://www.genioussonu.me/" style="color: var(--text); text-decoration: none;">SK Sahinur Islam</a>.
+      </div>
+      <div class="footer-links">
+        <a href="https://www.genioussonu.me/plugin/site-checkup-pro/docs/">Docs</a>
+        <a href="https://www.genioussonu.me/plugin/site-checkup-pro/support/">Support</a>
+        <a href="https://www.genioussonu.me/plugin/site-checkup-pro/changelog/">Changelog</a>
+        <a href="https://www.genioussonu.me/plugin/site-checkup-pro/privacy-policy/">Privacy Policy</a>
+        <a href="https://www.genioussonu.me/plugin/site-checkup-pro/terms/">Terms</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

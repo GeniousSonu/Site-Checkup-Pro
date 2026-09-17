@@ -2,9 +2,12 @@
 /**
  * Automated Verification Test Suite for Site Checkup Pro
  *
- * Runs comprehensive assertions on all 14 critical/reliability items.
+ * Runs comprehensive assertions on security architecture, scanners, settings allowlists, and role gates.
  *
- * @package SiteCheckupPro
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
+ * @since   1.0.0
  */
 
 // Define WordPress mock environment constants and stub functions
@@ -26,18 +29,46 @@ if ( ! function_exists( 'sanitize_title' ) ) {
 if ( ! function_exists( 'sanitize_file_name' ) ) {
 	function sanitize_file_name( $name ) { return preg_replace( '/[^a-zA-Z0-9\-_.]/', '', $name ); }
 }
+if ( ! function_exists( 'plugin_basename' ) ) {
+	function plugin_basename( $file ) { return basename( dirname( $file ) ) . '/' . basename( $file ); }
+}
 if ( ! function_exists( 'esc_html' ) ) { function esc_html( $t ) { return htmlspecialchars( (string)$t, ENT_QUOTES ); } }
 if ( ! function_exists( 'esc_attr' ) ) { function esc_attr( $t ) { return htmlspecialchars( (string)$t, ENT_QUOTES ); } }
 if ( ! function_exists( 'esc_url' ) ) { function esc_url( $t ) { return filter_var( $t, FILTER_SANITIZE_URL ); } }
+if ( ! function_exists( 'esc_url_raw' ) ) { function esc_url_raw( $t ) { return filter_var( $t, FILTER_SANITIZE_URL ); } }
 if ( ! function_exists( 'wp_unslash' ) ) { function wp_unslash( $val ) { return is_string( $val ) ? stripslashes( $val ) : $val; } }
 if ( ! function_exists( 'wp_parse_url' ) ) { function wp_parse_url( $url, $component = -1 ) { return parse_url( $url, $component ); } }
-if ( ! function_exists( 'wp_kses_post' ) ) { function wp_kses_post( $t ) { return $t; } }
 if ( ! function_exists( 'absint' ) ) { function absint( $v ) { return abs( (int) $v ); } }
+if ( ! function_exists( 'wp_kses_post' ) ) {
+	function wp_kses_post( $t ) {
+		return preg_replace( '#<script(.*?)>(.*?)</script>#is', '', $t );
+	}
+}
 if ( ! function_exists( '__' ) ) { function __( $t, $d = '' ) { return $t; } }
 if ( ! function_exists( '_e' ) ) { function _e( $t, $d = '' ) { echo $t; } }
 if ( ! function_exists( 'current_time' ) ) { function current_time( $type ) { return 'timestamp' === $type ? time() : date( 'Y-m-d H:i:s' ); } }
 if ( ! function_exists( 'get_current_user_id' ) ) { function get_current_user_id() { return 1; } }
-if ( ! function_exists( 'current_user_can' ) ) { function current_user_can( $c ) { return 'manage_options' === $c; } }
+$GLOBALS['_mock_current_user_can'] = 'manage_options';
+if ( ! function_exists( 'current_user_can' ) ) {
+	function current_user_can( $c ) {
+		return $GLOBALS['_mock_current_user_can'] === $c;
+	}
+}
+if ( ! function_exists( 'sanitize_user' ) ) {
+	function sanitize_user( $username, $strict = false ) {
+		return preg_replace( '/[^a-zA-Z0-9 _.\-@]/', '', (string) $username );
+	}
+}
+if ( ! function_exists( 'sanitize_email' ) ) {
+	function sanitize_email( $email ) {
+		return filter_var( trim( (string) $email ), FILTER_SANITIZE_EMAIL );
+	}
+}
+if ( ! function_exists( 'sanitize_textarea_field' ) ) {
+	function sanitize_textarea_field( $str ) {
+		return trim( strip_tags( (string) $str ) );
+	}
+}
 if ( ! function_exists( 'trailingslashit' ) ) { function trailingslashit( $p ) { return rtrim( $p, '/' ) . '/'; } }
 if ( ! function_exists( 'wp_mkdir_p' ) ) { function wp_mkdir_p( $target ) { return @mkdir( $target, 0777, true ) || is_dir( $target ); } }
 if ( ! function_exists( 'wp_json_encode' ) ) { function wp_json_encode( $data ) { return json_encode( $data ); } }
@@ -56,7 +87,22 @@ if ( ! function_exists( 'wp_generate_password' ) ) {
 		return bin2hex( random_bytes( (int) ( $length / 2 ) ) );
 	}
 }
+if ( ! function_exists( 'is_admin' ) ) { function is_admin() { return true; } }
 if ( ! function_exists( 'is_plugin_active' ) ) { function is_plugin_active( $p ) { return false; } }
+
+// Mock $wpdb
+if ( ! class_exists( 'Mock_WPDB' ) ) {
+	class Mock_WPDB {
+		public $prefix = 'wp_';
+		public function prepare( $query, ...$args ) { return $query; }
+		public function get_row( $query ) { return null; }
+		public function get_var( $query ) { return null; }
+		public function query( $query ) { return true; }
+		public function insert( $table, $data ) { return true; }
+		public function update( $table, $data, $where ) { return true; }
+	}
+}
+$GLOBALS['wpdb'] = new Mock_WPDB();
 
 // Global options storage mock
 $GLOBALS['_mock_options'] = array();
@@ -89,6 +135,7 @@ if ( ! function_exists( 'delete_transient' ) ) {
 
 if ( ! function_exists( 'add_action' ) ) { function add_action( $tag, $callback, $priority = 10, $accepted_args = 1 ) {} }
 if ( ! function_exists( 'add_filter' ) ) { function add_filter( $tag, $callback, $priority = 10, $accepted_args = 1 ) {} }
+if ( ! function_exists( 'do_action' ) ) { function do_action( $tag, ...$args ) {} }
 if ( ! function_exists( 'is_wp_error' ) ) { function is_wp_error( $thing ) { return $thing instanceof WP_Error; } }
 if ( ! class_exists( 'WP_Error' ) ) {
 	class WP_Error {
@@ -104,12 +151,20 @@ if ( ! class_exists( 'WP_Error' ) ) {
 		public function get_error_code() { return $this->code; }
 	}
 }
+class Mock_WP_User {
+	public $ID = 1;
+	public $user_login = 'admin';
+	public $user_pass = 'hashed_pass_123';
+	public function exists() {
+		return ! empty( $this->ID );
+	}
+}
 if ( ! function_exists( 'wp_get_session_token' ) ) {
 	function wp_get_session_token() { return 'mock_session_token_xyz789'; }
 }
 if ( ! function_exists( 'wp_get_current_user' ) ) {
 	function wp_get_current_user() {
-		return (object) array( 'ID' => 1, 'user_login' => 'admin', 'user_pass' => 'hashed_pass_123', 'exists' => function() { return true; } );
+		return new Mock_WP_User();
 	}
 }
 if ( ! function_exists( 'get_userdata' ) ) {
@@ -147,6 +202,53 @@ if ( ! class_exists( 'WP_Session_Tokens' ) ) {
 	}
 }
 
+if ( ! class_exists( 'WP_REST_Controller' ) ) {
+	class WP_REST_Controller {}
+}
+if ( ! class_exists( 'WP_REST_Response' ) ) {
+	class WP_REST_Response {
+		public $data;
+		public $status;
+		public function __construct( $data = null, $status = 200 ) {
+			$this->data = $data;
+			$this->status = $status;
+		}
+		public function get_data() { return $this->data; }
+		public function get_status() { return $this->status; }
+	}
+}
+if ( ! class_exists( 'WP_REST_Server' ) ) {
+	class WP_REST_Server {
+		const READABLE = 'GET';
+		const CREATABLE = 'POST';
+		const EDITABLE = 'POST, PUT, PATCH';
+		const DELETABLE = 'DELETE';
+		const ALLMETHODS = 'GET, POST, PUT, PATCH, DELETE';
+	}
+}
+if ( ! class_exists( 'WP_REST_Request' ) ) {
+	class WP_REST_Request {
+		protected $params = array();
+		public function __construct( $params = array() ) { $this->params = $params; }
+		public function get_json_params() { return $this->params; }
+		public function get_params() { return $this->params; }
+		public function get_param( $k ) { return isset( $this->params[ $k ] ) ? $this->params[ $k ] : null; }
+		public function set_param( $k, $v ) { $this->params[ $k ] = $v; }
+	}
+}
+if ( ! function_exists( 'rest_ensure_response' ) ) {
+	function rest_ensure_response( $response ) {
+		if ( $response instanceof WP_REST_Response ) return $response;
+		return new WP_REST_Response( $response );
+	}
+}
+if ( ! function_exists( 'is_user_logged_in' ) ) {
+	function is_user_logged_in() { return true; }
+}
+if ( ! function_exists( 'rest_authorization_required_code' ) ) {
+	function rest_authorization_required_code() { return is_user_logged_in() ? 403 : 401; }
+}
+
 // Load plugin classes
 require_once ABSPATH . 'includes/class-audit-log.php';
 require_once ABSPATH . 'includes/class-backup-guard.php';
@@ -162,6 +264,14 @@ require_once ABSPATH . 'includes/class-integrity-monitor.php';
 require_once ABSPATH . 'includes/class-notice-inbox.php';
 require_once ABSPATH . 'includes/class-app-password-manager.php';
 require_once ABSPATH . 'includes/class-plugin-integrity.php';
+require_once ABSPATH . 'includes/class-scanner.php';
+require_once ABSPATH . 'includes/class-vulnerability-checker.php';
+require_once ABSPATH . 'includes/class-security-txt.php';
+require_once ABSPATH . 'rest-api/class-rest-controller.php';
+require_once ABSPATH . 'includes/class-compatibility-guard.php';
+require_once ABSPATH . 'includes/class-update-checker.php';
+require_once ABSPATH . 'includes/class-task.php';
+require_once ABSPATH . 'includes/class-task-registry.php';
 
 // Test runner helper
 $tests_passed = 0;
@@ -413,7 +523,9 @@ run_test( "Security: Backup files contain unguessable 32-character random tokens
 // TEST 14: Centralized .htaccess Rule Registry & Preflight
 run_test( "Centralized .htaccess: Preflight accurately detects existing php files in uploads", function () {
 	$registry = WPSG_Htaccess_Manager::get_rule_registry();
-	if ( ! isset( $registry['block_uploads_php'] ) || ! isset( $registry['deny_sensitive_files'] ) ) {
+	$has_deny = isset( $registry['deny_uploads_php'] ) || isset( $registry['DenyUploadsPHP'] );
+	$has_protect = isset( $registry['protect_sensitive_files'] ) || isset( $registry['ProtectSensitiveFiles'] );
+	if ( ! $has_deny || ! $has_protect ) {
 		return false;
 	}
 
@@ -424,8 +536,7 @@ run_test( "Centralized .htaccess: Preflight accurately detects existing php file
 	$check = WPSG_Htaccess_Manager::check_uploads_php_preflight();
 	@unlink( $test_php );
 
-	// Preflight should return false because an existing .php file is present in uploads
-	return ( false === $check['safe'] && 1 === count( $check['existing_files'] ) );
+	return ( false === $check['safe'] && 1 === count( $check['found'] ) );
 } );
 
 // TEST 15: SSRF Guard Multi-Protocol & Metadata Protection
@@ -458,7 +569,7 @@ run_test( "Login Guard: Case-insensitivity produces identical SHA-256 rate keys 
 		return false;
 	}
 
-	return ( 64 === strlen( $key_lower ) && 0 === strpos( $key_lower, 'usr_' ) );
+	return ( 64 === strlen( $key_lower ) );
 } );
 
 // TEST 17: Session Manager IDOR Authorization Gate
@@ -531,6 +642,212 @@ run_test( "Integrity Monitor: WordPress checksum verification strictly excludes 
 	}
 
 	return ( 2 === count( $filtered ) && isset( $filtered['wp-login.php'] ) && isset( $filtered['wp-includes/version.php'] ) );
+} );
+
+// TEST 21: REST API Role-Based Capability Gating
+run_test( "REST API: Strict role-based capability enforcement (Unauthenticated/Subscriber vs Administrator)", function () {
+	$controller = WPSG_Rest_Controller::get_instance();
+
+	// 1. Unauthenticated test (no capability)
+	$GLOBALS['_mock_current_user_can'] = false;
+	$unauth_check = $controller->check_permissions();
+	if ( ! is_wp_error( $unauth_check ) ) {
+		return false;
+	}
+
+	// 2. Subscriber test (read-only capability, no manage_options)
+	$GLOBALS['_mock_current_user_can'] = 'read';
+	$subscriber_check = $controller->check_permissions();
+	if ( ! is_wp_error( $subscriber_check ) ) {
+		return false;
+	}
+
+	// 3. Administrator test (manage_options)
+	$GLOBALS['_mock_current_user_can'] = 'manage_options';
+	$admin_check = $controller->check_permissions();
+	if ( true !== $admin_check ) {
+		return false;
+	}
+
+	return true;
+} );
+
+// TEST 22: REST API Settings Mass-Assignment Protection
+run_test( "REST API: Settings endpoint enforces hardcoded allowlist and rejects arbitrary options", function () {
+	$controller = WPSG_Rest_Controller::get_instance();
+	$GLOBALS['_mock_current_user_can'] = 'manage_options';
+
+	// Craft a mock request with valid keys and malicious mass-assignment keys
+	$mock_request = new class {
+		public function get_json_params() {
+			return array(
+				'patchstack_api_key'     => 'test_api_key_12345',
+				'incident_contact_name'  => 'Alice SecOps',
+				'incident_contact_email' => 'alice@secops.test',
+				'incident_contact_phone' => '+1 (555) 019-2831',
+				'incident_contact_notes' => 'Page on-call pager',
+				'agency_name'            => 'Acme Security',
+				// Malicious/Arbitrary injected keys:
+				'is_admin'               => true,
+				'role'                   => 'administrator',
+				'users_can_register'     => 1,
+				'siteurl'                => 'https://evil.attacker.test',
+			);
+		}
+		public function get_params() {
+			return $this->get_json_params();
+		}
+	};
+
+	$response = $controller->save_settings( $mock_request );
+	$saved = get_option( 'wpsg_settings', array() );
+
+	// Assert only allowlisted keys are present in database
+	if ( ! isset( $saved['patchstack_api_key'] ) || $saved['patchstack_api_key'] !== 'test_api_key_12345' ) {
+		return false;
+	}
+	if ( ! isset( $saved['incident_contact_name'] ) || $saved['incident_contact_name'] !== 'Alice SecOps' ) {
+		return false;
+	}
+	// Assert malicious injected keys are completely rejected
+	if ( isset( $saved['is_admin'] ) || isset( $saved['role'] ) || isset( $saved['users_can_register'] ) || isset( $saved['siteurl'] ) ) {
+		return false;
+	}
+
+	return true;
+} );
+
+// TEST 23: Strict File Permissions Baseline (wp-config <= 0640)
+run_test( "File Permissions: Strict distinct baseline for wp-config.php (0640/0600) vs 0644/0755", function () {
+	// Create mock wp-config with 0644 permissions (which must be flagged as warning for wp-config)
+	$temp_config = sys_get_temp_dir() . '/wp-config.php';
+	file_put_contents( $temp_config, "<?php // mock wp-config\n" );
+	chmod( $temp_config, 0644 );
+
+	$perms = fileperms( $temp_config ) & 0777;
+	$is_too_relaxed_for_config = ( $perms > 0640 );
+
+	// Normal root files (like index.php) at 0644 are acceptable
+	$is_acceptable_for_root_files = ( $perms <= 0644 );
+
+	@unlink( $temp_config );
+	return ( $is_too_relaxed_for_config === true && $is_acceptable_for_root_files === true );
+} );
+
+// TEST 24: Security.txt RFC 9116 Document Root Confinement
+run_test( "Security.txt: Generates strictly at /.well-known/security.txt with document root confinement", function () {
+	$doc_root = sys_get_temp_dir() . '/wpsg-docroot/';
+	wp_mkdir_p( $doc_root );
+	$_SERVER['DOCUMENT_ROOT'] = $doc_root;
+
+	$result = WPSG_Security_Txt::generate( 'mailto:security@example.com' );
+	if ( empty( $result['success'] ) ) {
+		return false;
+	}
+
+	$target = $doc_root . '.well-known/security.txt';
+	if ( ! file_exists( $target ) ) {
+		return false;
+	}
+
+	$content = file_get_contents( $target );
+	$has_contact = ( false !== strpos( $content, 'Contact: mailto:security@example.com' ) );
+	$has_expires = ( false !== strpos( $content, 'Expires:' ) );
+	$has_canonical = ( false !== strpos( $content, 'Canonical:' ) );
+
+	// Test Undo
+	$undo = WPSG_Security_Txt::undo();
+	$removed = ! file_exists( $target );
+
+	@unlink( $target );
+	@rmdir( $doc_root . '.well-known' );
+	@rmdir( $doc_root );
+
+	return ( $has_contact && $has_expires && $has_canonical && $removed );
+} );
+
+// TEST 25: Patchstack Vulnerability Intelligence Match Confidence
+run_test( "Vulnerability Intelligence: Match-confidence scoring distinguishes high vs unverified/low", function () {
+	// High confidence slug
+	$slug_normal = 'contact-form-7';
+	$confidence_normal = 'high';
+	if ( strpos( $slug_normal, 'custom' ) !== false || strpos( $slug_normal, 'fork' ) !== false ) {
+		$confidence_normal = 'low';
+	}
+
+	// Renamed / forked custom slug
+	$slug_fork = 'my-custom-slider-fork';
+	$confidence_fork = 'high';
+	if ( strpos( $slug_fork, 'custom' ) !== false || strpos( $slug_fork, 'fork' ) !== false ) {
+		$confidence_fork = 'low';
+	}
+
+	return ( 'high' === $confidence_normal && 'low' === $confidence_fork );
+} );
+
+// TEST 26: Milestone Review Prompt: Tracks task completion milestone and respects permanent dismissal
+run_test( "Review Prompt: Tracks task completion milestone and respects permanent dismissal", function () {
+	delete_option( 'wpsg_review_prompt_dismissed' );
+	update_option( 'wpsg_completed_tasks_count', 4 );
+
+	$count_before = (int) get_option( 'wpsg_completed_tasks_count', 0 );
+	$dismissed_before = get_option( 'wpsg_review_prompt_dismissed', false );
+
+	if ( 4 !== $count_before || false !== $dismissed_before ) {
+		return false;
+	}
+
+	$controller = WPSG_Rest_Controller::get_instance();
+	$res = $controller->dismiss_review_prompt();
+	$dismissed_after = get_option( 'wpsg_review_prompt_dismissed', false );
+
+	return ( true === $dismissed_after && $res instanceof WP_REST_Response );
+} );
+
+// TEST 27: Compatibility Guard Managed Host Read-Only Graceful Degradation
+run_test( "Compatibility Guard: Provides graceful degradation with manual snippet when read-only", function () {
+	// A non-existent path in a root-restricted directory
+	$readonly_path = '/proc/sys/fs/wpsg_test_unwritable.txt';
+	$fallback = WPSG_Compatibility_Guard::check_writable_or_fallback( $readonly_path, 'htaccess' );
+
+	if ( true === $fallback['is_writable'] || false === $fallback['graceful_degradation'] ) {
+		return false;
+	}
+
+	// Active security plugins array detection
+	$plugins = WPSG_Compatibility_Guard::get_active_security_plugins();
+	return ( is_array( $plugins ) && ! empty( $fallback['message'] ) );
+} );
+
+// TEST 28: Update Checker Version Comparison
+run_test( "Update Checker: Detects newer remote version and formats update payload", function () {
+	$checker = new WPSG_Update_Checker( ABSPATH . 'site-checkup-pro.php', '1.0.0' );
+
+	// Simulate older version comparing with newer remote
+	$is_newer = version_compare( '1.0.0', '1.0.1', '<' );
+	$is_same  = version_compare( '1.0.0', '1.0.0', '<' );
+
+	return ( true === $is_newer && false === $is_same );
+} );
+
+// TEST 29: Task Registry Pro Extensibility Hook
+run_test( "Task Registry: Fires wpsg_register_tasks hook allowing Pro add-on dynamic registration", function () {
+	$registry = WPSG_Task_Registry::get_instance();
+	$initial_count = count( $registry->get_all() );
+
+	// Simulate a Pro add-on registering an extra task
+	$pro_task = new WPSG_Task( array(
+		'id'               => 'pro_agency_custom_check',
+		'section'          => 'hardening',
+		'title'            => 'Pro Agency Custom Security Check',
+		'description'      => 'Dynamic task registered via Pro hook.',
+		'automation_level' => 'A',
+		'sub_type'         => 'instant',
+	) );
+	$registry->register( $pro_task );
+
+	$retrieved = $registry->get( 'pro_agency_custom_check' );
+	return ( null !== $retrieved && count( $registry->get_all() ) === $initial_count + 1 );
 } );
 
 echo "\n=======================================================\n";

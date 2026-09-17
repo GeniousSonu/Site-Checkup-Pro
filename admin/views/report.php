@@ -2,9 +2,11 @@
 /**
  * Client-Facing SOP Coverage Report View
  *
- * Printable, executive-grade client report template.
+ * Printable, executive-grade client report template with emergency incident response sheet.
  *
- * @package SiteCheckupPro
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 
@@ -62,6 +64,33 @@ $data = WPSG_Report_Generator::get_report_data();
 		<div class="wpsg-report-disclaimer-card">
 			<strong><?php esc_html_e( 'Notice & Disclaimer:', 'site-checkup-pro' ); ?></strong>
 			<?php esc_html_e( 'This document reports checklist adherence to the agency standard operating procedure (SOP) for WordPress security hardening. It reflects configured protections, server rules, and maintenance processes at the time of report generation. It is not an absolute guarantee against zero-day exploits or targeted penetration attempts.', 'site-checkup-pro' ); ?>
+		</div>
+
+		<!-- Incident Response & Emergency Escalation Sheet -->
+		<div class="wpsg-report-block wpsg-incident-contact-block" style="margin-bottom: 24px; padding: 16px 20px; background: var(--wpsg-surface); border: 1px solid var(--wpsg-border); border-radius: var(--wpsg-radius-md);">
+			<h3 style="margin: 0 0 10px 0; font-size: 15px; font-weight: 600; color: var(--wpsg-text-primary); display: flex; align-items: center; gap: 8px;">
+				<span class="dashicons dashicons-phone" style="color: var(--wpsg-brand); font-size: 18px;"></span>
+				<?php esc_html_e( 'Emergency Incident Response Escalation Sheet', 'site-checkup-pro' ); ?>
+			</h3>
+			<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; font-size: 13px;">
+				<div>
+					<span style="color: var(--wpsg-text-secondary);"><?php esc_html_e( 'Primary Contact:', 'site-checkup-pro' ); ?></span><br />
+					<strong><?php echo ! empty( $data['incident_contact']['name'] ) ? esc_html( $data['incident_contact']['name'] ) : esc_html__( 'Agency Security Desk', 'site-checkup-pro' ); ?></strong>
+				</div>
+				<div>
+					<span style="color: var(--wpsg-text-secondary);"><?php esc_html_e( 'Emergency Email:', 'site-checkup-pro' ); ?></span><br />
+					<strong><?php echo ! empty( $data['incident_contact']['email'] ) ? esc_html( $data['incident_contact']['email'] ) : esc_html( get_option( 'admin_email' ) ); ?></strong>
+				</div>
+				<div>
+					<span style="color: var(--wpsg-text-secondary);"><?php esc_html_e( 'Emergency Phone / Slack:', 'site-checkup-pro' ); ?></span><br />
+					<strong><?php echo ! empty( $data['incident_contact']['phone'] ) ? esc_html( $data['incident_contact']['phone'] ) : esc_html__( 'On-call escalation pager', 'site-checkup-pro' ); ?></strong>
+				</div>
+			</div>
+			<?php if ( ! empty( $data['incident_contact']['notes'] ) ) : ?>
+				<div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--wpsg-border); font-size: 12px; color: var(--wpsg-text-secondary);">
+					<strong><?php esc_html_e( 'Incident Protocol:', 'site-checkup-pro' ); ?></strong> <?php echo esc_html( $data['incident_contact']['notes'] ); ?>
+				</div>
+			<?php endif; ?>
 		</div>
 
 		<!-- Section 1: Hardened & Completed Controls -->

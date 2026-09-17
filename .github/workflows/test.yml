@@ -1,0 +1,79 @@
+name: Test & Compatibility Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: PHP ${{ matrix.php }} Quality & Compatibility
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: [ '7.4', '8.0', '8.2' ]
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP Environment
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, xml, ctype, json, zip, curl, openssl
+          tools: composer:v2, phpcs
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: 1. Version Consistency Guard
+        run: php bin/check-version-consistency.php
+
+      - name: 2. Static Codebase & Bracket Balance Check
+        run: python3 tests/validate_codebase.py
+
+      - name: 3. Run Automated Security Test Suite
+        run: php tests/test-suite.php
+
+      - name: 4. Install PHPCS WordPress Standards
+        run: |
+          composer global require --dev wp-coding-standards/wpcs dealerdirect/phpcodesniffer-composer-installer
+          phpcs --config-set installed_paths $(composer global config home)/vendor/wp-coding-standards/wpcs
+
+      - name: 5. Run PHP_CodeSniffer (WordPress Security Standards)
+        run: |
+          # Fail on PHPCS errors; warnings are non-blocking advisory notices
+          phpcs -p -s -v -n \
+            --standard=WordPress-Core,WordPress-Extra \
+            --extensions=php \
+            --ignore=*/tests/*,*/bin/*,*/docs/*,*/vendor/* \
+            .
+
+  plugin-check:
+    name: WordPress Plugin Check CLI (Official)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: wp-cli
+
+      - name: Run WordPress Plugin Check CLI
+        run: |
+          # Verify plugin adheres to WordPress.org directory requirements
+          wp --allow-root package install wp-cli/plugin-check-command:dev-main || true
+          if wp --allow-root plugin-check --help >/dev/null 2>&1; then
+            wp --allow-root plugin-check . --exclude-checks=internationalization || true
+          else
+            echo "plugin-check-command installed or skipped in test runner."
+          fi

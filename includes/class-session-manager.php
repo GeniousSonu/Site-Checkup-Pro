@@ -1,11 +1,14 @@
 <?php
 /**
- * Session Manager & Re-Authentication Guard
+* Session Manager & Re-Authentication Guard
  *
  * Provides core WP_Session_Tokens governance, cross-user IDOR protection,
  * auto-invalidation on password reset, and session-bound single-use re-auth tokens.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

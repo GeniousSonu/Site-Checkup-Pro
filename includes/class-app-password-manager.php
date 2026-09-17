@@ -1,11 +1,14 @@
 <?php
 /**
- * Application Password Governance & Revocation
+* Application Password Governance & Revocation
  *
  * Surfaces active application passwords across all users via core WP_Application_Passwords,
  * and gates revocations behind manage_options and session-bound re-authentication.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

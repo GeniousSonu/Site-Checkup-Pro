@@ -1,9 +1,12 @@
 <?php
 /**
- * Safe .htaccess Rule Manager with Central Rule Registry, flock() File Locking,
+* Safe .htaccess Rule Manager with Central Rule Registry, flock() File Locking,
  * Server Detection & Staging-Safe Health Checks
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 
@@ -461,7 +464,14 @@ class WPSG_Htaccess_Manager {
 				if ( ! $file->isDir() ) {
 					$ext = strtolower( pathinfo( $file->getFilename(), PATHINFO_EXTENSION ) );
 					if ( in_array( $ext, array( 'php', 'phtml', 'php5', 'phar' ), true ) ) {
-						$found[] = substr( $file->getPathname(), strlen( $uploads_dir ) + 1 );
+						$rel = substr( $file->getPathname(), strlen( $uploads_dir ) + 1 );
+						if ( 0 === strpos( $rel, 'wpsg-backups' ) ) {
+							continue;
+						}
+						if ( 'index.php' === $file->getFilename() && $file->getSize() <= 60 ) {
+							continue;
+						}
+						$found[] = $rel;
 					}
 				}
 			}

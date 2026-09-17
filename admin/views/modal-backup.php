@@ -1,10 +1,13 @@
 <?php
 /**
- * Modal: Backup Gating
+* Modal: Backup Gating
  *
  * Enforces a verified backup within the last 48 hours before file writes occur.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

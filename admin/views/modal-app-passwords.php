@@ -1,11 +1,14 @@
 <?php
 /**
- * Modal: Application Passwords Governance
+* Modal: Application Passwords Governance
  *
  * Surfaces all active application passwords and safely gates revocations
  * behind explicit confirmation and re-authentication.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

@@ -5,7 +5,9 @@
  * Provides safe, marker-delimited constant management and salt rotation with automatic backups.
  * Strictly writes hardcoded predefined constants; accepts no arbitrary input.
  *
- * @package SiteCheckupPro
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 
@@ -90,7 +92,7 @@ class WPSG_Wp_Config_Manager {
 		}
 
 		// Only allow whitelisted security constants.
-		$allowed = array( 'DISALLOW_FILE_EDIT', 'DISALLOW_FILE_MODS' );
+		$allowed = array( 'DISALLOW_FILE_EDIT', 'DISALLOW_FILE_MODS', 'WP_DEBUG_DISPLAY' );
 		$clean   = array();
 		foreach ( $constants as $key => $val ) {
 			if ( in_array( $key, $allowed, true ) ) {

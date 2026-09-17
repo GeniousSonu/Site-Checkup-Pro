@@ -1,11 +1,14 @@
 <?php
 /**
- * Modal: Active Session Management
+* Modal: Active Session Management
  *
  * Lists all active WordPress sessions with IP, User-Agent, login time,
  * and allows terminating individual sessions or logging out other devices.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

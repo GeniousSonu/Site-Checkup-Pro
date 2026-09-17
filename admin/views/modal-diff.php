@@ -1,10 +1,13 @@
 <?php
 /**
- * Modal: Pre-Execution Diff Preview
+* Modal: Pre-Execution Diff Preview
  *
  * Transparent 4-part safety breakdown with syntax-highlighted diff.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

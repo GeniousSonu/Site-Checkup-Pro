@@ -1,0 +1,114 @@
+name: Deploy & Release Pipeline
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # 1. Pre-Deployment Verification
+  verify:
+    name: Verify Release Quality & Version Alignment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP Environment
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Hard-Gate: Version Consistency Verification
+        run: |
+          echo "Verifying Git tag ${{ github.ref_name }} against plugin files..."
+          php bin/check-version-consistency.php --tag=${{ github.ref_name }}
+
+      - name: Hard-Gate: Static Codebase & Syntax Validation
+        run: python3 tests/validate_codebase.py
+
+      - name: Hard-Gate: Run Automated Security Test Suite
+        run: php tests/test-suite.php
+
+  # 2. Package & Publish Dual Distribution
+  release:
+    name: Package & Publish Dual Distribution
+    needs: [ verify ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP Environment
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: wp-cli
+
+      - name: Compile Translation Template (POT)
+        run: |
+          php bin/make-pot.php
+
+      - name: Extract Clean Version String
+        id: get_version
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Target version: ${VERSION}"
+
+      - name: Extract Changelog from readme.txt
+        id: extract_changelog
+        run: |
+          php -r '
+            $readme = file_get_contents("readme.txt");
+            $changelog = "";
+            if (preg_match("/== Changelog ==(.*?)(?:==|$)/s", $readme, $m)) {
+              $changelog = trim($m[1]);
+            }
+            file_put_contents("/tmp/release_notes.txt", $changelog);
+          '
+
+      - name: Build Clean Release Package (.distignore Compliant)
+        run: |
+          mkdir -p build/site-checkup-pro
+          # Copy files respecting .distignore
+          rsync -rc --exclude-from='.distignore' ./ build/site-checkup-pro/
+          cd build
+          zip -r ../site-checkup-pro.zip site-checkup-pro
+          cd ..
+          echo "Built release package site-checkup-pro.zip:"
+          ls -lh site-checkup-pro.zip
+
+      - name: Create GitHub Release & Upload Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Site Checkup Pro v${{ steps.get_version.outputs.version }}"
+          body_path: /tmp/release_notes.txt
+          files: site-checkup-pro.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 3. WordPress.org SVN Deploy (Triggers when SVN secrets are present)
+      - name: Deploy to WordPress.org SVN Repository
+        if: env.SVN_PASSWORD != ''
+        uses: 10up/action-wordpress-plugin-deploy-svn@v2.2.2
+        with:
+          generate_zip: false
+          assets_dir: 'media'
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: site-checkup-pro

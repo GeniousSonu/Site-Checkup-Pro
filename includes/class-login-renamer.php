@@ -1,12 +1,15 @@
 <?php
 /**
- * Login URL Renamer & WPS Hide Login Bridge
+* Login URL Renamer & WPS Hide Login Bridge
  *
  * Provides safe detection of existing login-protection plugins (WPS Hide Login, iThemes, etc.).
  * Emergency recovery strictly requires filesystem access via the WPSG_DISABLE_LOGIN_RENAME constant in wp-config.php.
  * Zero query-string backdoor bypasses.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

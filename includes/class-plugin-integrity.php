@@ -1,11 +1,14 @@
 <?php
 /**
- * Plugin Integrity Checker & Safe Plugin Deleter
+* Plugin Integrity Checker & Safe Plugin Deleter
  *
  * Scans installed plugins against WordPress.org API with transient caching.
  * Safely backs up plugin directory to ZIP before deactivating and deleting.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

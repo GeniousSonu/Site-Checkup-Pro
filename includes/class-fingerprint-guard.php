@@ -1,11 +1,14 @@
 <?php
 /**
- * Fingerprint & Version Hiding Guard
+* Fingerprint & Version Hiding Guard
  *
  * Removes WordPress generator meta tags, provides opt-in script/style version stripping,
  * and manages Content-Security-Policy Report-Only headers and violation captures.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

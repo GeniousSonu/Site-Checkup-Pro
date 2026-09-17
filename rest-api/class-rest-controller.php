@@ -3,9 +3,11 @@
  * REST API Controller
  *
  * Exposes endpoints for task listing, running, undoing, diff previews,
- * baseline updates, reports, re-authentication, session control, and CSP reporting.
+ * baseline updates, reports, re-authentication, session control, scoped settings, and CSP reporting.
  *
- * @package SiteCheckupPro
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 
@@ -263,6 +265,47 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 		register_rest_route( $this->namespace, '/integrity/scan', array(
 			'methods'             => WP_REST_Server::CREATABLE,
 			'callback'            => array( $this, 'run_integrity_scan' ),
+			'permission_callback' => array( $this, 'check_permissions' ),
+		) );
+
+		// 24. Scoped Plugin Settings (Strict Key Allowlist)
+		register_rest_route( $this->namespace, '/settings', array(
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_settings' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
+			),
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'save_settings' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
+			),
+		) );
+
+		// 25. Vulnerability Intelligence Scan
+		register_rest_route( $this->namespace, '/vulnerabilities', array(
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => array( $this, 'get_vulnerabilities' ),
+			'permission_callback' => array( $this, 'check_permissions' ),
+		) );
+
+		register_rest_route( $this->namespace, '/vulnerabilities/scan', array(
+			'methods'             => WP_REST_Server::CREATABLE,
+			'callback'            => array( $this, 'scan_vulnerabilities' ),
+			'permission_callback' => array( $this, 'check_permissions' ),
+		) );
+
+		// 26. Generate RFC 9116 security.txt
+		register_rest_route( $this->namespace, '/security-txt/generate', array(
+			'methods'             => WP_REST_Server::CREATABLE,
+			'callback'            => array( $this, 'generate_security_txt' ),
+			'permission_callback' => array( $this, 'check_permissions' ),
+		) );
+
+		// 27. Dismiss Review Prompt
+		register_rest_route( $this->namespace, '/review-prompt/dismiss', array(
+			'methods'             => WP_REST_Server::CREATABLE,
+			'callback'            => array( $this, 'dismiss_review_prompt' ),
 			'permission_callback' => array( $this, 'check_permissions' ),
 		) );
 	}
@@ -899,6 +942,150 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 		return rest_ensure_response( array(
 			'checksums'   => $checksums,
 			'executables' => $execs,
+		) );
+	}
+
+	/**
+	 * Retrieve saved plugin settings.
+	 * Redacts sensitive API keys for safe display.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
+	 */
+	public function get_settings( $request ) {
+		$settings = get_option( 'wpsg_settings', array() );
+		if ( ! is_array( $settings ) ) {
+			$settings = array();
+		}
+
+		$redacted_key = '';
+		if ( ! empty( $settings['patchstack_api_key'] ) ) {
+			$len = strlen( $settings['patchstack_api_key'] );
+			$redacted_key = ( $len > 8 )
+				? substr( $settings['patchstack_api_key'], 0, 4 ) . str_repeat( '•', $len - 8 ) . substr( $settings['patchstack_api_key'], -4 )
+				: '••••••••';
+		}
+
+		return rest_ensure_response( array(
+			'success'  => true,
+			'settings' => array(
+				'patchstack_api_key_masked' => $redacted_key,
+				'has_patchstack_key'        => ! empty( $settings['patchstack_api_key'] ),
+				'incident_contact_name'     => isset( $settings['incident_contact_name'] ) ? $settings['incident_contact_name'] : '',
+				'incident_contact_email'    => isset( $settings['incident_contact_email'] ) ? $settings['incident_contact_email'] : '',
+				'incident_contact_phone'    => isset( $settings['incident_contact_phone'] ) ? $settings['incident_contact_phone'] : '',
+				'incident_contact_notes'    => isset( $settings['incident_contact_notes'] ) ? $settings['incident_contact_notes'] : '',
+				'agency_name'               => isset( $settings['agency_name'] ) ? $settings['agency_name'] : '',
+			),
+		) );
+	}
+
+	/**
+	 * Save plugin settings with a hardcoded allowlist and per-key sanitization.
+	 * Strictly rejects mass-assignment and arbitrary keys.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function save_settings( $request ) {
+		$allowlist = array(
+			'patchstack_api_key'     => function( $v ) { return sanitize_text_field( trim( (string) $v ) ); },
+			'incident_contact_name'  => function( $v ) { return sanitize_text_field( trim( (string) $v ) ); },
+			'incident_contact_email' => function( $v ) { return sanitize_email( trim( (string) $v ) ); },
+			'incident_contact_phone' => function( $v ) {
+				$clean = preg_replace( '/[^\+0-9\-\(\)\s]/', '', (string) $v );
+				return substr( trim( $clean ), 0, 25 );
+			},
+			'incident_contact_notes' => function( $v ) { return sanitize_textarea_field( trim( (string) $v ) ); },
+			'agency_name'            => function( $v ) { return sanitize_text_field( trim( (string) $v ) ); },
+		);
+
+		$params = $request->get_json_params();
+		if ( ! is_array( $params ) ) {
+			$params = $request->get_params();
+		}
+
+		$current_settings = get_option( 'wpsg_settings', array() );
+		if ( ! is_array( $current_settings ) ) {
+			$current_settings = array();
+		}
+
+		foreach ( $allowlist as $key => $sanitizer ) {
+			if ( array_key_exists( $key, $params ) ) {
+				// Avoid wiping existing API key if masked string was submitted back
+				if ( 'patchstack_api_key' === $key && false !== strpos( (string) $params[ $key ], '•' ) ) {
+					continue;
+				}
+				$current_settings[ $key ] = call_user_func( $sanitizer, $params[ $key ] );
+			}
+		}
+
+		update_option( 'wpsg_settings', $current_settings );
+
+		// Invalidate vulnerability cache if API key was updated
+		if ( array_key_exists( 'patchstack_api_key', $params ) ) {
+			delete_transient( 'wpsg_vulnerability_cache' );
+		}
+
+		return rest_ensure_response( array(
+			'success' => true,
+			'message' => __( 'Plugin settings updated successfully.', 'site-checkup-pro' ),
+		) );
+	}
+
+	/**
+	 * Retrieve cached vulnerability scan status.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
+	 */
+	public function get_vulnerabilities( $request ) {
+		$data = class_exists( 'WPSG_Vulnerability_Checker' )
+			? WPSG_Vulnerability_Checker::get_vulnerability_status( false )
+			: array( 'status' => 'pending', 'message' => __( 'Vulnerability module unavailable.', 'site-checkup-pro' ) );
+
+		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Force fresh vulnerability scan.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
+	 */
+	public function scan_vulnerabilities( $request ) {
+		$data = class_exists( 'WPSG_Vulnerability_Checker' )
+			? WPSG_Vulnerability_Checker::get_vulnerability_status( true )
+			: array( 'status' => 'pending', 'message' => __( 'Vulnerability module unavailable.', 'site-checkup-pro' ) );
+
+		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Generate RFC 9116 security.txt at /.well-known/security.txt.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function generate_security_txt( $request ) {
+		$contact = $request->get_param( 'contact' );
+		$result  = class_exists( 'WPSG_Security_Txt' )
+			? WPSG_Security_Txt::generate( $contact )
+			: array( 'success' => false, 'message' => __( 'Security.txt module unavailable.', 'site-checkup-pro' ) );
+
+		return rest_ensure_response( $result );
+	}
+
+	/**
+	 * Permanently dismiss the in-plugin review prompt.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function dismiss_review_prompt() {
+		update_option( 'wpsg_review_prompt_dismissed', true );
+		return rest_ensure_response( array(
+			'success' => true,
+			'message' => __( 'Review prompt dismissed.', 'site-checkup-pro' ),
 		) );
 	}
 }

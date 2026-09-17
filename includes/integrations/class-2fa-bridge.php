@@ -1,10 +1,13 @@
 <?php
 /**
- * Two-Factor Authentication (2FA) Bridge
+* Two-Factor Authentication (2FA) Bridge
  *
  * Checks for known 2FA implementations and provides setup deep-links.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 

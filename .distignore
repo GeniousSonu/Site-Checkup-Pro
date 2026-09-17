@@ -1,0 +1,20 @@
+# Distribution Ignore for Site Checkup Pro
+.git/
+.github/
+.gitignore
+.distignore
+docs/
+tests/
+bin/
+composer.json
+composer.lock
+package.json
+package-lock.json
+node_modules/
+build/
+site-checkup-pro.zip
+*.bak
+*.log
+*.tmp
+phpunit.xml*
+.editorconfig

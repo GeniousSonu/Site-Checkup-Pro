@@ -1,10 +1,13 @@
 <?php
 /**
- * Admin Menu & Assets Enqueuer
+* Admin Menu & Assets Enqueuer
  *
  * Registers the top-level Site Checkup dashboard menu and loads CSS/JS assets.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 
@@ -102,8 +105,12 @@ class WPSG_Admin_Menu {
 	 * @param string $hook Page hook.
 	 */
 	public function enqueue_assets( $hook ) {
-		if ( false === strpos( $hook, 'site-checkup-pro' ) ) {
-			return;
+		// Strict screen check: Only enqueue on Site Checkup Pro admin screens!
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen || false === strpos( $screen->id, 'site-checkup-pro' ) ) {
+			if ( false === strpos( $hook, 'site-checkup-pro' ) ) {
+				return;
+			}
 		}
 
 		wp_enqueue_style(

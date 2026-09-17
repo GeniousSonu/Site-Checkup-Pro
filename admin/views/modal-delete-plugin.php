@@ -1,10 +1,13 @@
 <?php
 /**
- * Modal: Quarantine & Delete Plugin
+* Modal: Quarantine & Delete Plugin
  *
  * Confirms plugin deletion after creating a full zip archive in wpsg-backups/plugins/.
  *
- * @package SiteCheckupPro
+ *
+ * @package Site_Checkup_Pro
+ * @author  SK Sahinur Islam <https://www.genioussonu.me/>
+ * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
  */
 
