@@ -1002,19 +1002,19 @@
 
 		// Grade calculation
 		let grade = 'Grade D';
-		let strokeColor = '#ef4444'; // Red
+		let strokeColor = '#DC2626'; // var(--wpsg-color-status-critical)
 		if (pct >= 90) {
 			grade = 'Grade A+';
-			strokeColor = '#10b981';
+			strokeColor = '#16A34A'; // var(--wpsg-color-status-success)
 		} else if (pct >= 75) {
 			grade = 'Grade A';
-			strokeColor = '#10b981';
+			strokeColor = '#16A34A'; // var(--wpsg-color-status-success)
 		} else if (pct >= 60) {
 			grade = 'Grade B';
-			strokeColor = '#06b6d4';
+			strokeColor = '#2563EB'; // var(--wpsg-color-brand)
 		} else if (pct >= 40) {
 			grade = 'Grade C';
-			strokeColor = '#f59e0b';
+			strokeColor = '#D97706'; // var(--wpsg-color-status-attention)
 		}
 
 		if (dom.postureGrade) {
@@ -2216,11 +2216,11 @@
 
 			dom.auditTbody.innerHTML = logs.map(l => `
 				<tr>
-					<td style="font-variant-numeric: tabular-nums;">${escapeHtml(l.created_at)}</td>
-					<td><code>${escapeHtml(l.task_id)}</code></td>
-					<td>${escapeHtml(l.action)}</td>
-					<td>${escapeHtml(l.display_name || l.user_login || 'System')}</td>
-					<td>
+					<td class="wpsg-audit-col-time">${escapeHtml(l.created_at)}</td>
+					<td class="wpsg-audit-col-task"><code>${escapeHtml(l.task_id)}</code></td>
+					<td class="wpsg-audit-col-action">${escapeHtml(l.action)}</td>
+					<td class="wpsg-audit-col-user">${escapeHtml(l.display_name || l.user_login || 'System')}</td>
+					<td class="wpsg-audit-col-result">
 						<span class="wpsg-status-indicator wpsg-status-${l.result === 'success' ? 'done' : 'critical'}">
 							<span class="wpsg-status-dot"></span> ${escapeHtml(l.result === 'success' ? 'Success' : 'Failed')}
 						</span>

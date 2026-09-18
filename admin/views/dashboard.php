@@ -809,11 +809,11 @@ $login_slug    = WPSG_Login_Renamer::get_login_slug();
 					<table class="wpsg-table" id="wpsg-audit-table">
 						<thead>
 							<tr>
-								<th style="width: 170px;"><?php esc_html_e( 'Timestamp', 'site-checkup-pro' ); ?></th>
-								<th style="width: 160px;"><?php esc_html_e( 'Task ID', 'site-checkup-pro' ); ?></th>
-								<th style="width: 110px;"><?php esc_html_e( 'Action', 'site-checkup-pro' ); ?></th>
-								<th style="width: 140px;"><?php esc_html_e( 'User', 'site-checkup-pro' ); ?></th>
-								<th style="width: 110px;"><?php esc_html_e( 'Result', 'site-checkup-pro' ); ?></th>
+								<th class="wpsg-audit-col-time"><?php esc_html_e( 'Timestamp', 'site-checkup-pro' ); ?></th>
+								<th class="wpsg-audit-col-task"><?php esc_html_e( 'Task ID', 'site-checkup-pro' ); ?></th>
+								<th class="wpsg-audit-col-action"><?php esc_html_e( 'Action', 'site-checkup-pro' ); ?></th>
+								<th class="wpsg-audit-col-user"><?php esc_html_e( 'User', 'site-checkup-pro' ); ?></th>
+								<th class="wpsg-audit-col-result"><?php esc_html_e( 'Result', 'site-checkup-pro' ); ?></th>
 								<th><?php esc_html_e( 'Technical Log Message (Redacted)', 'site-checkup-pro' ); ?></th>
 							</tr>
 						</thead>

@@ -55,6 +55,23 @@ class WPSG_Admin_Menu {
 
 		// Auto-updates column fallback rendering on plugins.php.
 		add_filter( 'plugin_auto_update_setting_html', array( $this, 'filter_auto_update_setting_html' ), 10, 3 );
+
+		// Clean, isolated workspace: Suppress external admin notices on Site Checkup Pro screens.
+		add_action( 'in_admin_header', array( $this, 'suppress_foreign_admin_notices' ), 100 );
+	}
+
+	/**
+	 * Suppress external WordPress admin notices on Site Checkup Pro screens
+	 * to prevent layout disruption and maintain an uncluttered, industry-standard UI.
+	 */
+	public function suppress_foreign_admin_notices() {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen || false === strpos( $screen->id, 'site-checkup-pro' ) ) {
+			return;
+		}
+
+		remove_all_actions( 'admin_notices' );
+		remove_all_actions( 'all_admin_notices' );
 	}
 
 	/**
@@ -122,18 +139,27 @@ class WPSG_Admin_Menu {
 			}
 		}
 
+		$ver = ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? time() : WPSG_VERSION;
+
+		wp_enqueue_style(
+			'wpsg-design-tokens',
+			WPSG_PLUGIN_URL . 'admin/assets/css/design-tokens.css',
+			array(),
+			$ver
+		);
+
 		wp_enqueue_style(
 			'wpsg-admin-css',
 			WPSG_PLUGIN_URL . 'admin/assets/css/admin.css',
-			array( 'dashicons' ),
-			WPSG_VERSION
+			array( 'dashicons', 'wpsg-design-tokens' ),
+			$ver
 		);
 
 		wp_enqueue_script(
 			'wpsg-admin-js',
 			WPSG_PLUGIN_URL . 'admin/assets/js/admin.js',
 			array( 'wp-api-fetch' ),
-			WPSG_VERSION,
+			$ver,
 			true
 		);
 
@@ -141,7 +167,7 @@ class WPSG_Admin_Menu {
 			'wpsg-report-js',
 			WPSG_PLUGIN_URL . 'admin/assets/js/report.js',
 			array(),
-			WPSG_VERSION,
+			$ver,
 			true
 		);
 

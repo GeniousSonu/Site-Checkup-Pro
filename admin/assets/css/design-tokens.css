@@ -1,0 +1,181 @@
+/**
+ * Site Checkup Pro — Design Tokens System
+ *
+ * Extracted directly from the Site Checkup Pro Design Knowledge Base.
+ * Single source of truth for all colors, spacing, typography, radii, and shadows.
+ *
+ * @package SiteCheckupPro
+ * @version 1.0.0
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+	/* ==========================================================================
+	   Color System
+	   Predominantly neutral with blue anchor, selective teal, and semantic states.
+	   ========================================================================== */
+
+	/* Primary Brand (Anchor) */
+	--wpsg-color-brand: #2563EB;
+	--wpsg-color-brand-dark: #1D4ED8;
+	--wpsg-color-brand-subtle: #EFF6FF;
+	--wpsg-color-brand-border: #BFDBFE;
+
+	/* Secondary Accent (Teal: used extremely selectively) */
+	--wpsg-color-accent: #14B8A6;
+	--wpsg-color-accent-subtle: #F0FDFA;
+	--wpsg-color-accent-border: #99F6E4;
+
+	/* Neutral Canvas & Surfaces */
+	--wpsg-color-bg: #F8FAFC;
+	--wpsg-color-surface: #FFFFFF;
+	--wpsg-color-surface-subtle: #F8FAFC;
+	--wpsg-color-surface-hover: #F1F5F9;
+
+	/* Borders */
+	--wpsg-color-border: #E2E8F0;
+	--wpsg-color-border-subtle: #F1F5F9;
+	--wpsg-color-border-strong: #CBD5E1;
+	--wpsg-color-border-focus: #2563EB;
+
+	/* Typography Hierarchy */
+	--wpsg-color-text-primary: #111827;
+	--wpsg-color-text-secondary: #64748B;
+	--wpsg-color-text-muted: #94A3B8;
+	--wpsg-color-text-inverse: #FFFFFF;
+
+	/* Semantic System States */
+	--wpsg-color-status-success: #16A34A;
+	--wpsg-color-status-success-bg: #F0FDF4;
+	--wpsg-color-status-success-border: #BBF7D0;
+	--wpsg-color-status-success-text: #15803D;
+
+	--wpsg-color-status-attention: #D97706;
+	--wpsg-color-status-attention-bg: #FFFBEB;
+	--wpsg-color-status-attention-border: #FDE68A;
+	--wpsg-color-status-attention-text: #B45309;
+
+	--wpsg-color-status-critical: #DC2626;
+	--wpsg-color-status-critical-bg: #FEF2F2;
+	--wpsg-color-status-critical-border: #FECACA;
+	--wpsg-color-status-critical-text: #B91C1C;
+
+	--wpsg-color-status-neutral: #64748B;
+	--wpsg-color-status-neutral-bg: #F8FAFC;
+	--wpsg-color-status-neutral-border: #E2E8F0;
+	--wpsg-color-status-neutral-text: #475569;
+
+	--wpsg-color-status-unverified: #2563EB;
+	--wpsg-color-status-unverified-bg: #EFF6FF;
+	--wpsg-color-status-unverified-border: #BFDBFE;
+	--wpsg-color-status-unverified-text: #1D4ED8;
+
+	/* Backward-compatibility aliases for existing variables */
+	--wpsg-brand: var(--wpsg-color-brand);
+	--wpsg-brand-hover: var(--wpsg-color-brand-dark);
+	--wpsg-brand-active: var(--wpsg-color-brand-dark);
+	--wpsg-brand-subtle: var(--wpsg-color-brand-subtle);
+	--wpsg-brand-border: var(--wpsg-color-brand-border);
+	--wpsg-accent: var(--wpsg-color-accent);
+	--wpsg-accent-subtle: var(--wpsg-color-accent-subtle);
+	--wpsg-accent-border: var(--wpsg-color-accent-border);
+	--wpsg-bg: var(--wpsg-color-bg);
+	--wpsg-surface: var(--wpsg-color-surface);
+	--wpsg-surface-subtle: var(--wpsg-color-surface-subtle);
+	--wpsg-surface-hover: var(--wpsg-color-surface-hover);
+	--wpsg-surface-elevated: var(--wpsg-color-surface);
+	--wpsg-border: var(--wpsg-color-border);
+	--wpsg-border-subtle: var(--wpsg-color-border-subtle);
+	--wpsg-border-strong: var(--wpsg-color-border-strong);
+	--wpsg-border-focus: var(--wpsg-color-border-focus);
+	--wpsg-text-primary: var(--wpsg-color-text-primary);
+	--wpsg-text-secondary: var(--wpsg-color-text-secondary);
+	--wpsg-text-muted: var(--wpsg-color-text-muted);
+	--wpsg-text-inverse: var(--wpsg-color-text-inverse);
+	--wpsg-success: var(--wpsg-color-status-success);
+	--wpsg-success-bg: var(--wpsg-color-status-success-bg);
+	--wpsg-success-border: var(--wpsg-color-status-success-border);
+	--wpsg-success-text: var(--wpsg-color-status-success-text);
+	--wpsg-attention: var(--wpsg-color-status-attention);
+	--wpsg-attention-bg: var(--wpsg-color-status-attention-bg);
+	--wpsg-attention-border: var(--wpsg-color-status-attention-border);
+	--wpsg-attention-text: var(--wpsg-color-status-attention-text);
+	--wpsg-critical: var(--wpsg-color-status-critical);
+	--wpsg-critical-bg: var(--wpsg-color-status-critical-bg);
+	--wpsg-critical-border: var(--wpsg-color-status-critical-border);
+	--wpsg-critical-text: var(--wpsg-color-status-critical-text);
+	--wpsg-neutral-state: var(--wpsg-color-status-neutral);
+	--wpsg-neutral-bg: var(--wpsg-color-status-neutral-bg);
+	--wpsg-neutral-border: var(--wpsg-color-status-neutral-border);
+	--wpsg-neutral-text: var(--wpsg-color-status-neutral-text);
+	--wpsg-unverified: var(--wpsg-color-status-unverified);
+	--wpsg-unverified-bg: var(--wpsg-color-status-unverified-bg);
+	--wpsg-unverified-border: var(--wpsg-color-status-unverified-border);
+	--wpsg-unverified-text: var(--wpsg-color-status-unverified-text);
+
+	/* ==========================================================================
+	   Typography System
+	   Inter: 400 normal, 500 labels, 600 important, 700 structural emphasis only.
+	   ========================================================================== */
+	--wpsg-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+	--wpsg-font-display: var(--wpsg-font-sans);
+	--wpsg-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+	--wpsg-font-size-xs: 12px;       /* Metadata */
+	--wpsg-font-size-sm: 13px;       /* Secondary information */
+	--wpsg-font-size-base: 14px;     /* Body & buttons */
+	--wpsg-font-size-md: 16px;       /* Subheadings (15-16px) */
+	--wpsg-font-size-lg: 18px;       /* Section headings (18-20px) */
+	--wpsg-font-size-xl: 20px;       /* Section headings (18-20px) */
+	--wpsg-font-size-2xl: 26px;      /* Large heading (24-28px) */
+	--wpsg-font-size-metric: 32px;   /* Primary numerical values (28-36px) */
+
+	--wpsg-font-weight-regular: 400;
+	--wpsg-font-weight-medium: 500;
+	--wpsg-font-weight-semibold: 600;
+	--wpsg-font-weight-bold: 700;
+
+	--wpsg-line-height-tight: 1.25;
+	--wpsg-line-height-normal: 1.5;
+	--wpsg-line-height-relaxed: 1.625;
+
+	/* ==========================================================================
+	   8px Spatial System
+	   4, 8, 12, 16, 24, 32, 40, 48, 64
+	   ========================================================================== */
+	--wpsg-space-1: 4px;
+	--wpsg-space-2: 8px;
+	--wpsg-space-3: 12px;
+	--wpsg-space-4: 16px;
+	--wpsg-space-5: 20px;
+	--wpsg-space-6: 24px;
+	--wpsg-space-8: 32px;
+	--wpsg-space-10: 40px;
+	--wpsg-space-12: 48px;
+	--wpsg-space-16: 64px;
+
+	/* ==========================================================================
+	   Border Radii
+	   Recommended range: 6–10px. Moderately rounded, no excessive pill shapes.
+	   ========================================================================== */
+	--wpsg-radius-xs: 4px;
+	--wpsg-radius-sm: 6px;
+	--wpsg-radius-md: 8px;
+	--wpsg-radius-lg: 10px;
+	--wpsg-radius-xl: 10px;          /* Bound max to 10px per KB constraint */
+	--wpsg-radius-full: 9999px;      /* Strictly for status dots and circular badges */
+
+	/* ==========================================================================
+	   Depth & Shadows
+	   Subtle borders preferred. Shadows strictly for genuinely floating elements.
+	   ========================================================================== */
+	--wpsg-shadow-none: none;
+	--wpsg-shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+	--wpsg-shadow-dropdown: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+	--wpsg-shadow-modal: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+
+	/* Aliases */
+	--wpsg-shadow-md: var(--wpsg-shadow-dropdown);
+	--wpsg-shadow-lg: var(--wpsg-shadow-modal);
+}
