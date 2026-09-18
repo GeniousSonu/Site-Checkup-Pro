@@ -79,7 +79,7 @@ class WPSG_Plugin_Integrity {
 		}
 
 		if ( ! empty( $found ) ) {
-			$names = wp_list_pluck( $found, 'name' );
+			$names = array_column( $found, 'name' );
 			return array(
 				'status'   => 'attention',
 				'plugins'  => $found,
@@ -190,8 +190,14 @@ class WPSG_Plugin_Integrity {
 	 * @return array Array with 'success' (bool), 'message' (string), 'zip_path' (string).
 	 */
 	public static function safe_delete_plugin( $plugin_path ) {
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		require_once ABSPATH . 'wp-admin/includes/file.php';
+		if ( ! function_exists( 'delete_plugins' ) && defined( 'ABSPATH' ) ) {
+			if ( file_exists( ABSPATH . 'wp-admin/includes/plugin.php' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
+			if ( file_exists( ABSPATH . 'wp-admin/includes/file.php' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/file.php';
+			}
+		}
 
 		$clean_path = ltrim( sanitize_text_field( $plugin_path ), '/\\' );
 		$slug       = dirname( $clean_path );
@@ -237,6 +243,7 @@ class WPSG_Plugin_Integrity {
 		}
 
 		// Store last backup path in option for undo.
+		update_option( 'wpsg_latest_deleted_plugin_slug', $slug );
 		update_option( 'wpsg_last_deleted_plugin_' . $slug, array(
 			'zip_path'    => $zip_path,
 			'plugin_path' => $clean_path,
@@ -328,6 +335,48 @@ class WPSG_Plugin_Integrity {
 	}
 
 	/**
+	 * Restore the most recently deleted plugin from zip backup.
+	 *
+	 * @return array
+	 */
+	public static function undo_last_deletion() {
+		global $wpdb;
+
+		$recent_slug = get_option( 'wpsg_latest_deleted_plugin_slug', '' );
+
+		if ( empty( $recent_slug ) && isset( $wpdb->options ) ) {
+			$row = $wpdb->get_row( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE 'wpsg_last_deleted_plugin_%' ORDER BY option_id DESC LIMIT 1" );
+			if ( is_object( $row ) && isset( $row->option_name ) ) {
+				$recent_slug = str_replace( 'wpsg_last_deleted_plugin_', '', (string) $row->option_name );
+			}
+		}
+
+		if ( empty( $recent_slug ) ) {
+			foreach ( array_keys( self::$unwanted_slugs ) as $slug ) {
+				if ( get_option( 'wpsg_last_deleted_plugin_' . $slug ) ) {
+					$recent_slug = $slug;
+					break;
+				}
+			}
+		}
+
+		if ( empty( $recent_slug ) ) {
+			return array(
+				'success' => false,
+				'message' => __( 'No recent plugin deletion archive found to restore.', 'site-checkup-pro' ),
+			);
+		}
+
+		$res = self::restore_plugin( $recent_slug );
+		if ( ! empty( $res['success'] ) ) {
+			delete_option( 'wpsg_latest_deleted_plugin_slug' );
+			delete_option( 'wpsg_last_deleted_plugin_' . $recent_slug );
+		}
+
+		return $res;
+	}
+
+	/**
 	 * Scan installed plugins against WordPress.org API to detect closed/abandoned plugins.
 	 * Uses 24-hour transient cache to prevent performance slowdowns and rate-limiting.
 	 *
@@ -351,6 +400,13 @@ class WPSG_Plugin_Integrity {
 			if ( defined( 'ABSPATH' ) && file_exists( ABSPATH . 'wp-admin/includes/plugin-install.php' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
 			}
+		}
+
+		if ( ! function_exists( 'plugins_api' ) ) {
+			return array(
+				'status'  => 'pending',
+				'message' => __( 'WordPress Plugin Information API is unavailable in this environment.', 'site-checkup-pro' ),
+			);
 		}
 
 		$all_plugins = function_exists( 'get_plugins' ) ? get_plugins() : array();

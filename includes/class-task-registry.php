@@ -275,6 +275,7 @@ class WPSG_Task_Registry {
 			'has_undo'         => true,
 			'status_callback'  => array( 'WPSG_Plugin_Integrity', 'detect_unwanted_plugins' ),
 			'run_callback'     => array( 'WPSG_Plugin_Integrity', 'detect_unwanted_plugins' ),
+			'undo_callback'    => array( 'WPSG_Plugin_Integrity', 'undo_last_deletion' ),
 		) ) );
 
 		// 2.7 Plugin Integrity (WP.org Closed/Removed Scan)

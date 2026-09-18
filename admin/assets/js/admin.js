@@ -34,6 +34,7 @@
 		batchTotal: 0,
 		batchIndex: 0,
 		pendingActionTask: null,
+		pendingDeletePlugin: null,
 	};
 
 	// DOM Elements Cache
@@ -483,6 +484,17 @@
 				loadCspReports();
 				return;
 			}
+
+			// Table Row Actions: Open Delete Plugin Modal
+			const openDelPluginBtn = e.target.closest('.wpsg-btn-open-delete-plugin');
+			if (openDelPluginBtn) {
+				e.preventDefault();
+				const slug = openDelPluginBtn.getAttribute('data-slug');
+				const name = openDelPluginBtn.getAttribute('data-name');
+				const path = openDelPluginBtn.getAttribute('data-path');
+				openDeletePluginModal(slug, name, path);
+				return;
+			}
 		});
 
 		// Close modals on overlay backdrop click
@@ -859,6 +871,7 @@
 		if (dom.batchBanner) dom.batchBanner.style.display = 'flex';
 		if (dom.batchProgress) dom.batchProgress.style.backgroundColor = 'var(--wpsg-brand)';
 		if (dom.btnBatchRun) dom.btnBatchRun.disabled = true;
+		if (dom.btnHeroRunSafe) dom.btnHeroRunSafe.disabled = true;
 		if (dom.btnRunSection) dom.btnRunSection.disabled = true;
 
 		processNextBatchTask();
@@ -1225,6 +1238,17 @@
 
 		// Level A: Automated
 		if (task.automation_level === 'A') {
+			if (task.id === 'detect_unwanted_plugins' && task.status === 'attention') {
+				const plugins = (task.live_data && Array.isArray(task.live_data.plugins)) ? task.live_data.plugins : [];
+				if (plugins.length > 0) {
+					plugins.forEach(p => {
+						html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-danger wpsg-btn-open-delete-plugin" data-slug="${escapeHtml(p.slug)}" data-name="${escapeHtml(p.name)}" data-path="${escapeHtml(p.plugin_path || '')}"><span class="dashicons dashicons-trash"></span> Remove ${escapeHtml(p.name)}</button> `;
+					});
+				} else {
+					html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-danger wpsg-btn-open-delete-plugin" data-slug="" data-name="" data-path=""><span class="dashicons dashicons-trash"></span> Remove Plugin</button> `;
+				}
+			}
+
 			if (task.has_diff && task.status !== 'done') {
 				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary wpsg-btn-diff" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-visibility"></span> Diff</button> `;
 			}
@@ -1458,6 +1482,13 @@
 	}
 
 	/**
+	 * Run All Safe Tasks (Hero button & Quick Action entry point)
+	 */
+	function runBatchSafeTasks() {
+		return startBatchRunner();
+	}
+
+	/**
 	 * Client-Driven Sequential Batch Runner ("Run All Safe Tasks")
 	 * Executes one task per REST call, advances on success, pauses on error.
 	 */
@@ -1477,8 +1508,11 @@
 		state.batchTotal = queue.length;
 		state.batchIndex = 0;
 
-		dom.batchBanner.style.display = 'flex';
-		dom.btnBatchRun.disabled = true;
+		if (dom.batchBanner) dom.batchBanner.style.display = 'flex';
+		if (dom.batchProgress) dom.batchProgress.style.backgroundColor = 'var(--wpsg-brand)';
+		if (dom.btnBatchRun) dom.btnBatchRun.disabled = true;
+		if (dom.btnHeroRunSafe) dom.btnHeroRunSafe.disabled = true;
+		if (dom.btnRunSection) dom.btnRunSection.disabled = true;
 
 		processNextBatchTask();
 	}
@@ -1517,15 +1551,20 @@
 
 			// If task failed, pause sequence and let user inspect
 			if (!res.success && res.status !== 'done') {
-				dom.batchText.textContent = `Paused: Task "${task.title}" reported an issue.`;
+				dom.batchText.textContent = `Paused: Task "${task ? task.title : taskId}" reported an issue.`;
 				dom.batchProgress.style.backgroundColor = '#ef4444';
 				state.batchRunning = false;
-				dom.btnBatchRun.disabled = false;
+				if (dom.btnBatchRun) dom.btnBatchRun.disabled = false;
+				if (dom.btnHeroRunSafe) dom.btnHeroRunSafe.disabled = false;
+				if (dom.btnRunSection) dom.btnRunSection.disabled = false;
 				renderTasksTable();
 				return;
 			}
 
 			state.batchIndex++;
+			state.doneCount = state.tasks.filter(t => t.status === 'done').length;
+			state.sopCoveragePct = state.totalCount > 0 ? Math.round((state.doneCount / state.totalCount) * 100) : 0;
+			updateKpis();
 			renderTasksTable();
 
 			// Short pause before next request to keep browser responsive
@@ -1535,32 +1574,40 @@
 			dom.batchText.textContent = `Paused on error: ${err.message || 'Execution failed'}`;
 			dom.batchProgress.style.backgroundColor = '#ef4444';
 			state.batchRunning = false;
-			dom.btnBatchRun.disabled = false;
+			if (dom.btnBatchRun) dom.btnBatchRun.disabled = false;
+			if (dom.btnHeroRunSafe) dom.btnHeroRunSafe.disabled = false;
+			if (dom.btnRunSection) dom.btnRunSection.disabled = false;
 			renderTasksTable();
 		}
 	}
 
 	function finishBatchRunner() {
 		state.batchRunning = false;
-		dom.batchProgress.style.width = '100%';
-		dom.batchText.textContent = 'All safe tasks executed successfully!';
-		dom.btnBatchRun.disabled = false;
+		if (dom.batchProgress) dom.batchProgress.style.width = '100%';
+		if (dom.batchText) dom.batchText.textContent = 'All safe tasks executed successfully!';
+		if (dom.btnBatchRun) dom.btnBatchRun.disabled = false;
+		if (dom.btnHeroRunSafe) dom.btnHeroRunSafe.disabled = false;
+		if (dom.btnRunSection) dom.btnRunSection.disabled = false;
 
 		state.doneCount = state.tasks.filter(t => t.status === 'done').length;
-		state.sopCoveragePct = Math.round((state.doneCount / state.totalCount) * 100);
+		state.sopCoveragePct = state.totalCount > 0 ? Math.round((state.doneCount / state.totalCount) * 100) : 0;
 		updateKpis();
 
 		setTimeout(() => {
-			dom.batchBanner.style.display = 'none';
-			dom.batchProgress.style.width = '0%';
-			dom.batchProgress.style.backgroundColor = '';
+			if (dom.batchBanner) dom.batchBanner.style.display = 'none';
+			if (dom.batchProgress) {
+				dom.batchProgress.style.width = '0%';
+				dom.batchProgress.style.backgroundColor = '';
+			}
 		}, 4000);
 	}
 
 	function stopBatchRunner() {
 		state.batchRunning = false;
-		dom.batchBanner.style.display = 'none';
-		dom.btnBatchRun.disabled = false;
+		if (dom.batchBanner) dom.batchBanner.style.display = 'none';
+		if (dom.btnBatchRun) dom.btnBatchRun.disabled = false;
+		if (dom.btnHeroRunSafe) dom.btnHeroRunSafe.disabled = false;
+		if (dom.btnRunSection) dom.btnRunSection.disabled = false;
 	}
 
 	/**
@@ -1714,10 +1761,65 @@
 	}
 
 	/**
+	 * Open Delete Plugin Modal
+	 */
+	function openDeletePluginModal(slug, name, path) {
+		if (!slug) {
+			const task = state.tasks.find(t => t.id === 'detect_unwanted_plugins');
+			if (task && task.live_data && Array.isArray(task.live_data.plugins) && task.live_data.plugins.length > 0) {
+				slug = task.live_data.plugins[0].slug;
+				name = task.live_data.plugins[0].name;
+				path = task.live_data.plugins[0].plugin_path;
+			}
+		}
+		state.pendingDeletePlugin = { slug: slug || '', name: name || slug || 'Unknown Plugin', path: path || '' };
+		if (dom.deletePluginName) dom.deletePluginName.textContent = state.pendingDeletePlugin.name;
+		if (dom.deletePluginSlug) dom.deletePluginSlug.textContent = state.pendingDeletePlugin.slug;
+		openModal(dom.modalDeletePlugin);
+	}
+
+	/**
 	 * Submit Plugin Deletion with ZIP Backup
 	 */
 	async function submitDeletePlugin() {
-		// Handled via task run callback
+		if (!state.pendingDeletePlugin || !state.pendingDeletePlugin.slug) return;
+
+		if (dom.btnConfirmDeletePlugin) {
+			dom.btnConfirmDeletePlugin.disabled = true;
+			dom.btnConfirmDeletePlugin.innerHTML = '<span class="wpsg-spinner"></span> Archiving & Deleting...';
+		}
+
+		try {
+			const headers = {};
+			if (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.delete_plugin) {
+				headers['X-WPSG-Nonce'] = window.wpsgData.nonces.delete_plugin;
+			}
+
+			const res = await apiCall({
+				path: '/site-checkup-pro/v1/tasks/delete-plugin',
+				method: 'POST',
+				headers: headers,
+				data: {
+					slug: state.pendingDeletePlugin.slug,
+					plugin_path: state.pendingDeletePlugin.path,
+				},
+			});
+
+			if (res.success) {
+				closeAllModals();
+				alert(res.message || `Plugin "${state.pendingDeletePlugin.name}" successfully archived and removed.`);
+				await runTask('detect_unwanted_plugins');
+			} else {
+				alert(`Error: ${res.message || 'Could not delete plugin.'}`);
+			}
+		} catch (err) {
+			alert(`Error: ${err.message || 'Could not delete plugin.'}`);
+		} finally {
+			if (dom.btnConfirmDeletePlugin) {
+				dom.btnConfirmDeletePlugin.disabled = false;
+				dom.btnConfirmDeletePlugin.innerHTML = '<span class="dashicons dashicons-trash"></span> Archive to ZIP & Delete Plugin';
+			}
+		}
 	}
 
 	/**

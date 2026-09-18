@@ -5,3 +5,7 @@ site-checkup-pro-*.zip
 *.tmp
 .DS_Store
 Thumbs.db
+vendor/
+composer.lock
+.vscode/
+

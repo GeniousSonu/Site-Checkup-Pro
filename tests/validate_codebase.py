@@ -30,6 +30,7 @@ def check_php_syntax(file_path):
     stack = []
     pairs = {')': '(', '}': '{', ']': '['}
     
+    in_php = True
     in_single_quote = False
     in_double_quote = False
     in_line_comment = False
@@ -51,7 +52,28 @@ def check_php_syntax(file_path):
             i += 1
             continue
 
+        if not in_php:
+            if content[i:i+5] == '<?php':
+                in_php = True
+                i += 5
+                continue
+            elif content[i:i+3] == '<?=':
+                in_php = True
+                i += 3
+                continue
+            elif content[i:i+2] == '<?':
+                in_php = True
+                i += 2
+                continue
+            i += 1
+            continue
+
         if in_line_comment:
+            if ch == '?' and nxt == '>':
+                in_line_comment = False
+                in_php = False
+                i += 2
+                continue
             i += 1
             continue
 
@@ -81,6 +103,12 @@ def check_php_syntax(file_path):
             else:
                 escape = False
             i += 1
+            continue
+
+        # PHP tag close
+        if ch == '?' and nxt == '>':
+            in_php = False
+            i += 2
             continue
 
         # Comments start
@@ -173,7 +201,7 @@ def main():
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     php_files = []
     for root, dirs, files in os.walk(project_root):
-        if '.git' in root or 'node_modules' in root or 'vendor' in root:
+        if '.git' in root or 'node_modules' in root or 'vendor' in root or 'build' in root:
             continue
         for f in files:
             if f.endswith('.php'):

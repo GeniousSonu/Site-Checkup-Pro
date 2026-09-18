@@ -152,7 +152,18 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			),
 		) );
 
-		// 9. Restore Plugin from Zip Backup
+		// 9. Quarantine & Delete Unwanted Plugin with Zip Backup
+		register_rest_route( $this->namespace, '/tasks/delete-plugin', array(
+			'methods'             => WP_REST_Server::CREATABLE,
+			'callback'            => array( $this, 'delete_plugin' ),
+			'permission_callback' => array( $this, 'check_permissions' ),
+			'args'                => array(
+				'slug'        => array( 'sanitize_callback' => 'sanitize_file_name', 'required' => true ),
+				'plugin_path' => array( 'sanitize_callback' => 'sanitize_text_field', 'required' => false ),
+			),
+		) );
+
+		// 10. Restore Plugin from Zip Backup
 		register_rest_route( $this->namespace, '/tasks/restore-plugin', array(
 			'methods'             => WP_REST_Server::CREATABLE,
 			'callback'            => array( $this, 'restore_plugin' ),
@@ -746,6 +757,55 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 				array( 'slug_configured' => true ),
 				'success',
 				sprintf( __( 'Custom login URL activated: /%s/', 'site-checkup-pro' ), $result['slug'] )
+			);
+		}
+
+		return rest_ensure_response( $result );
+	}
+
+	/**
+	 * Quarantine and delete an unwanted plugin with zip backup.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function delete_plugin( $request ) {
+		$nonce_check = $this->verify_action_nonce( $request, 'delete_plugin' );
+		if ( is_wp_error( $nonce_check ) ) {
+			return $nonce_check;
+		}
+
+		$slug        = $request->get_param( 'slug' );
+		$plugin_path = $request->get_param( 'plugin_path' );
+
+		if ( empty( $plugin_path ) ) {
+			if ( ! function_exists( 'get_plugins' ) ) {
+				if ( defined( 'ABSPATH' ) && file_exists( ABSPATH . 'wp-admin/includes/plugin.php' ) ) {
+					require_once ABSPATH . 'wp-admin/includes/plugin.php';
+				}
+			}
+			$all_plugins = function_exists( 'get_plugins' ) ? get_plugins() : array();
+			foreach ( array_keys( $all_plugins ) as $path ) {
+				if ( dirname( $path ) === $slug || basename( $path, '.php' ) === $slug ) {
+					$plugin_path = $path;
+					break;
+				}
+			}
+			if ( empty( $plugin_path ) ) {
+				$plugin_path = $slug . '/' . $slug . '.php';
+			}
+		}
+
+		$result = WPSG_Plugin_Integrity::safe_delete_plugin( $plugin_path );
+
+		if ( ! empty( $result['success'] ) ) {
+			WPSG_Audit_Log::log(
+				'detect_unwanted_plugins',
+				'delete_plugin',
+				'attention',
+				'done',
+				'success',
+				sprintf( 'Safely archived and deleted plugin: %s', $slug )
 			);
 		}
 

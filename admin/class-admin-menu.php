@@ -171,6 +171,7 @@ class WPSG_Admin_Menu {
 				'update_baseline' => wp_create_nonce( 'wpsg_update_baseline' ),
 				'set_login_slug'  => wp_create_nonce( 'wpsg_set_login_slug' ),
 				'restore_plugin'  => wp_create_nonce( 'wpsg_restore_plugin' ),
+				'delete_plugin'   => wp_create_nonce( 'wpsg_delete_plugin' ),
 				'reauth'          => wp_create_nonce( 'wpsg_reauth' ),
 				'destroy_session' => wp_create_nonce( 'wpsg_destroy_session' ),
 				'revoke_app_pass' => wp_create_nonce( 'wpsg_revoke_app_pass' ),
@@ -325,26 +326,10 @@ class WPSG_Admin_Menu {
 	 * Ensures the custom brand mark is cleanly sized, centered, and smooth on hover.
 	 */
 	public function enqueue_admin_menu_icon_styles() {
-		?>
-		<style id="wpsg-menu-icon-styles">
-			#adminmenu .toplevel_page_site-checkup-pro .wp-menu-image {
-				display: flex;
-				align-items: center;
-				justify-content: center;
-			}
-			#adminmenu .toplevel_page_site-checkup-pro .wp-menu-image img {
-				width: 19px !important;
-				height: 19px !important;
-				padding: 0 !important;
-				opacity: 0.88;
-				transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease;
-			}
-			#adminmenu .toplevel_page_site-checkup-pro:hover .wp-menu-image img,
-			#adminmenu .toplevel_page_site-checkup-pro.wp-has-current-submenu .wp-menu-image img {
-				opacity: 1;
-				transform: scale(1.12);
-			}
-		</style>
-		<?php
+		echo '<style id="wpsg-menu-icon-styles">' . "\n";
+		echo '#adminmenu .toplevel_page_site-checkup-pro .wp-menu-image { display: flex; align-items: center; justify-content: center; }' . "\n";
+		echo '#adminmenu .toplevel_page_site-checkup-pro .wp-menu-image img { width: 19px !important; height: 19px !important; padding: 0 !important; opacity: 0.88; transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease; }' . "\n";
+		echo '#adminmenu .toplevel_page_site-checkup-pro:hover .wp-menu-image img, #adminmenu .toplevel_page_site-checkup-pro.wp-has-current-submenu .wp-menu-image img { opacity: 1; transform: scale(1.12); }' . "\n";
+		echo '</style>' . "\n";
 	}
 }

@@ -63,6 +63,16 @@ if ( ! function_exists( 'current_user_can' ) ) {
 		return $GLOBALS['_mock_current_user_can'] === $c;
 	}
 }
+if ( ! function_exists( 'wp_create_nonce' ) ) {
+	function wp_create_nonce( $action = -1 ) {
+		return substr( md5( 'mock_nonce_' . $action ), 0, 10 );
+	}
+}
+if ( ! function_exists( 'wp_verify_nonce' ) ) {
+	function wp_verify_nonce( $nonce, $action = -1 ) {
+		return ( $nonce === substr( md5( 'mock_nonce_' . $action ), 0, 10 ) ) ? 1 : false;
+	}
+}
 if ( ! function_exists( 'sanitize_user' ) ) {
 	function sanitize_user( $username, $strict = false ) {
 		return preg_replace( '/[^a-zA-Z0-9 _.\-@]/', '', (string) $username );
@@ -101,6 +111,34 @@ if ( ! defined( 'OBJECT' ) ) { define( 'OBJECT', 'OBJECT' ); }
 if ( ! defined( 'ARRAY_A' ) ) { define( 'ARRAY_A', 'ARRAY_A' ); }
 if ( ! function_exists( 'is_admin' ) ) { function is_admin() { return true; } }
 if ( ! function_exists( 'is_plugin_active' ) ) { function is_plugin_active( $p ) { return false; } }
+if ( ! function_exists( 'deactivate_plugins' ) ) { function deactivate_plugins( $p, $s = false, $n = null ) { return true; } }
+if ( ! function_exists( 'delete_plugins' ) ) {
+	function delete_plugins( $plugins ) {
+		foreach ( (array) $plugins as $plugin ) {
+			$slug = dirname( $plugin );
+			if ( '.' === $slug || empty( $slug ) ) {
+				$slug = basename( $plugin, '.php' );
+			}
+			$dir = WP_PLUGIN_DIR . '/' . $slug;
+			if ( is_dir( $dir ) ) {
+				$it = new RecursiveDirectoryIterator( $dir, RecursiveDirectoryIterator::SKIP_DOTS );
+				$files = new RecursiveIteratorIterator( $it, RecursiveIteratorIterator::CHILD_FIRST );
+				foreach ( $files as $file ) {
+					if ( $file->isDir() ) {
+						@rmdir( $file->getRealPath() );
+					} else {
+						@unlink( $file->getRealPath() );
+					}
+				}
+				@rmdir( $dir );
+			} elseif ( file_exists( WP_PLUGIN_DIR . '/' . $plugin ) ) {
+				@unlink( WP_PLUGIN_DIR . '/' . $plugin );
+			}
+		}
+		return true;
+	}
+}
+wp_mkdir_p( WP_PLUGIN_DIR );
 if ( ! function_exists( 'get_bloginfo' ) ) { function get_bloginfo( $show = '' ) { return 'Site Checkup Pro Test'; } }
 if ( ! function_exists( 'get_plugins' ) ) { function get_plugins() { return array(); } }
 if ( ! function_exists( 'wp_cache_get' ) ) { function wp_cache_get( $key, $group = '' ) { return false; } }
@@ -886,7 +924,7 @@ run_test( "REST API: Settings endpoint enforces hardcoded allowlist and rejects 
 	$GLOBALS['_mock_current_user_can'] = 'manage_options';
 
 	// Craft a mock request with valid keys and malicious mass-assignment keys
-	$mock_request = new class {
+	$mock_request = new class extends WP_REST_Request {
 		public function get_json_params() {
 			return array(
 				'patchstack_api_key'     => 'test_api_key_12345',
@@ -1414,6 +1452,88 @@ run_test( "Task Runner: File write without live HTTP verification transitions to
 	unset( $GLOBALS['_mock_remote_handler'] );
 
 	return ( isset( $res['status'] ) && 'applied_unverified' === $res['status'] );
+} );
+
+// TEST 46: Plugin Integrity: Safe Deletion with ZIP Archive & Undo
+run_test( "Plugin Integrity: Safe deletion creates ZIP backup and undo_last_deletion restores it", function () {
+	$plugin_dir = WP_PLUGIN_DIR . '/test-dummy-plugin';
+	wp_mkdir_p( $plugin_dir );
+	file_put_contents( $plugin_dir . '/test-dummy-plugin.php', '<?php // Dummy plugin' );
+
+	$plugin_rel_path = 'test-dummy-plugin/test-dummy-plugin.php';
+	$delete_res = WPSG_Plugin_Integrity::safe_delete_plugin( $plugin_rel_path );
+
+	if ( empty( $delete_res['success'] ) ) {
+		return false;
+	}
+
+	// Deletion verified (mock deletes directory)
+	if ( file_exists( $plugin_dir . '/test-dummy-plugin.php' ) ) {
+		return false;
+	}
+
+	// Now undo deletion
+	$undo_res = WPSG_Plugin_Integrity::undo_last_deletion();
+	if ( empty( $undo_res['success'] ) ) {
+		return false;
+	}
+
+	// Verify plugin file was restored
+	$restored = file_exists( $plugin_dir . '/test-dummy-plugin.php' );
+
+	// Cleanup
+	@unlink( $plugin_dir . '/test-dummy-plugin.php' );
+	@rmdir( $plugin_dir );
+
+	return $restored;
+} );
+
+// TEST 47: REST API: delete_plugin endpoint verifies nonce and invokes safe deletion
+run_test( "REST API: /tasks/delete-plugin rejects invalid nonce and invokes safe deletion with valid nonce", function () {
+	$controller = WPSG_Rest_Controller::get_instance();
+	$GLOBALS['_mock_current_user_can'] = 'manage_options';
+
+	// 1. Invalid nonce should return WP_Error
+	$invalid_request = new class extends WP_REST_Request {
+		public function get_header( $name ) { return 'invalid_nonce'; }
+		public function get_param( $name ) { return null; }
+	};
+	$res1 = $controller->delete_plugin( $invalid_request );
+	if ( ! is_wp_error( $res1 ) ) {
+		return false;
+	}
+
+	// 2. Valid nonce triggers safe deletion
+	$plugin_dir = WP_PLUGIN_DIR . '/rest-dummy-plugin';
+	wp_mkdir_p( $plugin_dir );
+	file_put_contents( $plugin_dir . '/rest-dummy-plugin.php', '<?php // REST Dummy' );
+
+	$valid_nonce = wp_create_nonce( 'wpsg_delete_plugin' );
+	$valid_request = new class( $valid_nonce ) extends WP_REST_Request {
+		private $nonce;
+		public function __construct( $n ) { $this->nonce = $n; }
+		public function get_header( $name ) { return 'X-WPSG-Nonce' === $name ? $this->nonce : null; }
+		public function get_param( $name ) {
+			if ( 'slug' === $name ) return 'rest-dummy-plugin';
+			if ( 'plugin_path' === $name ) return 'rest-dummy-plugin/rest-dummy-plugin.php';
+			return null;
+		}
+	};
+
+	$res2 = $controller->delete_plugin( $valid_request );
+	if ( is_wp_error( $res2 ) ) {
+		return false;
+	}
+
+	$data = $res2->get_data();
+	$success = ! empty( $data['success'] );
+
+	// Cleanup undo
+	WPSG_Plugin_Integrity::undo_last_deletion();
+	@unlink( $plugin_dir . '/rest-dummy-plugin.php' );
+	@rmdir( $plugin_dir );
+
+	return $success;
 } );
 
 echo "\n=======================================================\n";
