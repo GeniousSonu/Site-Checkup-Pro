@@ -112,12 +112,12 @@ jobs:
       #   guaranteeing trunk/readme.txt reflects the current version simultaneously.
       - name: Deploy to WordPress.org SVN Repository (Stripped Guideline 8 Build)
         if: env.SVN_PASSWORD != ''
-        uses: 10up/action-wordpress-plugin-deploy-svn@v2.2.2
+        uses: 10up/action-wordpress-plugin-deploy@v2.2.2
         with:
-          generate_zip: false
-          assets_dir: 'media'
+          generate-zip: false
         env:
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
           SLUG: site-checkup-pro
           BUILD_DIR: 'build/wporg/site-checkup-pro'
+          ASSETS_DIR: 'media'
