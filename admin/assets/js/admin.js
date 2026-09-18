@@ -29,6 +29,8 @@
 		filterLevel: '',
 		filterStatus: '',
 		searchQuery: '',
+		loading: true,
+		loadError: null,
 		batchRunning: false,
 		batchQueue: [],
 		batchTotal: 0,
@@ -120,15 +122,17 @@
 	 */
 	function applyTasksPayload(res) {
 		if (!res) return;
-		state.tasks = res.tasks || [];
+		state.tasks = Array.isArray(res.tasks) ? res.tasks : Object.values(res.tasks || {});
 		state.sections = res.sections || {};
 		state.safeInstantIds = res.safe_instant_ids || [];
-		state.totalCount = res.total_count || 0;
+		state.totalCount = res.total_count || state.tasks.length || 0;
 		state.doneCount = res.done_count || 0;
 		state.sopCoveragePct = res.sop_coverage_pct || 0;
 		if (res.server_type) state.serverType = res.server_type;
 		if (typeof res.supports_htaccess !== 'undefined') state.supportsHtaccess = res.supports_htaccess;
 		state.backupStatus = res.backup_status || {};
+		state.loading = false;
+		state.loadError = null;
 
 		updateKpis();
 		renderViews();
@@ -154,8 +158,10 @@
 		bindEvents();
 
 		// Hydrate immediately from server-rendered initial data (Zero-latency UI render)
-		if (window.wpsgData && window.wpsgData.initialData) {
+		if (window.wpsgData && window.wpsgData.initialData && window.wpsgData.initialData.tasks) {
 			applyTasksPayload(window.wpsgData.initialData);
+		} else {
+			state.loading = true;
 		}
 
 		loadTasks();
@@ -382,7 +388,7 @@
 				e.preventDefault();
 				const targetSec = attGoBtn.getAttribute('data-go-section') || 'all';
 				const targetTaskId = attGoBtn.getAttribute('data-go-task') || '';
-				switchTab(targetSec);
+				switchTab(targetSec, true);
 				if (targetTaskId && dom.searchTasks) {
 					dom.searchTasks.value = targetTaskId;
 					state.searchQuery = targetTaskId;
@@ -731,23 +737,48 @@
 	 */
 	async function loadTasks() {
 		try {
+			state.loading = true;
+			state.loadError = null;
 			const res = await apiCall({
 				path: '/site-checkup-pro/v1/tasks',
 			});
 			applyTasksPayload(res);
 		} catch (err) {
 			console.error('Failed to load Site Checkup Pro tasks:', err);
+			state.loading = false;
+			state.loadError = err.message || 'Error communicating with REST API.';
 			if (dom.tbody && (!state.tasks || state.tasks.length === 0)) {
-				dom.tbody.innerHTML = `<tr><td colspan="5" class="wpsg-error-state"><span class="dashicons dashicons-warning"></span> ${escapeHtml(err.message || 'Error communicating with REST API.')}</td></tr>`;
+				dom.tbody.innerHTML = `
+					<tr>
+						<td colspan="5" class="wpsg-error-state" style="text-align: center; padding: 40px;">
+							<span class="dashicons dashicons-warning" style="font-size: 32px; color: var(--wpsg-danger);"></span>
+							<h4 style="margin: 8px 0 4px;">Unable to load checklist tasks</h4>
+							<p style="color: var(--wpsg-text-secondary); margin-bottom: 12px;">${escapeHtml(state.loadError)}</p>
+							<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary" id="wpsg-btn-retry-tasks">Retry Loading Tasks</button>
+						</td>
+					</tr>
+				`;
+				const retryBtn = document.getElementById('wpsg-btn-retry-tasks');
+				if (retryBtn) retryBtn.addEventListener('click', () => loadTasks());
 			}
 		}
 	}
 
 	/**
 	 * Switch active tab and render appropriate panel
+	 *
+	 * @param {string} tabId Target tab slug
+	 * @param {boolean} preserveSearch Whether to retain active search query
 	 */
-	function switchTab(tabId) {
+	function switchTab(tabId, preserveSearch = false) {
 		state.activeTab = tabId;
+
+		if (!preserveSearch) {
+			state.searchQuery = '';
+			if (dom.searchTasks) {
+				dom.searchTasks.value = '';
+			}
+		}
 
 		// Update active class on all tab buttons
 		document.querySelectorAll('.wpsg-tab').forEach(t => {
@@ -1087,9 +1118,39 @@
 	function renderTasksTable() {
 		if (!dom.tbody) return;
 
+		// 0. If tasks are currently loading and local tasks list is empty, show loading state
+		if (state.loading && (!state.tasks || state.tasks.length === 0)) {
+			dom.tbody.innerHTML = `
+				<tr>
+					<td colspan="5" style="text-align: center; padding: 40px;">
+						<span class="wpsg-spinner" aria-hidden="true"></span>
+						<p style="margin: 8px 0 0 0; color: var(--wpsg-text-secondary); font-size: 13px;">Loading checklist tasks and live verification status...</p>
+					</td>
+				</tr>
+			`;
+			return;
+		}
+
+		// 0b. If load failed and tasks list is empty, show explicit REST error with retry
+		if (state.loadError && (!state.tasks || state.tasks.length === 0)) {
+			dom.tbody.innerHTML = `
+				<tr>
+					<td colspan="5" class="wpsg-error-state" style="text-align: center; padding: 40px;">
+						<span class="dashicons dashicons-warning" style="font-size: 32px; color: var(--wpsg-danger);"></span>
+						<h4 style="margin: 8px 0 4px;">Unable to load checklist tasks</h4>
+						<p style="color: var(--wpsg-text-secondary); margin-bottom: 12px;">${escapeHtml(state.loadError)}</p>
+						<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary" id="wpsg-btn-retry-tasks-view">Retry Loading Tasks</button>
+					</td>
+				</tr>
+			`;
+			const retryBtn = document.getElementById('wpsg-btn-retry-tasks-view');
+			if (retryBtn) retryBtn.addEventListener('click', () => loadTasks());
+			return;
+		}
+
 		let filtered = state.tasks;
 
-		// 0. Filter by Search Query
+		// 1. Filter by Search Query
 		if (state.searchQuery) {
 			const q = state.searchQuery.toLowerCase();
 			filtered = filtered.filter(t =>
@@ -1099,12 +1160,12 @@
 			);
 		}
 
-		// 1. Filter by Section tab
+		// 2. Filter by Section tab
 		if (state.activeTab !== 'all' && state.activeTab !== 'audit_trail' && state.activeTab !== 'overview' && state.activeTab !== 'features') {
 			filtered = filtered.filter(t => t.section === state.activeTab);
 		}
 
-		// 2. Filter by Level
+		// 3. Filter by Level
 		if (state.filterLevel) {
 			if (state.filterLevel === 'A_instant') {
 				filtered = filtered.filter(t => t.automation_level === 'A' && t.sub_type === 'instant');
@@ -1115,7 +1176,7 @@
 			}
 		}
 
-		// 3. Filter by Status
+		// 4. Filter by Status
 		if (state.filterStatus) {
 			filtered = filtered.filter(t => t.status === state.filterStatus);
 		}
@@ -1129,10 +1190,25 @@
 							${emptyImg ? `<img src="${emptyImg}" width="120" height="85" alt="" />` : '<span class="dashicons dashicons-search"></span>'}
 							<h4>No checklist tasks found</h4>
 							<p>No tasks match the active filters or search query. Try switching categories or clearing search.</p>
+							<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary" id="wpsg-btn-clear-task-filters" style="margin-top: 14px;">
+								<span class="dashicons dashicons-dismiss"></span> Clear Filters & Search
+							</button>
 						</div>
 					</td>
 				</tr>
 			`;
+			const clearBtn = document.getElementById('wpsg-btn-clear-task-filters');
+			if (clearBtn) {
+				clearBtn.addEventListener('click', () => {
+					state.searchQuery = '';
+					state.filterLevel = '';
+					state.filterStatus = '';
+					if (dom.searchTasks) dom.searchTasks.value = '';
+					if (dom.filterLevel) dom.filterLevel.value = '';
+					if (dom.filterStatus) dom.filterStatus.value = '';
+					renderTasksTable();
+				});
+			}
 			return;
 		}
 

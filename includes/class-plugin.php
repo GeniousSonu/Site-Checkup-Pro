@@ -85,7 +85,25 @@ class WPSG_Plugin {
 			WPSG_Admin_Menu::get_instance();
 		}
 
-		// Initialize REST API.
+		// Initialize REST API on rest_api_init and during components load.
+		add_action( 'rest_api_init', function () {
+			if ( ! class_exists( 'WP_REST_Controller' ) ) {
+				$rest_path = defined( 'ABSPATH' ) ? ABSPATH . ( defined( 'WPINC' ) ? WPINC : 'wp-includes' ) . '/rest-api/endpoints/class-wp-rest-controller.php' : '';
+				if ( $rest_path && file_exists( $rest_path ) ) {
+					require_once $rest_path;
+				}
+			}
+			if ( class_exists( 'WPSG_Rest_Controller' ) ) {
+				WPSG_Rest_Controller::get_instance();
+			}
+		} );
+
+		if ( ! class_exists( 'WP_REST_Controller' ) ) {
+			$rest_path = defined( 'ABSPATH' ) ? ABSPATH . ( defined( 'WPINC' ) ? WPINC : 'wp-includes' ) . '/rest-api/endpoints/class-wp-rest-controller.php' : '';
+			if ( $rest_path && file_exists( $rest_path ) ) {
+				require_once $rest_path;
+			}
+		}
 		if ( class_exists( 'WPSG_Rest_Controller' ) ) {
 			WPSG_Rest_Controller::get_instance();
 		}

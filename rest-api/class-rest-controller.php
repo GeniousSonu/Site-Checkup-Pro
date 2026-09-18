@@ -16,6 +16,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+if ( ! class_exists( 'WP_REST_Controller' ) ) {
+	$wpsg_rest_controller_file = defined( 'ABSPATH' )
+		? ABSPATH . ( defined( 'WPINC' ) ? WPINC : 'wp-includes' ) . '/rest-api/endpoints/class-wp-rest-controller.php'
+		: '';
+	if ( $wpsg_rest_controller_file && file_exists( $wpsg_rest_controller_file ) ) {
+		require_once $wpsg_rest_controller_file;
+	}
+}
+
 /**
  * Class WPSG_Rest_Controller
  */
@@ -51,7 +60,11 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 	 * Constructor.
 	 */
 	private function __construct() {
-		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
+		if ( function_exists( 'did_action' ) && did_action( 'rest_api_init' ) ) {
+			$this->register_routes();
+		} else {
+			add_action( 'rest_api_init', array( $this, 'register_routes' ) );
+		}
 	}
 
 	/**

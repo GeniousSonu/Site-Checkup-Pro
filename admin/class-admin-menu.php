@@ -146,6 +146,12 @@ class WPSG_Admin_Menu {
 		);
 
 		$initial_catalog = null;
+		if ( ! class_exists( 'WP_REST_Controller' ) ) {
+			$rest_path = defined( 'ABSPATH' ) ? ABSPATH . ( defined( 'WPINC' ) ? WPINC : 'wp-includes' ) . '/rest-api/endpoints/class-wp-rest-controller.php' : '';
+			if ( $rest_path && file_exists( $rest_path ) ) {
+				require_once $rest_path;
+			}
+		}
 		if ( class_exists( 'WPSG_Rest_Controller' ) ) {
 			try {
 				$initial_catalog = WPSG_Rest_Controller::get_instance()->get_tasks_catalog();
