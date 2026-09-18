@@ -1,28 +1,23 @@
 # Local Development & Testing Guide
 
-## 1. Local WordPress Plugin Symlink Requirement
+## 1. Local WordPress Synchronization & Symlink Constraint
 
-When testing Site Checkup Pro on a local development server (such as LocalWP, Docker, or native LAMP/LEMP stacks), the plugin folder inside `wp-content/plugins/` **must always be a symbolic link** to this git repository, never a manually copied or synced folder.
+### ⚠️ Critical Constraint: Do NOT Use Symlinks Across Directory Trees
+In LocalWP and containerized WordPress environments, the web server (Apache/Nginx) and PHP-FPM process run inside isolated mount/container namespaces. 
+**Symbolic links from `wp-content/plugins/site-checkup-pro` to an external path (e.g. `~/Pictures/Site Checkup Pro`) are broken and invisible to the web server's PHP execution context.** 
+While host-level CLI tools may resolve the symlink, real HTTP requests fail with `file_exists() === false`, causing WordPress to report *"Plugin file does not exist"* and automatically deactivate the plugin.
 
-### Why this is critical
-Manually copying files or keeping a static clone inside `wp-content/plugins/` causes silent divergence: code edits committed to the git repository will not be executed by the local server, leading to testing stale code and false bug reports.
+### Proper Local Synchronization (`bin/sync-local.sh`)
+To keep the local testing site synchronized with this Git repository without manual copying or unreliable symlinks, use the automated sync tool:
 
-### Setup Instructions
+```bash
+./bin/sync-local.sh
+```
 
-1. Remove any existing physical directory in the WordPress plugins folder:
-   ```bash
-   rm -rf "/path/to/local-site/app/public/wp-content/plugins/site-checkup-pro"
-   ```
-
-2. Create a symbolic link pointing to the repository root:
-   ```bash
-   ln -s "/path/to/repo/Site Checkup Pro" "/path/to/local-site/app/public/wp-content/plugins/site-checkup-pro"
-   ```
-
-3. Confirm the symlink resolves correctly:
-   ```bash
-   ls -la "/path/to/local-site/app/public/wp-content/plugins/site-checkup-pro"
-   ```
+This script:
+1. Detects local test sites (e.g., `Local Sites/test111`, `Local Sites/test`).
+2. Removes any broken or legacy symlinks.
+3. Performs a clean mirror sync of repository files directly into `wp-content/plugins/site-checkup-pro/` while respecting `.distignore` rules.
 
 ---
 
