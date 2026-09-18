@@ -112,7 +112,7 @@ jobs:
       #   guaranteeing trunk/readme.txt reflects the current version simultaneously.
       - name: Deploy to WordPress.org SVN Repository (Stripped Guideline 8 Build)
         if: env.SVN_PASSWORD != ''
-        uses: 10up/action-wordpress-plugin-deploy@v2.2.2
+        uses: 10up/action-wordpress-plugin-deploy@stable
         with:
           generate-zip: false
         env:
