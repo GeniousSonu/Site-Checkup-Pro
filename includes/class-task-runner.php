@@ -98,11 +98,12 @@ class WPSG_Task_Runner {
 			// - 'status: done' — check passed.
 			// - 'status: attention' for instant (scanner) tasks — scan ran fine, found issues.
 			//   'attention' is a valid scan result, not a run failure.
-			$result_status = isset( $result['status'] ) ? $result['status'] : '';
-			$is_success = ! empty( $result['success'] )
+			$result_status             = isset( $result['status'] ) ? $result['status'] : '';
+			$run_returned_success_flag = ! empty( $result['success'] );
+			$is_success                = $run_returned_success_flag
 				|| 'done' === $result_status
 				|| ( 'attention' === $result_status && 'instant' === $task->sub_type );
-			$message    = isset( $result['message'] ) ? $result['message'] : '';
+			$message                   = isset( $result['message'] ) ? $result['message'] : '';
 
 			// 7. Post-action verification (Verify).
 			$new_status    = 'pending';

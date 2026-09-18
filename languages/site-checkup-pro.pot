@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Site Checkup Pro 1.0.0\n"
 "Report-Msgid-Bugs-To: https://github.com/GeniousSonu/site-checkup-pro/issues\n"
-"POT-Creation-Date: 2026-09-18 07:04+0000\n"
+"POT-Creation-Date: 2026-09-18 11:46+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -152,9 +152,9 @@ msgstr ""
 msgid "API Token / Secret Key (Stored Encrypted)"
 msgstr ""
 
-#: rest-api/class-rest-controller.php:588
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:588
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:588
+#: rest-api/class-rest-controller.php:602
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:601
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:601
 msgid "Access denied."
 msgstr ""
 
@@ -320,7 +320,7 @@ msgstr ""
 msgid "Administrator password confirmation is required before executing file modifications."
 msgstr ""
 
-#: includes/class-task-runner.php:265
+#: includes/class-task-runner.php:266
 #: build/wporg/site-checkup-pro/includes/class-task-runner.php:265
 #: build/self-hosted/site-checkup-pro/includes/class-task-runner.php:265
 msgid "Administrator password confirmation is required before undoing file modifications."
@@ -602,9 +602,9 @@ msgstr ""
 msgid "Authorizes Site Checkup Pro to transmit authenticated Nginx directive configurations to the specified control panel API endpoint. Token is never logged or exported."
 msgstr ""
 
-#: rest-api/class-rest-controller.php:657
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:657
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:657
+#: rest-api/class-rest-controller.php:671
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:670
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:670
 msgid "Automated Level A and guided Level B tasks cannot be manually marked done. They must be executed or verified through their respective procedures."
 msgstr ""
 
@@ -692,9 +692,9 @@ msgstr ""
 msgid "Baseline initialized with %d recognized administrator(s)."
 msgstr ""
 
-#: rest-api/class-rest-controller.php:731
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:731
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:731
+#: rest-api/class-rest-controller.php:745
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:744
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:744
 msgid "Baseline updated successfully."
 msgstr ""
 
@@ -785,9 +785,9 @@ msgstr ""
 msgid "CSP enabled in settings, but live HTTP header could not be verified on front-end."
 msgstr ""
 
-#: rest-api/class-rest-controller.php:1028
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:1028
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:1028
+#: rest-api/class-rest-controller.php:1042
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:1041
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:1041
 msgid "CSP report payload exceeds 10KB size limit."
 msgstr ""
 
@@ -835,7 +835,7 @@ msgstr ""
 
 #: includes/class-htaccess-manager.php:547
 #: includes/class-htaccess-manager.php:711
-#: includes/class-task.php:261
+#: includes/class-task.php:263
 #: includes/class-task-registry.php:456
 #: includes/class-task-registry.php:496
 #: includes/class-task-registry.php:536
@@ -911,7 +911,7 @@ msgstr ""
 msgid "Check / Procedure"
 msgstr ""
 
-#: includes/class-task.php:204
+#: includes/class-task.php:205
 #: build/wporg/site-checkup-pro/includes/class-task.php:204
 #: build/self-hosted/site-checkup-pro/includes/class-task.php:204
 msgid "Check encountered an environmental notice: %s"
@@ -1430,9 +1430,9 @@ msgstr ""
 msgid "Custom Login URL (Hide /wp-admin & /wp-login.php)"
 msgstr ""
 
-#: rest-api/class-rest-controller.php:759
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:759
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:759
+#: rest-api/class-rest-controller.php:773
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:772
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:772
 msgid "Custom login URL activated: /%s/"
 msgstr ""
 
@@ -1697,9 +1697,9 @@ msgstr ""
 msgid "Disable XML-RPC (Runtime Filter)"
 msgstr ""
 
-#: admin/class-admin-menu.php:305
-#: build/wporg/site-checkup-pro/admin/class-admin-menu.php:305
-#: build/self-hosted/site-checkup-pro/admin/class-admin-menu.php:305
+#: admin/class-admin-menu.php:312
+#: build/wporg/site-checkup-pro/admin/class-admin-menu.php:311
+#: build/self-hosted/site-checkup-pro/admin/class-admin-menu.php:311
 msgid "Disable auto-updates"
 msgstr ""
 
@@ -1733,9 +1733,9 @@ msgstr ""
 msgid "Docs"
 msgstr ""
 
-#: admin/class-admin-menu.php:270
-#: build/wporg/site-checkup-pro/admin/class-admin-menu.php:270
-#: build/self-hosted/site-checkup-pro/admin/class-admin-menu.php:270
+#: admin/class-admin-menu.php:277
+#: build/wporg/site-checkup-pro/admin/class-admin-menu.php:276
+#: build/self-hosted/site-checkup-pro/admin/class-admin-menu.php:276
 msgid "Docs & FAQs"
 msgstr ""
 
@@ -1853,9 +1853,9 @@ msgstr ""
 msgid "Empty or non-string URL specified."
 msgstr ""
 
-#: admin/class-admin-menu.php:305
-#: build/wporg/site-checkup-pro/admin/class-admin-menu.php:305
-#: build/self-hosted/site-checkup-pro/admin/class-admin-menu.php:305
+#: admin/class-admin-menu.php:312
+#: build/wporg/site-checkup-pro/admin/class-admin-menu.php:311
+#: build/self-hosted/site-checkup-pro/admin/class-admin-menu.php:311
 msgid "Enable auto-updates"
 msgstr ""
 
@@ -2441,9 +2441,9 @@ msgstr ""
 msgid "Integrity Alert: %1$d modified core file(s) and %2$d missing file(s) detected!"
 msgstr ""
 
-#: rest-api/class-rest-controller.php:1037
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:1037
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:1037
+#: rest-api/class-rest-controller.php:1051
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:1050
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:1050
 msgid "Invalid JSON payload."
 msgstr ""
 
@@ -2459,9 +2459,9 @@ msgstr ""
 msgid "Invalid loopback URL specified."
 msgstr ""
 
-#: rest-api/class-rest-controller.php:373
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:373
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:373
+#: rest-api/class-rest-controller.php:386
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:386
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:386
 msgid "Invalid or expired security token for this action."
 msgstr ""
 
@@ -2759,9 +2759,9 @@ msgstr ""
 msgid "Manual Host/cPanel Backup"
 msgstr ""
 
-#: rest-api/class-rest-controller.php:676
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:676
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:676
+#: rest-api/class-rest-controller.php:690
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:689
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:689
 msgid "Manual SOP checklist item updated."
 msgstr ""
 
@@ -2771,9 +2771,9 @@ msgstr ""
 msgid "Manual audit required: verify Directory Privacy in cPanel."
 msgstr ""
 
-#: rest-api/class-rest-controller.php:702
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:702
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:702
+#: rest-api/class-rest-controller.php:716
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:715
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:715
 msgid "Manual backup confirmation recorded."
 msgstr ""
 
@@ -3113,7 +3113,7 @@ msgstr ""
 msgid "Optimize WAF to Extended Protection (user.ini/php.ini setup)."
 msgstr ""
 
-#: includes/class-task.php:277
+#: includes/class-task.php:279
 #: build/wporg/site-checkup-pro/includes/class-task.php:277
 #: build/self-hosted/site-checkup-pro/includes/class-task.php:277
 msgid "Overdue reminder: scheduled review was due on %s."
@@ -3176,9 +3176,9 @@ msgstr ""
 msgid "Panel URL / Port"
 msgstr ""
 
-#: rest-api/class-rest-controller.php:877
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:877
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:877
+#: rest-api/class-rest-controller.php:891
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:890
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:890
 msgid "Password is required."
 msgstr ""
 
@@ -3276,7 +3276,7 @@ msgid "Permission denied."
 msgstr ""
 
 #: includes/class-task-runner.php:38
-#: includes/class-task-runner.php:235
+#: includes/class-task-runner.php:236
 #: includes/class-app-password-manager.php:75
 #: build/wporg/site-checkup-pro/includes/class-task-runner.php:38
 #: build/wporg/site-checkup-pro/includes/class-task-runner.php:235
@@ -3350,9 +3350,9 @@ msgstr ""
 msgid "Plugin directory removed from wp-content/plugins/."
 msgstr ""
 
-#: rest-api/class-rest-controller.php:1258
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:1258
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:1258
+#: rest-api/class-rest-controller.php:1272
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:1271
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:1271
 msgid "Plugin settings updated successfully."
 msgstr ""
 
@@ -3716,9 +3716,9 @@ msgstr ""
 msgid "Review concurrent logged-in sessions across devices, terminate stale logins, and enforce automatic session invalidation on password updates."
 msgstr ""
 
-#: rest-api/class-rest-controller.php:1314
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:1314
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:1314
+#: rest-api/class-rest-controller.php:1328
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:1327
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:1327
 msgid "Review prompt dismissed."
 msgstr ""
 
@@ -4019,9 +4019,9 @@ msgstr ""
 msgid "Security Update"
 msgstr ""
 
-#: rest-api/class-rest-controller.php:726
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:726
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:726
+#: rest-api/class-rest-controller.php:740
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:739
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:739
 msgid "Security baseline snapshot updated with current administrators and options."
 msgstr ""
 
@@ -4055,15 +4055,15 @@ msgstr ""
 msgid "Security error: Malicious path traversal entries detected in zip archive."
 msgstr ""
 
-#: includes/class-task-runner.php:281
+#: includes/class-task-runner.php:282
 #: build/wporg/site-checkup-pro/includes/class-task-runner.php:281
 #: build/self-hosted/site-checkup-pro/includes/class-task-runner.php:281
 msgid "Security error: Snapshot integrity check failed (tampered snapshot detected). Undo aborted."
 msgstr ""
 
-#: rest-api/class-rest-controller.php:1300
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:1300
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:1300
+#: rest-api/class-rest-controller.php:1314
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:1313
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:1313
 msgid "Security.txt module unavailable."
 msgstr ""
 
@@ -4097,9 +4097,9 @@ msgstr ""
 msgid "Server security headers, .htaccess protection, wp-config restrictions, and login security."
 msgstr ""
 
-#: rest-api/class-rest-controller.php:881
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:881
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:881
+#: rest-api/class-rest-controller.php:895
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:894
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:894
 msgid "Session manager is not available."
 msgstr ""
 
@@ -4109,24 +4109,24 @@ msgstr ""
 msgid "Session terminated successfully."
 msgstr ""
 
-#: rest-api/class-rest-controller.php:933
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:933
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:933
+#: rest-api/class-rest-controller.php:947
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:946
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:946
 msgid "Session verifier required."
 msgstr ""
 
 #: admin/views/dashboard.php:50
 #: admin/views/dashboard.php:191
-#: admin/class-admin-menu.php:237
-#: admin/class-admin-menu.php:265
+#: admin/class-admin-menu.php:244
+#: admin/class-admin-menu.php:272
 #: build/wporg/site-checkup-pro/admin/views/dashboard.php:50
 #: build/wporg/site-checkup-pro/admin/views/dashboard.php:191
-#: build/wporg/site-checkup-pro/admin/class-admin-menu.php:237
-#: build/wporg/site-checkup-pro/admin/class-admin-menu.php:265
+#: build/wporg/site-checkup-pro/admin/class-admin-menu.php:243
+#: build/wporg/site-checkup-pro/admin/class-admin-menu.php:271
 #: build/self-hosted/site-checkup-pro/admin/views/dashboard.php:50
 #: build/self-hosted/site-checkup-pro/admin/views/dashboard.php:191
-#: build/self-hosted/site-checkup-pro/admin/class-admin-menu.php:237
-#: build/self-hosted/site-checkup-pro/admin/class-admin-menu.php:265
+#: build/self-hosted/site-checkup-pro/admin/class-admin-menu.php:243
+#: build/self-hosted/site-checkup-pro/admin/class-admin-menu.php:271
 msgid "Settings"
 msgstr ""
 
@@ -4184,18 +4184,18 @@ msgstr ""
 msgid "Site Checkup Pro Settings"
 msgstr ""
 
-#: admin/class-admin-menu.php:222
-#: build/wporg/site-checkup-pro/admin/class-admin-menu.php:222
-#: build/self-hosted/site-checkup-pro/admin/class-admin-menu.php:222
+#: admin/class-admin-menu.php:229
+#: build/wporg/site-checkup-pro/admin/class-admin-menu.php:228
+#: build/self-hosted/site-checkup-pro/admin/class-admin-menu.php:228
 msgid "Site Checkup Pro encountered an unexpected error generating the report: %s"
 msgstr ""
 
-#: admin/class-admin-menu.php:194
-#: admin/class-admin-menu.php:208
-#: build/wporg/site-checkup-pro/admin/class-admin-menu.php:194
-#: build/wporg/site-checkup-pro/admin/class-admin-menu.php:208
-#: build/self-hosted/site-checkup-pro/admin/class-admin-menu.php:194
-#: build/self-hosted/site-checkup-pro/admin/class-admin-menu.php:208
+#: admin/class-admin-menu.php:201
+#: admin/class-admin-menu.php:215
+#: build/wporg/site-checkup-pro/admin/class-admin-menu.php:200
+#: build/wporg/site-checkup-pro/admin/class-admin-menu.php:214
+#: build/self-hosted/site-checkup-pro/admin/class-admin-menu.php:200
+#: build/self-hosted/site-checkup-pro/admin/class-admin-menu.php:214
 msgid "Site Checkup Pro encountered an unexpected error: %s"
 msgstr ""
 
@@ -4223,15 +4223,15 @@ msgstr ""
 msgid "Site is not running over HTTPS/SSL."
 msgstr ""
 
-#: admin/class-admin-menu.php:189
-#: admin/class-admin-menu.php:203
-#: admin/class-admin-menu.php:217
-#: build/wporg/site-checkup-pro/admin/class-admin-menu.php:189
-#: build/wporg/site-checkup-pro/admin/class-admin-menu.php:203
-#: build/wporg/site-checkup-pro/admin/class-admin-menu.php:217
-#: build/self-hosted/site-checkup-pro/admin/class-admin-menu.php:189
-#: build/self-hosted/site-checkup-pro/admin/class-admin-menu.php:203
-#: build/self-hosted/site-checkup-pro/admin/class-admin-menu.php:217
+#: admin/class-admin-menu.php:196
+#: admin/class-admin-menu.php:210
+#: admin/class-admin-menu.php:224
+#: build/wporg/site-checkup-pro/admin/class-admin-menu.php:195
+#: build/wporg/site-checkup-pro/admin/class-admin-menu.php:209
+#: build/wporg/site-checkup-pro/admin/class-admin-menu.php:223
+#: build/self-hosted/site-checkup-pro/admin/class-admin-menu.php:195
+#: build/self-hosted/site-checkup-pro/admin/class-admin-menu.php:209
+#: build/self-hosted/site-checkup-pro/admin/class-admin-menu.php:223
 msgid "Sorry, you are not allowed to access this page."
 msgstr ""
 
@@ -4382,15 +4382,15 @@ msgstr ""
 msgid "Task not found in registry."
 msgstr ""
 
-#: rest-api/class-rest-controller.php:542
-#: rest-api/class-rest-controller.php:620
-#: rest-api/class-rest-controller.php:650
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:542
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:620
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:650
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:542
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:620
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:650
+#: rest-api/class-rest-controller.php:556
+#: rest-api/class-rest-controller.php:634
+#: rest-api/class-rest-controller.php:664
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:555
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:633
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:663
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:555
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:633
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:663
 msgid "Task not found."
 msgstr ""
 
@@ -4448,7 +4448,7 @@ msgstr ""
 msgid "This operation modifies core server configurations or active credentials. Please confirm your administrator password to proceed."
 msgstr ""
 
-#: includes/class-task-runner.php:243
+#: includes/class-task-runner.php:244
 #: build/wporg/site-checkup-pro/includes/class-task-runner.php:243
 #: build/self-hosted/site-checkup-pro/includes/class-task-runner.php:243
 msgid "This task does not support undo operations."
@@ -4460,7 +4460,7 @@ msgstr ""
 msgid "This task is currently being executed by another process. Please wait."
 msgstr ""
 
-#: includes/class-task-runner.php:251
+#: includes/class-task-runner.php:252
 #: build/wporg/site-checkup-pro/includes/class-task-runner.php:251
 #: build/self-hosted/site-checkup-pro/includes/class-task-runner.php:251
 msgid "This task is currently being modified. Please wait."
@@ -4490,15 +4490,15 @@ msgstr ""
 msgid "Too many failed login attempts. Please wait %d minute(s) before trying again."
 msgstr ""
 
-#: rest-api/class-rest-controller.php:1016
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:1016
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:1016
+#: rest-api/class-rest-controller.php:1030
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:1029
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:1029
 msgid "Too many reports from this IP."
 msgstr ""
 
-#: rest-api/class-rest-controller.php:491
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:491
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:491
+#: rest-api/class-rest-controller.php:505
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:504
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:504
 msgid "Too many task execution requests. Please pause a moment."
 msgstr ""
 
@@ -4643,9 +4643,9 @@ msgstr ""
 msgid "User enumeration protection is disabled."
 msgstr ""
 
-#: includes/class-plugin.php:198
-#: build/wporg/site-checkup-pro/includes/class-plugin.php:198
-#: build/self-hosted/site-checkup-pro/includes/class-plugin.php:198
+#: includes/class-plugin.php:216
+#: build/wporg/site-checkup-pro/includes/class-plugin.php:216
+#: build/self-hosted/site-checkup-pro/includes/class-plugin.php:216
 msgid "User enumeration via REST API is disabled for unauthenticated visitors."
 msgstr ""
 
@@ -4865,9 +4865,9 @@ msgstr ""
 msgid "Version strings stripped from enqueued assets."
 msgstr ""
 
-#: admin/class-admin-menu.php:275
-#: build/wporg/site-checkup-pro/admin/class-admin-menu.php:275
-#: build/self-hosted/site-checkup-pro/admin/class-admin-menu.php:275
+#: admin/class-admin-menu.php:282
+#: build/wporg/site-checkup-pro/admin/class-admin-menu.php:281
+#: build/self-hosted/site-checkup-pro/admin/class-admin-menu.php:281
 msgid "Video Tutorials"
 msgstr ""
 
@@ -4910,12 +4910,12 @@ msgstr ""
 msgid "View Report"
 msgstr ""
 
-#: rest-api/class-rest-controller.php:1271
 #: rest-api/class-rest-controller.php:1285
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:1271
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:1285
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:1271
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:1285
+#: rest-api/class-rest-controller.php:1299
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:1284
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:1298
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:1284
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:1298
 msgid "Vulnerability module unavailable."
 msgstr ""
 
@@ -5117,15 +5117,15 @@ msgstr ""
 msgid "You are about to remove an obsolete development, migration, or unused plugin from this installation."
 msgstr ""
 
-#: rest-api/class-rest-controller.php:905
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:905
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:905
+#: rest-api/class-rest-controller.php:919
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:918
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:918
 msgid "You cannot inspect sessions for other users."
 msgstr ""
 
-#: rest-api/class-rest-controller.php:350
-#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:350
-#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:350
+#: rest-api/class-rest-controller.php:363
+#: build/wporg/site-checkup-pro/rest-api/class-rest-controller.php:363
+#: build/self-hosted/site-checkup-pro/rest-api/class-rest-controller.php:363
 msgid "You do not have administrative permissions to access Site Checkup Pro."
 msgstr ""
 

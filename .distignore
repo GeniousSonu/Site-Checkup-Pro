@@ -20,3 +20,5 @@ media/*.png
 phpunit.xml*
 .editorconfig
 .vscode/
+vendor/
+DEVELOPMENT.md

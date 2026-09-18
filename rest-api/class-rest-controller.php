@@ -428,6 +428,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			try {
 				$task_data = $task->to_array( $db_record );
 			} catch ( \Throwable $e ) {
+				error_log( sprintf( '[Site Checkup Pro] Error serializing task "%s": %s in %s:%d', $task->id, $e->getMessage(), $e->getFile(), $e->getLine() ) );
 				$task_data = array(
 					'id'               => $task->id,
 					'section'          => $task->section,

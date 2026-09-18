@@ -156,6 +156,7 @@ class WPSG_Admin_Menu {
 			try {
 				$initial_catalog = WPSG_Rest_Controller::get_instance()->get_tasks_catalog();
 			} catch ( \Throwable $e ) {
+				error_log( sprintf( '[Site Checkup Pro] Failed to generate initial tasks catalog: %s in %s:%d', $e->getMessage(), $e->getFile(), $e->getLine() ) );
 				$initial_catalog = null;
 			}
 		}

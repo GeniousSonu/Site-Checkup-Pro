@@ -199,6 +199,7 @@ class WPSG_Task {
 				$res = call_user_func( $this->status_callback );
 				return is_array( $res ) ? $res : array( 'status' => 'pending', 'message' => '' );
 			} catch ( \Throwable $e ) {
+				error_log( sprintf( '[Site Checkup Pro] Error evaluating live status for task "%s": %s in %s:%d', $this->id, $e->getMessage(), $e->getFile(), $e->getLine() ) );
 				return array(
 					'status'  => 'attention',
 					'message' => sprintf( __( 'Check encountered an environmental notice: %s', 'site-checkup-pro' ), $e->getMessage() ),
@@ -232,16 +233,17 @@ class WPSG_Task {
 	/**
 	 * Serialize task into array representation for UI/REST.
 	 *
-	 * @param array $db_status Current database status record if available.
+	 * @param object|array|null $db_status Current database status record if available.
 	 * @return array
 	 */
 	public function to_array( $db_status = null ) {
-		$live = $this->get_live_status();
+		$db_obj = is_array( $db_status ) ? (object) $db_status : ( is_object( $db_status ) ? $db_status : null );
+		$live   = $this->get_live_status();
 
-		$status           = isset( $live['status'] ) ? $live['status'] : ( $db_status && isset( $db_status->status ) ? $db_status->status : 'pending' );
-		$last_run_at      = $db_status && isset( $db_status->last_run_at ) ? $db_status->last_run_at : null;
-		$note             = $db_status && isset( $db_status->note ) ? $db_status->note : '';
-		$next_reminder_at = $db_status && isset( $db_status->next_reminder_at ) ? $db_status->next_reminder_at : null;
+		$status           = isset( $live['status'] ) ? $live['status'] : ( $db_obj && isset( $db_obj->status ) ? $db_obj->status : 'pending' );
+		$last_run_at      = $db_obj && isset( $db_obj->last_run_at ) ? $db_obj->last_run_at : null;
+		$note             = $db_obj && isset( $db_obj->note ) ? $db_obj->note : '';
+		$next_reminder_at = $db_obj && isset( $db_obj->next_reminder_at ) ? $db_obj->next_reminder_at : null;
 		$live_message     = isset( $live['message'] ) ? $live['message'] : '';
 		$is_na            = isset( $live['is_na'] ) ? (bool) $live['is_na'] : false;
 
@@ -261,13 +263,13 @@ class WPSG_Task {
 					$live_message = __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'site-checkup-pro' );
 				}
 				if ( 'not_applicable' === $status || 'pending' === $status ) {
-					$status = ( $db_status && in_array( $db_status->status, array( 'done', 'applied_unverified' ), true ) ) ? $db_status->status : 'pending';
+					$status = ( $db_obj && in_array( $db_obj->status, array( 'done', 'applied_unverified' ), true ) ) ? $db_obj->status : 'pending';
 				}
 			}
 		}
 
 		// Support applied_unverified from database or live verification
-		if ( $db_status && 'applied_unverified' === $db_status->status && 'done' !== $status ) {
+		if ( $db_obj && 'applied_unverified' === $db_obj->status && 'done' !== $status ) {
 			$status = 'applied_unverified';
 		}
 
