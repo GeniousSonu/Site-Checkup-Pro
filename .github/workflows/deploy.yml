@@ -30,15 +30,15 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Hard-Gate: Version Consistency Verification
+      - name: "Hard-Gate: Version Consistency Verification"
         run: |
           echo "Verifying Git tag ${{ github.ref_name }} against plugin files..."
           php bin/check-version-consistency.php --tag=${{ github.ref_name }}
 
-      - name: Hard-Gate: Static Codebase & Syntax Validation
+      - name: "Hard-Gate: Static Codebase & Syntax Validation"
         run: python3 tests/validate_codebase.py
 
-      - name: Hard-Gate: Run Automated Security Test Suite
+      - name: "Hard-Gate: Run Automated Security Test Suite"
         run: php tests/test-suite.php
 
   # 2. Package & Publish Dual Distribution
@@ -46,6 +46,9 @@ jobs:
     name: Package & Publish Dual Distribution
     needs: [ verify ]
     runs-on: ubuntu-latest
+    env:
+      SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+      SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
