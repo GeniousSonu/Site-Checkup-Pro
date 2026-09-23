@@ -4,11 +4,12 @@
 
 Before every tagged release, strictly adhere to the following rules:
 
-1. **Three-Point Version Synchronization**:
-   - Bump and synchronize the version string in three places to match exactly:
+1. **Four-Point Version Synchronization**:
+   - Bump and synchronize the version string in four places to match exactly:
      - Plugin header `Version:` and `WPSG_VERSION` constant in `site-checkup-pro.php`.
      - `Stable tag:` field in `readme.txt`.
-     - Git tag itself (prefixed with `v`, e.g., `v1.0.1`).
+     - `version` field in `update-info.json` (auto-generated via `php bin/generate-update-info.php`).
+     - Git tag itself (prefixed with `v`, e.g., `v1.0.2`).
 
 2. **Semantic Versioning**:
    - **PATCH (`x.y.Z`)**: Strictly for bug/security fixes only.

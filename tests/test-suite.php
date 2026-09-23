@@ -15,11 +15,13 @@ define( 'ABSPATH', __DIR__ . '/../' );
 define( 'WPSG_VERSION', '1.0.0' );
 define( 'WP_CONTENT_DIR', sys_get_temp_dir() . '/wp-content' );
 define( 'WP_PLUGIN_DIR', WP_CONTENT_DIR . '/plugins' );
+define( 'WPMU_PLUGIN_DIR', WP_CONTENT_DIR . '/mu-plugins' );
 define( 'WPSG_PLUGIN_FILE', ABSPATH . 'site-checkup-pro.php' );
 define( 'WPSG_PLUGIN_DIR', ABSPATH );
 define( 'WPSG_PLUGIN_URL', 'https://example.com/wp-content/plugins/site-checkup-pro/' );
 define( 'WPSG_BASENAME', 'site-checkup-pro/site-checkup-pro.php' );
 define( 'WPSG_PLUGIN_BASENAME', WPSG_BASENAME );
+if ( ! defined( 'WP_DEBUG' ) ) { define( 'WP_DEBUG', false ); }
 
 // Mock WordPress functions
 if ( ! function_exists( 'sanitize_key' ) ) {
@@ -57,6 +59,20 @@ if ( ! function_exists( 'esc_attr__' ) ) { function esc_attr__( $t, $d = '' ) { 
 if ( ! function_exists( 'esc_attr_e' ) ) { function esc_attr_e( $t, $d = '' ) { echo esc_attr( $t ); } }
 if ( ! function_exists( 'current_time' ) ) { function current_time( $type ) { return 'timestamp' === $type ? time() : date( 'Y-m-d H:i:s' ); } }
 if ( ! function_exists( 'get_current_user_id' ) ) { function get_current_user_id() { return 1; } }
+if ( ! function_exists( 'get_file_data' ) ) {
+	function get_file_data( $file, $default_headers, $context = '' ) {
+		$content = file_exists( $file ) ? file_get_contents( $file ) : '';
+		$headers = array();
+		foreach ( $default_headers as $field => $regex ) {
+			if ( preg_match( '/' . preg_quote( $regex, '/' ) . ':\s*(.*)$/mi', $content, $m ) ) {
+				$headers[ $field ] = trim( $m[1] );
+			} else {
+				$headers[ $field ] = '';
+			}
+		}
+		return $headers;
+	}
+}
 $GLOBALS['_mock_current_user_can'] = 'manage_options';
 if ( ! function_exists( 'current_user_can' ) ) {
 	function current_user_can( $c ) {
@@ -222,6 +238,13 @@ if ( ! function_exists( 'apply_filters' ) ) {
 if ( ! function_exists( 'add_action' ) ) { function add_action( $tag, $callback, $priority = 10, $accepted_args = 1 ) {} }
 if ( ! function_exists( 'add_filter' ) ) { function add_filter( $tag, $callback, $priority = 10, $accepted_args = 1 ) {} }
 if ( ! function_exists( 'do_action' ) ) { function do_action( $tag, ...$args ) {} }
+if ( ! function_exists( 'did_action' ) ) { function did_action( $tag ) { return 0; } }
+if ( ! function_exists( 'is_admin' ) ) { function is_admin() { return true; } }
+if ( ! function_exists( 'wp_next_scheduled' ) ) { function wp_next_scheduled( $hook, $args = array() ) { return false; } }
+if ( ! function_exists( 'wp_schedule_event' ) ) { function wp_schedule_event( $timestamp, $recurrence, $hook, $args = array() ) { return true; } }
+if ( ! function_exists( 'wp_clear_scheduled_hook' ) ) { function wp_clear_scheduled_hook( $hook, $args = array() ) { return true; } }
+if ( ! function_exists( 'register_activation_hook' ) ) { function register_activation_hook( $file, $callback ) {} }
+if ( ! function_exists( 'register_deactivation_hook' ) ) { function register_deactivation_hook( $file, $callback ) {} }
 if ( ! function_exists( 'is_wp_error' ) ) { function is_wp_error( $thing ) { return $thing instanceof WP_Error; } }
 if ( ! class_exists( 'WP_Error' ) ) {
 	class WP_Error {
@@ -1158,16 +1181,18 @@ run_test( "Guideline 7 Consent: Security webhooks blocked until explicit user op
 // TEST 32: WP.org Guideline 8: Dual Build Separation
 run_test( "Guideline 8 Separation: WordPress.org release build strictly excludes update-checker", function () {
 	$root = dirname( __DIR__ );
-	$wporg_file = $root . '/build/wporg/site-checkup-pro/includes/class-update-checker.php';
+	$wporg_file      = $root . '/build/wporg/site-checkup-pro/includes/class-update-checker.php';
+	$wporg_puc       = $root . '/build/wporg/site-checkup-pro/includes/plugin-update-checker';
 	$selfhosted_file = $root . '/build/self-hosted/site-checkup-pro/includes/class-update-checker.php';
+	$selfhosted_puc  = $root . '/build/self-hosted/site-checkup-pro/includes/plugin-update-checker';
 
 	// If build directory doesn't exist yet in local run, run builder
 	if ( ! file_exists( $wporg_file ) && ! file_exists( $selfhosted_file ) ) {
-		exec( "bash " . escapeshellarg( $root . '/bin/build-release.sh' ) . " 1.0.0" );
+		exec( "bash " . escapeshellarg( $root . '/bin/build-release.sh' ) . " 1.0.2" );
 	}
 
-	$wporg_clean = ! file_exists( $wporg_file );
-	$selfhosted_has_it = file_exists( $selfhosted_file );
+	$wporg_clean       = ! file_exists( $wporg_file ) && ! file_exists( $wporg_puc );
+	$selfhosted_has_it = file_exists( $selfhosted_file ) && file_exists( $selfhosted_puc );
 
 	return ( $wporg_clean && $selfhosted_has_it );
 } );

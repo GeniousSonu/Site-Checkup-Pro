@@ -23,10 +23,12 @@ echo "======================================================="
 
 cd "${ROOT_DIR}"
 
-# 1. Verify version consistency before building
+# 1. Auto-generate update-info.json and verify version consistency before building
 if command -v php >/dev/null 2>&1; then
+    php bin/generate-update-info.php
     php bin/check-version-consistency.php --tag="v${VERSION}"
 elif [ -f "/home/dayshift/.config/Local/lightning-services/php-8.2.29+0/bin/linux/bin/php" ]; then
+    LD_LIBRARY_PATH=/home/dayshift/.config/Local/lightning-services/php-8.2.29+0/bin/linux/shared-libs /home/dayshift/.config/Local/lightning-services/php-8.2.29+0/bin/linux/bin/php bin/generate-update-info.php
     LD_LIBRARY_PATH=/home/dayshift/.config/Local/lightning-services/php-8.2.29+0/bin/linux/shared-libs /home/dayshift/.config/Local/lightning-services/php-8.2.29+0/bin/linux/bin/php bin/check-version-consistency.php --tag="v${VERSION}"
 fi
 
@@ -50,6 +52,7 @@ rsync -rc --exclude-from='.distignore' ./ build/wporg/site-checkup-pro/
 
 # Strip update checker completely from WP.org build target
 rm -f build/wporg/site-checkup-pro/includes/class-update-checker.php
+rm -rf build/wporg/site-checkup-pro/includes/plugin-update-checker/
 
 cd build/wporg
 zip -r ../site-checkup-pro-wporg.zip site-checkup-pro -x "*.DS_Store"

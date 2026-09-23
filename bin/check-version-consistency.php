@@ -50,7 +50,17 @@ if ( preg_match( '/^[ \t]*Stable tag:\s*([0-9]+\.[0-9]+(?:\.[0-9]+)?(?:-[a-zA-Z0
 	$readme_version = trim( $matches[1] );
 }
 
-// 4. Extract Git Tag if provided via CLI flag or GITHUB_REF_NAME
+// 4. Extract update-info.json Version
+$json_file    = $root_dir . '/update-info.json';
+$json_version = null;
+if ( file_exists( $json_file ) ) {
+	$json_data = json_decode( file_get_contents( $json_file ), true );
+	if ( is_array( $json_data ) && ! empty( $json_data['version'] ) ) {
+		$json_version = trim( $json_data['version'] );
+	}
+}
+
+// 5. Extract Git Tag if provided via CLI flag or GITHUB_REF_NAME
 $git_tag_version = null;
 $expected_tag    = null;
 
@@ -79,6 +89,7 @@ $versions = array(
 	'site-checkup-pro.php Header'   => $header_version,
 	'site-checkup-pro.php Constant' => $constant_version,
 	'readme.txt Stable tag'         => $readme_version,
+	'update-info.json Version'      => $json_version,
 );
 
 if ( null !== $git_tag_version ) {
