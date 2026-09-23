@@ -14,6 +14,7 @@ REPO_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 TARGETS=(
   "/home/dayshift/Local Sites/test111/app/public/wp-content/plugins/site-checkup-pro"
+  "/home/dayshift/Local Sites/test111/app/public/site2/wp-content/plugins/site-checkup-pro"
   "/home/dayshift/Local Sites/test/app/public/wp-content/plugins/site-checkup-pro"
 )
 

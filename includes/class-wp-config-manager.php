@@ -192,16 +192,16 @@ class WPSG_Wp_Config_Manager {
 			'NONCE_SALT',
 		);
 
-		// Generate cryptographically secure salts.
+		// Generate cryptographically secure salts without quotes or backreferences.
 		foreach ( $salts as $salt_key ) {
-			$new_salt = wp_generate_password( 64, true, true );
+			$new_salt = wp_generate_password( 64, true, false );
 
-			// Replace existing define statement.
-			$regex = "/define\s*\(\s*['\"]" . preg_quote( $salt_key, '/' ) . "['\"]\s*,\s*['\"].*?['\"]\s*\)\s*;/";
-			$replacement = "define( '{$salt_key}', " . var_export( $new_salt, true ) . " );";
-
+			// Replace existing define statement on its own line safely without preg backreference issues.
+			$regex = '/^[ \t]*define\s*\(\s*[\'"]' . preg_quote( $salt_key, '/' ) . '[\'"].*?\);[ \t]*$/m';
 			if ( preg_match( $regex, $content ) ) {
-				$content = preg_replace( $regex, $replacement, $content );
+				$content = preg_replace_callback( $regex, function () use ( $salt_key, $new_salt ) {
+					return "define( '{$salt_key}', " . var_export( $new_salt, true ) . " );";
+				}, $content );
 			}
 		}
 
@@ -214,6 +214,8 @@ class WPSG_Wp_Config_Manager {
 				'message' => __( 'Failed to write updated salts. Restored from backup.', 'site-checkup-pro' ),
 			);
 		}
+
+		update_option( 'wpsg_salts_last_rotated', time() );
 
 		return array(
 			'success' => true,

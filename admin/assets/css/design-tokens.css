@@ -71,6 +71,15 @@
 	--wpsg-color-status-unverified-border: #BFDBFE;
 	--wpsg-color-status-unverified-text: #1D4ED8;
 
+	/* Category Accents */
+	--wpsg-color-slate-900: #0F172A;
+	--wpsg-color-purple: #9333EA;
+	--wpsg-color-purple-subtle: #FAF5FF;
+	--wpsg-color-orange: #EA580C;
+	--wpsg-color-orange-subtle: #FFF7ED;
+	--wpsg-color-yellow: #CA8A04;
+	--wpsg-color-yellow-subtle: #FEFCE8;
+
 	/* Backward-compatibility aliases for existing variables */
 	--wpsg-brand: var(--wpsg-color-brand);
 	--wpsg-brand-hover: var(--wpsg-color-brand-dark);

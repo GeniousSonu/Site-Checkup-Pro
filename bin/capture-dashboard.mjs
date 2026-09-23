@@ -5,6 +5,8 @@ async function main() {
     const outputPath = process.argv[2] || '/tmp/dashboard_current.png';
     const tabToClick = process.argv[3] || null;
     const targetPage = process.argv[4] || 'site-checkup-pro';
+    const width = parseInt(process.argv[5] || '1280', 10);
+    const height = parseInt(process.argv[6] || '900', 10);
 
     // 1. Launch headless chrome
     const chrome = spawn('/usr/bin/google-chrome', [
@@ -15,7 +17,7 @@ async function main() {
         '--disable-dev-shm-usage',
         '--disable-extensions',
         '--user-data-dir=/tmp/chrome-eval-profile',
-        '--window-size=1280,900',
+        `--window-size=${width},${height}`,
         '--host-resolver-rules=MAP test111.local 127.0.0.1:10003'
     ]);
 
@@ -59,6 +61,12 @@ async function main() {
         await send('Runtime.enable');
         await send('Network.enable');
         await send('Network.setCacheDisabled', { cacheDisabled: true });
+        await send('Emulation.setDeviceMetricsOverride', {
+            width,
+            height,
+            deviceScaleFactor: 1,
+            mobile: width < 768
+        });
 
         // Login first if needed
         await send('Page.navigate', { url: 'http://test111.local/wp-login.php' });

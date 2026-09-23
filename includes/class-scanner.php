@@ -777,7 +777,7 @@ class WPSG_Scanner {
 		$host = wp_parse_url( home_url(), PHP_URL_HOST );
 		if ( ! $host || ! is_ssl() ) {
 			$result = array(
-				'status'       => 'failed',
+				'status'       => 'attention',
 				'message'      => __( 'Site is not running over HTTPS. SSL/TLS depth inspection requires an active SSL connection.', 'site-checkup-pro' ),
 				'last_checked' => current_time( 'mysql' ),
 			);

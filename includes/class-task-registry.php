@@ -272,7 +272,7 @@ class WPSG_Task_Registry {
 			'description'      => __( 'Detects leftover migration tools (Better Search Replace, File Manager, Duplicate Page). Deleting zips the plugin first to enable real Undo.', 'site-checkup-pro' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
-			'has_undo'         => true,
+			'has_undo'         => false,
 			'status_callback'  => array( 'WPSG_Plugin_Integrity', 'detect_unwanted_plugins' ),
 			'run_callback'     => array( 'WPSG_Plugin_Integrity', 'detect_unwanted_plugins' ),
 			'undo_callback'    => array( 'WPSG_Plugin_Integrity', 'undo_last_deletion' ),
@@ -757,6 +757,14 @@ class WPSG_Task_Registry {
 			'sub_type'         => 'writes_files',
 			'requires_backup'  => true,
 			'status_callback'  => function () {
+				$last_rotated = get_option( 'wpsg_salts_last_rotated' );
+				if ( ! empty( $last_rotated ) ) {
+					$days = round( ( time() - $last_rotated ) / 86400, 1 );
+					return array(
+						'status'  => 'done',
+						'message' => sprintf( __( 'Salts rotated successfully (%s day(s) ago).', 'site-checkup-pro' ), $days ),
+					);
+				}
 				return array(
 					'status'  => 'pending',
 					'message' => __( 'Salts can be rotated on demand. Invalidates all active login sessions.', 'site-checkup-pro' ),

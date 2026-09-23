@@ -283,6 +283,16 @@
 		dom.sessionsTbody = document.getElementById('wpsg-sessions-tbody');
 		dom.btnDestroyOtherSessions = document.getElementById('wpsg-btn-destroy-other-sessions');
 
+		// Standardized Confirmation Modal
+		dom.modalConfirm = document.getElementById('wpsg-modal-confirm');
+		dom.confirmTitleText = document.getElementById('wpsg-confirm-title-text');
+		dom.confirmIcon = document.getElementById('wpsg-confirm-icon');
+		dom.confirmMessage = document.getElementById('wpsg-confirm-message');
+		dom.confirmNotice = document.getElementById('wpsg-confirm-notice');
+		dom.confirmNoticeText = document.getElementById('wpsg-confirm-notice-text');
+		dom.btnConfirmCancel = document.getElementById('wpsg-btn-confirm-cancel');
+		dom.btnConfirmSubmit = document.getElementById('wpsg-btn-confirm-submit');
+
 		dom.modalAppPasswords = document.getElementById('wpsg-modal-app-passwords');
 		dom.appPasswordsTbody = document.getElementById('wpsg-app-passwords-tbody');
 
@@ -919,7 +929,15 @@
 			return;
 		}
 
-		if (!confirm(`Are you sure you want to change your WordPress login URL to:\n${window.wpsgData?.homeUrl || ''}/${slug}/\n\nMake sure to remember this URL before proceeding!`)) {
+		const confirmed = await showConfirmModal({
+			title: 'Confirm Login URL Change',
+			message: `Are you sure you want to change your WordPress login URL to:\n${window.wpsgData?.homeUrl || ''}/${slug}/\n\nMake sure to remember this URL before proceeding!`,
+			notice: 'Losing this URL may require manual reset via database or WP-CLI if forgotten.',
+			confirmText: 'Change Login URL',
+			confirmClass: 'wpsg-btn-danger',
+			iconClass: 'dashicons-admin-network'
+		});
+		if (!confirmed) {
 			return;
 		}
 
@@ -949,7 +967,15 @@
 	 * Reset custom login URL back to default
 	 */
 	async function resetFeatureLoginSlug() {
-		if (!confirm('Revert back to standard WordPress /wp-login.php?')) {
+		const confirmed = await showConfirmModal({
+			title: 'Revert Login URL',
+			message: 'Revert back to standard WordPress /wp-login.php?',
+			notice: 'This will re-enable the standard WordPress login URL.',
+			confirmText: 'Revert to Default',
+			confirmClass: 'wpsg-btn-primary',
+			iconClass: 'dashicons-undo'
+		});
+		if (!confirmed) {
 			return;
 		}
 
@@ -1921,7 +1947,15 @@
 	 * Update trusted baseline
 	 */
 	async function updateBaseline() {
-		if (!confirm('Update the baseline snapshot to accept all current administrators and configuration settings as trusted?')) {
+		const confirmed = await showConfirmModal({
+			title: 'Update Baseline Snapshot',
+			message: 'Update the baseline snapshot to accept all current administrators and configuration settings as trusted?',
+			notice: 'Future integrity audits will use this current state as the trusted baseline.',
+			confirmText: 'Update Baseline',
+			confirmClass: 'wpsg-btn-primary',
+			iconClass: 'dashicons-yes-alt'
+		});
+		if (!confirmed) {
 			return;
 		}
 
@@ -2033,7 +2067,15 @@
 			dom.sessionsTbody.querySelectorAll('.wpsg-btn-destroy-session').forEach(btn => {
 				btn.addEventListener('click', async () => {
 					const verifier = btn.getAttribute('data-verifier');
-					if (!confirm('Are you sure you want to terminate this remote session?')) return;
+					const confirmed = await showConfirmModal({
+						title: 'Terminate Remote Session',
+						message: 'Are you sure you want to terminate this remote session?',
+						notice: 'The user on that device will be immediately logged out.',
+						confirmText: 'Terminate Session',
+						confirmClass: 'wpsg-btn-danger',
+						iconClass: 'dashicons-dismiss'
+					});
+					if (!confirmed) return;
 					btn.disabled = true;
 					try {
 						await apiCall({
@@ -2055,7 +2097,15 @@
 	}
 
 	async function destroyOtherSessions() {
-		if (!confirm('Log out all other browser sessions across all devices?')) return;
+		const confirmed = await showConfirmModal({
+			title: 'Terminate All Other Sessions',
+			message: 'Log out all other browser sessions across all devices?',
+			notice: 'Your current session will remain active, but all other active logins will be invalidated.',
+			confirmText: 'Log Out All Others',
+			confirmClass: 'wpsg-btn-danger',
+			iconClass: 'dashicons-shield-alt'
+		});
+		if (!confirmed) return;
 		if (dom.btnDestroyOtherSessions) dom.btnDestroyOtherSessions.disabled = true;
 
 		try {
@@ -2108,12 +2158,18 @@
 
 			// Bind revoke buttons with confirmation and reauth
 			dom.appPasswordsTbody.querySelectorAll('.wpsg-btn-revoke-app-pass').forEach(btn => {
-				btn.addEventListener('click', () => {
+				btn.addEventListener('click', async () => {
 					const uuid = btn.getAttribute('data-uuid');
 					const userId = btn.getAttribute('data-user-id');
-					if (!confirm('WARNING: Revoking this application password will permanently break external REST API clients, third-party integrations, or mobile apps using it. Proceed?')) {
-						return;
-					}
+					const confirmed = await showConfirmModal({
+						title: 'Revoke Application Password',
+						message: 'Are you sure you want to revoke this application password?',
+						notice: 'WARNING: Revoking this application password will permanently break external REST API clients, third-party integrations, or mobile apps using it.',
+						confirmText: 'Revoke Password',
+						confirmClass: 'wpsg-btn-danger',
+						iconClass: 'dashicons-warning'
+					});
+					if (!confirmed) return;
 
 					requireReauth(async (token) => {
 						btn.disabled = true;
@@ -2231,6 +2287,69 @@
 		} catch (err) {
 			dom.auditTbody.innerHTML = `<tr><td colspan="6" class="wpsg-error-state">Error loading audit log: ${escapeHtml(err.message)}</td></tr>`;
 		}
+	}
+
+	/**
+	 * Standardized, accessible confirmation modal replacing browser confirm()
+	 */
+	function showConfirmModal({
+		title = 'Confirm Action',
+		message = '',
+		notice = '',
+		confirmText = 'Confirm',
+		confirmClass = 'wpsg-btn-danger',
+		iconClass = 'dashicons-warning'
+	} = {}) {
+		return new Promise((resolve) => {
+			if (!dom.modalConfirm) {
+				resolve(window.confirm(message));
+				return;
+			}
+			if (dom.confirmTitleText) dom.confirmTitleText.textContent = title;
+			if (dom.confirmMessage) dom.confirmMessage.textContent = message;
+			if (dom.confirmNotice && dom.confirmNoticeText) {
+				if (notice) {
+					dom.confirmNoticeText.textContent = notice;
+					dom.confirmNotice.style.display = 'flex';
+				} else {
+					dom.confirmNotice.style.display = 'none';
+				}
+			}
+			if (dom.btnConfirmSubmit) {
+				dom.btnConfirmSubmit.textContent = confirmText;
+				dom.btnConfirmSubmit.className = `wpsg-btn ${confirmClass}`;
+			}
+			if (dom.confirmIcon) {
+				dom.confirmIcon.className = `dashicons ${iconClass}`;
+			}
+
+			let resolved = false;
+
+			const cleanup = (val) => {
+				if (!resolved) {
+					resolved = true;
+					dom.btnConfirmSubmit?.removeEventListener('click', onConfirm);
+					dom.btnConfirmCancel?.removeEventListener('click', onCancel);
+					if (dom.modalConfirm) dom.modalConfirm.style.display = 'none';
+					resolve(val);
+				}
+			};
+
+			const onConfirm = (e) => {
+				e?.preventDefault();
+				cleanup(true);
+			};
+
+			const onCancel = (e) => {
+				e?.preventDefault();
+				cleanup(false);
+			};
+
+			dom.btnConfirmSubmit?.addEventListener('click', onConfirm, { once: true });
+			dom.btnConfirmCancel?.addEventListener('click', onCancel, { once: true });
+
+			openModal(dom.modalConfirm);
+		});
 	}
 
 	/**

@@ -1015,6 +1015,7 @@ $login_slug    = WPSG_Login_Renamer::get_login_slug();
 	<?php include WPSG_PLUGIN_DIR . 'admin/views/modal-app-passwords.php'; ?>
 	<?php include WPSG_PLUGIN_DIR . 'admin/views/modal-csp-reports.php'; ?>
 	<?php include WPSG_PLUGIN_DIR . 'admin/views/modal-settings.php'; ?>
+	<?php include WPSG_PLUGIN_DIR . 'admin/views/modal-confirm.php'; ?>
 
 	<!-- Settings Screen Footer / Resource Block -->
 	<footer class="wpsg-dashboard-footer" style="margin-top: 32px; padding: 18px 24px; background: var(--wpsg-surface); border: 1px solid var(--wpsg-border); border-radius: var(--wpsg-radius-md); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; font-size: 13px;">

@@ -7,7 +7,7 @@ Tags: security, hardening, security audit, login security, firewall
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -95,6 +95,14 @@ Version 1.0 is optimized for single-site agency workflows. On Multisite installa
 4. Client-facing executive SOP coverage report ready for PDF export with emergency incident response contacts.
 
 == Changelog ==
+
+= 1.0.1 =
+* Fix: Prevent syntax corruption in wp-config.php during security salt rotation by removing unescaped quotes/backreferences and using safe callback replacement.
+* Fix: Ensure full excision of empty marker blocks and directive-aware verification in WPSG_Htaccess_Manager.
+* Fix: Ensure dbDelta schema updates run automatically on plugin version upgrades, not only on initial activation.
+* Fix: Replace native browser confirm dialogs with accessible, branded custom modal dialogs.
+* Fix: Enforce design tokens across entire admin stylesheet, eliminating hardcoded hex values.
+* Fix: Resolve header case-sensitivity in loopback self-verification checks.
 
 = 1.0.0 =
 * Initial release.

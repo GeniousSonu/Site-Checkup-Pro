@@ -65,9 +65,10 @@ class WPSG_HTTP_Verifier {
 		if ( ! empty( $_SERVER['HTTP_X_WPSG_SELF_VERIFICATION'] ) ) {
 			$header = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_WPSG_SELF_VERIFICATION'] ) );
 		} elseif ( function_exists( 'getallheaders' ) ) {
-			$headers = getallheaders();
-			if ( is_array( $headers ) && ! empty( $headers[ self::VERIFY_HEADER ] ) ) {
-				$header = sanitize_text_field( $headers[ self::VERIFY_HEADER ] );
+			$headers = array_change_key_case( (array) getallheaders(), CASE_LOWER );
+			$lower_key = strtolower( self::VERIFY_HEADER );
+			if ( ! empty( $headers[ $lower_key ] ) ) {
+				$header = sanitize_text_field( $headers[ $lower_key ] );
 			}
 		}
 

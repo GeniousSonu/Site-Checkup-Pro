@@ -155,7 +155,15 @@ class WPSG_Integrity_Monitor {
 				if ( ! $file->isDir() ) {
 					$ext = strtolower( pathinfo( $file->getFilename(), PATHINFO_EXTENSION ) );
 					if ( in_array( $ext, array( 'php', 'phtml', 'php5', 'phar', 'shtml' ), true ) ) {
-						$found[] = substr( $file->getPathname(), strlen( $uploads_dir ) + 1 );
+						$rel_path = substr( $file->getPathname(), strlen( $uploads_dir ) + 1 );
+						// Whitelist benign directory index guards (standard WordPress silence or HTTP 403 exit guards).
+						if ( 'index.php' === $file->getFilename() ) {
+							$content = @file_get_contents( $file->getPathname() );
+							if ( false !== $content && ( false !== strpos( $content, 'Silence is golden' ) || false !== strpos( $content, 'http_response_code( 403 )' ) || trim( $content ) === '<?php' || trim( $content ) === '<?php exit;' ) ) {
+								continue;
+							}
+						}
+						$found[] = $rel_path;
 					}
 				}
 			}

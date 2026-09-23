@@ -962,6 +962,15 @@ class WPSG_Htaccess_Manager {
 
 		try {
 			$removed = insert_with_markers( $htaccess_file, $full_marker, array() );
+			// Also excise any remaining empty marker block completely to keep .htaccess clean.
+			if ( $removed && file_exists( $htaccess_file ) ) {
+				$c       = file_get_contents( $htaccess_file );
+				$pattern = '/\s*#\s*BEGIN\s+' . preg_quote( $full_marker, '/' ) . '.*?#\s*END\s+' . preg_quote( $full_marker, '/' ) . '\s*/s';
+				$cleaned = preg_replace( $pattern, "\n", $c );
+				if ( null !== $cleaned && $cleaned !== $c ) {
+					file_put_contents( $htaccess_file, $cleaned );
+				}
+			}
 		} finally {
 			if ( $lock_fp ) {
 				flock( $lock_fp, LOCK_UN );
@@ -994,7 +1003,7 @@ class WPSG_Htaccess_Manager {
 	}
 
 	/**
-	 * Check if a marker block is currently present in .htaccess.
+	 * Check if a marker block is currently present and contains active directives in .htaccess.
 	 *
 	 * @param string $marker Rule name without prefix.
 	 * @return bool
@@ -1008,7 +1017,21 @@ class WPSG_Htaccess_Manager {
 		$content     = file_get_contents( $htaccess_file );
 		$full_marker = self::MARKER_PREFIX . $marker;
 
-		return ( false !== strpos( $content, "# BEGIN {$full_marker}" ) );
+		$pattern = '/#\s*BEGIN\s+' . preg_quote( $full_marker, '/' ) . '(.*?)#\s*END\s+' . preg_quote( $full_marker, '/' ) . '/s';
+		if ( ! preg_match( $pattern, $content, $matches ) ) {
+			return false;
+		}
+
+		// Check if there is actual directive content between markers (ignoring WP auto-comments & whitespace)
+		$lines = explode( "\n", $matches[1] );
+		foreach ( $lines as $line ) {
+			$trimmed = trim( $line );
+			if ( '' !== $trimmed && '#' !== $trimmed[0] ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

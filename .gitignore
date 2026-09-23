@@ -8,4 +8,4 @@ Thumbs.db
 vendor/
 composer.lock
 .vscode/
-
+bin/start-test-services.sh

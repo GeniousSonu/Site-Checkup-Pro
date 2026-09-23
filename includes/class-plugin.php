@@ -75,6 +75,14 @@ class WPSG_Plugin {
 	 * Initialize core components.
 	 */
 	private function init_components() {
+		// Schema upgrade check on version bump: ensures dbDelta runs on update, not just first install.
+		$installed_db_ver = get_option( 'wpsg_db_version', '0.0.0' );
+		if ( version_compare( $installed_db_ver, WPSG_VERSION, '<' ) ) {
+			if ( function_exists( 'wpsg_create_database_tables' ) ) {
+				wpsg_create_database_tables();
+			}
+		}
+
 		// Initialize Task Registry.
 		if ( class_exists( 'WPSG_Task_Registry' ) ) {
 			WPSG_Task_Registry::get_instance();
