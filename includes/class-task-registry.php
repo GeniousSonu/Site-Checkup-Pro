@@ -376,6 +376,367 @@ class WPSG_Task_Registry {
 			},
 		) ) );
 
+		// 2.14 REST API Security Auditor
+		$this->register( new WPSG_Task( array(
+			'id'               => 'rest_api_security_audit',
+			'section'          => 'general_check',
+			'title'            => __( 'REST API Security Audit', 'site-checkup-pro' ),
+			'description'      => __( 'Enumerates all registered WordPress REST API endpoints, inspects permission callbacks, maps source plugins/themes, and identifies unauthenticated exposure risks.', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'instant',
+			'status_callback'  => function () {
+				if ( ! class_exists( 'WPSG_Rest_Auditor' ) ) {
+					return array( 'status' => 'pending', 'message' => __( 'REST API Auditor not loaded.', 'site-checkup-pro' ) );
+				}
+				$audit = WPSG_Rest_Auditor::audit_routes();
+				$high  = isset( $audit['summary']['high_risk'] ) ? $audit['summary']['high_risk'] : 0;
+				$total = isset( $audit['summary']['total_endpoints'] ) ? $audit['summary']['total_endpoints'] : 0;
+				if ( $high > 0 ) {
+					return array(
+						'status'  => 'attention',
+						'message' => sprintf( __( '%1$d high-risk or publicly exposed REST endpoint(s) detected across %2$d endpoints.', 'site-checkup-pro' ), $high, $total ),
+						'data'    => $audit['summary'],
+					);
+				}
+				return array(
+					'status'  => 'done',
+					'message' => sprintf( __( 'All %d registered REST endpoints audited. No unauthorized public write routes detected.', 'site-checkup-pro' ), $total ),
+					'data'    => $audit['summary'],
+				);
+			},
+			'run_callback'     => function () {
+				if ( ! class_exists( 'WPSG_Rest_Auditor' ) ) {
+					return array( 'success' => false, 'message' => __( 'REST API Auditor not loaded.', 'site-checkup-pro' ) );
+				}
+				$audit = WPSG_Rest_Auditor::audit_routes();
+				$high  = isset( $audit['summary']['high_risk'] ) ? $audit['summary']['high_risk'] : 0;
+				$total = isset( $audit['summary']['total_endpoints'] ) ? $audit['summary']['total_endpoints'] : 0;
+				if ( class_exists( 'WPSG_Audit_Logger' ) ) {
+					WPSG_Audit_Logger::log(
+						'rest_api_audit_performed',
+						sprintf( 'Audited %1$d REST endpoints: %2$d public, %3$d protected, %4$d high-risk.', $total, $audit['summary']['public'], $audit['summary']['protected'], $high ),
+						'system',
+						$high > 0 ? 'warning' : 'info'
+					);
+				}
+				return array(
+					'success' => true,
+					'status'  => $high > 0 ? 'attention' : 'done',
+					'message' => $high > 0
+						? sprintf( __( 'Audit complete: %1$d high-risk endpoint(s) identified across %2$d endpoints.', 'site-checkup-pro' ), $high, $total )
+						: sprintf( __( 'Audit complete: all %d endpoints verified with proper authorization.', 'site-checkup-pro' ), $total ),
+					'summary' => $audit['summary'],
+				);
+			},
+		) ) );
+
+		// 2.15 Environment Tagging & Admin Bar Badge
+		$this->register( new WPSG_Task( array(
+			'id'               => 'environment_badge_check',
+			'section'          => 'general_check',
+			'title'            => __( 'Environment Tagging & Admin Bar Badge', 'site-checkup-pro' ),
+			'description'      => __( 'Tags the environment (Production, Staging, or Development) and displays a persistent color-coded safety badge in the WordPress top admin bar to prevent accidental changes on production.', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'instant',
+			'status_callback'  => function () {
+				if ( ! class_exists( 'WPSG_Environment_Badge' ) ) {
+					return array( 'status' => 'pending', 'message' => __( 'Environment Badge component not loaded.', 'site-checkup-pro' ) );
+				}
+				$confirmed = WPSG_Environment_Badge::is_confirmed();
+				$env       = WPSG_Environment_Badge::get_environment();
+				if ( $confirmed ) {
+					return array(
+						'status'  => 'done',
+						'message' => sprintf( __( 'Active environment confirmed: %s (Admin bar badge active).', 'site-checkup-pro' ), ucfirst( $env ) ),
+						'data'    => array( 'environment' => $env, 'confirmed' => true ),
+					);
+				}
+				return array(
+					'status'  => 'pending',
+					'message' => sprintf( __( 'Unconfirmed environment. Domain heuristics suggest: %s. Click Run to confirm.', 'site-checkup-pro' ), ucfirst( $env ) ),
+					'data'    => array( 'environment' => $env, 'confirmed' => false ),
+				);
+			},
+			'run_callback'     => function () {
+				if ( ! class_exists( 'WPSG_Environment_Badge' ) ) {
+					return array( 'success' => false, 'message' => __( 'Environment Badge component not loaded.', 'site-checkup-pro' ) );
+				}
+				$suggested = WPSG_Environment_Badge::suggest_environment();
+				update_option( WPSG_Environment_Badge::OPTION_KEY, $suggested );
+				if ( class_exists( 'WPSG_Audit_Logger' ) ) {
+					WPSG_Audit_Logger::log(
+						'environment_tagged',
+						sprintf( 'Environment manually tagged as %s via Site Checkup Pro.', ucfirst( $suggested ) ),
+						'admin',
+						'info'
+					);
+				}
+				return array(
+					'success' => true,
+					'status'  => 'done',
+					'message' => sprintf( __( 'Environment confirmed as %s. Admin bar badge updated.', 'site-checkup-pro' ), ucfirst( $suggested ) ),
+					'data'    => array( 'environment' => $suggested, 'confirmed' => true ),
+				);
+			},
+		) ) );
+
+		// 2.16 Developer Diagnostic Snapshot
+		$this->register( new WPSG_Task( array(
+			'id'               => 'diagnostic_snapshot_check',
+			'section'          => 'general_check',
+			'title'            => __( 'Developer Diagnostic Snapshot', 'site-checkup-pro' ),
+			'description'      => __( 'Generates a sanitized one-click diagnostic snapshot of PHP, server, database, theme, active plugins, and non-sensitive wp-config flags formatted for developer debugging and support tickets.', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'instant',
+			'status_callback'  => function () {
+				if ( ! class_exists( 'WPSG_Diagnostic_Snapshot' ) ) {
+					return array( 'status' => 'pending', 'message' => __( 'Diagnostic Snapshot component not loaded.', 'site-checkup-pro' ) );
+				}
+				return array(
+					'status'  => 'done',
+					'message' => __( 'Diagnostic snapshot generator ready. Click Re-run to generate a fresh export.', 'site-checkup-pro' ),
+				);
+			},
+			'run_callback'     => function () {
+				if ( ! class_exists( 'WPSG_Diagnostic_Snapshot' ) ) {
+					return array( 'success' => false, 'message' => __( 'Diagnostic Snapshot component not loaded.', 'site-checkup-pro' ) );
+				}
+				$snapshot = WPSG_Diagnostic_Snapshot::compile();
+				if ( class_exists( 'WPSG_Audit_Logger' ) ) {
+					WPSG_Audit_Logger::log(
+						'diagnostic_snapshot_generated',
+						sprintf( 'Generated developer diagnostic snapshot (PHP %s, WP %s).', $snapshot['server']['php_version'], $snapshot['wordpress']['version'] ),
+						'admin',
+						'info'
+					);
+				}
+				return array(
+					'success'  => true,
+					'status'   => 'done',
+					'message'  => __( 'Developer diagnostic snapshot generated successfully.', 'site-checkup-pro' ),
+					'markdown' => $snapshot['markdown'],
+					'data'     => $snapshot,
+				);
+			},
+		) ) );
+
+		// 2.17 WP-Cron Scheduled Events Audit
+		$this->register( new WPSG_Task( array(
+			'id'               => 'cron_job_audit',
+			'section'          => 'general_check',
+			'title'            => __( 'WP-Cron Scheduled Events Audit', 'site-checkup-pro' ),
+			'description'      => __( 'Lists all scheduled WP-Cron background jobs, detects overdue stalled tasks indicating cron failure, and identifies duplicate conflicting hook registrations.', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'instant',
+			'status_callback'  => function () {
+				if ( ! class_exists( 'WPSG_Cron_Auditor' ) ) {
+					return array( 'status' => 'pending', 'message' => __( 'Cron Auditor component not loaded.', 'site-checkup-pro' ) );
+				}
+				$audit = WPSG_Cron_Auditor::audit_cron_jobs();
+				$overdue = $audit['summary']['overdue_count'];
+				$dupes   = $audit['summary']['duplicate_count'];
+				$total   = $audit['summary']['total_jobs'];
+				if ( $overdue > 0 || $dupes > 0 ) {
+					return array(
+						'status'  => 'attention',
+						'message' => sprintf( __( 'Cron anomalies detected: %1$d overdue task(s), %2$d duplicate registration(s) across %3$d scheduled events.', 'site-checkup-pro' ), $overdue, $dupes, $total ),
+						'data'    => $audit['summary'],
+					);
+				}
+				return array(
+					'status'  => 'done',
+					'message' => sprintf( __( 'All %d scheduled WP-Cron jobs running normally. No overdue or duplicate tasks found.', 'site-checkup-pro' ), $total ),
+					'data'    => $audit['summary'],
+				);
+			},
+			'run_callback'     => function () {
+				if ( ! class_exists( 'WPSG_Cron_Auditor' ) ) {
+					return array( 'success' => false, 'message' => __( 'Cron Auditor component not loaded.', 'site-checkup-pro' ) );
+				}
+				$audit   = WPSG_Cron_Auditor::audit_cron_jobs();
+				$overdue = $audit['summary']['overdue_count'];
+				$dupes   = $audit['summary']['duplicate_count'];
+				$total   = $audit['summary']['total_jobs'];
+				if ( class_exists( 'WPSG_Audit_Logger' ) ) {
+					WPSG_Audit_Logger::log(
+						'cron_audit_performed',
+						sprintf( 'Audited WP-Cron: %1$d jobs, %2$d overdue, %3$d duplicates.', $total, $overdue, $dupes ),
+						'system',
+						( $overdue > 0 || $dupes > 0 ) ? 'warning' : 'info'
+					);
+				}
+				return array(
+					'success' => true,
+					'status'  => ( $overdue > 0 || $dupes > 0 ) ? 'attention' : 'done',
+					'message' => ( $overdue > 0 || $dupes > 0 )
+						? sprintf( __( 'Cron scan complete: %1$d overdue task(s), %2$d duplicate(s) found.', 'site-checkup-pro' ), $overdue, $dupes )
+						: sprintf( __( 'Cron scan complete: all %d events verified and scheduled properly.', 'site-checkup-pro' ), $total ),
+					'summary' => $audit['summary'],
+				);
+			},
+		) ) );
+
+		// 2.18 Database Health Scanner
+		$this->register( new WPSG_Task( array(
+			'id'               => 'db_health_scanner',
+			'section'          => 'general_check',
+			'title'            => __( 'Database Overhead & Orphaned Data Scanner', 'site-checkup-pro' ),
+			'description'      => __( 'Detects orphaned postmeta, orphaned usermeta, expired transients, and excess post revisions with storage impact metrics and protected Level-B cleanup.', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'instant',
+			'status_callback'  => function () {
+				if ( ! class_exists( 'WPSG_Db_Health_Scanner' ) ) {
+					return array( 'status' => 'pending', 'message' => __( 'Database Health Scanner component not loaded.', 'site-checkup-pro' ) );
+				}
+				$scan = WPSG_Db_Health_Scanner::scan();
+				$bloat = $scan['summary']['total_bloat_items'];
+				$mb    = $scan['summary']['estimated_savings_mb'];
+				if ( $bloat > 0 ) {
+					return array(
+						'status'  => 'attention',
+						'message' => sprintf( __( '%1$d orphaned/stale database item(s) found (~%2$s MB overhead). Click Run to inspect.', 'site-checkup-pro' ), $bloat, $mb ),
+						'data'    => $scan['summary'],
+					);
+				}
+				return array(
+					'status'  => 'done',
+					'message' => __( 'Database is optimized. Zero orphaned metadata or expired transients detected.', 'site-checkup-pro' ),
+					'data'    => $scan['summary'],
+				);
+			},
+			'run_callback'     => function () {
+				if ( ! class_exists( 'WPSG_Db_Health_Scanner' ) ) {
+					return array( 'success' => false, 'message' => __( 'Database Health Scanner component not loaded.', 'site-checkup-pro' ) );
+				}
+				$scan  = WPSG_Db_Health_Scanner::scan();
+				$bloat = $scan['summary']['total_bloat_items'];
+				$mb    = $scan['summary']['estimated_savings_mb'];
+				if ( class_exists( 'WPSG_Audit_Logger' ) ) {
+					WPSG_Audit_Logger::log(
+						'db_health_scanned',
+						sprintf( 'Database bloat scanned: %1$d items (~%2$s MB overhead).', $bloat, $mb ),
+						'system',
+						$bloat > 0 ? 'warning' : 'info'
+					);
+				}
+				return array(
+					'success' => true,
+					'status'  => $bloat > 0 ? 'attention' : 'done',
+					'message' => $bloat > 0
+						? sprintf( __( 'Scan complete: %1$d orphaned/stale item(s) identified (~%2$s MB overhead).', 'site-checkup-pro' ), $bloat, $mb )
+						: __( 'Scan complete: database is clean and optimized.', 'site-checkup-pro' ),
+					'summary' => $scan['summary'],
+					'details' => $scan['details'],
+				);
+			},
+		) ) );
+
+		// 2.19 Migration Readiness Check
+		$this->register( new WPSG_Task( array(
+			'id'               => 'migration_readiness_check',
+			'section'          => 'general_check',
+			'title'            => __( 'Migration URL & Serialization Risk Check', 'site-checkup-pro' ),
+			'description'      => __( 'Scans the database for hardcoded absolute URLs embedded inside PHP serialized strings that break during domain migrations, providing safe WP-CLI guidance.', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'instant',
+			'status_callback'  => function () {
+				if ( ! class_exists( 'WPSG_Migration_Readiness' ) ) {
+					return array( 'status' => 'pending', 'message' => __( 'Migration Readiness component not loaded.', 'site-checkup-pro' ) );
+				}
+				$scan  = WPSG_Migration_Readiness::scan();
+				$count = $scan['summary']['total_findings'];
+				if ( $count > 0 ) {
+					return array(
+						'status'  => 'attention',
+						'message' => sprintf( __( '%d serialized database row(s) contain hardcoded domain URLs. Standard SQL export/import will corrupt these strings.', 'site-checkup-pro' ), $count ),
+						'data'    => $scan['summary'],
+					);
+				}
+				return array(
+					'status'  => 'done',
+					'message' => __( 'Zero serialized URL risks detected. Database is ready for safe migration.', 'site-checkup-pro' ),
+					'data'    => $scan['summary'],
+				);
+			},
+			'run_callback'     => function () {
+				if ( ! class_exists( 'WPSG_Migration_Readiness' ) ) {
+					return array( 'success' => false, 'message' => __( 'Migration Readiness component not loaded.', 'site-checkup-pro' ) );
+				}
+				$scan  = WPSG_Migration_Readiness::scan();
+				$count = $scan['summary']['total_findings'];
+				if ( class_exists( 'WPSG_Audit_Logger' ) ) {
+					WPSG_Audit_Logger::log(
+						'migration_readiness_scanned',
+						sprintf( 'Migration readiness scanned: %d serialized URL risks detected.', $count ),
+						'system',
+						$count > 0 ? 'warning' : 'info'
+					);
+				}
+				return array(
+					'success'  => true,
+					'status'   => $count > 0 ? 'attention' : 'done',
+					'message'  => $count > 0
+						? sprintf( __( 'Scan complete: %d serialized row(s) contain absolute URLs. Review WP-CLI guidance.', 'site-checkup-pro' ), $count )
+						: __( 'Scan complete: no serialized absolute URL risks detected.', 'site-checkup-pro' ),
+					'summary'  => $scan['summary'],
+					'guidance' => $scan['guidance'],
+				);
+			},
+		) ) );
+
+		// 2.20 Update Changelog Intelligence Digest
+		$this->register( new WPSG_Task( array(
+			'id'               => 'changelog_digest_check',
+			'section'          => 'general_check',
+			'title'            => __( 'Update Changelog Intelligence Digest', 'site-checkup-pro' ),
+			'description'      => __( 'Aggregates changelogs and release notes for available plugin/theme updates and delivers a weekly intelligence digest via alerts and dashboard.', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'instant',
+			'status_callback'  => function () {
+				if ( ! class_exists( 'WPSG_Changelog_Digest' ) ) {
+					return array( 'status' => 'pending', 'message' => __( 'Changelog Digest component not loaded.', 'site-checkup-pro' ) );
+				}
+				$digest = WPSG_Changelog_Digest::compile_digest();
+				$total  = $digest['summary']['total_updates'];
+				if ( $total > 0 ) {
+					return array(
+						'status'  => 'attention',
+						'message' => sprintf( __( '%d plugin/theme update(s) available with changelog summaries ready for review.', 'site-checkup-pro' ), $total ),
+						'data'    => $digest['summary'],
+					);
+				}
+				return array(
+					'status'  => 'done',
+					'message' => __( 'All plugins and themes are up to date. Weekly changelog digest scheduled.', 'site-checkup-pro' ),
+					'data'    => $digest['summary'],
+				);
+			},
+			'run_callback'     => function () {
+				if ( ! class_exists( 'WPSG_Changelog_Digest' ) ) {
+					return array( 'success' => false, 'message' => __( 'Changelog Digest component not loaded.', 'site-checkup-pro' ) );
+				}
+				$digest = WPSG_Changelog_Digest::compile_digest();
+				$total  = $digest['summary']['total_updates'];
+				if ( class_exists( 'WPSG_Audit_Logger' ) ) {
+					WPSG_Audit_Logger::log(
+						'changelog_digest_compiled',
+						sprintf( 'Compiled changelog digest: %d update(s) available.', $total ),
+						'system',
+						'info'
+					);
+				}
+				return array(
+					'success' => true,
+					'status'  => $total > 0 ? 'attention' : 'done',
+					'message' => $total > 0
+						? sprintf( __( 'Digest compiled: %d update(s) available with release notes.', 'site-checkup-pro' ), $total )
+						: __( 'Digest compiled: all plugins and themes are current.', 'site-checkup-pro' ),
+					'summary' => $digest['summary'],
+					'items'   => $digest['items'],
+				);
+			},
+		) ) );
+
 		// ==========================================
 		// SECTION 3: HARDENING (.htaccess & wp-config)
 		// ==========================================

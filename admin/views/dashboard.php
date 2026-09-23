@@ -180,6 +180,16 @@ $login_slug    = WPSG_Login_Renamer::get_login_slug();
 					<span class="wpsg-sidebar-label"><?php esc_html_e( 'Audit Trail', 'site-checkup-pro' ); ?></span>
 				</button>
 
+				<button type="button" class="wpsg-sidebar-item wpsg-tab" data-tab="rest_api">
+					<span class="dashicons dashicons-rest-api" aria-hidden="true"></span>
+					<span class="wpsg-sidebar-label"><?php esc_html_e( 'REST API', 'site-checkup-pro' ); ?></span>
+				</button>
+
+				<button type="button" class="wpsg-sidebar-item wpsg-tab" data-tab="dev_toolkit">
+					<span class="dashicons dashicons-code-standards" aria-hidden="true"></span>
+					<span class="wpsg-sidebar-label"><?php esc_html_e( 'Developer Toolkit', 'site-checkup-pro' ); ?></span>
+				</button>
+
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=site-checkup-pro-report' ) ); ?>" class="wpsg-sidebar-item wpsg-sidebar-link">
 					<span class="dashicons dashicons-media-document" aria-hidden="true"></span>
 					<span class="wpsg-sidebar-label"><?php esc_html_e( 'Client Report', 'site-checkup-pro' ); ?></span>
@@ -826,6 +836,246 @@ $login_slug    = WPSG_Login_Renamer::get_login_slug();
 
 			</section>
 
+			<!-- PANEL: REST API SECURITY AUDITOR -->
+			<section class="wpsg-panel" id="wpsg-panel-rest-api" style="display: none;">
+				<div class="wpsg-section-banner">
+					<div class="wpsg-section-banner-content">
+						<div class="wpsg-section-banner-icon-wrap">
+							<span class="dashicons dashicons-rest-api"></span>
+						</div>
+						<div>
+							<div class="wpsg-section-banner-title-row">
+								<h2><?php esc_html_e( 'REST API Security Auditor', 'site-checkup-pro' ); ?></h2>
+								<span class="wpsg-section-banner-badge"><?php esc_html_e( 'Endpoint Inspector', 'site-checkup-pro' ); ?></span>
+							</div>
+							<p><?php esc_html_e( 'Complete discovery and authorization inspection of all registered REST endpoints across core, active plugins, and themes.', 'site-checkup-pro' ); ?></p>
+						</div>
+					</div>
+					<div class="wpsg-section-banner-actions">
+						<button type="button" class="wpsg-btn wpsg-btn-primary" id="wpsg-btn-refresh-rest-audit">
+							<span class="dashicons dashicons-update" style="font-size: 14px; width: 14px; height: 14px; margin-right: 4px;"></span>
+							<?php esc_html_e( 'Re-scan REST Routes', 'site-checkup-pro' ); ?>
+						</button>
+					</div>
+				</div>
+
+				<!-- REST Stats Summary -->
+				<div class="wpsg-overview-grid" style="margin-bottom: 20px;">
+					<div class="wpsg-category-card">
+						<div class="wpsg-category-header">
+							<div>
+								<div class="wpsg-category-title"><?php esc_html_e( 'Total Endpoints', 'site-checkup-pro' ); ?></div>
+								<div class="wpsg-category-subtitle"><?php esc_html_e( 'Across all routes', 'site-checkup-pro' ); ?></div>
+							</div>
+							<div class="wpsg-category-stat" id="wpsg-rest-stat-total">0</div>
+						</div>
+					</div>
+					<div class="wpsg-category-card">
+						<div class="wpsg-category-header">
+							<div>
+								<div class="wpsg-category-title"><?php esc_html_e( 'Protected Endpoints', 'site-checkup-pro' ); ?></div>
+								<div class="wpsg-category-subtitle"><?php esc_html_e( 'Capability gated', 'site-checkup-pro' ); ?></div>
+							</div>
+							<div class="wpsg-category-stat" style="color: var(--wpsg-success);" id="wpsg-rest-stat-protected">0</div>
+						</div>
+					</div>
+					<div class="wpsg-category-card">
+						<div class="wpsg-category-header">
+							<div>
+								<div class="wpsg-category-title"><?php esc_html_e( 'Publicly Accessible', 'site-checkup-pro' ); ?></div>
+								<div class="wpsg-category-subtitle"><?php esc_html_e( 'Open to unauthenticated visitors', 'site-checkup-pro' ); ?></div>
+							</div>
+							<div class="wpsg-category-stat" style="color: var(--wpsg-warning);" id="wpsg-rest-stat-public">0</div>
+						</div>
+					</div>
+					<div class="wpsg-category-card">
+						<div class="wpsg-category-header">
+							<div>
+								<div class="wpsg-category-title"><?php esc_html_e( 'High Risk Write Endpoints', 'site-checkup-pro' ); ?></div>
+								<div class="wpsg-category-subtitle"><?php esc_html_e( 'Public POST/PUT/DELETE', 'site-checkup-pro' ); ?></div>
+							</div>
+							<div class="wpsg-category-stat" style="color: var(--wpsg-danger);" id="wpsg-rest-stat-high">0</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- REST Filter Controls -->
+				<div class="wpsg-filter-bar" style="margin-bottom: 16px; display: flex; gap: 12px; align-items: center; justify-content: space-between;">
+					<div class="wpsg-filter-group" style="display: flex; gap: 6px;">
+						<button type="button" class="wpsg-filter-btn active" data-rest-filter="all"><?php esc_html_e( 'All', 'site-checkup-pro' ); ?></button>
+						<button type="button" class="wpsg-filter-btn" data-rest-filter="public"><?php esc_html_e( 'Public', 'site-checkup-pro' ); ?></button>
+						<button type="button" class="wpsg-filter-btn" data-rest-filter="protected"><?php esc_html_e( 'Protected', 'site-checkup-pro' ); ?></button>
+						<button type="button" class="wpsg-filter-btn" data-rest-filter="needs_review"><?php esc_html_e( 'Needs Review', 'site-checkup-pro' ); ?></button>
+						<button type="button" class="wpsg-filter-btn" data-rest-filter="critical"><?php esc_html_e( 'High Risk', 'site-checkup-pro' ); ?></button>
+					</div>
+					<div class="wpsg-search-box" style="max-width: 280px; width: 100%;">
+						<input type="search" id="wpsg-rest-search" class="wpsg-input" placeholder="<?php esc_attr_e( 'Search routes or plugins...', 'site-checkup-pro' ); ?>">
+					</div>
+				</div>
+
+				<div class="wpsg-table-container">
+					<table class="wpsg-table" id="wpsg-rest-table">
+						<thead>
+							<tr>
+								<th><?php esc_html_e( 'Route Pattern', 'site-checkup-pro' ); ?></th>
+								<th><?php esc_html_e( 'Method(s)', 'site-checkup-pro' ); ?></th>
+								<th><?php esc_html_e( 'Origin / Namespace', 'site-checkup-pro' ); ?></th>
+								<th><?php esc_html_e( 'Permission Callback', 'site-checkup-pro' ); ?></th>
+								<th><?php esc_html_e( 'Risk Level', 'site-checkup-pro' ); ?></th>
+							</tr>
+						</thead>
+						<tbody id="wpsg-rest-tbody">
+							<!-- Populated via admin.js -->
+						</tbody>
+					</table>
+				</div>
+			</section>
+
+			<!-- PANEL: DEVELOPER TOOLKIT -->
+			<section class="wpsg-panel" id="wpsg-panel-dev-toolkit" style="display: none;">
+				<div class="wpsg-section-banner">
+					<div class="wpsg-section-banner-content">
+						<div class="wpsg-section-banner-icon-wrap">
+							<span class="dashicons dashicons-code-standards"></span>
+						</div>
+						<div>
+							<div class="wpsg-section-banner-title-row">
+								<h2><?php esc_html_e( 'Developer Toolkit & Diagnostics', 'site-checkup-pro' ); ?></h2>
+								<span class="wpsg-section-banner-badge"><?php esc_html_e( 'v1.2 Tools', 'site-checkup-pro' ); ?></span>
+							</div>
+							<p><?php esc_html_e( 'Professional tools for WordPress engineers: environment tagging, sanitized system diagnostic snapshots, WP-Cron inspection, database bloat cleanup, and migration verification.', 'site-checkup-pro' ); ?></p>
+						</div>
+					</div>
+				</div>
+
+				<div class="wpsg-overview-grid" style="margin-bottom: 24px;">
+					
+					<!-- Toolkit 1: Environment Tag & Admin Bar -->
+					<div class="wpsg-settings-card">
+						<div class="wpsg-settings-card-header">
+							<div class="wpsg-settings-card-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--wpsg-success);">
+								<span class="dashicons dashicons-tag"></span>
+							</div>
+							<div>
+								<h3 class="wpsg-settings-card-title"><?php esc_html_e( 'Environment Badge Tagging', 'site-checkup-pro' ); ?></h3>
+								<p class="wpsg-settings-card-desc"><?php esc_html_e( 'Active top admin bar safety badge indicating server environment.', 'site-checkup-pro' ); ?></p>
+							</div>
+						</div>
+						<div class="wpsg-settings-card-body" style="padding-top: 14px;">
+							<div style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px;">
+								<select id="wpsg-dev-env-select" class="wpsg-select" style="max-width: 200px;">
+									<option value="production"><?php esc_html_e( 'Production (Red)', 'site-checkup-pro' ); ?></option>
+									<option value="staging"><?php esc_html_e( 'Staging (Amber)', 'site-checkup-pro' ); ?></option>
+									<option value="development"><?php esc_html_e( 'Development (Gray)', 'site-checkup-pro' ); ?></option>
+								</select>
+								<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-primary" id="wpsg-btn-save-env"><?php esc_html_e( 'Update Badge', 'site-checkup-pro' ); ?></button>
+							</div>
+							<p class="wpsg-help-text" id="wpsg-dev-env-help"><?php esc_html_e( 'Smart heuristics inspect your hostname and constants to protect production sites.', 'site-checkup-pro' ); ?></p>
+						</div>
+					</div>
+
+					<!-- Toolkit 2: Diagnostic Snapshot -->
+					<div class="wpsg-settings-card">
+						<div class="wpsg-settings-card-header">
+							<div class="wpsg-settings-card-icon" style="background: rgba(59, 130, 246, 0.1); color: var(--wpsg-primary);">
+								<span class="dashicons dashicons-clipboard"></span>
+							</div>
+							<div>
+								<h3 class="wpsg-settings-card-title"><?php esc_html_e( 'Diagnostic Snapshot Export', 'site-checkup-pro' ); ?></h3>
+								<p class="wpsg-settings-card-desc"><?php esc_html_e( 'Sanitized Markdown report ready for GitHub issues and tickets.', 'site-checkup-pro' ); ?></p>
+							</div>
+						</div>
+						<div class="wpsg-settings-card-body" style="padding-top: 14px;">
+							<div style="display: flex; gap: 8px; margin-bottom: 10px;">
+								<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-primary" id="wpsg-btn-copy-diagnostic">
+									<span class="dashicons dashicons-admin-page" style="font-size: 14px; width: 14px; height: 14px; margin-right: 4px;"></span>
+									<?php esc_html_e( 'Copy Markdown to Clipboard', 'site-checkup-pro' ); ?>
+								</button>
+								<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary" id="wpsg-btn-view-diagnostic"><?php esc_html_e( 'View Snapshot', 'site-checkup-pro' ); ?></button>
+							</div>
+							<p class="wpsg-help-text"><?php esc_html_e( 'All database passwords, salts, and secret credentials are strictly redacted.', 'site-checkup-pro' ); ?></p>
+						</div>
+					</div>
+
+					<!-- Toolkit 3: WP-Cron Scheduled Events -->
+					<div class="wpsg-settings-card">
+						<div class="wpsg-settings-card-header">
+							<div class="wpsg-settings-card-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--wpsg-warning);">
+								<span class="dashicons dashicons-calendar-alt"></span>
+							</div>
+							<div>
+								<h3 class="wpsg-settings-card-title"><?php esc_html_e( 'WP-Cron Health Auditor', 'site-checkup-pro' ); ?></h3>
+								<p class="wpsg-settings-card-desc"><?php esc_html_e( 'Detects overdue background tasks and duplicate hooks.', 'site-checkup-pro' ); ?></p>
+							</div>
+						</div>
+						<div class="wpsg-settings-card-body" style="padding-top: 14px;">
+							<div id="wpsg-dev-cron-summary" style="font-size: 13px; color: var(--wpsg-text-secondary); margin-bottom: 10px;">
+								<?php esc_html_e( 'Loading scheduled cron events...', 'site-checkup-pro' ); ?>
+							</div>
+							<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary" id="wpsg-btn-refresh-cron"><?php esc_html_e( 'Audit Cron Jobs', 'site-checkup-pro' ); ?></button>
+						</div>
+					</div>
+
+					<!-- Toolkit 4: Database Health & Bloat -->
+					<div class="wpsg-settings-card">
+						<div class="wpsg-settings-card-header">
+							<div class="wpsg-settings-card-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--wpsg-danger);">
+								<span class="dashicons dashicons-database"></span>
+							</div>
+							<div>
+								<h3 class="wpsg-settings-card-title"><?php esc_html_e( 'Database Bloat & Cleanup', 'site-checkup-pro' ); ?></h3>
+								<p class="wpsg-settings-card-desc"><?php esc_html_e( 'Orphaned meta, expired transients, and excess revisions.', 'site-checkup-pro' ); ?></p>
+							</div>
+						</div>
+						<div class="wpsg-settings-card-body" style="padding-top: 14px;">
+							<div id="wpsg-dev-db-summary" style="font-size: 13px; color: var(--wpsg-text-secondary); margin-bottom: 10px;">
+								<?php esc_html_e( 'Loading database health metrics...', 'site-checkup-pro' ); ?>
+							</div>
+							<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-danger" id="wpsg-btn-clean-db"><?php esc_html_e( 'Clean Up Bloat (Level B)', 'site-checkup-pro' ); ?></button>
+						</div>
+					</div>
+
+					<!-- Toolkit 5: Migration Readiness -->
+					<div class="wpsg-settings-card">
+						<div class="wpsg-settings-card-header">
+							<div class="wpsg-settings-card-icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">
+								<span class="dashicons dashicons-migrate"></span>
+							</div>
+							<div>
+								<h3 class="wpsg-settings-card-title"><?php esc_html_e( 'Migration Serialization Readiness', 'site-checkup-pro' ); ?></h3>
+								<p class="wpsg-settings-card-desc"><?php esc_html_e( 'Detects absolute URLs inside serialized PHP objects.', 'site-checkup-pro' ); ?></p>
+							</div>
+						</div>
+						<div class="wpsg-settings-card-body" style="padding-top: 14px;">
+							<div id="wpsg-dev-migration-summary" style="font-size: 13px; color: var(--wpsg-text-secondary); margin-bottom: 10px;">
+								<?php esc_html_e( 'Scanning for serialized URL hazards...', 'site-checkup-pro' ); ?>
+							</div>
+							<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary" id="wpsg-btn-check-migration"><?php esc_html_e( 'Re-scan Migration Risk', 'site-checkup-pro' ); ?></button>
+						</div>
+					</div>
+
+					<!-- Toolkit 6: Weekly Changelog Digest -->
+					<div class="wpsg-settings-card">
+						<div class="wpsg-settings-card-header">
+							<div class="wpsg-settings-card-icon" style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9;">
+								<span class="dashicons dashicons-rss"></span>
+							</div>
+							<div>
+								<h3 class="wpsg-settings-card-title"><?php esc_html_e( 'Weekly Changelog Digest', 'site-checkup-pro' ); ?></h3>
+								<p class="wpsg-settings-card-desc"><?php esc_html_e( 'Intelligence summaries for available updates.', 'site-checkup-pro' ); ?></p>
+							</div>
+						</div>
+						<div class="wpsg-settings-card-body" style="padding-top: 14px;">
+							<div id="wpsg-dev-changelog-summary" style="font-size: 13px; color: var(--wpsg-text-secondary); margin-bottom: 10px;">
+								<?php esc_html_e( 'Aggregating update transients...', 'site-checkup-pro' ); ?>
+							</div>
+							<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary" id="wpsg-btn-refresh-digest"><?php esc_html_e( 'Refresh Digest', 'site-checkup-pro' ); ?></button>
+						</div>
+					</div>
+
+				</div>
+			</section>
+
 			<!-- PANEL 5: SETTINGS -->
 			<section class="wpsg-panel" id="wpsg-panel-settings" style="display: none;">
 				
@@ -1017,6 +1267,7 @@ $login_slug    = WPSG_Login_Renamer::get_login_slug();
 	<?php include WPSG_PLUGIN_DIR . 'admin/views/modal-csp-reports.php'; ?>
 	<?php include WPSG_PLUGIN_DIR . 'admin/views/modal-settings.php'; ?>
 	<?php include WPSG_PLUGIN_DIR . 'admin/views/modal-confirm.php'; ?>
+	<?php include WPSG_PLUGIN_DIR . 'admin/views/modal-diagnostic.php'; ?>
 
 	<!-- Settings Screen Footer / Resource Block -->
 	<footer class="wpsg-dashboard-footer" style="margin-top: 32px; padding: 18px 24px; background: var(--wpsg-surface); border: 1px solid var(--wpsg-border); border-radius: var(--wpsg-radius-md); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; font-size: 13px;">

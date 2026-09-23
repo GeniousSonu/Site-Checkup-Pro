@@ -349,6 +349,59 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			'callback'            => array( $this, 'dismiss_review_prompt' ),
 			'permission_callback' => array( $this, 'check_permissions' ),
 		) );
+
+		// 28. REST API Security Auditor
+		register_rest_route( $this->namespace, '/developer/rest-audit', array(
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => array( $this, 'get_rest_audit' ),
+			'permission_callback' => array( $this, 'check_permissions' ),
+		) );
+
+		// 29. Developer Diagnostic Snapshot
+		register_rest_route( $this->namespace, '/developer/diagnostic-snapshot', array(
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => array( $this, 'get_diagnostic_snapshot' ),
+			'permission_callback' => array( $this, 'check_permissions' ),
+		) );
+
+		// 30. WP-Cron Scheduled Events Audit
+		register_rest_route( $this->namespace, '/developer/cron-audit', array(
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => array( $this, 'get_cron_audit' ),
+			'permission_callback' => array( $this, 'check_permissions' ),
+		) );
+
+		// 31. Database Health Scanner
+		register_rest_route( $this->namespace, '/developer/db-health', array(
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => array( $this, 'get_db_health' ),
+			'permission_callback' => array( $this, 'check_permissions' ),
+		) );
+
+		// 32. Database Health Protected Cleanup (Level B)
+		register_rest_route( $this->namespace, '/developer/db-health/clean', array(
+			'methods'             => WP_REST_Server::CREATABLE,
+			'callback'            => array( $this, 'clean_db_health' ),
+			'permission_callback' => array( $this, 'check_permissions' ),
+			'args'                => array(
+				'type'         => array( 'sanitize_callback' => 'sanitize_key', 'default' => 'all' ),
+				'reauth_token' => array( 'sanitize_callback' => 'sanitize_text_field' ),
+			),
+		) );
+
+		// 33. Migration Readiness Check
+		register_rest_route( $this->namespace, '/developer/migration-readiness', array(
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => array( $this, 'get_migration_readiness' ),
+			'permission_callback' => array( $this, 'check_permissions' ),
+		) );
+
+		// 34. Weekly Changelog Digest
+		register_rest_route( $this->namespace, '/developer/changelog-digest', array(
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => array( $this, 'get_changelog_digest' ),
+			'permission_callback' => array( $this, 'check_permissions' ),
+		) );
 	}
 
 	/**
@@ -1352,6 +1405,149 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 		return rest_ensure_response( array(
 			'success' => true,
 			'message' => __( 'Review prompt dismissed.', 'site-checkup-pro' ),
+		) );
+	}
+
+	/**
+	 * Run REST API security audit.
+	 *
+	 * @param WP_REST_Request $request REST request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_rest_audit( $request ) {
+		if ( ! class_exists( 'WPSG_Rest_Auditor' ) ) {
+			return new WP_Error( 'wpsg_class_missing', __( 'REST API Auditor component missing.', 'site-checkup-pro' ), array( 'status' => 500 ) );
+		}
+
+		$results = WPSG_Rest_Auditor::audit_routes();
+		return rest_ensure_response( array(
+			'success' => true,
+			'data'    => $results,
+		) );
+	}
+
+	/**
+	 * Compile developer diagnostic snapshot.
+	 *
+	 * @param WP_REST_Request $request REST request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_diagnostic_snapshot( $request ) {
+		if ( ! class_exists( 'WPSG_Diagnostic_Snapshot' ) ) {
+			return new WP_Error( 'wpsg_class_missing', __( 'Diagnostic Snapshot component missing.', 'site-checkup-pro' ), array( 'status' => 500 ) );
+		}
+
+		$snapshot = WPSG_Diagnostic_Snapshot::compile();
+		return rest_ensure_response( array(
+			'success' => true,
+			'data'    => $snapshot,
+		) );
+	}
+
+	/**
+	 * Run WP-Cron scheduled events audit.
+	 *
+	 * @param WP_REST_Request $request REST request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_cron_audit( $request ) {
+		if ( ! class_exists( 'WPSG_Cron_Auditor' ) ) {
+			return new WP_Error( 'wpsg_class_missing', __( 'Cron Auditor component missing.', 'site-checkup-pro' ), array( 'status' => 500 ) );
+		}
+
+		$audit = WPSG_Cron_Auditor::audit_cron_jobs();
+		return rest_ensure_response( array(
+			'success' => true,
+			'data'    => $audit,
+		) );
+	}
+
+	/**
+	 * Run database health scan.
+	 *
+	 * @param WP_REST_Request $request REST request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_db_health( $request ) {
+		if ( ! class_exists( 'WPSG_Db_Health_Scanner' ) ) {
+			return new WP_Error( 'wpsg_class_missing', __( 'Database Health Scanner component missing.', 'site-checkup-pro' ), array( 'status' => 500 ) );
+		}
+
+		$scan = WPSG_Db_Health_Scanner::scan();
+		return rest_ensure_response( array(
+			'success' => true,
+			'data'    => $scan,
+		) );
+	}
+
+	/**
+	 * Execute protected database cleanup (Level B).
+	 *
+	 * @param WP_REST_Request $request REST request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function clean_db_health( $request ) {
+		if ( ! class_exists( 'WPSG_Db_Health_Scanner' ) ) {
+			return new WP_Error( 'wpsg_class_missing', __( 'Database Health Scanner component missing.', 'site-checkup-pro' ), array( 'status' => 500 ) );
+		}
+
+		$type = $request->get_param( 'type' );
+		if ( empty( $type ) ) {
+			$type = 'all';
+		}
+
+		$reauth_token = $request->get_header( 'X-WPSG-Reauth' );
+		if ( empty( $reauth_token ) ) {
+			$reauth_token = $request->get_param( 'reauth_token' );
+		}
+
+		$result = WPSG_Db_Health_Scanner::cleanup( $type, $reauth_token );
+		if ( ! empty( $result['needs_reauth'] ) ) {
+			return new WP_Error( 'wpsg_reauth_required', $result['message'], array( 'status' => 403, 'needs_reauth' => true ) );
+		}
+		if ( ! empty( $result['needs_backup'] ) ) {
+			return new WP_Error( 'wpsg_backup_required', $result['message'], array( 'status' => 412, 'needs_backup' => true ) );
+		}
+		if ( empty( $result['success'] ) ) {
+			return new WP_Error( 'wpsg_cleanup_failed', $result['message'], array( 'status' => 400 ) );
+		}
+
+		return rest_ensure_response( $result );
+	}
+
+	/**
+	 * Run migration readiness scan.
+	 *
+	 * @param WP_REST_Request $request REST request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_migration_readiness( $request ) {
+		if ( ! class_exists( 'WPSG_Migration_Readiness' ) ) {
+			return new WP_Error( 'wpsg_class_missing', __( 'Migration Readiness component missing.', 'site-checkup-pro' ), array( 'status' => 500 ) );
+		}
+
+		$scan = WPSG_Migration_Readiness::scan();
+		return rest_ensure_response( array(
+			'success' => true,
+			'data'    => $scan,
+		) );
+	}
+
+	/**
+	 * Compile weekly changelog digest.
+	 *
+	 * @param WP_REST_Request $request REST request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_changelog_digest( $request ) {
+		if ( ! class_exists( 'WPSG_Changelog_Digest' ) ) {
+			return new WP_Error( 'wpsg_class_missing', __( 'Changelog Digest component missing.', 'site-checkup-pro' ), array( 'status' => 500 ) );
+		}
+
+		$digest = WPSG_Changelog_Digest::compile_digest();
+		return rest_ensure_response( array(
+			'success' => true,
+			'data'    => $digest,
 		) );
 	}
 }

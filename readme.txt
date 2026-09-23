@@ -7,7 +7,7 @@ Tags: security, hardening, security audit, login security, firewall
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.2
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -95,6 +95,16 @@ Version 1.0 is optimized for single-site agency workflows. On Multisite installa
 4. Client-facing executive SOP coverage report ready for PDF export with emergency incident response contacts.
 
 == Changelog ==
+
+= 1.2.0 =
+* Feature: REST API Security Auditor — Complete discovery and permission callback inspection of all registered REST endpoints across core, active plugins, and themes with risk scoring and source reflection.
+* Feature: Environment Badge Tagging — Persistent, color-coded admin bar badge (Production/Red, Staging/Amber, Development/Gray) with smart heuristics and hostname safety guards.
+* Feature: Developer Diagnostic Snapshot — Sanitized Markdown system report export for GitHub issues and tickets with strict secret/salt/password redaction.
+* Feature: WP-Cron Health Auditor — Inspection of scheduled background tasks with overdue stalled event detection (>600s late) and duplicate hook identification.
+* Feature: Database Health Scanner & Bloat Cleanup — Detection of orphaned postmeta, orphaned usermeta, expired transients, and excess revisions with protected Level-B cleanup gated by administrator re-authentication and recent backup validation.
+* Feature: Migration Serialization Readiness — Bounded scanning for absolute site URLs embedded inside serialized PHP objects with actionable WP-CLI search-replace guidance.
+* Feature: Weekly Changelog Digest — Automated aggregation of available plugin and theme updates with upgrade notice highlighting, scheduled weekly digest alerts, and manual inspection.
+* Integration: Self-Hosted Update Checker — Native support for update notifications and changelog viewing via YahnisElsts/plugin-update-checker library, cleanly isolated from WordPress.org releases.
 
 = 1.0.2 =
 * Fix: Resolve Run-button flicker and silent reversion on audit scanner tasks (File Permissions Audit, PHP Security Restrictions, Database Table Prefix, etc.) by ensuring all task response states (completed, unverified, findings-detected, failed) render explicit, visible UI states and appropriate action buttons.

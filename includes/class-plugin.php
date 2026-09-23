@@ -69,6 +69,7 @@ class WPSG_Plugin {
 		'wpsg_csp_mode',
 		'wpsg_alert_settings',
 		'wpsg_focus_mode',
+		'wpsg_environment_type',
 	);
 
 	/**
@@ -149,6 +150,16 @@ class WPSG_Plugin {
 		// Initialize Notice Inbox & Focus Mode.
 		if ( class_exists( 'WPSG_Notice_Inbox' ) ) {
 			WPSG_Notice_Inbox::get_instance();
+		}
+
+		// Initialize Environment Badge.
+		if ( class_exists( 'WPSG_Environment_Badge' ) ) {
+			WPSG_Environment_Badge::get_instance();
+		}
+
+		// Initialize Weekly Changelog Digest.
+		if ( class_exists( 'WPSG_Changelog_Digest' ) ) {
+			WPSG_Changelog_Digest::get_instance();
 		}
 
 		// Ensure Auto-Update support is registered in WordPress update transient and background updater.

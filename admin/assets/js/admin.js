@@ -40,6 +40,12 @@
 		reauthToken: null,
 		reauthExpiresAt: 0,
 		justUpdatedTaskId: null,
+		restData: null,
+		restLoading: false,
+		restFilter: 'all',
+		restSearch: '',
+		diagnosticMarkdown: '',
+		diagnosticLoading: false,
 	};
 
 	// DOM Elements Cache
@@ -256,6 +262,8 @@
 		dom.panelFeatures = document.getElementById('wpsg-panel-features');
 		dom.panelAudit = document.getElementById('wpsg-panel-audit');
 		dom.panelSettings = document.getElementById('wpsg-panel-settings');
+		dom.panelRestApi = document.getElementById('wpsg-panel-rest-api');
+		dom.panelDevToolkit = document.getElementById('wpsg-panel-dev-toolkit');
 
 		// Section Banner
 		dom.currentSecIcon = document.getElementById('wpsg-current-sec-icon');
@@ -430,6 +438,34 @@
 		dom.pageSettingIncidentNotes = document.getElementById('wpsg-page-setting-incident-notes');
 		dom.pageSettingsSaveStatus = document.getElementById('wpsg-page-settings-save-status');
 		dom.btnPageSaveSettings = document.getElementById('wpsg-btn-page-save-settings');
+
+		// REST API Security Auditor Controls
+		dom.btnRefreshRestAudit = document.getElementById('wpsg-btn-refresh-rest-audit');
+		dom.restStatTotal = document.getElementById('wpsg-rest-stat-total');
+		dom.restStatProtected = document.getElementById('wpsg-rest-stat-protected');
+		dom.restStatPublic = document.getElementById('wpsg-rest-stat-public');
+		dom.restStatHigh = document.getElementById('wpsg-rest-stat-high');
+		dom.restSearch = document.getElementById('wpsg-rest-search');
+		dom.restTbody = document.getElementById('wpsg-rest-tbody');
+		dom.restFilterBtns = document.querySelectorAll('[data-rest-filter]');
+
+		// Developer Toolkit Controls
+		dom.devEnvSelect = document.getElementById('wpsg-dev-env-select');
+		dom.btnSaveEnv = document.getElementById('wpsg-btn-save-env');
+		dom.devEnvHelp = document.getElementById('wpsg-dev-env-help');
+		dom.btnCopyDiagnostic = document.getElementById('wpsg-btn-copy-diagnostic');
+		dom.btnViewDiagnostic = document.getElementById('wpsg-btn-view-diagnostic');
+		dom.modalDiagnostic = document.getElementById('wpsg-modal-diagnostic');
+		dom.diagnosticContent = document.getElementById('wpsg-diagnostic-content');
+		dom.btnDiagnosticModalCopy = document.getElementById('wpsg-btn-diagnostic-modal-copy');
+		dom.devCronSummary = document.getElementById('wpsg-dev-cron-summary');
+		dom.btnRefreshCron = document.getElementById('wpsg-btn-refresh-cron');
+		dom.devDbSummary = document.getElementById('wpsg-dev-db-summary');
+		dom.btnCleanDb = document.getElementById('wpsg-btn-clean-db');
+		dom.devMigrationSummary = document.getElementById('wpsg-dev-migration-summary');
+		dom.btnCheckMigration = document.getElementById('wpsg-btn-check-migration');
+		dom.devChangelogSummary = document.getElementById('wpsg-dev-changelog-summary');
+		dom.btnRefreshDigest = document.getElementById('wpsg-btn-refresh-digest');
 	}
 
 	/**
@@ -814,6 +850,54 @@
 		}
 		if (dom.btnSaveSettings) {
 			dom.btnSaveSettings.addEventListener('click', saveSettings);
+		}
+
+		// REST API Security Auditor Events
+		if (dom.btnRefreshRestAudit) {
+			dom.btnRefreshRestAudit.addEventListener('click', () => loadRestAudit(true));
+		}
+		if (dom.restSearch) {
+			dom.restSearch.addEventListener('input', (e) => {
+				state.restSearch = e.target.value.trim().toLowerCase();
+				renderRestTable();
+			});
+		}
+		if (dom.restFilterBtns) {
+			dom.restFilterBtns.forEach(btn => {
+				btn.addEventListener('click', (e) => {
+					e.preventDefault();
+					dom.restFilterBtns.forEach(b => b.classList.remove('active'));
+					btn.classList.add('active');
+					state.restFilter = btn.getAttribute('data-rest-filter') || 'all';
+					renderRestTable();
+				});
+			});
+		}
+
+		// Developer Toolkit Events
+		if (dom.btnSaveEnv) {
+			dom.btnSaveEnv.addEventListener('click', saveEnvironmentType);
+		}
+		if (dom.btnCopyDiagnostic) {
+			dom.btnCopyDiagnostic.addEventListener('click', copyDiagnosticSnapshot);
+		}
+		if (dom.btnViewDiagnostic) {
+			dom.btnViewDiagnostic.addEventListener('click', viewDiagnosticSnapshot);
+		}
+		if (dom.btnDiagnosticModalCopy) {
+			dom.btnDiagnosticModalCopy.addEventListener('click', copyDiagnosticSnapshot);
+		}
+		if (dom.btnRefreshCron) {
+			dom.btnRefreshCron.addEventListener('click', () => loadCronAudit(true));
+		}
+		if (dom.btnCleanDb) {
+			dom.btnCleanDb.addEventListener('click', cleanDbBloat);
+		}
+		if (dom.btnCheckMigration) {
+			dom.btnCheckMigration.addEventListener('click', () => loadMigrationReadiness(true));
+		}
+		if (dom.btnRefreshDigest) {
+			dom.btnRefreshDigest.addEventListener('click', () => loadChangelogDigest(true));
 		}
 	}
 
@@ -1207,6 +1291,8 @@
 		if (dom.panelFeatures) dom.panelFeatures.style.display = 'none';
 		if (dom.panelAudit) dom.panelAudit.style.display = 'none';
 		if (dom.panelSettings) dom.panelSettings.style.display = 'none';
+		if (dom.panelRestApi) dom.panelRestApi.style.display = 'none';
+		if (dom.panelDevToolkit) dom.panelDevToolkit.style.display = 'none';
 
 		if (state.activeTab === 'overview') {
 			if (dom.panelOverview) dom.panelOverview.style.display = 'block';
@@ -1219,6 +1305,12 @@
 		} else if (state.activeTab === 'audit_trail') {
 			if (dom.panelAudit) dom.panelAudit.style.display = 'block';
 			loadAuditLogs();
+		} else if (state.activeTab === 'rest_api') {
+			if (dom.panelRestApi) dom.panelRestApi.style.display = 'block';
+			loadRestAudit(false);
+		} else if (state.activeTab === 'dev_toolkit') {
+			if (dom.panelDevToolkit) dom.panelDevToolkit.style.display = 'block';
+			loadDevToolkit();
 		} else if (state.activeTab === 'settings') {
 			if (dom.panelSettings) dom.panelSettings.style.display = 'block';
 			loadSettings(true);
@@ -2530,6 +2622,389 @@
 
 			openModal(dom.modalConfirm);
 		});
+	}
+
+	/**
+	 * REST API Security Auditor Methods
+	 */
+	async function loadRestAudit(force = false) {
+		if (!dom.restTbody) return;
+		if (state.restData && !force) {
+			renderRestTable();
+			return;
+		}
+
+		dom.restTbody.innerHTML = `
+			<tr>
+				<td colspan="5" style="text-align: center; padding: 36px;">
+					<span class="wpsg-spinner" aria-hidden="true"></span>
+					<p style="margin: 8px 0 0; color: var(--wpsg-text-secondary); font-size: 13px;">Analyzing all registered REST routes across active plugins and themes...</p>
+				</td>
+			</tr>
+		`;
+
+		try {
+			state.restLoading = true;
+			const res = await apiCall({ path: '/site-checkup-pro/v1/developer/rest-audit' });
+			if (res && res.success) {
+				state.restData = res;
+				if (dom.restStatTotal) dom.restStatTotal.textContent = res.total_endpoints || 0;
+				if (dom.restStatProtected) dom.restStatProtected.textContent = res.protected_count || 0;
+				if (dom.restStatPublic) dom.restStatPublic.textContent = res.public_count || 0;
+				if (dom.restStatHigh) dom.restStatHigh.textContent = res.high_risk_count || 0;
+				renderRestTable();
+			} else {
+				throw new Error(res.message || 'Failed to inspect REST routes.');
+			}
+		} catch (err) {
+			dom.restTbody.innerHTML = `
+				<tr>
+					<td colspan="5" class="wpsg-error-state" style="text-align: center; padding: 30px;">
+						<span class="dashicons dashicons-warning" style="font-size: 28px; color: var(--wpsg-danger);"></span>
+						<p style="color: var(--wpsg-text-secondary); margin: 6px 0 10px;">${escapeHtml(err.message || 'Error running REST API security audit.')}</p>
+						<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary" id="wpsg-btn-retry-rest-audit">Retry Audit</button>
+					</td>
+				</tr>
+			`;
+			const retryBtn = document.getElementById('wpsg-btn-retry-rest-audit');
+			if (retryBtn) retryBtn.addEventListener('click', () => loadRestAudit(true));
+		} finally {
+			state.restLoading = false;
+		}
+	}
+
+	function renderRestTable() {
+		if (!dom.restTbody || !state.restData || !Array.isArray(state.restData.endpoints)) return;
+
+		const query = (state.restSearch || '').toLowerCase();
+		const filter = state.restFilter || 'all';
+
+		const filtered = state.restData.endpoints.filter(ep => {
+			// Status / Risk filter
+			if (filter === 'public' && ep.permission_status !== 'public') return false;
+			if (filter === 'protected' && ep.permission_status !== 'protected') return false;
+			if (filter === 'needs_review' && ep.permission_status !== 'needs_review') return false;
+			if (filter === 'critical' && ep.risk_level !== 'critical' && ep.risk_level !== 'high') return false;
+
+			// Search query
+			if (query) {
+				const matchRoute = (ep.route || '').toLowerCase().includes(query);
+				const matchNamespace = (ep.namespace || '').toLowerCase().includes(query);
+				const matchSource = (ep.source_name || '').toLowerCase().includes(query);
+				const matchMethod = (Array.isArray(ep.methods) ? ep.methods.join(' ') : '').toLowerCase().includes(query);
+				if (!matchRoute && !matchNamespace && !matchSource && !matchMethod) return false;
+			}
+			return true;
+		});
+
+		if (filtered.length === 0) {
+			dom.restTbody.innerHTML = `
+				<tr>
+					<td colspan="5" style="text-align: center; padding: 32px; color: var(--wpsg-text-secondary); font-size: 13px;">
+						No REST endpoints matched your filter or search criteria.
+					</td>
+				</tr>
+			`;
+			return;
+		}
+
+		let html = '';
+		filtered.forEach(ep => {
+			let riskBadge = '';
+			if (ep.risk_level === 'critical' || ep.risk_level === 'high') {
+				riskBadge = '<span class="wpsg-badge wpsg-badge-danger" style="text-transform: uppercase;">' + escapeHtml(ep.risk_level) + '</span>';
+			} else if (ep.risk_level === 'medium') {
+				riskBadge = '<span class="wpsg-badge wpsg-badge-warning" style="text-transform: uppercase;">Medium</span>';
+			} else {
+				riskBadge = '<span class="wpsg-badge wpsg-badge-success" style="text-transform: uppercase;">Low</span>';
+			}
+
+			let permBadge = '';
+			if (ep.permission_status === 'protected') {
+				permBadge = '<span class="wpsg-badge wpsg-badge-success" style="margin-right: 6px;">Protected</span>';
+			} else if (ep.permission_status === 'public') {
+				permBadge = '<span class="wpsg-badge wpsg-badge-warning" style="margin-right: 6px;">Public</span>';
+			} else {
+				permBadge = '<span class="wpsg-badge wpsg-badge-neutral" style="margin-right: 6px;">Review</span>';
+			}
+
+			const methodsStr = Array.isArray(ep.methods) ? ep.methods.join(', ') : (ep.methods || 'GET');
+
+			html += `
+				<tr>
+					<td>
+						<code style="font-size: 12px; font-weight: 600; color: var(--wpsg-text-primary);">${escapeHtml(ep.route)}</code>
+					</td>
+					<td>
+						<span style="font-size: 11px; font-weight: 700; color: var(--wpsg-text-secondary);">${escapeHtml(methodsStr)}</span>
+					</td>
+					<td>
+						<div style="font-size: 13px; font-weight: 500; color: var(--wpsg-text-primary);">${escapeHtml(ep.source_name || 'WordPress')}</div>
+						<div style="font-size: 11px; color: var(--wpsg-text-secondary); font-family: monospace;">${escapeHtml(ep.namespace || '')}</div>
+					</td>
+					<td>
+						<div style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+							${permBadge}
+							<span style="font-size: 11px; color: var(--wpsg-text-secondary); font-family: monospace;">${escapeHtml(ep.permission_detail || '')}</span>
+						</div>
+					</td>
+					<td>
+						${riskBadge}
+					</td>
+				</tr>
+			`;
+		});
+
+		dom.restTbody.innerHTML = html;
+	}
+
+	/**
+	 * Developer Toolkit Methods
+	 */
+	function loadDevToolkit() {
+		// Populate environment select
+		if (dom.devEnvSelect) {
+			const currentEnv = (window.wpsgData && window.wpsgData.environmentType) || 'production';
+			dom.devEnvSelect.value = currentEnv;
+		}
+
+		loadCronAudit(false);
+		loadDbHealth(false);
+		loadMigrationReadiness(false);
+		loadChangelogDigest(false);
+	}
+
+	async function saveEnvironmentType() {
+		if (!dom.devEnvSelect || !dom.btnSaveEnv) return;
+		const env = dom.devEnvSelect.value;
+		const originalText = dom.btnSaveEnv.innerHTML;
+		dom.btnSaveEnv.disabled = true;
+		dom.btnSaveEnv.innerHTML = '<span class="wpsg-spinner" aria-hidden="true"></span> Saving...';
+
+		try {
+			const res = await apiCall({
+				path: '/site-checkup-pro/v1/settings',
+				method: 'POST',
+				data: { wpsg_environment_type: env },
+			});
+			if (res && res.success) {
+				if (window.wpsgData) window.wpsgData.environmentType = env;
+				dom.btnSaveEnv.innerHTML = '<span class="dashicons dashicons-yes"></span> Saved!';
+				if (dom.devEnvHelp) {
+					dom.devEnvHelp.textContent = `Environment badge updated to ${env.toUpperCase()}. Refresh page to view admin bar badge change.`;
+				}
+				setTimeout(() => {
+					dom.btnSaveEnv.disabled = false;
+					dom.btnSaveEnv.innerHTML = originalText;
+				}, 2000);
+			} else {
+				throw new Error(res.message || 'Failed to update environment setting.');
+			}
+		} catch (err) {
+			alert('Error updating environment badge: ' + (err.message || 'Unknown error'));
+			dom.btnSaveEnv.disabled = false;
+			dom.btnSaveEnv.innerHTML = originalText;
+		}
+	}
+
+	async function getDiagnosticSnapshot() {
+		if (state.diagnosticMarkdown) return state.diagnosticMarkdown;
+		const res = await apiCall({ path: '/site-checkup-pro/v1/developer/diagnostic-snapshot' });
+		if (res && res.markdown) {
+			state.diagnosticMarkdown = res.markdown;
+			return res.markdown;
+		}
+		throw new Error(res.message || 'Failed to generate diagnostic snapshot.');
+	}
+
+	async function copyDiagnosticSnapshot() {
+		const btn = dom.btnCopyDiagnostic;
+		const original = btn ? btn.innerHTML : '';
+		if (btn) {
+			btn.disabled = true;
+			btn.innerHTML = '<span class="wpsg-spinner" aria-hidden="true"></span> Generating...';
+		}
+
+		try {
+			const markdown = await getDiagnosticSnapshot();
+			if (navigator.clipboard && navigator.clipboard.writeText) {
+				await navigator.clipboard.writeText(markdown);
+			} else {
+				const textarea = document.createElement('textarea');
+				textarea.value = markdown;
+				document.body.appendChild(textarea);
+				textarea.select();
+				document.execCommand('copy');
+				document.body.removeChild(textarea);
+			}
+			if (btn) {
+				btn.innerHTML = '<span class="dashicons dashicons-yes"></span> Markdown Copied!';
+				setTimeout(() => {
+					btn.disabled = false;
+					btn.innerHTML = original;
+				}, 2000);
+			}
+		} catch (err) {
+			alert('Could not copy diagnostic snapshot: ' + err.message);
+			if (btn) {
+				btn.disabled = false;
+				btn.innerHTML = original;
+			}
+		}
+	}
+
+	async function viewDiagnosticSnapshot() {
+		if (dom.modalDiagnostic) {
+			openModal(dom.modalDiagnostic);
+		}
+		if (dom.diagnosticContent) {
+			dom.diagnosticContent.textContent = 'Generating sanitized diagnostic report...';
+		}
+		try {
+			const md = await getDiagnosticSnapshot();
+			if (dom.diagnosticContent) {
+				dom.diagnosticContent.textContent = md;
+			}
+		} catch (err) {
+			if (dom.diagnosticContent) {
+				dom.diagnosticContent.textContent = 'Error: ' + err.message;
+			}
+		}
+	}
+
+	async function loadCronAudit(force = false) {
+		if (!dom.devCronSummary) return;
+		if (force) dom.devCronSummary.textContent = 'Scanning WP-Cron schedules and hooks...';
+
+		try {
+			const res = await apiCall({ path: '/site-checkup-pro/v1/developer/cron-audit' });
+			if (res && res.success) {
+				const overdue = res.overdue_count || 0;
+				const dupes = res.duplicate_count || 0;
+				const total = res.total_events || 0;
+
+				if (overdue === 0 && dupes === 0) {
+					dom.devCronSummary.innerHTML = `<span style="color: var(--wpsg-success); font-weight: 600;">&bull; Healthy:</span> ${total} scheduled events active. 0 overdue, 0 duplicate hooks.`;
+				} else {
+					let issues = [];
+					if (overdue > 0) issues.push(`<strong>${overdue} overdue events</strong> (>10m late)`);
+					if (dupes > 0) issues.push(`<strong>${dupes} duplicate hooks</strong>`);
+					dom.devCronSummary.innerHTML = `<span style="color: var(--wpsg-warning); font-weight: 600;">&bull; Warning:</span> ${issues.join(' and ')} detected across ${total} scheduled tasks.`;
+				}
+			}
+		} catch (err) {
+			dom.devCronSummary.textContent = 'Unable to check cron jobs: ' + err.message;
+		}
+	}
+
+	async function loadDbHealth(force = false) {
+		if (!dom.devDbSummary) return;
+		if (force) dom.devDbSummary.textContent = 'Scanning database for bloat and orphaned records...';
+
+		try {
+			const res = await apiCall({ path: '/site-checkup-pro/v1/developer/db-health' });
+			if (res && res.success) {
+				const bloat = res.total_bloat || 0;
+				if (bloat === 0) {
+					dom.devDbSummary.innerHTML = `<span style="color: var(--wpsg-success); font-weight: 600;">&bull; Clean:</span> 0 bloat records found. Database tables are lean and optimized.`;
+					if (dom.btnCleanDb) dom.btnCleanDb.disabled = true;
+				} else {
+					dom.devDbSummary.innerHTML = `<span style="color: var(--wpsg-danger); font-weight: 600;">&bull; ${bloat} bloat items detected:</span> ${res.orphaned_postmeta || 0} orphaned postmeta, ${res.orphaned_usermeta || 0} orphaned usermeta, ${res.expired_transients || 0} expired transients, ${res.excess_revisions || 0} excess revisions.`;
+					if (dom.btnCleanDb) dom.btnCleanDb.disabled = false;
+				}
+			}
+		} catch (err) {
+			dom.devDbSummary.textContent = 'Unable to check database health: ' + err.message;
+		}
+	}
+
+	async function cleanDbBloat() {
+		const confirmed = await showConfirmModal({
+			title: 'Clean Database Bloat?',
+			message: 'This operation will permanently delete orphaned metadata, expired transients, and excess revisions.',
+			notice: 'Ensure you have a recent database backup before proceeding.',
+			confirmText: 'Verify & Clean',
+			confirmClass: 'wpsg-btn-danger',
+			iconClass: 'dashicons-database'
+		});
+
+		if (!confirmed) return;
+
+		requireReauth(async (reauthToken) => {
+			if (!dom.btnCleanDb) return;
+			const orig = dom.btnCleanDb.innerHTML;
+			dom.btnCleanDb.disabled = true;
+			dom.btnCleanDb.innerHTML = '<span class="wpsg-spinner" aria-hidden="true"></span> Cleaning...';
+
+			try {
+				const res = await apiCall({
+					path: '/site-checkup-pro/v1/developer/db-health/clean',
+					method: 'POST',
+					data: {
+						type: 'all',
+						reauth_token: reauthToken,
+					},
+					headers: {
+						'X-WPSG-Reauth': reauthToken,
+					}
+				});
+
+				if (res && res.success) {
+					alert(`Cleanup complete! Deleted ${res.deleted_total || 0} bloat records.`);
+					loadDbHealth(true);
+					loadTasks();
+				} else {
+					throw new Error(res.message || 'Cleanup operation failed.');
+				}
+			} catch (err) {
+				alert('Database cleanup failed: ' + (err.message || 'Unknown error'));
+			} finally {
+				dom.btnCleanDb.disabled = false;
+				dom.btnCleanDb.innerHTML = orig;
+			}
+		});
+	}
+
+	async function loadMigrationReadiness(force = false) {
+		if (!dom.devMigrationSummary) return;
+		if (force) dom.devMigrationSummary.textContent = 'Scanning options and postmeta for serialized URL hazards...';
+
+		try {
+			const res = await apiCall({ path: '/site-checkup-pro/v1/developer/migration-readiness' });
+			if (res && res.data) {
+				const data = res.data;
+				const count = data.serialized_url_count || 0;
+				if (count === 0) {
+					dom.devMigrationSummary.innerHTML = `<span style="color: var(--wpsg-success); font-weight: 600;">&bull; Migration Ready:</span> 0 serialized URL hazards detected. Plain SQL replacement safe.`;
+				} else {
+					dom.devMigrationSummary.innerHTML = `<span style="color: var(--wpsg-warning); font-weight: 600;">&bull; Serialization Risk:</span> Found <strong>${count} serialized absolute URLs</strong>. Use <code style="font-size: 11px;">wp search-replace</code> instead of raw SQL dumps.`;
+				}
+			}
+		} catch (err) {
+			dom.devMigrationSummary.textContent = 'Unable to verify migration readiness: ' + err.message;
+		}
+	}
+
+	async function loadChangelogDigest(force = false) {
+		if (!dom.devChangelogSummary) return;
+		if (force) dom.devChangelogSummary.textContent = 'Compiling changelog notices from active updates...';
+
+		try {
+			const res = await apiCall({ path: '/site-checkup-pro/v1/developer/changelog-digest' });
+			if (res && res.data) {
+				const d = res.data;
+				const total = d.total_updates || 0;
+				const notices = d.upgrade_notices_count || 0;
+
+				if (total === 0) {
+					dom.devChangelogSummary.innerHTML = `<span style="color: var(--wpsg-success); font-weight: 600;">&bull; Up to Date:</span> All active plugins and themes are running the latest versions.`;
+				} else {
+					dom.devChangelogSummary.innerHTML = `<span style="color: var(--wpsg-primary); font-weight: 600;">&bull; ${total} Updates Available:</span> ${d.plugin_updates_count || 0} plugins, ${d.theme_updates_count || 0} themes. ${notices > 0 ? `<strong style="color: var(--wpsg-warning);">${notices} upgrade/security notices</strong>.` : 'No critical upgrade alerts.'}`;
+				}
+			}
+		} catch (err) {
+			dom.devChangelogSummary.textContent = 'Unable to check changelog digest: ' + err.message;
+		}
 	}
 
 	/**

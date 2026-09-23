@@ -195,6 +195,7 @@ class WPSG_Admin_Menu {
 			'mediaUrl'         => esc_url_raw( WPSG_PLUGIN_URL . 'media/' ),
 			'serverType'       => WPSG_Htaccess_Manager::get_server_type(),
 			'supportsHtaccess' => WPSG_Htaccess_Manager::supports_htaccess(),
+			'environmentType'  => class_exists( 'WPSG_Environment_Badge' ) ? WPSG_Environment_Badge::get_environment_type() : 'production',
 			'initialData'      => $initial_catalog,
 			'nonces'           => array(
 				'run_task'        => wp_create_nonce( 'wpsg_run_task' ),

@@ -171,14 +171,19 @@ if ( ! class_exists( 'Mock_WPDB' ) ) {
 		public $prefix    = 'wp_';
 		public $users     = 'wp_users';
 		public $options   = 'wp_options';
+		public $posts     = 'wp_posts';
+		public $postmeta  = 'wp_postmeta';
+		public $usermeta  = 'wp_usermeta';
 		public $insert_id = 1;
 		public function prepare( $query, ...$args ) { return $query; }
 		public function get_row( $query ) { return null; }
 		public function get_var( $query ) { return null; }
+		public function get_col( $query ) { return array(); }
 		public function get_results( $query = '', $output = OBJECT ) { return array(); }
 		public function query( $query ) { return true; }
 		public function insert( $table, $data ) { return true; }
 		public function update( $table, $data, $where ) { return true; }
+		public function esc_like( $text ) { return addcslashes( $text, '_%\\' ); }
 	}
 }
 $GLOBALS['wpdb'] = new Mock_WPDB();
@@ -210,6 +215,15 @@ if ( ! function_exists( 'set_transient' ) ) {
 }
 if ( ! function_exists( 'delete_transient' ) ) {
 	function delete_transient( $name ) { return delete_option( '_transient_' . $name ); }
+}
+if ( ! function_exists( 'get_site_transient' ) ) {
+	function get_site_transient( $name ) { return get_transient( $name ); }
+}
+if ( ! function_exists( 'set_site_transient' ) ) {
+	function set_site_transient( $name, $val, $ttl = 0 ) { return set_transient( $name, $val, $ttl ); }
+}
+if ( ! function_exists( 'delete_site_transient' ) ) {
+	function delete_site_transient( $name ) { return delete_transient( $name ); }
 }
 if ( ! function_exists( 'get_site_option' ) ) {
 	function get_site_option( $name, $default = false ) { return get_option( $name, $default ); }
@@ -1590,6 +1604,258 @@ run_test( "REST API: /tasks/delete-plugin rejects invalid nonce and invokes safe
 	@rmdir( $plugin_dir );
 
 	return $success;
+} );
+
+// ------------------------------------------------------------------
+// Test: REST API Security Auditor Route Assessment & Risk Scoring
+// ------------------------------------------------------------------
+run_test( 'REST API Auditor: Correctly classifies public, protected, and high-risk write routes', function () {
+	require_once ABSPATH . 'includes/class-rest-auditor.php';
+
+	// 1. Analyze permission callback states
+	$pub1 = WPSG_Rest_Auditor::analyze_permission_callback( '__return_true' );
+	if ( 'public' !== $pub1['type'] ) return false;
+
+	$pub2 = WPSG_Rest_Auditor::analyze_permission_callback( null );
+	if ( 'public' !== $pub2['type'] ) return false;
+
+	$prot1 = WPSG_Rest_Auditor::analyze_permission_callback( 'is_user_logged_in' );
+	if ( 'protected' !== $prot1['type'] ) return false;
+
+	$prot2 = WPSG_Rest_Auditor::analyze_permission_callback( function () {
+		return current_user_can( 'manage_options' );
+	} );
+	if ( 'protected' !== $prot2['type'] ) return false;
+
+	// 2. Risk scoring calculation
+	$risk_post_public = WPSG_Rest_Auditor::calculate_risk_level( array( 'POST' ), 'public', '/test/submit' );
+	if ( 'critical' !== $risk_post_public ) return false;
+
+	$risk_get_public_posts = WPSG_Rest_Auditor::calculate_risk_level( array( 'GET' ), 'public', '/wp/v2/posts' );
+	if ( 'low' !== $risk_get_public_posts ) return false;
+
+	$risk_get_public_users = WPSG_Rest_Auditor::calculate_risk_level( array( 'GET' ), 'public', '/wp/v2/users' );
+	if ( 'high' !== $risk_get_public_users ) return false;
+
+	return true;
+} );
+
+// ------------------------------------------------------------------
+// Test: Environment Badge Domain Heuristics & Persistence
+// ------------------------------------------------------------------
+run_test( 'Environment Badge: Domain heuristics accurately detect dev/staging/prod and track confirmation', function () {
+	require_once ABSPATH . 'includes/class-environment-badge.php';
+
+	// 1. Clean option state
+	delete_option( WPSG_Environment_Badge::OPTION_KEY );
+	if ( WPSG_Environment_Badge::is_confirmed() ) return false;
+
+	// 2. Test development heuristic with localhost / .local
+	$_SERVER['HTTP_HOST'] = 'myclient.local';
+	$suggested_dev = WPSG_Environment_Badge::suggest_environment();
+	if ( 'development' !== $suggested_dev ) return false;
+
+	// 3. Test staging heuristic
+	$_SERVER['HTTP_HOST'] = 'staging.clientwebsite.com';
+	$suggested_staging = WPSG_Environment_Badge::suggest_environment();
+	if ( 'staging' !== $suggested_staging ) return false;
+
+	// 4. Test production heuristic
+	$_SERVER['HTTP_HOST'] = 'clientwebsite.com';
+	$suggested_prod = WPSG_Environment_Badge::suggest_environment();
+	if ( 'production' !== $suggested_prod ) return false;
+
+	// 5. Test confirmation persistence
+	update_option( WPSG_Environment_Badge::OPTION_KEY, 'production' );
+	if ( ! WPSG_Environment_Badge::is_confirmed() ) return false;
+	if ( 'production' !== WPSG_Environment_Badge::get_environment() ) return false;
+
+	delete_option( WPSG_Environment_Badge::OPTION_KEY );
+	return true;
+} );
+
+// ------------------------------------------------------------------
+// Test: Developer Diagnostic Snapshot Compilation & Redaction
+// ------------------------------------------------------------------
+run_test( 'Diagnostic Snapshot: Compiles sanitized system state and markdown export with strict secret exclusion', function () {
+	require_once ABSPATH . 'includes/class-diagnostic-snapshot.php';
+
+	$snapshot = WPSG_Diagnostic_Snapshot::compile();
+
+	// 1. Structure assertions
+	if ( empty( $snapshot['server']['php_version'] ) ) return false;
+	if ( ! isset( $snapshot['wordpress']['version'] ) ) return false;
+	if ( ! is_array( $snapshot['constants'] ) ) return false;
+	if ( empty( $snapshot['markdown'] ) ) return false;
+
+	// 2. Secret Redaction Assertions: Constants must never contain DB_PASSWORD, AUTH_KEY, or raw secrets
+	foreach ( $snapshot['constants'] as $k => $v ) {
+		if ( preg_match( '/(pass|pwd|secret|key|salt|token|auth)/i', $k ) ) {
+			return false; // Sensitive constant name must not be present in tracked constants
+		}
+		// Values must only be boolean strings or sanitised env strings
+		if ( ! in_array( $v, array( 'true', 'false', 'defined', 'undefined', 'development', 'staging', 'production', 'local' ), true ) ) {
+			return false;
+		}
+	}
+
+	// 3. Markdown format verification
+	if ( false === strpos( $snapshot['markdown'], '### Site Checkup Pro — Developer Diagnostic Snapshot' ) ) return false;
+	if ( false === strpos( $snapshot['markdown'], '#### WordPress Environment' ) ) return false;
+	if ( false === strpos( $snapshot['markdown'], '#### Server & Database' ) ) return false;
+
+	return true;
+} );
+
+// ------------------------------------------------------------------
+// Test: WP-Cron Auditor Overdue & Duplicate Anomaly Detection
+// ------------------------------------------------------------------
+run_test( 'Cron Job Auditor: Detects overdue stalled cron events and duplicate hook registrations', function () {
+	require_once ABSPATH . 'includes/class-cron-auditor.php';
+
+	// Mock _get_cron_array with known events
+	$now = time();
+	$mock_cron = array(
+		// 1. Normal upcoming event
+		( $now + 3600 ) => array(
+			'wp_version_check' => array(
+				'sig1' => array( 'schedule' => 'daily', 'interval' => 86400, 'args' => array() ),
+			),
+		),
+		// 2. Overdue stalled event (2 hours ago)
+		( $now - 7200 ) => array(
+			'custom_stalled_cron' => array(
+				'sig2' => array( 'schedule' => 'hourly', 'interval' => 3600, 'args' => array() ),
+			),
+			// 3. Duplicate hook instance 1
+			'conflicting_worker_hook' => array(
+				'sig3' => array( 'schedule' => 'hourly', 'interval' => 3600, 'args' => array() ),
+			),
+		),
+		// 4. Duplicate hook instance 2 (same hook at different timestamp)
+		( $now + 1800 ) => array(
+			'conflicting_worker_hook' => array(
+				'sig4' => array( 'schedule' => 'hourly', 'interval' => 3600, 'args' => array() ),
+			),
+		),
+	);
+
+	$GLOBALS['_mock_cron_array'] = $mock_cron;
+	if ( ! function_exists( '_get_cron_array' ) ) {
+		function _get_cron_array() {
+			return isset( $GLOBALS['_mock_cron_array'] ) ? $GLOBALS['_mock_cron_array'] : array();
+		}
+	} else {
+		$GLOBALS['_mock_cron_array'] = $mock_cron;
+	}
+
+	$audit = WPSG_Cron_Auditor::audit_cron_jobs();
+
+	// Check summary
+	if ( $audit['summary']['total_jobs'] < 4 ) return false;
+	if ( $audit['summary']['overdue_count'] < 1 ) return false;
+	if ( $audit['summary']['duplicate_count'] < 2 ) return false;
+
+	// Check source detection
+	$core_source = WPSG_Cron_Auditor::resolve_hook_source( 'wp_version_check' );
+	if ( 'WordPress Core' !== $core_source['name'] ) return false;
+
+	$wpsg_source = WPSG_Cron_Auditor::resolve_hook_source( 'wpsg_weekly_integrity' );
+	if ( 'Site Checkup Pro' !== $wpsg_source['name'] ) return false;
+
+	return true;
+} );
+
+// ------------------------------------------------------------------
+// Test: Database Health Scanner & Protected Level-B Cleanup
+// ------------------------------------------------------------------
+run_test( 'Database Health Scanner: Detects overhead bloat and enforces reauth & backup guard on cleanup', function () {
+	require_once ABSPATH . 'includes/class-db-health-scanner.php';
+
+	// 1. Scan assertions
+	$scan = WPSG_Db_Health_Scanner::scan( 5 );
+	if ( ! isset( $scan['summary']['total_bloat_items'] ) ) return false;
+	if ( ! isset( $scan['details']['orphaned_postmeta'] ) ) return false;
+	if ( ! isset( $scan['details']['expired_transients'] ) ) return false;
+
+	// 2. Cleanup without re-auth token must fail
+	$failed_cleanup = WPSG_Db_Health_Scanner::cleanup( 'all', 'invalid_token_123' );
+	if ( empty( $failed_cleanup['needs_reauth'] ) ) return false;
+
+	// 3. Cleanup with valid re-auth and confirmed backup must succeed
+	WPSG_Backup_Guard::confirm_manual_backup();
+	$auth_grant = WPSG_Session_Manager::verify_password_and_grant_reauth( 'valid_admin_password' );
+	$valid_reauth = isset( $auth_grant['reauth_token'] ) ? $auth_grant['reauth_token'] : '';
+
+	$success_cleanup = WPSG_Db_Health_Scanner::cleanup( 'all', $valid_reauth );
+	if ( empty( $success_cleanup['success'] ) ) return false;
+	if ( ! isset( $success_cleanup['total_deleted'] ) ) return false;
+
+	return true;
+} );
+
+// ------------------------------------------------------------------
+// Test: Migration Readiness Serialized URL Detection & Guidance
+// ------------------------------------------------------------------
+run_test( 'Migration Readiness: Detects serialized absolute URLs and generates WP-CLI guidance', function () {
+	require_once ABSPATH . 'includes/class-migration-readiness.php';
+
+	// 1. Serialization detection logic
+	$serialized_str = 's:23:"https://oldsite.local";';
+	if ( ! WPSG_Migration_Readiness::is_serialized_string( $serialized_str ) ) return false;
+
+	$serialized_arr = serialize( array( 'url' => 'https://oldsite.local' ) );
+	if ( ! WPSG_Migration_Readiness::is_serialized_string( $serialized_arr ) ) return false;
+
+	$plain_url = 'https://oldsite.local/page';
+	if ( WPSG_Migration_Readiness::is_serialized_string( $plain_url ) ) return false;
+
+	// 2. Scan output & guidance verification
+	$scan = WPSG_Migration_Readiness::scan();
+	if ( ! isset( $scan['summary']['total_findings'] ) ) return false;
+	if ( ! isset( $scan['guidance']['cli_command'] ) ) return false;
+	if ( false === strpos( $scan['guidance']['cli_command'], 'wp search-replace' ) ) return false;
+
+	return true;
+} );
+
+// ------------------------------------------------------------------
+// Test: Weekly Changelog Digest Aggregation & Notification Dispatch
+// ------------------------------------------------------------------
+run_test( 'Changelog Digest: Aggregates update transient data and dispatches scheduled alert', function () {
+	require_once ABSPATH . 'includes/class-changelog-digest.php';
+
+	// Mock update_plugins transient
+	$mock_update_transient = (object) array(
+		'response' => array(
+			'dummy-plugin/dummy-plugin.php' => (object) array(
+				'new_version'    => '2.0.0',
+				'upgrade_notice' => 'Critical security patch for SQL injection vulnerability.',
+				'tested'         => '6.6',
+			),
+		),
+	);
+	set_site_transient( 'update_plugins', $mock_update_transient );
+
+	$digest = WPSG_Changelog_Digest::compile_digest();
+
+	if ( empty( $digest['summary']['total_updates'] ) || 1 !== $digest['summary']['total_updates'] ) {
+		delete_site_transient( 'update_plugins' );
+		return false;
+	}
+
+	$item = $digest['items'][0];
+	if ( '2.0.0' !== $item['new_version'] ) {
+		delete_site_transient( 'update_plugins' );
+		return false;
+	}
+	if ( false === strpos( $item['upgrade_notice'], 'Critical security patch' ) ) {
+		delete_site_transient( 'update_plugins' );
+		return false;
+	}
+
+	delete_site_transient( 'update_plugins' );
+	return true;
 } );
 
 echo "\n=======================================================\n";
