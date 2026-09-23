@@ -128,6 +128,15 @@ class WPSG_Environment_Badge {
 	}
 
 	/**
+	 * Alias for get_environment().
+	 *
+	 * @return string
+	 */
+	public static function get_environment_type() {
+		return self::get_environment();
+	}
+
+	/**
 	 * Check if environment has been explicitly confirmed and saved by admin.
 	 *
 	 * @return bool

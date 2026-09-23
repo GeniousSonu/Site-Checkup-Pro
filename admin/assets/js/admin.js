@@ -2646,15 +2646,17 @@
 		try {
 			state.restLoading = true;
 			const res = await apiCall({ path: '/site-checkup-pro/v1/developer/rest-audit' });
-			if (res && res.success) {
-				state.restData = res;
-				if (dom.restStatTotal) dom.restStatTotal.textContent = res.total_endpoints || 0;
-				if (dom.restStatProtected) dom.restStatProtected.textContent = res.protected_count || 0;
-				if (dom.restStatPublic) dom.restStatPublic.textContent = res.public_count || 0;
-				if (dom.restStatHigh) dom.restStatHigh.textContent = res.high_risk_count || 0;
+			const data = (res && res.data) ? res.data : res;
+			if (data && Array.isArray(data.endpoints)) {
+				state.restData = data;
+				const sum = data.summary || {};
+				if (dom.restStatTotal) dom.restStatTotal.textContent = sum.total_endpoints || data.endpoints.length || 0;
+				if (dom.restStatProtected) dom.restStatProtected.textContent = sum.protected || 0;
+				if (dom.restStatPublic) dom.restStatPublic.textContent = sum.public || 0;
+				if (dom.restStatHigh) dom.restStatHigh.textContent = sum.high_risk || 0;
 				renderRestTable();
 			} else {
-				throw new Error(res.message || 'Failed to inspect REST routes.');
+				throw new Error((res && res.message) || 'Failed to inspect REST routes.');
 			}
 		} catch (err) {
 			dom.restTbody.innerHTML = `
@@ -2680,18 +2682,22 @@
 		const filter = state.restFilter || 'all';
 
 		const filtered = state.restData.endpoints.filter(ep => {
+			const status = ep.status || ep.permission_status || 'public';
+			const risk = ep.risk_level || 'low';
+
 			// Status / Risk filter
-			if (filter === 'public' && ep.permission_status !== 'public') return false;
-			if (filter === 'protected' && ep.permission_status !== 'protected') return false;
-			if (filter === 'needs_review' && ep.permission_status !== 'needs_review') return false;
-			if (filter === 'critical' && ep.risk_level !== 'critical' && ep.risk_level !== 'high') return false;
+			if (filter === 'public' && status !== 'public') return false;
+			if (filter === 'protected' && status !== 'protected') return false;
+			if (filter === 'needs_review' && status !== 'needs_review') return false;
+			if (filter === 'critical' && risk !== 'critical' && risk !== 'high') return false;
 
 			// Search query
 			if (query) {
 				const matchRoute = (ep.route || '').toLowerCase().includes(query);
 				const matchNamespace = (ep.namespace || '').toLowerCase().includes(query);
-				const matchSource = (ep.source_name || '').toLowerCase().includes(query);
-				const matchMethod = (Array.isArray(ep.methods) ? ep.methods.join(' ') : '').toLowerCase().includes(query);
+				const matchSource = (ep.source || ep.source_name || '').toLowerCase().includes(query);
+				const methodsStr = Array.isArray(ep.methods) ? ep.methods.join(' ') : (ep.methods || '');
+				const matchMethod = methodsStr.toLowerCase().includes(query);
 				if (!matchRoute && !matchNamespace && !matchSource && !matchMethod) return false;
 			}
 			return true;
@@ -2710,19 +2716,24 @@
 
 		let html = '';
 		filtered.forEach(ep => {
+			const status = ep.status || ep.permission_status || 'public';
+			const risk = ep.risk_level || 'low';
+			const sourceName = ep.source || ep.source_name || 'WordPress';
+			const detail = ep.detail || ep.permission_detail || '';
+
 			let riskBadge = '';
-			if (ep.risk_level === 'critical' || ep.risk_level === 'high') {
-				riskBadge = '<span class="wpsg-badge wpsg-badge-danger" style="text-transform: uppercase;">' + escapeHtml(ep.risk_level) + '</span>';
-			} else if (ep.risk_level === 'medium') {
+			if (risk === 'critical' || risk === 'high') {
+				riskBadge = '<span class="wpsg-badge wpsg-badge-danger" style="text-transform: uppercase;">' + escapeHtml(risk) + '</span>';
+			} else if (risk === 'medium') {
 				riskBadge = '<span class="wpsg-badge wpsg-badge-warning" style="text-transform: uppercase;">Medium</span>';
 			} else {
 				riskBadge = '<span class="wpsg-badge wpsg-badge-success" style="text-transform: uppercase;">Low</span>';
 			}
 
 			let permBadge = '';
-			if (ep.permission_status === 'protected') {
+			if (status === 'protected') {
 				permBadge = '<span class="wpsg-badge wpsg-badge-success" style="margin-right: 6px;">Protected</span>';
-			} else if (ep.permission_status === 'public') {
+			} else if (status === 'public') {
 				permBadge = '<span class="wpsg-badge wpsg-badge-warning" style="margin-right: 6px;">Public</span>';
 			} else {
 				permBadge = '<span class="wpsg-badge wpsg-badge-neutral" style="margin-right: 6px;">Review</span>';
@@ -2739,13 +2750,12 @@
 						<span style="font-size: 11px; font-weight: 700; color: var(--wpsg-text-secondary);">${escapeHtml(methodsStr)}</span>
 					</td>
 					<td>
-						<div style="font-size: 13px; font-weight: 500; color: var(--wpsg-text-primary);">${escapeHtml(ep.source_name || 'WordPress')}</div>
-						<div style="font-size: 11px; color: var(--wpsg-text-secondary); font-family: monospace;">${escapeHtml(ep.namespace || '')}</div>
+						<div style="font-size: 13px; font-weight: 500; color: var(--wpsg-text-primary);">${escapeHtml(sourceName)}</div>
 					</td>
 					<td>
 						<div style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
 							${permBadge}
-							<span style="font-size: 11px; color: var(--wpsg-text-secondary); font-family: monospace;">${escapeHtml(ep.permission_detail || '')}</span>
+							<span style="font-size: 11px; color: var(--wpsg-text-secondary); font-family: monospace;">${escapeHtml(detail)}</span>
 						</div>
 					</td>
 					<td>
@@ -2878,10 +2888,12 @@
 
 		try {
 			const res = await apiCall({ path: '/site-checkup-pro/v1/developer/cron-audit' });
-			if (res && res.success) {
-				const overdue = res.overdue_count || 0;
-				const dupes = res.duplicate_count || 0;
-				const total = res.total_events || 0;
+			const data = (res && res.data) ? res.data : res;
+			const sum = (data && data.summary) ? data.summary : data;
+			if (sum) {
+				const overdue = sum.overdue_count || 0;
+				const dupes = sum.duplicate_count || 0;
+				const total = sum.total_jobs || sum.total_events || (Array.isArray(data.jobs) ? data.jobs.length : 0);
 
 				if (overdue === 0 && dupes === 0) {
 					dom.devCronSummary.innerHTML = `<span style="color: var(--wpsg-success); font-weight: 600;">&bull; Healthy:</span> ${total} scheduled events active. 0 overdue, 0 duplicate hooks.`;
@@ -2903,15 +2915,22 @@
 
 		try {
 			const res = await apiCall({ path: '/site-checkup-pro/v1/developer/db-health' });
-			if (res && res.success) {
-				const bloat = res.total_bloat || 0;
-				if (bloat === 0) {
-					dom.devDbSummary.innerHTML = `<span style="color: var(--wpsg-success); font-weight: 600;">&bull; Clean:</span> 0 bloat records found. Database tables are lean and optimized.`;
-					if (dom.btnCleanDb) dom.btnCleanDb.disabled = true;
-				} else {
-					dom.devDbSummary.innerHTML = `<span style="color: var(--wpsg-danger); font-weight: 600;">&bull; ${bloat} bloat items detected:</span> ${res.orphaned_postmeta || 0} orphaned postmeta, ${res.orphaned_usermeta || 0} orphaned usermeta, ${res.expired_transients || 0} expired transients, ${res.excess_revisions || 0} excess revisions.`;
-					if (dom.btnCleanDb) dom.btnCleanDb.disabled = false;
-				}
+			const data = (res && res.data) ? res.data : res;
+			const sum = (data && data.summary) ? data.summary : data;
+			const details = (data && data.details) ? data.details : {};
+
+			const bloat = sum.total_bloat_items !== undefined ? sum.total_bloat_items : (sum.total_bloat || 0);
+			const postmeta = (details.orphaned_postmeta && details.orphaned_postmeta.count !== undefined) ? details.orphaned_postmeta.count : (sum.orphaned_postmeta || 0);
+			const usermeta = (details.orphaned_usermeta && details.orphaned_usermeta.count !== undefined) ? details.orphaned_usermeta.count : (sum.orphaned_usermeta || 0);
+			const transients = (details.expired_transients && details.expired_transients.count !== undefined) ? details.expired_transients.count : (sum.expired_transients || 0);
+			const revisions = (details.excess_revisions && details.excess_revisions.count !== undefined) ? details.excess_revisions.count : (sum.excess_revisions || 0);
+
+			if (bloat === 0) {
+				dom.devDbSummary.innerHTML = `<span style="color: var(--wpsg-success); font-weight: 600;">&bull; Clean:</span> 0 bloat records found. Database tables are lean and optimized.`;
+				if (dom.btnCleanDb) dom.btnCleanDb.disabled = true;
+			} else {
+				dom.devDbSummary.innerHTML = `<span style="color: var(--wpsg-danger); font-weight: 600;">&bull; ${bloat} bloat items detected:</span> ${postmeta} orphaned postmeta, ${usermeta} orphaned usermeta, ${transients} expired transients, ${revisions} excess revisions.`;
+				if (dom.btnCleanDb) dom.btnCleanDb.disabled = false;
 			}
 		} catch (err) {
 			dom.devDbSummary.textContent = 'Unable to check database health: ' + err.message;
@@ -2950,7 +2969,8 @@
 				});
 
 				if (res && res.success) {
-					alert(`Cleanup complete! Deleted ${res.deleted_total || 0} bloat records.`);
+					const deleted = res.total_deleted !== undefined ? res.total_deleted : (res.deleted_total || 0);
+					alert(`Cleanup complete! Deleted ${deleted} bloat records.`);
 					loadDbHealth(true);
 					loadTasks();
 				} else {
@@ -2971,9 +2991,10 @@
 
 		try {
 			const res = await apiCall({ path: '/site-checkup-pro/v1/developer/migration-readiness' });
-			if (res && res.data) {
-				const data = res.data;
-				const count = data.serialized_url_count || 0;
+			const data = (res && res.data) ? res.data : res;
+			if (data) {
+				const sum = data.summary || {};
+				const count = sum.total_findings !== undefined ? sum.total_findings : (data.serialized_url_count || 0);
 				if (count === 0) {
 					dom.devMigrationSummary.innerHTML = `<span style="color: var(--wpsg-success); font-weight: 600;">&bull; Migration Ready:</span> 0 serialized URL hazards detected. Plain SQL replacement safe.`;
 				} else {
@@ -2991,15 +3012,17 @@
 
 		try {
 			const res = await apiCall({ path: '/site-checkup-pro/v1/developer/changelog-digest' });
-			if (res && res.data) {
-				const d = res.data;
-				const total = d.total_updates || 0;
-				const notices = d.upgrade_notices_count || 0;
+			const d = (res && res.data) ? res.data : res;
+			if (d) {
+				const items = Array.isArray(d.items) ? d.items : [];
+				const sum = d.summary || {};
+				const total = sum.total_updates !== undefined ? sum.total_updates : items.length;
 
 				if (total === 0) {
 					dom.devChangelogSummary.innerHTML = `<span style="color: var(--wpsg-success); font-weight: 600;">&bull; Up to Date:</span> All active plugins and themes are running the latest versions.`;
 				} else {
-					dom.devChangelogSummary.innerHTML = `<span style="color: var(--wpsg-primary); font-weight: 600;">&bull; ${total} Updates Available:</span> ${d.plugin_updates_count || 0} plugins, ${d.theme_updates_count || 0} themes. ${notices > 0 ? `<strong style="color: var(--wpsg-warning);">${notices} upgrade/security notices</strong>.` : 'No critical upgrade alerts.'}`;
+					const firstPlugin = items[0] ? `${escapeHtml(items[0].name)} (${escapeHtml(items[0].current_version)} &rarr; ${escapeHtml(items[0].new_version)})` : '';
+					dom.devChangelogSummary.innerHTML = `<span style="color: var(--wpsg-primary); font-weight: 600;">&bull; ${total} Update(s) Available:</span> ${firstPlugin ? firstPlugin : `${total} items pending update.`}`;
 				}
 			}
 		} catch (err) {
