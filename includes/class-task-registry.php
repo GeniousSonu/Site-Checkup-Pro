@@ -1226,7 +1226,7 @@ class WPSG_Task_Registry {
 			'title'            => __( 'Security Disclosure Policy (security.txt)', 'site-checkup-pro' ),
 			'description'      => __( 'Verifies and generates RFC 9116 responsible disclosure contact information at /.well-known/security.txt inside the document root.', 'site-checkup-pro' ),
 			'automation_level' => 'A',
-			'sub_type'         => 'writes_files',
+			'sub_type'         => 'instant',
 			'has_undo'         => true,
 			'status_callback'  => function () {
 				$raw = WPSG_Security_Txt::check_status();

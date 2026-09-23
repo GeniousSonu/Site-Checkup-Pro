@@ -167,8 +167,11 @@ class WPSG_Plugin {
 		add_filter( 'auto_update_plugin', array( $this, 'filter_auto_update_plugin' ), 10, 2 );
 
 		// Initialize Self-Hosted Update Checker (Excluded from WordPress.org directory releases per Guideline 8).
-		if ( file_exists( WPSG_PLUGIN_DIR . 'includes/class-update-checker.php' ) && class_exists( 'WPSG_Update_Checker' ) && defined( 'WPSG_PLUGIN_FILE' ) ) {
-			new WPSG_Update_Checker( WPSG_PLUGIN_FILE, WPSG_VERSION );
+		if ( file_exists( WPSG_PLUGIN_DIR . 'includes/class-update-checker.php' ) && defined( 'WPSG_PLUGIN_FILE' ) ) {
+			require_once WPSG_PLUGIN_DIR . 'includes/class-update-checker.php';
+			if ( class_exists( 'WPSG_Update_Checker' ) ) {
+				new WPSG_Update_Checker( WPSG_PLUGIN_FILE, WPSG_VERSION );
+			}
 		}
 	}
 
