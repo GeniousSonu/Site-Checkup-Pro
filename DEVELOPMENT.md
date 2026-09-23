@@ -29,7 +29,23 @@ Before committing any changes, always run the automated PHP test suite:
 php tests/test-suite.php
 ```
 
-All 47 tests must pass with zero failures.
+All 54 tests must pass with zero failures.
+
+---
+
+## 5. Architecture Roadmap & Feature Batch Notes
+
+### v1.2.0 Developer Toolkit
+- **REST API Security Auditor** (`class-rest-auditor.php`): Enumerates registered REST routes, analyzes callbacks, and detects risks.
+- **Environment Badge** (`class-environment-badge.php`): Top admin bar badge (Production/Staging/Dev) with safety heuristics.
+- **Diagnostic Snapshot** (`class-diagnostic-snapshot.php`): Sanitized Markdown export with secret/credential redaction.
+- **WP-Cron Health Auditor** (`class-cron-auditor.php`): Flags overdue events (>600s late) and duplicate hooks.
+- **Database Health Scanner** (`class-db-health-scanner.php`): Audits bloat; cleanup is gated by re-auth and backup validation.
+- **Migration Serialization Readiness** (`class-migration-readiness.php`): Bounded scan for serialized URLs with WP-CLI guidance.
+- **Weekly Changelog Digest** (`class-changelog-digest.php`): Aggregates update notices and schedules digest alerts.
+
+### Phase 5 Roadmap
+- **Multi-site Agency Dashboard**: Architecture explicitly deferred to Phase 5. Site Checkup Pro currently focuses on single-site and standard network node execution. Network-wide aggregated dashboards and cross-site management will be implemented as a dedicated Phase 5 module.
 
 ---
 
