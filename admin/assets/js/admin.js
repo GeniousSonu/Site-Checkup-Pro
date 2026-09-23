@@ -37,10 +37,79 @@
 		batchIndex: 0,
 		pendingActionTask: null,
 		pendingDeletePlugin: null,
+		reauthToken: null,
+		reauthExpiresAt: 0,
+		justUpdatedTaskId: null,
 	};
 
 	// DOM Elements Cache
 	const dom = {};
+
+	/**
+	 * Retrieve active session-bound re-auth token if still within trusted window
+	 */
+	function getActiveReauthToken() {
+		if (state.reauthToken && state.reauthExpiresAt > Date.now()) {
+			return state.reauthToken;
+		}
+		try {
+			const stored = sessionStorage.getItem('wpsg_reauth_token');
+			const expires = parseInt(sessionStorage.getItem('wpsg_reauth_expires') || '0', 10);
+			if (stored && expires > Date.now()) {
+				state.reauthToken = stored;
+				state.reauthExpiresAt = expires;
+				return stored;
+			}
+		} catch (_) {}
+		return null;
+	}
+
+	/**
+	 * Set re-auth token with 20-30 minute trusted window
+	 */
+	function setReauthToken(token, expiresInSeconds = 1800) {
+		const expiresAt = Date.now() + (expiresInSeconds * 1000);
+		state.reauthToken = token;
+		state.reauthExpiresAt = expiresAt;
+		try {
+			sessionStorage.setItem('wpsg_reauth_token', token);
+			sessionStorage.setItem('wpsg_reauth_expires', expiresAt.toString());
+		} catch (_) {}
+	}
+
+	/**
+	 * Clear re-auth token on expiration or explicit rejection
+	 */
+	function clearReauthToken() {
+		state.reauthToken = null;
+		state.reauthExpiresAt = 0;
+		try {
+			sessionStorage.removeItem('wpsg_reauth_token');
+			sessionStorage.removeItem('wpsg_reauth_expires');
+		} catch (_) {}
+	}
+
+	/**
+	 * Helper: Identify read-only instant scanner/audit tasks
+	 */
+	function isScannerTask(task) {
+		if (!task || task.automation_level !== 'A' || task.sub_type !== 'instant') {
+			return false;
+		}
+		const runtimeActionIds = [
+			'trigger_backup',
+			'toggle_auto_updates',
+			'disable_xmlrpc',
+			'restrict_rest_api',
+			'block_user_enumeration',
+			'login_hardening',
+			'hide_wordpress_fingerprint',
+			'strip_script_versions',
+			'security_headers_csp',
+			'admin_notice_focus_mode'
+		];
+		return runtimeActionIds.indexOf(task.id) === -1;
+	}
 
 	/**
 	 * Resilient REST API caller with automatic nonce injection & native fetch fallback
@@ -54,6 +123,12 @@
 		// Ensure standard WP REST nonce is present for cookie authentication
 		if (window.wpsgData && window.wpsgData.nonce && !headers['X-WP-Nonce']) {
 			headers['X-WP-Nonce'] = window.wpsgData.nonce;
+		}
+
+		// Automatically attach active trusted reauth token if present
+		const activeReauth = getActiveReauthToken();
+		if (activeReauth && !headers['X-WPSG-Reauth']) {
+			headers['X-WPSG-Reauth'] = activeReauth;
 		}
 
 		// Try window.wp.apiFetch first if available
@@ -950,6 +1025,15 @@
 				data: { slug, confirm: 'CHANGE' },
 			});
 
+			if (res && res.reauth_required) {
+				clearReauthToken();
+				dom.btnSaveFeatLogin.disabled = false;
+				requireReauth(() => {
+					saveFeatureLoginSlug();
+				});
+				return;
+			}
+
 			if (res.success) {
 				alert(res.message);
 				window.location.reload();
@@ -986,6 +1070,14 @@
 				headers: (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.set_login_slug) ? { 'X-WPSG-Nonce': window.wpsgData.nonces.set_login_slug } : {},
 				data: { slug: '', confirm: 'CHANGE' },
 			});
+
+			if (res && res.reauth_required) {
+				clearReauthToken();
+				requireReauth(() => {
+					resetFeatureLoginSlug();
+				});
+				return;
+			}
 
 			if (res.success) {
 				alert(res.message);
@@ -1204,7 +1296,7 @@
 
 		// 4. Filter by Status
 		if (state.filterStatus) {
-			filtered = filtered.filter(t => t.status === state.filterStatus);
+			filtered = filtered.filter(t => t.status === state.filterStatus || t.id === state.justUpdatedTaskId);
 		}
 
 		if (filtered.length === 0) {
@@ -1250,8 +1342,25 @@
 		const levelBadge = getLevelBadgeHtml(task.automation_level, task.sub_type);
 		const actionButtons = getActionButtonsHtml(task);
 		const lastRunText = task.last_run_at ? formatDate(task.last_run_at) : '<span class="wpsg-text-muted">Not checked yet</span>';
-		const rowClass = `wpsg-task-row ${task.status === 'done' ? 'wpsg-row-completed' : ''}`;
+		const isJustUpdated = state.justUpdatedTaskId === task.id;
+		const rowClass = `wpsg-task-row ${task.status === 'done' ? 'wpsg-row-completed' : ''} ${isJustUpdated ? 'wpsg-row-highlight' : ''}`;
 		const isManualNginx = !state.supportsHtaccess && task.nginx_snippet && !task.has_nginx_tier1 && !task.has_nginx_tier2 && task.status !== 'done';
+
+		let evidenceClass = '';
+		let evidenceIcon = 'dashicons-info';
+		if (task.status === 'attention') {
+			evidenceClass = 'wpsg-evidence-attention';
+			evidenceIcon = 'dashicons-warning';
+		} else if (task.status === 'failed') {
+			evidenceClass = 'wpsg-evidence-critical';
+			evidenceIcon = 'dashicons-dismiss';
+		} else if (task.status === 'applied_unverified') {
+			evidenceClass = 'wpsg-evidence-unverified';
+			evidenceIcon = 'dashicons-info';
+		} else if (task.status === 'done') {
+			evidenceClass = 'wpsg-evidence-success';
+			evidenceIcon = 'dashicons-yes-alt';
+		}
 
 		return `
 			<tr data-task-id="${escapeHtml(task.id)}" class="${rowClass}">
@@ -1262,7 +1371,7 @@
 						<span class="wpsg-task-title">${escapeHtml(task.title)}</span>
 						<span class="wpsg-task-desc">${escapeHtml(task.description)}</span>
 						${isManualNginx ? `<div class="wpsg-task-evidence wpsg-evidence-notice"><span class="dashicons dashicons-warning" style="font-size:12px;width:12px;height:12px;margin-top:1px;"></span> <span>Cannot be applied automatically on this hosting setup — manual step required.</span></div>` : ''}
-						${task.live_message ? `<div class="wpsg-task-evidence"><span class="dashicons dashicons-info" style="font-size:12px;width:12px;height:12px;margin-top:1px;"></span> <span>${escapeHtml(task.live_message)}</span></div>` : ''}
+						${task.live_message ? `<div class="wpsg-task-evidence ${evidenceClass}"><span class="dashicons ${evidenceIcon}" style="font-size:12px;width:12px;height:12px;margin-top:1px;"></span> <span>${escapeHtml(task.live_message)}</span></div>` : ''}
 						${task.note ? `<div class="wpsg-task-evidence"><span class="dashicons dashicons-edit" style="font-size:12px;width:12px;height:12px;margin-top:1px;"></span> <span>Note: ${escapeHtml(task.note)}</span></div>` : ''}
 					</div>
 				</td>
@@ -1340,6 +1449,8 @@
 
 		// Level A: Automated
 		if (task.automation_level === 'A') {
+			const isScanner = isScannerTask(task);
+
 			if (task.id === 'detect_unwanted_plugins' && task.status === 'attention') {
 				const plugins = (task.live_data && Array.isArray(task.live_data.plugins)) ? task.live_data.plugins : [];
 				if (plugins.length > 0) {
@@ -1355,14 +1466,37 @@
 				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary wpsg-btn-diff" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-visibility"></span> Diff</button> `;
 			}
 
-			if (task.status === 'done' && task.has_undo) {
-				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary wpsg-btn-undo" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-undo"></span> Undo</button> `;
+			if (task.status === 'done') {
+				if (task.has_undo) {
+					html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary wpsg-btn-undo" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-undo"></span> Undo</button> `;
+				} else {
+					const label = isScanner ? 'Re-scan' : 'Re-run';
+					html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary wpsg-btn-run" data-id="${escapeHtml(task.id)}" title="Task completed. Click to re-run."><span class="dashicons dashicons-update"></span> ${label}</button> `;
+				}
+			} else if (task.status === 'applied_unverified') {
+				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-warning wpsg-btn-verify" data-id="${escapeHtml(task.id)}" title="Run live HTTP verification check"><span class="dashicons dashicons-update"></span> Check Now</button> `;
+				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary wpsg-btn-run" data-id="${escapeHtml(task.id)}" title="Re-apply directive"><span class="dashicons dashicons-controls-play"></span> Re-apply</button> `;
+				if (task.has_undo) {
+					html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-secondary wpsg-btn-undo" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-undo"></span> Undo</button> `;
+				}
+			} else if (task.status === 'attention') {
+				if (isScanner) {
+					html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-warning wpsg-btn-run" data-id="${escapeHtml(task.id)}" title="Findings detected. Click to re-scan."><span class="dashicons dashicons-search"></span> Re-scan (Findings)</button> `;
+				} else {
+					html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-warning wpsg-btn-run" data-id="${escapeHtml(task.id)}" title="Action needed. Click to re-run."><span class="dashicons dashicons-controls-play"></span> Re-run</button> `;
+				}
+			} else if (task.status === 'failed') {
+				const retryLabel = isScanner ? 'Retry Scan' : 'Retry';
+				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-danger wpsg-btn-run" data-id="${escapeHtml(task.id)}" title="Task execution failed. Click to retry."><span class="dashicons dashicons-warning"></span> ${retryLabel}</button> `;
 			} else {
-				const runLabel = (task.status === 'done' || task.status === 'applied_unverified') ? 'Re-run' : 'Run';
-				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-primary wpsg-btn-run" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-controls-play"></span> ${runLabel}</button> `;
+				if (isScanner) {
+					html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-primary wpsg-btn-run" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-search"></span> Run Scan</button> `;
+				} else {
+					html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-primary wpsg-btn-run" data-id="${escapeHtml(task.id)}"><span class="dashicons dashicons-controls-play"></span> Run</button> `;
+				}
 			}
 
-			if (canVerify) {
+			if (canVerify && task.status !== 'applied_unverified') {
 				html += `<button type="button" class="wpsg-btn wpsg-btn-sm wpsg-btn-outline wpsg-btn-verify" data-id="${escapeHtml(task.id)}" title="Run live HTTP verification"><span class="dashicons dashicons-update"></span> Check Now</button>`;
 			}
 		}
@@ -1418,10 +1552,13 @@
 		const task = state.tasks.find(t => t.id === taskId);
 		if (!task) return;
 
+		const isScanner = isScannerTask(task);
+		const token = reauthToken || getActiveReauthToken();
+
 		// Set button loading state
 		if (btnElement) {
 			btnElement.disabled = true;
-			btnElement.innerHTML = '<span class="wpsg-spinner"></span> Running...';
+			btnElement.innerHTML = `<span class="wpsg-spinner"></span> ${isScanner ? 'Scanning...' : 'Running...'}`;
 		}
 
 		try {
@@ -1429,25 +1566,26 @@
 			if (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.run_task) {
 				headers['X-WPSG-Nonce'] = window.wpsgData.nonces.run_task;
 			}
-			if (reauthToken) {
-				headers['X-WPSG-Reauth'] = reauthToken;
+			if (token) {
+				headers['X-WPSG-Reauth'] = token;
 			}
 
 			const res = await apiCall({
 				path: `/site-checkup-pro/v1/tasks/${taskId}/run`,
 				method: 'POST',
 				headers: headers,
-				data: reauthToken ? { reauth_token: reauthToken } : {},
+				data: token ? { reauth_token: token } : {},
 			});
 
 			// Re-authentication check
 			if (res && res.reauth_required) {
+				clearReauthToken();
 				if (btnElement) {
 					btnElement.disabled = false;
 					btnElement.innerHTML = '<span class="dashicons dashicons-lock"></span> Password Required';
 				}
-				requireReauth((token) => {
-					runTask(taskId, btnElement, token);
+				requireReauth((freshToken) => {
+					runTask(taskId, btnElement, freshToken);
 				});
 				return;
 			}
@@ -1462,7 +1600,7 @@
 				openModal(dom.modalBackup);
 				if (btnElement) {
 					btnElement.disabled = false;
-					btnElement.innerHTML = '<span class="dashicons dashicons-controls-play"></span> Run';
+					btnElement.innerHTML = `<span class="dashicons dashicons-controls-play"></span> ${isScanner ? 'Run Scan' : 'Run'}`;
 				}
 				return;
 			}
@@ -1471,6 +1609,12 @@
 			task.status = res.status || (res.success ? 'done' : 'failed');
 			task.live_message = res.live_message || res.message;
 			task.last_run_at = new Date().toISOString();
+			if (res.live_data) {
+				task.live_data = res.live_data;
+			}
+
+			// Keep track of the task just updated so it highlights and doesn't get filtered out
+			state.justUpdatedTaskId = taskId;
 
 			// Recalculate summary metrics
 			state.doneCount = state.tasks.filter(t => t.status === 'done').length;
@@ -1483,6 +1627,7 @@
 			console.error(`Task ${taskId} failed:`, err);
 			task.status = 'failed';
 			task.live_message = err.message || 'Execution error.';
+			state.justUpdatedTaskId = taskId;
 			renderTasksTable();
 		}
 	}
@@ -1494,6 +1639,8 @@
 		const task = state.tasks.find(t => t.id === taskId);
 		if (!task) return;
 
+		const token = reauthToken || getActiveReauthToken();
+
 		if (btnElement) {
 			btnElement.disabled = true;
 			btnElement.innerHTML = '<span class="wpsg-spinner"></span> Undoing...';
@@ -1504,30 +1651,32 @@
 			if (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.undo_task) {
 				headers['X-WPSG-Nonce'] = window.wpsgData.nonces.undo_task;
 			}
-			if (reauthToken) {
-				headers['X-WPSG-Reauth'] = reauthToken;
+			if (token) {
+				headers['X-WPSG-Reauth'] = token;
 			}
 
 			const res = await apiCall({
 				path: `/site-checkup-pro/v1/tasks/${taskId}/undo`,
 				method: 'POST',
 				headers: headers,
-				data: reauthToken ? { reauth_token: reauthToken } : {},
+				data: token ? { reauth_token: token } : {},
 			});
 
 			if (res && res.reauth_required) {
+				clearReauthToken();
 				if (btnElement) {
 					btnElement.disabled = false;
 					btnElement.innerHTML = '<span class="dashicons dashicons-lock"></span> Password Required';
 				}
-				requireReauth((token) => {
-					undoTask(taskId, btnElement, token);
+				requireReauth((freshToken) => {
+					undoTask(taskId, btnElement, freshToken);
 				});
 				return;
 			}
 
 			task.status = res.status || 'pending';
 			task.live_message = res.live_message || res.message;
+			state.justUpdatedTaskId = taskId;
 
 			state.doneCount = state.tasks.filter(t => t.status === 'done').length;
 			state.sopCoveragePct = Math.round((state.doneCount / state.totalCount) * 100);
@@ -1565,6 +1714,7 @@
 			task.status = res.status || (res.verified ? 'done' : 'applied_unverified');
 			task.live_message = res.message || (res.verified ? 'Enforcement verified live.' : 'Verification check could not confirm enforcement.');
 			task.last_run_at = new Date().toISOString();
+			state.justUpdatedTaskId = taskId;
 
 			state.doneCount = state.tasks.filter(t => t.status === 'done').length;
 			state.sopCoveragePct = Math.round((state.doneCount / state.totalCount) * 100);
@@ -1574,6 +1724,7 @@
 		} catch (err) {
 			console.error(`Verification check failed for ${taskId}:`, err);
 			task.live_message = `Verification error: ${err.message || 'Check failed'}`;
+			state.justUpdatedTaskId = taskId;
 			renderTasksTable();
 		} finally {
 			if (btnElement) {
@@ -1848,6 +1999,15 @@
 				data: { slug, confirm },
 			});
 
+			if (res && res.reauth_required) {
+				clearReauthToken();
+				dom.btnConfirmLoginRename.disabled = false;
+				requireReauth(() => {
+					submitLoginRename();
+				});
+				return;
+			}
+
 			if (res.success) {
 				alert(res.message);
 				closeAllModals();
@@ -1906,6 +2066,18 @@
 					plugin_path: state.pendingDeletePlugin.path,
 				},
 			});
+
+			if (res && res.reauth_required) {
+				clearReauthToken();
+				if (dom.btnConfirmDeletePlugin) {
+					dom.btnConfirmDeletePlugin.disabled = false;
+					dom.btnConfirmDeletePlugin.innerHTML = '<span class="dashicons dashicons-trash"></span> Archive to ZIP & Delete Plugin';
+				}
+				requireReauth(() => {
+					submitDeletePlugin();
+				});
+				return;
+			}
 
 			if (res.success) {
 				closeAllModals();
@@ -1977,6 +2149,13 @@
 	 * Re-authentication Modal Prompt
 	 */
 	function requireReauth(callback) {
+		const activeToken = getActiveReauthToken();
+		if (activeToken) {
+			if (typeof callback === 'function') {
+				callback(activeToken);
+			}
+			return;
+		}
 		state.pendingReauthCallback = callback;
 		if (dom.reauthPassword) dom.reauthPassword.value = '';
 		if (dom.reauthErrorBox) dom.reauthErrorBox.style.display = 'none';
@@ -2010,6 +2189,7 @@
 			});
 
 			if (res && res.reauth_token) {
+				setReauthToken(res.reauth_token, res.expires_in || 1800);
 				closeAllModals();
 				const cb = state.pendingReauthCallback;
 				state.pendingReauthCallback = null;

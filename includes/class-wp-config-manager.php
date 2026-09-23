@@ -243,4 +243,24 @@ class WPSG_Wp_Config_Manager {
 			'description'  => __( 'The following configuration block will be inserted into wp-config.php.', 'site-checkup-pro' ),
 		);
 	}
+
+	/**
+	 * Check if a constant is present in the wp-config.php file content.
+	 *
+	 * @param string $constant_name Name of constant.
+	 * @return bool
+	 */
+	public static function has_constant_in_file( $constant_name ) {
+		$config_path = self::get_config_path();
+		if ( ! $config_path || ! file_exists( $config_path ) ) {
+			return false;
+		}
+
+		$content = file_get_contents( $config_path );
+		if ( false === $content ) {
+			return false;
+		}
+
+		return (bool) preg_match( "/define\s*\(\s*['\"]" . preg_quote( $constant_name, '/' ) . "['\"]\s*,\s*(true|1)\s*\)/i", $content );
+	}
 }

@@ -91,6 +91,10 @@ if ( ! function_exists( 'sanitize_textarea_field' ) ) {
 if ( ! function_exists( 'trailingslashit' ) ) { function trailingslashit( $p ) { return rtrim( $p, '/' ) . '/'; } }
 if ( ! function_exists( 'wp_mkdir_p' ) ) { function wp_mkdir_p( $target ) { return @mkdir( $target, 0777, true ) || is_dir( $target ); } }
 if ( ! function_exists( 'wp_json_encode' ) ) { function wp_json_encode( $data ) { return json_encode( $data ); } }
+if ( ! defined( 'HOUR_IN_SECONDS' ) ) { define( 'HOUR_IN_SECONDS', 3600 ); }
+if ( ! defined( 'DAY_IN_SECONDS' ) ) { define( 'DAY_IN_SECONDS', 86400 ); }
+if ( ! function_exists( 'get_theme_root' ) ) { function get_theme_root() { return sys_get_temp_dir(); } }
+if ( ! function_exists( 'get_locale' ) ) { function get_locale() { return 'en_US'; } }
 if ( ! function_exists( 'home_url' ) ) { function home_url( $p = '' ) { return 'https://example.com' . $p; } }
 if ( ! function_exists( 'admin_url' ) ) { function admin_url( $p = '' ) { return 'https://example.com/wp-admin/' . $p; } }
 if ( ! function_exists( 'get_home_path' ) ) { function get_home_path() { return sys_get_temp_dir() . '/'; } }
@@ -244,9 +248,16 @@ class Mock_WP_User {
 if ( ! function_exists( 'wp_get_session_token' ) ) {
 	function wp_get_session_token() { return 'mock_session_token_xyz789'; }
 }
+if ( ! defined( 'WPINC' ) ) { define( 'WPINC', 'wp-includes' ); }
+global $mock_current_user;
+$mock_current_user = new Mock_WP_User();
 if ( ! function_exists( 'wp_get_current_user' ) ) {
 	function wp_get_current_user() {
-		return new Mock_WP_User();
+		global $mock_current_user;
+		if ( empty( $mock_current_user ) ) {
+			$mock_current_user = new Mock_WP_User();
+		}
+		return $mock_current_user;
 	}
 }
 if ( ! function_exists( 'get_userdata' ) ) {
@@ -803,8 +814,8 @@ run_test( "Session Manager IDOR: Prevents users from modifying sessions of anoth
 	return ( false === $result['success'] && false !== strpos( $result['message'], 'Permission denied' ) );
 } );
 
-// TEST 18: Re-authentication Single-Use Token Consumption
-run_test( "Re-authentication: Token is single-use and invalidates immediately after verification", function () {
+// TEST 18: Re-authentication Trusted Window & Invalidation
+run_test( "Re-authentication: Token is valid within trusted window and invalidated on password change", function () {
 	// Generate re-auth token
 	$auth_res = WPSG_Session_Manager::verify_password_and_grant_reauth( 'valid_admin_password' );
 	if ( empty( $auth_res['reauth_token'] ) ) {
@@ -813,15 +824,27 @@ run_test( "Re-authentication: Token is single-use and invalidates immediately af
 
 	$token = $auth_res['reauth_token'];
 
-	// 1st consumption: MUST succeed
-	$first_use = WPSG_Session_Manager::validate_and_consume_reauth_token( $token );
+	// 1st validation: MUST succeed
+	$first_use = WPSG_Session_Manager::validate_reauth_token( $token );
 	if ( true !== $first_use ) {
 		return false;
 	}
 
-	// 2nd consumption (Replay): MUST fail
-	$second_use = WPSG_Session_Manager::validate_and_consume_reauth_token( $token );
-	return ( false === $second_use );
+	// 2nd validation within trusted window: MUST also succeed (reduced friction)
+	$second_use = WPSG_Session_Manager::validate_reauth_token( $token );
+	if ( true !== $second_use ) {
+		return false;
+	}
+
+	// Invalidation test: Simulate password change on user
+	$user = wp_get_current_user();
+	$orig_pass = $user->user_pass;
+	$user->user_pass = 'new_different_password_hash';
+
+	$invalidated_use = WPSG_Session_Manager::validate_reauth_token( $token );
+	$user->user_pass = $orig_pass; // restore
+
+	return ( false === $invalidated_use );
 } );
 
 // TEST 19: Notice Inbox HTML Sanitization & Core Update Immunity
@@ -1509,13 +1532,21 @@ run_test( "REST API: /tasks/delete-plugin rejects invalid nonce and invokes safe
 	file_put_contents( $plugin_dir . '/rest-dummy-plugin.php', '<?php // REST Dummy' );
 
 	$valid_nonce = wp_create_nonce( 'wpsg_delete_plugin' );
-	$valid_request = new class( $valid_nonce ) extends WP_REST_Request {
+	$auth_grant  = WPSG_Session_Manager::verify_password_and_grant_reauth( 'valid_admin_password' );
+	$reauth_tok  = isset( $auth_grant['reauth_token'] ) ? $auth_grant['reauth_token'] : '';
+	$valid_request = new class( $valid_nonce, $reauth_tok ) extends WP_REST_Request {
 		private $nonce;
-		public function __construct( $n ) { $this->nonce = $n; }
-		public function get_header( $name ) { return 'X-WPSG-Nonce' === $name ? $this->nonce : null; }
+		private $reauth;
+		public function __construct( $n, $r ) { $this->nonce = $n; $this->reauth = $r; }
+		public function get_header( $name ) {
+			if ( 'X-WPSG-Nonce' === $name ) return $this->nonce;
+			if ( 'X-WPSG-Reauth' === $name ) return $this->reauth;
+			return null;
+		}
 		public function get_param( $name ) {
 			if ( 'slug' === $name ) return 'rest-dummy-plugin';
 			if ( 'plugin_path' === $name ) return 'rest-dummy-plugin/rest-dummy-plugin.php';
+			if ( 'reauth_token' === $name ) return $this->reauth;
 			return null;
 		}
 	};

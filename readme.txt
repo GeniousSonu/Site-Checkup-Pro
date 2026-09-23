@@ -7,7 +7,7 @@ Tags: security, hardening, security audit, login security, firewall
 Requires at least: 5.8
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -95,6 +95,12 @@ Version 1.0 is optimized for single-site agency workflows. On Multisite installa
 4. Client-facing executive SOP coverage report ready for PDF export with emergency incident response contacts.
 
 == Changelog ==
+
+= 1.0.2 =
+* Fix: Resolve Run-button flicker and silent reversion on audit scanner tasks (File Permissions Audit, PHP Security Restrictions, Database Table Prefix, etc.) by ensuring all task response states (completed, unverified, findings-detected, failed) render explicit, visible UI states and appropriate action buttons.
+* Fix: Restrict administrator password re-authentication exclusively to destructive, state-changing tasks (file modifications, plugin deletion, login URL renames, salt rotation, application password revocation) and exclude all read-only diagnostic scanners.
+* Performance: Extend re-authentication token validity to a 30-minute trusted window after successful verification, eliminating repetitive password re-entry while retaining session binding and instant invalidation on logout or password change.
+* UI: Retain updated task row visibility and add visual highlight animation upon manual scan execution during filtered status views.
 
 = 1.0.1 =
 * Fix: Prevent syntax corruption in wp-config.php during security salt rotation by removing unescaped quotes/backreferences and using safe callback replacement.

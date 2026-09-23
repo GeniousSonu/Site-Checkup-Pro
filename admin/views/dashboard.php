@@ -613,6 +613,7 @@ $login_slug    = WPSG_Login_Renamer::get_login_slug();
 							<option value=""><?php esc_html_e( 'All Statuses', 'site-checkup-pro' ); ?></option>
 							<option value="pending"><?php esc_html_e( 'Pending', 'site-checkup-pro' ); ?></option>
 							<option value="done"><?php esc_html_e( 'Completed', 'site-checkup-pro' ); ?></option>
+							<option value="applied_unverified"><?php esc_html_e( 'Applied (Unverified)', 'site-checkup-pro' ); ?></option>
 							<option value="attention"><?php esc_html_e( 'Action Needed', 'site-checkup-pro' ); ?></option>
 							<option value="failed"><?php esc_html_e( 'Critical / Failed', 'site-checkup-pro' ); ?></option>
 							<option value="not_applicable"><?php esc_html_e( 'Not Applicable', 'site-checkup-pro' ); ?></option>

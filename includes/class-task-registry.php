@@ -731,6 +731,9 @@ class WPSG_Task_Registry {
 				if ( $disallow ) {
 					return array( 'status' => 'applied_unverified', 'message' => __( 'Constant defined, awaiting fresh process verification.', 'site-checkup-pro' ) );
 				}
+				if ( class_exists( 'WPSG_Wp_Config_Manager' ) && WPSG_Wp_Config_Manager::has_constant_in_file( 'DISALLOW_FILE_EDIT' ) ) {
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Constant configured in wp-config.php, awaiting fresh process verification.', 'site-checkup-pro' ) );
+				}
 				return array(
 					'status'  => 'pending',
 					'message' => __( 'File editing is currently enabled in wp-admin.', 'site-checkup-pro' ),

@@ -758,6 +758,19 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			return $nonce_check;
 		}
 
+		// Re-authentication check for state-changing login URL rename
+		$reauth_token = $request->get_header( 'X-WPSG-Reauth' );
+		if ( ! $reauth_token ) {
+			$reauth_token = $request->get_param( 'reauth_token' );
+		}
+		if ( class_exists( 'WPSG_Session_Manager' ) && ! WPSG_Session_Manager::validate_reauth_token( $reauth_token ) ) {
+			return rest_ensure_response( array(
+				'success'         => false,
+				'reauth_required' => true,
+				'message'         => __( 'Administrator password confirmation is required before changing the login URL.', 'site-checkup-pro' ),
+			) );
+		}
+
 		$slug    = $request->get_param( 'slug' );
 		$confirm = $request->get_param( 'confirm' );
 
@@ -787,6 +800,19 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 		$nonce_check = $this->verify_action_nonce( $request, 'delete_plugin' );
 		if ( is_wp_error( $nonce_check ) ) {
 			return $nonce_check;
+		}
+
+		// Re-authentication check for destructive plugin removal
+		$reauth_token = $request->get_header( 'X-WPSG-Reauth' );
+		if ( ! $reauth_token ) {
+			$reauth_token = $request->get_param( 'reauth_token' );
+		}
+		if ( class_exists( 'WPSG_Session_Manager' ) && ! WPSG_Session_Manager::validate_reauth_token( $reauth_token ) ) {
+			return rest_ensure_response( array(
+				'success'         => false,
+				'reauth_required' => true,
+				'message'         => __( 'Administrator password confirmation is required before deleting plugins.', 'site-checkup-pro' ),
+			) );
 		}
 
 		$slug        = $request->get_param( 'slug' );

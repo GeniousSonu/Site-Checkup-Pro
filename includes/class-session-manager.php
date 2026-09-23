@@ -48,6 +48,7 @@ class WPSG_Session_Manager {
 		// Invalidate all other sessions when user updates password.
 		add_action( 'password_reset', array( $this, 'on_password_reset' ), 10, 2 );
 		add_action( 'profile_update', array( $this, 'on_profile_update' ), 10, 2 );
+		add_action( 'wp_logout', array( $this, 'on_user_logout' ) );
 	}
 
 	/**
@@ -233,8 +234,25 @@ class WPSG_Session_Manager {
 	}
 
 	/**
-	 * Verify password and grant a session-bound, single-use re-auth token.
-	 * Shares the exact same throttling/lockout pipeline as the login form!
+	 * Invalidate re-auth token on user logout.
+	 *
+	 * @param int $user_id User ID.
+	 */
+	public function on_user_logout( $user_id = 0 ) {
+		if ( ! $user_id ) {
+			$user_id = get_current_user_id();
+		}
+		// Session token is destroyed by WP core on logout, making token hashes invalid.
+	}
+
+	/**
+	 * Trusted window duration for re-authentication: 30 minutes (1800 seconds).
+	 */
+	const REAUTH_WINDOW_SECONDS = 1800;
+
+	/**
+	 * Verify password and grant a session-bound re-auth token valid for a trusted window.
+	 * Shares the exact same throttling/lockout pipeline as the login form.
 	 *
 	 * @param string $password Password provided by current user.
 	 * @return array|WP_Error Array with reauth_token or WP_Error.
@@ -277,54 +295,112 @@ class WPSG_Session_Manager {
 			);
 		}
 
-		// 3. Password verified! Generate single-use token bound to current session.
-		$random_token  = wp_generate_password( 32, false, false );
-		$session_token = function_exists( 'wp_get_session_token' ) ? wp_get_session_token() : 'default_session';
-		$auth_salt     = defined( 'AUTH_SALT' ) ? AUTH_SALT : 'wpsg_salt';
-		$token_hash    = hash_hmac( 'sha256', $random_token, $session_token . $auth_salt );
+		// 3. Password verified! Generate token bound to current session and current password hash.
+		$random_token   = wp_generate_password( 32, false, false );
+		$session_token  = function_exists( 'wp_get_session_token' ) ? wp_get_session_token() : 'default_session';
+		$user_pass_salt = substr( (string) $current_user->user_pass, 0, 16 );
+		$auth_salt      = defined( 'AUTH_SALT' ) ? AUTH_SALT : 'wpsg_salt';
+		$token_hash     = hash_hmac( 'sha256', $random_token, $session_token . $user_pass_salt . $auth_salt );
 
-		// Store in transient for 5 minutes.
+		// Store in transient for the 30-minute trusted window.
 		$transient_key = 'wpsg_reauth_' . $current_user->ID . '_' . substr( $token_hash, 0, 32 );
-		set_transient( $transient_key, $token_hash, 300 );
+		$payload = array(
+			'token_hash' => $token_hash,
+			'user_id'    => $current_user->ID,
+			'user_pass'  => $user_pass_salt,
+			'granted_at' => time(),
+			'expires_at' => time() + self::REAUTH_WINDOW_SECONDS,
+		);
+		set_transient( $transient_key, $payload, self::REAUTH_WINDOW_SECONDS );
 
 		return array(
 			'success'      => true,
 			'reauth_token' => $random_token,
-			'expires_in'   => 300,
+			'expires_in'   => self::REAUTH_WINDOW_SECONDS,
 			'message'      => __( 'Password verified successfully.', 'site-checkup-pro' ),
 		);
 	}
 
 	/**
-	 * Validate a re-auth token and consume it (single-use enforcement).
+	 * Validate a re-auth token against current session and trusted window.
+	 * Stays valid for the full trusted window (20-30 minutes) rather than single-use.
+	 * Still strictly session-bound and invalidated on password change or logout.
+	 *
+	 * @param string $token Raw re-auth token string.
+	 * @return bool True if valid and unexpired, false otherwise.
+	 */
+	public static function validate_reauth_token( $token ) {
+		if ( empty( $token ) || ! is_string( $token ) ) {
+			return false;
+		}
+
+		$current_user = wp_get_current_user();
+		if ( ! $current_user || ! $current_user->exists() ) {
+			return false;
+		}
+
+		$session_token  = function_exists( 'wp_get_session_token' ) ? wp_get_session_token() : 'default_session';
+		$user_pass_salt = substr( (string) $current_user->user_pass, 0, 16 );
+		$auth_salt      = defined( 'AUTH_SALT' ) ? AUTH_SALT : 'wpsg_salt';
+		$token_hash     = hash_hmac( 'sha256', $token, $session_token . $user_pass_salt . $auth_salt );
+
+		$transient_key = 'wpsg_reauth_' . $current_user->ID . '_' . substr( $token_hash, 0, 32 );
+		$stored        = get_transient( $transient_key );
+
+		// Also check legacy token hash format (without user_pass_salt) for backward compatibility
+		if ( empty( $stored ) ) {
+			$legacy_hash = hash_hmac( 'sha256', $token, $session_token . $auth_salt );
+			$legacy_key  = 'wpsg_reauth_' . $current_user->ID . '_' . substr( $legacy_hash, 0, 32 );
+			$stored      = get_transient( $legacy_key );
+			if ( ! empty( $stored ) ) {
+				$transient_key = $legacy_key;
+				$token_hash    = $legacy_hash;
+			}
+		}
+
+		if ( empty( $stored ) ) {
+			return false;
+		}
+
+		// Handle payload array format
+		if ( is_array( $stored ) ) {
+			$expected_hash = isset( $stored['token_hash'] ) ? $stored['token_hash'] : '';
+			$stored_pass   = isset( $stored['user_pass'] ) ? $stored['user_pass'] : '';
+
+			if ( ! hash_equals( (string) $expected_hash, (string) $token_hash ) ) {
+				return false;
+			}
+
+			// Invalidate immediately if password changed
+			if ( $stored_pass && ! hash_equals( (string) $stored_pass, (string) $user_pass_salt ) ) {
+				delete_transient( $transient_key );
+				return false;
+			}
+
+			if ( isset( $stored['expires_at'] ) && time() > $stored['expires_at'] ) {
+				delete_transient( $transient_key );
+				return false;
+			}
+
+			return true;
+		}
+
+		// Handle raw string hash format
+		if ( is_string( $stored ) && hash_equals( (string) $stored, (string) $token_hash ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Validate a re-auth token (backward compatible alias).
 	 *
 	 * @param string $token Raw re-auth token string.
 	 * @return bool True if valid, false if invalid, expired, or replayed.
 	 */
 	public static function validate_and_consume_reauth_token( $token ) {
-		if ( empty( $token ) || ! is_string( $token ) ) {
-			return false;
-		}
-
-		$current_user_id = get_current_user_id();
-		if ( ! $current_user_id ) {
-			return false;
-		}
-
-		$session_token = function_exists( 'wp_get_session_token' ) ? wp_get_session_token() : 'default_session';
-		$auth_salt     = defined( 'AUTH_SALT' ) ? AUTH_SALT : 'wpsg_salt';
-		$token_hash    = hash_hmac( 'sha256', $token, $session_token . $auth_salt );
-
-		$transient_key = 'wpsg_reauth_' . $current_user_id . '_' . substr( $token_hash, 0, 32 );
-		$stored_hash   = get_transient( $transient_key );
-
-		if ( empty( $stored_hash ) || ! hash_equals( (string) $stored_hash, (string) $token_hash ) ) {
-			return false;
-		}
-
-		// Single-use: delete immediately to prevent replay!
-		delete_transient( $transient_key );
-
-		return true;
+		return self::validate_reauth_token( $token );
 	}
 }
+
