@@ -1430,10 +1430,11 @@ class WPSG_Task_Registry {
 			'automation_level' => 'C',
 			'sub_type'         => 'manual',
 			'status_callback'  => function () {
-				$s = get_option( 'wpsg_settings', array() );
+				$s           = get_option( 'wpsg_settings', array() );
 				$has_contact = ! empty( $s['incident_contact_email'] ) || ! empty( $s['incident_contact_phone'] );
+				$contact_val = ! empty( $s['incident_contact_name'] ) ? $s['incident_contact_name'] : ( ! empty( $s['incident_contact_email'] ) ? $s['incident_contact_email'] : '' );
 				/* translators: %s: contact details */
-				$msg_contact = sprintf( __( 'Incident contact configured: %s', 'site-checkup-pro' ), esc_html( ! empty( $s['incident_contact_name'] ) ? $s['incident_contact_name'] : $s['incident_contact_email'] ) );
+				$msg_contact = sprintf( __( 'Incident contact configured: %s', 'site-checkup-pro' ), esc_html( $contact_val ) );
 				return array(
 					'status'  => $has_contact ? 'done' : 'attention',
 					'message' => $has_contact ? $msg_contact : __( 'No emergency incident contact details recorded. Update in Settings.', 'site-checkup-pro' ),
