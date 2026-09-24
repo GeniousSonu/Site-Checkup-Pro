@@ -26,11 +26,12 @@ class WPSG_Task_Runner {
 	/**
 	 * Run a task safely following Validate -> Authorize -> Perform -> Verify -> Log -> Recover.
 	 *
-	 * @param string      $task_id      Task identifier.
-	 * @param string|null $reauth_token Optional single-use re-auth token.
+	 * @param string      $task_id       Task identifier.
+	 * @param string|null $reauth_token  Optional single-use re-auth token.
+	 * @param bool        $force_refresh Whether to bypass and bust transient cache.
 	 * @return array Result payload.
 	 */
-	public static function run( $task_id, $reauth_token = null ) {
+	public static function run( $task_id, $reauth_token = null, $force_refresh = true ) {
 		// 1. Strict capability enforcement: Hard-require manage_options.
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return array(
@@ -45,6 +46,25 @@ class WPSG_Task_Runner {
 				'success' => false,
 				'message' => __( 'Task not found in registry.', 'site-checkup-pro' ),
 			);
+		}
+
+		// Cache-busting for scanners: when explicitly running/re-scanning, purge transient caches.
+		if ( $force_refresh || 'instant' === $task->sub_type ) {
+			$cache_transients = array(
+				'file_permissions_audit'       => 'wpsg_file_perms_cache',
+				'php_server_restrictions'      => 'wpsg_php_restrictions_cache',
+				'db_prefix_check'              => 'wpsg_db_prefix_cache',
+				'tls_cert_depth_check'         => 'wpsg_tls_depth_cache',
+				'email_domain_auth_check'      => 'wpsg_email_auth_cache',
+				'wp_debug_display_check'       => 'wpsg_debug_display_cache',
+				'core_checksum_integrity'      => 'wpsg_core_checksums',
+				'plugin_integrity_check'       => 'wpsg_plugin_integrity_cache',
+				'vulnerability_database_check' => 'wpsg_vulnerability_cache',
+			);
+			if ( isset( $cache_transients[ $task_id ] ) ) {
+				delete_transient( $cache_transients[ $task_id ] );
+			}
+			wp_cache_delete( 'wpsg_task_status_' . $task_id, 'site-checkup-pro' );
 		}
 
 		// 2. Concurrency Mutex Lock: Prevent concurrent executions of the same task.
@@ -86,23 +106,25 @@ class WPSG_Task_Runner {
 			}
 
 			// 5. Capture before snapshot and compute HMAC integrity hash.
-			$before_status = $task->get_live_status();
+			$before_status = $task->get_live_status( false );
 			$auth_salt     = defined( 'AUTH_SALT' ) ? AUTH_SALT : 'wpsg_salt';
 			$snapshot_hash = hash_hmac( 'sha256', wp_json_encode( $before_status ), $auth_salt );
 
 			// 6. Execute task callback (Perform).
-			$result = $task->run();
+			$result = $task->run( $force_refresh );
 
 			// Determine if the run itself succeeded (not whether the site passed the check).
 			// - Explicit 'success: true' from the callback (write/action tasks).
 			// - 'status: done' — check passed.
-			// - 'status: attention' for instant (scanner) tasks — scan ran fine, found issues.
-			//   'attention' is a valid scan result, not a run failure.
+			// - 'status: attention' or 'failed' for instant (scanner) tasks — scan ran fine and returned findings.
+			//   'attention' and 'failed' are valid scan findings, not execution crashes.
 			$result_status             = isset( $result['status'] ) ? $result['status'] : '';
 			$run_returned_success_flag = ! empty( $result['success'] );
+			$is_scanner                = ( 'instant' === $task->sub_type );
 			$is_success                = $run_returned_success_flag
 				|| 'done' === $result_status
-				|| ( 'attention' === $result_status && 'instant' === $task->sub_type );
+				|| ( $is_scanner && in_array( $result_status, array( 'done', 'attention', 'failed' ), true ) )
+				|| ( 'attention' === $result_status && $is_scanner );
 			$message                   = isset( $result['message'] ) ? $result['message'] : '';
 
 			// 7. Post-action verification (Verify).
@@ -134,15 +156,16 @@ class WPSG_Task_Runner {
 					self::update_db_status( $task_id, 'done', $task->automation_level );
 				}
 
-				$after_status = $task->get_live_status();
+				$after_status = $task->get_live_status( $force_refresh );
 
 				if ( $is_success ) {
 					$live_st = isset( $after_status['status'] ) ? $after_status['status'] : 'done';
 					if ( 'done' === $live_st ) {
 						$new_status    = 'done';
 						$verified_live = true;
-					} elseif ( 'instant' === $task->sub_type && 'attention' === $live_st ) {
-						$new_status = 'attention'; // Scanner found issues
+					} elseif ( 'instant' === $task->sub_type ) {
+						$new_status = in_array( $live_st, array( 'done', 'attention', 'failed' ), true ) ? $live_st : 'attention';
+						$verified_live = true;
 					} elseif ( 'writes_files' === $task->sub_type ) {
 						// File write succeeded but live check not confirmed
 						$new_status = 'applied_unverified';
@@ -190,13 +213,16 @@ class WPSG_Task_Runner {
 				update_option( 'wpsg_completed_tasks_count', $completed_count );
 			}
 
+			$now = current_time( 'mysql' );
 			return array(
-				'success'      => ( 'done' === $new_status || 'attention' === $new_status || 'applied_unverified' === $new_status ),
+				'success'      => true,
 				'task_id'      => $task_id,
 				'status'       => $new_status,
 				'message'      => $message,
 				'live_message' => $message,
+				'last_run_at'  => $now,
 				'has_undo'     => $task->has_undo,
+				'live_data'    => isset( $after_status['data'] ) ? $after_status['data'] : ( isset( $result['data'] ) ? $result['data'] : ( isset( $result['summary'] ) ? $result['summary'] : ( isset( $after_status['issues'] ) ? $after_status['issues'] : null ) ) ),
 			);
 
 		} catch ( Exception $e ) {

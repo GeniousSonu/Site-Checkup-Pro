@@ -1666,7 +1666,10 @@
 				path: `/site-checkup-pro/v1/tasks/${taskId}/run`,
 				method: 'POST',
 				headers: headers,
-				data: token ? { reauth_token: token } : {},
+				data: Object.assign(
+					{ force: true, force_refresh: true },
+					token ? { reauth_token: token } : {}
+				),
 			});
 
 			// Re-authentication check
@@ -1700,7 +1703,7 @@
 			// Update task state
 			task.status = res.status || (res.success ? 'done' : 'failed');
 			task.live_message = res.live_message || res.message;
-			task.last_run_at = new Date().toISOString();
+			task.last_run_at = res.last_run_at || new Date().toISOString();
 			if (res.live_data) {
 				task.live_data = res.live_data;
 			}

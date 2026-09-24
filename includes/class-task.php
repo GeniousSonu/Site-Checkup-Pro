@@ -159,11 +159,12 @@ class WPSG_Task {
 	/**
 	 * Execute the task.
 	 *
+	 * @param bool $force_refresh Whether to bypass transient cache.
 	 * @return array Array with 'success' (bool), 'message' (string), 'data' (array).
 	 */
-	public function run() {
+	public function run( $force_refresh = true ) {
 		if ( is_callable( $this->run_callback ) ) {
-			return call_user_func( $this->run_callback );
+			return call_user_func( $this->run_callback, $force_refresh );
 		}
 
 		return array(
@@ -191,12 +192,13 @@ class WPSG_Task {
 	/**
 	 * Get current live status of this task.
 	 *
+	 * @param bool $force_refresh Whether to bypass transient cache.
 	 * @return array Status payload.
 	 */
-	public function get_live_status() {
+	public function get_live_status( $force_refresh = false ) {
 		if ( is_callable( $this->status_callback ) ) {
 			try {
-				$res = call_user_func( $this->status_callback );
+				$res = call_user_func( $this->status_callback, $force_refresh );
 				return is_array( $res ) ? $res : array( 'status' => 'pending', 'message' => '' );
 			} catch ( \Throwable $e ) {
 				error_log( sprintf( '[Site Checkup Pro] Error evaluating live status for task "%s": %s in %s:%d', $this->id, $e->getMessage(), $e->getFile(), $e->getLine() ) );
@@ -234,11 +236,12 @@ class WPSG_Task {
 	 * Serialize task into array representation for UI/REST.
 	 *
 	 * @param object|array|null $db_status Current database status record if available.
+	 * @param bool              $force_refresh Whether to bypass transient cache on live evaluation.
 	 * @return array
 	 */
-	public function to_array( $db_status = null ) {
+	public function to_array( $db_status = null, $force_refresh = false ) {
 		$db_obj = is_array( $db_status ) ? (object) $db_status : ( is_object( $db_status ) ? $db_status : null );
-		$live   = $this->get_live_status();
+		$live   = $this->get_live_status( $force_refresh );
 
 		$status           = isset( $live['status'] ) ? $live['status'] : ( $db_obj && isset( $db_obj->status ) ? $db_obj->status : 'pending' );
 		$last_run_at      = $db_obj && isset( $db_obj->last_run_at ) ? $db_obj->last_run_at : null;

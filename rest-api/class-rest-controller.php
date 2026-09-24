@@ -561,13 +561,19 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			}
 		}
 
-		$task_id      = $request->get_param( 'id' );
-		$reauth_token = $request->get_header( 'X-WPSG-Reauth' );
+		$task_id       = $request->get_param( 'id' );
+		$reauth_token  = $request->get_header( 'X-WPSG-Reauth' );
 		if ( ! $reauth_token ) {
 			$reauth_token = $request->get_param( 'reauth_token' );
 		}
+		$force_refresh = true; // An explicit run/re-scan action should always evaluate live
+		if ( null !== $request->get_param( 'force' ) ) {
+			$force_refresh = (bool) $request->get_param( 'force' );
+		} elseif ( null !== $request->get_param( 'force_refresh' ) ) {
+			$force_refresh = (bool) $request->get_param( 'force_refresh' );
+		}
 
-		$result = WPSG_Task_Runner::run( $task_id, $reauth_token );
+		$result = WPSG_Task_Runner::run( $task_id, $reauth_token, $force_refresh );
 
 		return rest_ensure_response( $result );
 	}
