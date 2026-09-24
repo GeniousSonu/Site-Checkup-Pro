@@ -28,6 +28,21 @@ class WPSG_Encryption {
 	const HKDF_INFO_HOSTING_PANEL = 'wpsg_hosting_panel_encryption_v1';
 
 	/**
+	 * HKDF Info context string for WPScan API token encryption.
+	 */
+	const HKDF_INFO_WPSCAN = 'wpsg_wpscan_encryption_v1';
+
+	/**
+	 * HKDF Info context string for NVD API key encryption.
+	 */
+	const HKDF_INFO_NVD = 'wpsg_nvd_encryption_v1';
+
+	/**
+	 * HKDF Info context string for Patchstack API key encryption.
+	 */
+	const HKDF_INFO_PATCHSTACK = 'wpsg_patchstack_encryption_v1';
+
+	/**
 	 * Derive a dedicated 256-bit encryption key using HKDF from a WordPress salt.
 	 *
 	 * Isolates keys across functional domains to prevent key-reuse vulnerabilities.

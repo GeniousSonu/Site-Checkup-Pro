@@ -1280,6 +1280,17 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 				'patchstack_api_key_masked' => $redacted_key,
 				'has_patchstack_key'        => ! empty( $settings['patchstack_api_key'] ),
 				'patchstack_optin'          => ! empty( $settings['patchstack_optin'] ),
+				'ghsa_optin'                => ! empty( $settings['ghsa_optin'] ),
+				'osv_optin'                 => ! empty( $settings['osv_optin'] ),
+				'nvd_optin'                 => ! empty( $settings['nvd_optin'] ),
+				'has_nvd_key'               => ! empty( $settings['nvd_api_key_enc'] ),
+				'nvd_key_masked'            => ! empty( $settings['nvd_api_key_enc'] ) ? '••••••••' : '',
+				'cisa_kev_optin'            => ! empty( $settings['cisa_kev_optin'] ),
+				'wporg_api_optin'           => ! empty( $settings['wporg_api_optin'] ),
+				'wpscan_optin'              => ! empty( $settings['wpscan_optin'] ),
+				'has_wpscan_key'            => ! empty( $settings['wpscan_api_key_enc'] ),
+				'wpscan_has_token'          => ! empty( $settings['wpscan_api_key_enc'] ),
+				'wpscan_key_masked'         => ! empty( $settings['wpscan_api_key_enc'] ) ? '••••••••' : '',
 				'webhook_url'               => isset( $settings['webhook_url'] ) ? $settings['webhook_url'] : '',
 				'webhook_optin'             => ! empty( $settings['webhook_optin'] ),
 				'incident_contact_name'     => isset( $settings['incident_contact_name'] ) ? $settings['incident_contact_name'] : '',
@@ -1313,6 +1324,12 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 		$allowlist = array(
 			'patchstack_api_key'     => function( $v ) { return sanitize_text_field( trim( (string) $v ) ); },
 			'patchstack_optin'       => function( $v ) { return ! empty( $v ) ? 1 : 0; },
+			'ghsa_optin'             => function( $v ) { return ! empty( $v ) ? 1 : 0; },
+			'osv_optin'              => function( $v ) { return ! empty( $v ) ? 1 : 0; },
+			'nvd_optin'              => function( $v ) { return ! empty( $v ) ? 1 : 0; },
+			'cisa_kev_optin'         => function( $v ) { return ! empty( $v ) ? 1 : 0; },
+			'wporg_api_optin'        => function( $v ) { return ! empty( $v ) ? 1 : 0; },
+			'wpscan_optin'           => function( $v ) { return ! empty( $v ) ? 1 : 0; },
 			'webhook_url'            => function( $v ) { return esc_url_raw( trim( (string) $v ) ); },
 			'webhook_optin'          => function( $v ) { return ! empty( $v ) ? 1 : 0; },
 			'incident_contact_name'  => function( $v ) { return sanitize_text_field( trim( (string) $v ) ); },
@@ -1365,10 +1382,37 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			}
 		}
 
+		// Handle WPScan API token encrypted storage (never plaintext)
+		$wpscan_input = null;
+		if ( array_key_exists( 'wpscan_token', $params ) ) {
+			$wpscan_input = (string) $params['wpscan_token'];
+		} elseif ( array_key_exists( 'wpscan_api_key', $params ) ) {
+			$wpscan_input = (string) $params['wpscan_api_key'];
+		}
+
+		if ( null !== $wpscan_input ) {
+			$raw_wpscan_key = trim( $wpscan_input );
+			if ( '' !== $raw_wpscan_key && false === strpos( $raw_wpscan_key, '•' ) ) {
+				$current_settings['wpscan_api_key_enc'] = WPSG_Encryption::encrypt( $raw_wpscan_key, WPSG_Encryption::HKDF_INFO_WPSCAN );
+			} elseif ( '' === $raw_wpscan_key ) {
+				unset( $current_settings['wpscan_api_key_enc'] );
+			}
+		}
+
+		// Handle NVD API key encrypted storage (never plaintext)
+		if ( array_key_exists( 'nvd_api_key', $params ) ) {
+			$raw_nvd_key = trim( (string) $params['nvd_api_key'] );
+			if ( '' !== $raw_nvd_key && false === strpos( $raw_nvd_key, '•' ) ) {
+				$current_settings['nvd_api_key_enc'] = WPSG_Encryption::encrypt( $raw_nvd_key, WPSG_Encryption::HKDF_INFO_NVD );
+			} elseif ( '' === $raw_nvd_key ) {
+				unset( $current_settings['nvd_api_key_enc'] );
+			}
+		}
+
 		update_option( 'wpsg_settings', $current_settings );
 
-		// Invalidate vulnerability cache if API key was updated
-		if ( array_key_exists( 'patchstack_api_key', $params ) ) {
+		// Invalidate vulnerability cache if API keys or opt-ins were updated
+		if ( array_key_exists( 'patchstack_api_key', $params ) || null !== $wpscan_input || array_key_exists( 'nvd_api_key', $params ) ) {
 			delete_transient( 'wpsg_vulnerability_cache' );
 		}
 
