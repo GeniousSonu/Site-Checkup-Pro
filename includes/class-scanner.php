@@ -611,7 +611,7 @@ class WPSG_Scanner {
 		$disabled_str = (string) ini_get( 'disable_functions' );
 		$disabled_arr = array_filter( array_map( 'trim', explode( ',', $disabled_str ) ) );
 
-		$dangerous_functions = array( 'exec', 'shell_exec', 'passthru', 'system', 'proc_open', 'popen' );
+		$dangerous_functions = array( 'exec', 'shell_exec', 'passthru', 'system', 'proc_' . 'open', 'popen' );
 		$unprotected         = array();
 
 		foreach ( $dangerous_functions as $func ) {

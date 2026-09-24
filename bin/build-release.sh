@@ -54,6 +54,9 @@ rsync -rc --exclude-from='.distignore' ./ build/wporg/site-checkup-pro/
 rm -f build/wporg/site-checkup-pro/includes/class-update-checker.php
 rm -rf build/wporg/site-checkup-pro/includes/plugin-update-checker/
 
+# Strip Tier 2 Nginx companion completely from WP.org build target
+rm -f build/wporg/site-checkup-pro/includes/class-nginx-tier2.php
+
 cd build/wporg
 zip -r ../site-checkup-pro-wporg.zip site-checkup-pro -x "*.DS_Store"
 # Copy the clean, fully compliant WP.org package as the official root release with the actual plugin name

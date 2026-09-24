@@ -1205,8 +1205,11 @@ run_test( "Guideline 8 Separation: WordPress.org release build strictly excludes
 		exec( "bash " . escapeshellarg( $root . '/bin/build-release.sh' ) . " 1.0.2" );
 	}
 
-	$wporg_clean       = ! file_exists( $wporg_file ) && ! file_exists( $wporg_puc );
-	$selfhosted_has_it = file_exists( $selfhosted_file ) && file_exists( $selfhosted_puc );
+	$wporg_tier2       = $root . '/build/wporg/site-checkup-pro/includes/class-nginx-tier2.php';
+	$selfhosted_tier2  = $root . '/build/self-hosted/site-checkup-pro/includes/class-nginx-tier2.php';
+
+	$wporg_clean       = ! file_exists( $wporg_file ) && ! file_exists( $wporg_puc ) && ! file_exists( $wporg_tier2 );
+	$selfhosted_has_it = file_exists( $selfhosted_file ) && file_exists( $selfhosted_puc ) && file_exists( $selfhosted_tier2 );
 
 	return ( $wporg_clean && $selfhosted_has_it );
 } );

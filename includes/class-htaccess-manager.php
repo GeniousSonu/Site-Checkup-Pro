@@ -317,35 +317,17 @@ class WPSG_Htaccess_Manager {
 	}
 
 	/**
-	 * Check if Tier 2 (Companion include directory + sudoers reload) is active.
+	 * Check if Tier 2 (Companion include directory) is active.
 	 *
-	 * Requires that the companion script was run, the marker file exists and is owned by root,
-	 * and the include directory is writable.
+	 * Requires that the companion module is present and configured.
 	 *
 	 * @return bool
 	 */
 	public static function has_nginx_tier2() {
-		if ( defined( 'WPSG_NGINX_TIER2_ACTIVE' ) && WPSG_NGINX_TIER2_ACTIVE ) {
-			return true;
+		if ( class_exists( 'WPSG_Nginx_Tier2' ) ) {
+			return WPSG_Nginx_Tier2::is_active();
 		}
-
-		$conf_dir = self::get_nginx_conf_dir();
-		$marker   = defined( 'WPSG_NGINX_TIER2_MARKER' ) ? WPSG_NGINX_TIER2_MARKER : $conf_dir . '.wpsg-tier2-active';
-
-		if ( ! file_exists( $marker ) ) {
-			return false;
-		}
-
-		// Security constraint: Marker file must be owned by UID 0 (root)
-		$bypass_owner = defined( 'WPSG_TEST_SUITE' ) && WPSG_TEST_SUITE;
-		if ( ! $bypass_owner ) {
-			$owner = @fileowner( $marker );
-			if ( 0 !== $owner ) {
-				return false;
-			}
-		}
-
-		return is_dir( $conf_dir ) && is_writable( $conf_dir );
+		return false;
 	}
 
 	/**
@@ -354,10 +336,10 @@ class WPSG_Htaccess_Manager {
 	 * @return string
 	 */
 	public static function get_nginx_conf_dir() {
-		if ( defined( 'WPSG_NGINX_CONF_DIR' ) && WPSG_NGINX_CONF_DIR ) {
-			return trailingslashit( WPSG_NGINX_CONF_DIR );
+		if ( class_exists( 'WPSG_Nginx_Tier2' ) ) {
+			return WPSG_Nginx_Tier2::get_conf_dir();
 		}
-		return '/etc/nginx/site-checkup-pro/';
+		return '';
 	}
 
 	/**
@@ -366,89 +348,26 @@ class WPSG_Htaccess_Manager {
 	 * @return string
 	 */
 	public static function get_nginx_staging_dir() {
-		$dir = self::get_nginx_conf_dir() . '.staging/';
-		if ( ! is_dir( $dir ) && is_writable( self::get_nginx_conf_dir() ) ) {
-			@mkdir( $dir, 0770, true );
+		if ( class_exists( 'WPSG_Nginx_Tier2' ) ) {
+			return WPSG_Nginx_Tier2::get_staging_dir();
 		}
-		return $dir;
+		return '';
 	}
 
 	/**
-	 * Execute a strictly hardcoded system command via proc_open without shell invocation.
-	 *
-	 * Architectural Exception: Allows exactly two literal fixed command arrays for
-	 * syntax-checking and reloading Nginx without invoking /bin/sh.
-	 * Zero variables, zero interpolation, zero concatenation.
+	 * Execute a strictly hardcoded system command via Tier 2 companion.
 	 *
 	 * @param array $cmd Literal command array.
 	 * @return array Array with 'success' (bool), 'exit_code' (int), 'output' (string).
 	 */
 	public static function execute_fixed_system_command( array $cmd ) {
-		// Strictly hardcoded command allowlist
-		$allowed_commands = array(
-			array( 'sudo', '/usr/sbin/nginx', '-t' ),
-			array( 'sudo', '/bin/systemctl', 'reload', 'nginx' ),
-			array( 'sudo', '/usr/sbin/service', 'nginx', 'reload' ),
-		);
-
-		$matched = false;
-		foreach ( $allowed_commands as $allowed ) {
-			if ( $cmd === $allowed ) {
-				$matched = true;
-				break;
-			}
+		if ( class_exists( 'WPSG_Nginx_Tier2' ) ) {
+			return WPSG_Nginx_Tier2::execute_fixed_system_command( $cmd );
 		}
-
-		if ( ! $matched ) {
-			return array(
-				'success'   => false,
-				'exit_code' => -1,
-				'output'    => 'Command not in strictly allowed fixed argv list.',
-			);
-		}
-
-		// Allow test suites to mock execution via filter
-		$mock = apply_filters( 'wpsg_pre_execute_system_command', null, $cmd );
-		if ( null !== $mock ) {
-			return $mock;
-		}
-
-		if ( ! function_exists( 'proc_open' ) ) {
-			return array(
-				'success'   => false,
-				'exit_code' => -1,
-				'output'    => 'proc_open function is disabled on this server.',
-			);
-		}
-
-		$descriptors = array(
-			0 => array( 'pipe', 'r' ),
-			1 => array( 'pipe', 'w' ),
-			2 => array( 'pipe', 'w' ),
-		);
-
-		$process = @proc_open( $cmd, $descriptors, $pipes );
-		if ( ! is_resource( $process ) ) {
-			return array(
-				'success'   => false,
-				'exit_code' => -1,
-				'output'    => 'Failed to spawn process.',
-			);
-		}
-
-		fclose( $pipes[0] );
-		$stdout = stream_get_contents( $pipes[1] );
-		fclose( $pipes[1] );
-		$stderr = stream_get_contents( $pipes[2] );
-		fclose( $pipes[2] );
-
-		$exit_code = proc_close( $process );
-		$output    = trim( $stdout . "\n" . $stderr );
-
 		return array(
-			'success'   => 0 === $exit_code,
-			'exit_code' => $exit_code,
-			'output'    => $output,
+			'success'   => false,
+			'exit_code' => -1,
+			'output'    => 'Tier 2 execution unavailable.',
 		);
 	}
 
@@ -477,69 +396,8 @@ class WPSG_Htaccess_Manager {
 		}
 
 		// Tier 2: Companion Directory with atomic staging + test-before-live
-		if ( self::has_nginx_tier2() ) {
-			$conf_dir    = self::get_nginx_conf_dir();
-			$staging_dir = self::get_nginx_staging_dir();
-			$safe_key    = sanitize_key( $rule_key );
-
-			$staging_file = $staging_dir . $safe_key . '.conf';
-			$live_file    = $conf_dir . $safe_key . '.conf';
-
-			// 1. Write rule to staging file
-			$header  = "# Site Checkup Pro Rule: {$safe_key}\n# Generated: " . gmdate( 'Y-m-d H:i:s' ) . " UTC\n";
-			$content = $header . trim( $directive ) . "\n";
-
-			if ( false === @file_put_contents( $staging_file, $content ) ) {
-				return array(
-					'success' => false,
-					'message' => __( 'Could not write directive to Nginx staging path. Verify directory permissions.', 'site-checkup-pro' ),
-				);
-			}
-
-			// 2. Syntax-check config using fixed command
-			$test_res = self::execute_fixed_system_command( array( 'sudo', '/usr/sbin/nginx', '-t' ) );
-			if ( ! $test_res['success'] ) {
-				// Syntax check failed! Discard staged file immediately
-				@unlink( $staging_file );
-				return array(
-					'success' => false,
-					'message' => sprintf(
-						/* translators: %s: syntax test error message */
-						__( 'Nginx configuration test failed (%s). Rule was safely discarded before going live.', 'site-checkup-pro' ),
-						$test_res['output']
-					),
-				);
-			}
-
-			// 3. Atomically rename into live include directory
-			if ( ! @rename( $staging_file, $live_file ) ) {
-				@unlink( $staging_file );
-				return array(
-					'success' => false,
-					'message' => __( 'Could not atomically move validated config into live Nginx directory.', 'site-checkup-pro' ),
-				);
-			}
-
-			// 4. Reload Nginx
-			$reload_res = self::execute_fixed_system_command( array( 'sudo', '/bin/systemctl', 'reload', 'nginx' ) );
-			if ( ! $reload_res['success'] ) {
-				// Fallback to service reload
-				$reload_res = self::execute_fixed_system_command( array( 'sudo', '/usr/sbin/service', 'nginx', 'reload' ) );
-			}
-
-			if ( ! $reload_res['success'] ) {
-				// Rollback
-				@unlink( $live_file );
-				return array(
-					'success' => false,
-					'message' => sprintf( __( 'Nginx reload failed: %s. Rule was rolled back.', 'site-checkup-pro' ), $reload_res['output'] ),
-				);
-			}
-
-			return array(
-				'success' => true,
-				'message' => __( 'Nginx directive validated and applied successfully (Tier 2).', 'site-checkup-pro' ),
-			);
+		if ( self::has_nginx_tier2() && class_exists( 'WPSG_Nginx_Tier2' ) ) {
+			return WPSG_Nginx_Tier2::apply_rule( $rule_key, $directive );
 		}
 
 		return array(
@@ -559,35 +417,8 @@ class WPSG_Htaccess_Manager {
 			return WPSG_Hosting_Panel_Bridge::remove_directive( $rule_key );
 		}
 
-		if ( self::has_nginx_tier2() ) {
-			$conf_dir  = self::get_nginx_conf_dir();
-			$safe_key  = sanitize_key( $rule_key );
-			$live_file = $conf_dir . $safe_key . '.conf';
-
-			if ( file_exists( $live_file ) ) {
-				$staging_dir  = self::get_nginx_staging_dir();
-				$staging_file = $staging_dir . $safe_key . '.conf.bak';
-				@copy( $live_file, $staging_file );
-				@unlink( $live_file );
-
-				$test_res = self::execute_fixed_system_command( array( 'sudo', '/usr/sbin/nginx', '-t' ) );
-				if ( ! $test_res['success'] ) {
-					// Restore
-					@rename( $staging_file, $live_file );
-					return array(
-						'success' => false,
-						'message' => __( 'Nginx configuration test failed after removal attempt. Rolled back.', 'site-checkup-pro' ),
-					);
-				}
-
-				@unlink( $staging_file );
-				self::execute_fixed_system_command( array( 'sudo', '/bin/systemctl', 'reload', 'nginx' ) );
-			}
-
-			return array(
-				'success' => true,
-				'message' => __( 'Nginx directive removed successfully (Tier 2).', 'site-checkup-pro' ),
-			);
+		if ( self::has_nginx_tier2() && class_exists( 'WPSG_Nginx_Tier2' ) ) {
+			return WPSG_Nginx_Tier2::remove_rule( $rule_key );
 		}
 
 		return array(
@@ -603,13 +434,12 @@ class WPSG_Htaccess_Manager {
 	 * @return bool
 	 */
 	public static function has_nginx_named_rule( $rule_key ) {
-		if ( self::has_nginx_tier2() ) {
-			$safe_key  = sanitize_key( $rule_key );
-			$live_file = self::get_nginx_conf_dir() . $safe_key . '.conf';
-			return file_exists( $live_file );
+		if ( self::has_nginx_tier2() && class_exists( 'WPSG_Nginx_Tier2' ) ) {
+			return WPSG_Nginx_Tier2::has_rule( $rule_key );
 		}
 		return false;
 	}
+
 
 	/**
 	 * Get absolute path to the webroot .htaccess file.
