@@ -25,31 +25,133 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 
 		<div class="wpsg-modal-body">
-			<!-- Vulnerability API Settings -->
+			<!-- Multi-Source Vulnerability Intelligence Settings -->
 			<div class="wpsg-form-section" style="margin-bottom: 20px;">
 				<h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: var(--wpsg-text-primary);">
-					<?php esc_html_e( 'Patchstack Vulnerability Intelligence API', 'site-checkup-pro' ); ?>
+					<?php esc_html_e( 'Vulnerability Intelligence Sources', 'site-checkup-pro' ); ?>
 				</h4>
-				<p style="margin: 0 0 10px 0; font-size: 12px; color: var(--wpsg-text-secondary);">
-					<?php esc_html_e( 'Enter your Patchstack API key for continuous live cross-referencing of installed plugins against active security advisories. An optional free-tier key can be obtained from Patchstack.', 'site-checkup-pro' ); ?>
+				<p style="margin: 0 0 14px 0; font-size: 12px; color: var(--wpsg-text-secondary);">
+					<?php esc_html_e( 'Configure opt-in external intelligence sources to cross-reference installed plugins and themes against active CVE advisories. All API keys and tokens are encrypted at rest using HKDF-derived keys and never logged. Outbound queries require explicit opt-in per WordPress.org Guideline 7.', 'site-checkup-pro' ); ?>
 				</p>
-				<div class="wpsg-input-group">
-					<label for="wpsg-setting-patchstack-key" style="display: block; font-size: 12px; font-weight: 500; margin-bottom: 4px;">
-						<?php esc_html_e( 'Patchstack API Token', 'site-checkup-pro' ); ?>
-					</label>
-					<input type="password" id="wpsg-setting-patchstack-key" class="wpsg-input" placeholder="<?php esc_attr_e( 'Paste API key or leave blank for default check', 'site-checkup-pro' ); ?>" style="width: 100%;" autocomplete="off" />
-					<p id="wpsg-patchstack-masked-status" style="margin: 4px 0 0 0; font-size: 11px; color: var(--wpsg-text-muted);"></p>
-				</div>
-				<div style="margin-top: 10px; padding: 10px; background: var(--wpsg-bg); border: 1px solid var(--wpsg-border); border-radius: 6px;">
-					<label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px; font-weight: 500; cursor: pointer;">
-						<input type="checkbox" id="wpsg-setting-patchstack-optin" style="margin-top: 2px;" />
+
+				<!-- GitHub Security Advisories -->
+				<div style="margin-bottom: 14px; padding: 12px; background: var(--wpsg-bg); border: 1px solid var(--wpsg-border); border-radius: 6px;">
+					<label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px; font-weight: 500; cursor: pointer; margin-bottom: 8px;">
+						<input type="checkbox" id="wpsg-setting-ghsa-optin" style="margin-top: 2px;" />
 						<span>
-							<strong><?php esc_html_e( 'Allow outbound queries to Patchstack API (Explicit Consent)', 'site-checkup-pro' ); ?></strong><br />
+							<strong><?php esc_html_e( 'GitHub Security Advisories (GHSA)', 'site-checkup-pro' ); ?></strong><br />
 							<span style="font-weight: 400; color: var(--wpsg-text-secondary); font-size: 11px;">
-								<?php esc_html_e( 'Per WordPress.org Guideline 7, outbound network calls require explicit user consent. When enabled, Site Checkup Pro transmits installed plugin/theme slugs and version numbers to Patchstack (https://patchstack.com/database/api/v2/vulnerabilities) to query public CVE advisories. No personal data, user credentials, or database records are ever transmitted.', 'site-checkup-pro' ); ?>
+								<?php esc_html_e( 'Query GitHub GraphQL/REST Advisories API (api.github.com) for WordPress package advisories and version ranges.', 'site-checkup-pro' ); ?>
 							</span>
 						</span>
 					</label>
+					<div class="wpsg-input-group" style="margin-top: 8px; padding-left: 24px;">
+						<label for="wpsg-setting-ghsa-key" style="display: block; font-size: 11px; font-weight: 500; margin-bottom: 4px; color: var(--wpsg-text-secondary);">
+							<?php esc_html_e( 'GitHub Personal Access Token (Optional, for higher rate limits)', 'site-checkup-pro' ); ?>
+						</label>
+						<input type="password" id="wpsg-setting-ghsa-key" class="wpsg-input" placeholder="<?php esc_attr_e( 'Paste GitHub token (stored encrypted with HKDF)', 'site-checkup-pro' ); ?>" style="width: 100%; font-size: 12px;" autocomplete="off" />
+						<p id="wpsg-ghsa-masked-status" style="margin: 4px 0 0 0; font-size: 11px; color: var(--wpsg-text-muted);"></p>
+					</div>
+				</div>
+
+				<!-- OSV (Open Source Vulnerabilities) -->
+				<div style="margin-bottom: 14px; padding: 12px; background: var(--wpsg-bg); border: 1px solid var(--wpsg-border); border-radius: 6px;">
+					<label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px; font-weight: 500; cursor: pointer; margin-bottom: 8px;">
+						<input type="checkbox" id="wpsg-setting-osv-optin" style="margin-top: 2px;" />
+						<span>
+							<strong><?php esc_html_e( 'OSV.dev (Open Source Vulnerabilities)', 'site-checkup-pro' ); ?></strong><br />
+							<span style="font-weight: 400; color: var(--wpsg-text-secondary); font-size: 11px;">
+								<?php esc_html_e( 'Query Google OSV database (api.osv.dev) for precise semantic version range correlation.', 'site-checkup-pro' ); ?>
+							</span>
+						</span>
+					</label>
+					<div class="wpsg-input-group" style="margin-top: 8px; padding-left: 24px;">
+						<label for="wpsg-setting-osv-key" style="display: block; font-size: 11px; font-weight: 500; margin-bottom: 4px; color: var(--wpsg-text-secondary);">
+							<?php esc_html_e( 'OSV API Key / Token (Optional, stored encrypted)', 'site-checkup-pro' ); ?>
+						</label>
+						<input type="password" id="wpsg-setting-osv-key" class="wpsg-input" placeholder="<?php esc_attr_e( 'Paste OSV API key or leave blank for public queries', 'site-checkup-pro' ); ?>" style="width: 100%; font-size: 12px;" autocomplete="off" />
+						<p id="wpsg-osv-masked-status" style="margin: 4px 0 0 0; font-size: 11px; color: var(--wpsg-text-muted);"></p>
+					</div>
+				</div>
+
+				<!-- NVD (National Vulnerability Database) -->
+				<div style="margin-bottom: 14px; padding: 12px; background: var(--wpsg-bg); border: 1px solid var(--wpsg-border); border-radius: 6px;">
+					<label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px; font-weight: 500; cursor: pointer; margin-bottom: 8px;">
+						<input type="checkbox" id="wpsg-setting-nvd-optin" style="margin-top: 2px;" />
+						<span>
+							<strong><?php esc_html_e( 'NVD (National Vulnerability Database - NIST)', 'site-checkup-pro' ); ?></strong><br />
+							<span style="font-weight: 400; color: var(--wpsg-text-secondary); font-size: 11px;">
+								<?php esc_html_e( 'Query NIST NVD 2.0 API (services.nvd.nist.gov) for authoritative CVE records and CVSS severity metrics.', 'site-checkup-pro' ); ?>
+							</span>
+						</span>
+					</label>
+					<div class="wpsg-input-group" style="margin-top: 8px; padding-left: 24px;">
+						<label for="wpsg-setting-nvd-key" style="display: block; font-size: 11px; font-weight: 500; margin-bottom: 4px; color: var(--wpsg-text-secondary);">
+							<?php esc_html_e( 'NVD API Key (Recommended for higher rate limits)', 'site-checkup-pro' ); ?>
+						</label>
+						<input type="password" id="wpsg-setting-nvd-key" class="wpsg-input" placeholder="<?php esc_attr_e( 'Paste NIST NVD 2.0 API key (stored encrypted with HKDF)', 'site-checkup-pro' ); ?>" style="width: 100%; font-size: 12px;" autocomplete="off" />
+						<p id="wpsg-nvd-masked-status" style="margin: 4px 0 0 0; font-size: 11px; color: var(--wpsg-text-muted);"></p>
+					</div>
+				</div>
+
+				<!-- CISA KEV (Known Exploited Vulnerabilities) -->
+				<div style="margin-bottom: 14px; padding: 12px; background: var(--wpsg-bg); border: 1px solid var(--wpsg-border); border-radius: 6px;">
+					<label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px; font-weight: 500; cursor: pointer; margin-bottom: 8px;">
+						<input type="checkbox" id="wpsg-setting-cisa-kev-optin" style="margin-top: 2px;" />
+						<span>
+							<strong><?php esc_html_e( 'CISA KEV Catalog (Actively Exploited in the Wild)', 'site-checkup-pro' ); ?></strong><br />
+							<span style="font-weight: 400; color: var(--wpsg-text-secondary); font-size: 11px;">
+								<?php esc_html_e( 'Cross-reference detected CVEs against the CISA Known Exploited Vulnerabilities catalog (cisa.gov) to highlight critical weaponized threats.', 'site-checkup-pro' ); ?>
+							</span>
+						</span>
+					</label>
+					<div class="wpsg-input-group" style="margin-top: 8px; padding-left: 24px;">
+						<label for="wpsg-setting-cisa-kev-key" style="display: block; font-size: 11px; font-weight: 500; margin-bottom: 4px; color: var(--wpsg-text-secondary);">
+							<?php esc_html_e( 'CISA Access / Proxy Token (Optional, stored encrypted)', 'site-checkup-pro' ); ?>
+						</label>
+						<input type="password" id="wpsg-setting-cisa-kev-key" class="wpsg-input" placeholder="<?php esc_attr_e( 'Paste token or leave blank for default feed', 'site-checkup-pro' ); ?>" style="width: 100%; font-size: 12px;" autocomplete="off" />
+						<p id="wpsg-cisa-kev-masked-status" style="margin: 4px 0 0 0; font-size: 11px; color: var(--wpsg-text-muted);"></p>
+					</div>
+				</div>
+
+				<!-- WPScan Vulnerability Database -->
+				<div style="margin-bottom: 14px; padding: 12px; background: var(--wpsg-bg); border: 1px solid var(--wpsg-border); border-radius: 6px;">
+					<label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px; font-weight: 500; cursor: pointer; margin-bottom: 8px;">
+						<input type="checkbox" id="wpsg-setting-wpscan-optin" style="margin-top: 2px;" />
+						<span>
+							<strong><?php esc_html_e( 'WPScan Vulnerability Database API', 'site-checkup-pro' ); ?></strong><br />
+							<span style="font-weight: 400; color: var(--wpsg-text-secondary); font-size: 11px;">
+								<?php esc_html_e( 'Query Automattic WPScan database (wpscan.com/api/v3). Note: Per WPScan terms, vulnerability data from this source is strictly non-cached and never permanently stored.', 'site-checkup-pro' ); ?>
+							</span>
+						</span>
+					</label>
+					<div class="wpsg-input-group" style="margin-top: 8px; padding-left: 24px;">
+						<label for="wpsg-setting-wpscan-token" style="display: block; font-size: 11px; font-weight: 500; margin-bottom: 4px; color: var(--wpsg-text-secondary);">
+							<?php esc_html_e( 'WPScan API Token', 'site-checkup-pro' ); ?>
+						</label>
+						<input type="password" id="wpsg-setting-wpscan-token" class="wpsg-input" placeholder="<?php esc_attr_e( 'Paste WPScan user API token (stored encrypted with HKDF)', 'site-checkup-pro' ); ?>" style="width: 100%; font-size: 12px;" autocomplete="off" />
+						<p id="wpsg-wpscan-masked-status" style="margin: 4px 0 0 0; font-size: 11px; color: var(--wpsg-text-muted);"></p>
+					</div>
+				</div>
+
+				<!-- Patchstack API -->
+				<div style="margin-bottom: 0; padding: 12px; background: var(--wpsg-bg); border: 1px solid var(--wpsg-border); border-radius: 6px;">
+					<label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px; font-weight: 500; cursor: pointer; margin-bottom: 8px;">
+						<input type="checkbox" id="wpsg-setting-patchstack-optin" style="margin-top: 2px;" />
+						<span>
+							<strong><?php esc_html_e( 'Patchstack Vulnerability Intelligence API', 'site-checkup-pro' ); ?></strong><br />
+							<span style="font-weight: 400; color: var(--wpsg-text-secondary); font-size: 11px;">
+								<?php esc_html_e( 'Cross-reference plugins and themes against Patchstack database (patchstack.com/database/api/v2).', 'site-checkup-pro' ); ?>
+							</span>
+						</span>
+					</label>
+					<div class="wpsg-input-group" style="margin-top: 8px; padding-left: 24px;">
+						<label for="wpsg-setting-patchstack-key" style="display: block; font-size: 11px; font-weight: 500; margin-bottom: 4px; color: var(--wpsg-text-secondary);">
+							<?php esc_html_e( 'Patchstack API Token', 'site-checkup-pro' ); ?>
+						</label>
+						<input type="password" id="wpsg-setting-patchstack-key" class="wpsg-input" placeholder="<?php esc_attr_e( 'Paste API key or leave blank for default check', 'site-checkup-pro' ); ?>" style="width: 100%; font-size: 12px;" autocomplete="off" />
+						<p id="wpsg-patchstack-masked-status" style="margin: 4px 0 0 0; font-size: 11px; color: var(--wpsg-text-muted);"></p>
+					</div>
 				</div>
 			</div>
 

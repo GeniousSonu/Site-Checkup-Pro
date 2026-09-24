@@ -7,7 +7,7 @@ Tags: security, hardening, security audit, login security, firewall
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -19,7 +19,7 @@ Security audit, site hardening checklist, and vulnerability scanner for WordPres
 
 Rather than competing with or replacing mature firewalls and backup tools, Site Checkup Pro audits your environment, detects vulnerabilities, and applies verified, reversible **hardening** fixes with zero bloat. Automate safe security tasks, guide complex configurations with seamless plugin bridges, track routine credential rotations, and generate print-ready executive client audit reports:
 
-* **Level A (Safe Automation & Scanners):** Disable XML-RPC, restrict unauthenticated REST user enumeration, hide PHP versions, enforce clickjacking protection (X-Frame-Options), MIME sniffing protection, HSTS, disable front-end `WP_DEBUG_DISPLAY`, audit file permissions (strict 640 baseline on `wp-config.php`), detect risky PHP `disable_functions` / `open_basedir`, check default `wp_` database prefix, and probe TLS protocols (`TLSv1.0` through `TLSv1.3`) and certificate chain depth.
+* **Level A (Safe Automation & Scanners):** Disable XML-RPC, restrict unauthenticated REST user enumeration, hide PHP versions, enforce clickjacking protection (X-Frame-Options), MIME sniffing protection, HSTS, disable front-end `WP_DEBUG_DISPLAY`, audit file permissions (strict 640 baseline on `wp-config.php`), detect risky PHP `disable_functions` / `open_basedir`, check default `wp_` database prefix, external fingerprint scanner, and probe TLS protocols (`TLSv1.0` through `TLSv1.3`) and certificate chain depth.
 * **Level B (Guided Actions & Bridges):** Seamlessly detects and bridges to mature, audited plugins (WPS Hide Login, Wordfence, Two-Factor Authentication, and Backup plugins) with recommended setting checklists. Generates RFC 9116 `/.well-known/security.txt` responsible disclosure contact files.
 * **Level C (Manual Audits & Reminders):** Track 15-day credential rotations (cPanel, WordPress admin), quarterly (90-day) backup restore test rehearsals, staging site HTTP basic authentication, and 6-month Google Search Console URL removal reviews with automated dashboard reminder notices.
 * **Level D (Executive Client Reports):** Generate print-ready HTML and PDF audit summaries detailing completed hardening, SOP coverage percentage, emergency incident-response escalation sheets, and timestamped audit logs for client handoff.
@@ -56,6 +56,40 @@ Site Checkup Pro connects to the following external third-party services to deli
    - **Explicit Consent Required:** Outbound alert dispatch requires an explicit opt-in checkbox to be enabled in Plugin Settings per WordPress.org Guideline 7.
    - **Data Sent:** Factual incident event summaries (timestamp, alert type, sanitized technical message). Audit logs and webhook payloads strictly redact passwords, security salts, and authentication tokens.
    - **Terms & Privacy:** Governed by the destination endpoint provider chosen by the site administrator.
+
+4. **GitHub Advisory Database (GHSA) (`https://api.github.com`)**
+   - **Service & Purpose:** Queries the GitHub Advisory Database GraphQL/REST API for known security advisories affecting installed WordPress plugins and themes.
+   - **Explicit Consent Required:** Disabled by default. Outbound requests require enabling the GHSA toggle in Settings per WordPress.org Guideline 7.
+   - **Data Sent:** Software component slugs and versions. If supplied, an encrypted GitHub Personal Access Token is sent in the Authorization header. No personal user data or site contents are sent.
+   - **Privacy Policy:** [GitHub Privacy Statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement)
+   - **Terms of Service:** [GitHub Terms of Service](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service)
+
+5. **Open Source Vulnerabilities (OSV) API (`https://api.osv.dev`)**
+   - **Service & Purpose:** Queries the Google OSV distributed vulnerability database for security advisories across open-source ecosystems.
+   - **Explicit Consent Required:** Disabled by default. Outbound requests require enabling the OSV toggle in Settings per WordPress.org Guideline 7.
+   - **Data Sent:** Software component names and version strings. No user or visitor personal data is transmitted.
+   - **Privacy Policy:** [Google Privacy Policy](https://policies.google.com/privacy)
+   - **Terms of Service:** [OSV Terms of Service](https://osv.dev/faq)
+
+6. **National Vulnerability Database (NVD) API (`https://services.nvd.nist.gov`)**
+   - **Service & Purpose:** Queries the NIST National Vulnerability Database for Common Vulnerabilities and Exposures (CVE) intelligence and CVSS scores.
+   - **Explicit Consent Required:** Disabled by default. Outbound requests require enabling the NVD toggle in Settings per WordPress.org Guideline 7.
+   - **Data Sent:** Software identifiers and version parameters. Optional encrypted NVD API key sent if configured. No personally identifiable information is sent.
+   - **Privacy Policy:** [NIST Privacy Policy](https://www.nist.gov/privacy-policy)
+
+7. **CISA Known Exploited Vulnerabilities Catalog (KEV) (`https://www.cisa.gov`)**
+   - **Service & Purpose:** Cross-references installed software with the CISA Known Exploited Vulnerabilities catalog to alert administrators of actively weaponized zero-days and exploits.
+   - **Explicit Consent Required:** Disabled by default. Outbound requests require enabling the CISA KEV toggle in Settings per WordPress.org Guideline 7.
+   - **Data Sent:** No site or user data is transmitted. Only a standard GET request to fetch the public catalog JSON feed.
+   - **Privacy Policy:** [CISA Privacy Policy](https://www.cisa.gov/privacy-policy)
+
+8. **WPScan WordPress Vulnerability Database (`https://wpscan.com`)**
+   - **Service & Purpose:** Queries the WPScan vulnerability database for dedicated WordPress core, plugin, and theme security advisories.
+   - **Explicit Consent Required:** Disabled by default. Outbound requests require enabling the WPScan toggle and providing an API key in Settings per WordPress.org Guideline 7.
+   - **Data Sent:** Plugin and theme slugs and version numbers, along with the encrypted API token in request headers. No site content, visitor data, or user credentials are transmitted.
+   - **Data Handling Notice:** In strict compliance with WPScan Terms of Service and data licensing, vulnerability intelligence data retrieved from WPScan is never permanently stored or cached on disk.
+   - **Privacy Policy:** [WPScan Privacy Policy](https://wpscan.com/privacy)
+   - **Terms of Service:** [WPScan Terms of Service](https://wpscan.com/terms)
 
 == Source Code & Development ==
 
@@ -95,6 +129,13 @@ Version 1.0 is optimized for single-site agency workflows. On Multisite installa
 4. Client-facing executive SOP coverage report ready for PDF export with emergency incident response contacts.
 
 == Changelog ==
+
+= 1.3.0 =
+* Feature: Multi-Source Vulnerability Intelligence — Unified threat feed integrating GitHub Advisory Database (GHSA), Google OSV, NIST NVD, CISA Known Exploited Vulnerabilities (KEV), and WPScan with strict Guideline 7 consent toggles and HKDF-encrypted API keys.
+* Feature: Compound Version-Range Correlation — Semver boundary parser (`<`, `<=`, `>`, `>=`, `=`, `x`, compound `,` / `AND`) mapping vulnerability ranges accurately to installed plugin/theme versions.
+* Feature: 3-State Fix Verification — Verifies vulnerability remediations (`done`, `applied_unverified`, `not_applied`) through live HTTP header and file checks.
+* Feature: External Fingerprint & Information Disclosure Audit — Non-destructive loopback scanner probing for exposed backup dumps, sensitive files, and version leaks.
+* Security: End-to-End Cryptographic Masking — HKDF-derived encryption at rest for all third-party API credentials with write-only REST submissions and masked getters.
 
 = 1.2.0 =
 * Feature: REST API Security Auditor — Complete discovery and permission callback inspection of all registered REST endpoints across core, active plugins, and themes with risk scoring and source reflection.

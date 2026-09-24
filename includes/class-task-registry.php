@@ -753,6 +753,51 @@ class WPSG_Task_Registry {
 			},
 		) ) );
 
+		// 2.21 External Fingerprint & Information Disclosure Audit
+		$this->register( new WPSG_Task( array(
+			'id'               => 'external_fingerprint_check',
+			'section'          => 'general_check',
+			'title'            => __( 'External Fingerprint & Information Disclosure Audit', 'site-checkup-pro' ),
+			'description'      => __( 'Conducts safe, non-destructive loopback HTTP probes against the site origin to detect exposed sensitive files, version disclosures, backup artifacts, and debug logs.', 'site-checkup-pro' ),
+			'automation_level' => 'A',
+			'sub_type'         => 'instant',
+			'status_callback'  => function () {
+				if ( ! class_exists( 'WPSG_External_Fingerprint' ) ) {
+					return array( 'status' => 'pending', 'message' => __( 'External Fingerprint scanner not loaded.', 'site-checkup-pro' ) );
+				}
+				$res         = WPSG_External_Fingerprint::scan();
+				$exposed_cnt = isset( $res['exposed_count'] ) ? (int) $res['exposed_count'] : 0;
+				return array(
+					'status'        => $exposed_cnt > 0 ? 'attention' : 'done',
+					'message'       => isset( $res['message'] ) ? $res['message'] : '',
+					'exposed_count' => $exposed_cnt,
+					'exposed_items' => isset( $res['exposed_items'] ) ? $res['exposed_items'] : array(),
+				);
+			},
+			'run_callback'     => function () {
+				if ( ! class_exists( 'WPSG_External_Fingerprint' ) ) {
+					return array( 'success' => false, 'message' => __( 'External Fingerprint scanner not loaded.', 'site-checkup-pro' ) );
+				}
+				$res         = WPSG_External_Fingerprint::scan( true );
+				$exposed_cnt = isset( $res['exposed_count'] ) ? (int) $res['exposed_count'] : 0;
+				if ( class_exists( 'WPSG_Audit_Logger' ) ) {
+					WPSG_Audit_Logger::log(
+						'external_fingerprint_scanned',
+						sprintf( 'External fingerprint probe: %1$d exposed path(s) detected out of %2$d probed.', $exposed_cnt, isset( $res['total_probed'] ) ? (int) $res['total_probed'] : 0 ),
+						'system',
+						$exposed_cnt > 0 ? 'warning' : 'info'
+					);
+				}
+				return array(
+					'success'       => true,
+					'status'        => $exposed_cnt > 0 ? 'attention' : 'done',
+					'message'       => isset( $res['message'] ) ? $res['message'] : '',
+					'exposed_count' => $exposed_cnt,
+					'exposed_items' => isset( $res['exposed_items'] ) ? $res['exposed_items'] : array(),
+				);
+			},
+		) ) );
+
 		// ==========================================
 		// SECTION 3: HARDENING (.htaccess & wp-config)
 		// ==========================================

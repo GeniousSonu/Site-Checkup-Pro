@@ -1112,30 +1112,122 @@ $login_slug    = WPSG_Login_Renamer::get_login_slug();
 					<form id="wpsg-inpage-settings-form" onsubmit="return false;">
 						
 						<!-- Section 1: Patchstack API -->
+						<!-- Section 1: Vulnerability Intelligence Sources -->
 						<div class="wpsg-settings-card">
 							<div class="wpsg-settings-card-header">
 								<div class="wpsg-settings-icon wpsg-icon-brand"><span class="dashicons dashicons-shield"></span></div>
 								<div>
-									<h3><?php esc_html_e( 'Patchstack Vulnerability Intelligence API', 'site-checkup-pro' ); ?></h3>
-									<p><?php esc_html_e( 'Live cross-referencing of installed plugins & themes against active CVE vulnerabilities.', 'site-checkup-pro' ); ?></p>
+									<h3><?php esc_html_e( 'Multi-Source Vulnerability Intelligence', 'site-checkup-pro' ); ?></h3>
+									<p><?php esc_html_e( 'Continuous cross-referencing against public security advisories with multi-source evidence chains.', 'site-checkup-pro' ); ?></p>
 								</div>
 							</div>
 							<div class="wpsg-settings-card-body">
-								<div class="wpsg-input-group">
-									<label for="wpsg-page-setting-patchstack-key"><?php esc_html_e( 'Patchstack API Token', 'site-checkup-pro' ); ?></label>
-									<input type="password" id="wpsg-page-setting-patchstack-key" class="wpsg-input" placeholder="<?php esc_attr_e( 'Paste API key or leave blank for default local advisories', 'site-checkup-pro' ); ?>" autocomplete="off" />
-									<p id="wpsg-page-patchstack-masked-status" class="wpsg-input-hint"></p>
-								</div>
-								<div class="wpsg-consent-box">
-									<label class="wpsg-checkbox-label">
-										<input type="checkbox" id="wpsg-page-setting-patchstack-optin" />
+								<!-- GitHub Security Advisories -->
+								<div style="margin-bottom: 16px; padding: 12px; background: var(--wpsg-bg); border: 1px solid var(--wpsg-border); border-radius: 6px;">
+									<label class="wpsg-checkbox-label" style="margin-bottom: 8px;">
+										<input type="checkbox" id="wpsg-page-setting-ghsa-optin" />
 										<span>
-											<strong><?php esc_html_e( 'Allow outbound queries to Patchstack API (Explicit Consent)', 'site-checkup-pro' ); ?></strong><br />
+											<strong><?php esc_html_e( 'GitHub Security Advisories (GHSA)', 'site-checkup-pro' ); ?></strong><br />
 											<span class="wpsg-consent-desc">
-												<?php esc_html_e( 'Per WordPress.org Guideline 7, outbound network calls require explicit consent. Transmits installed plugin/theme slugs and versions to Patchstack to check public advisories. No personal data or database records are ever transmitted.', 'site-checkup-pro' ); ?>
+												<?php esc_html_e( 'Per WordPress.org Guideline 7, outbound queries require explicit consent. Checks api.github.com for WordPress advisory records.', 'site-checkup-pro' ); ?>
 											</span>
 										</span>
 									</label>
+									<div class="wpsg-input-group" style="padding-left: 24px;">
+										<label for="wpsg-page-setting-ghsa-key"><?php esc_html_e( 'GitHub Personal Access Token (Optional)', 'site-checkup-pro' ); ?></label>
+										<input type="password" id="wpsg-page-setting-ghsa-key" class="wpsg-input" placeholder="<?php esc_attr_e( 'Paste token (stored encrypted with HKDF)', 'site-checkup-pro' ); ?>" autocomplete="off" />
+										<p id="wpsg-page-ghsa-masked-status" class="wpsg-input-hint"></p>
+									</div>
+								</div>
+
+								<!-- OSV -->
+								<div style="margin-bottom: 16px; padding: 12px; background: var(--wpsg-bg); border: 1px solid var(--wpsg-border); border-radius: 6px;">
+									<label class="wpsg-checkbox-label" style="margin-bottom: 8px;">
+										<input type="checkbox" id="wpsg-page-setting-osv-optin" />
+										<span>
+											<strong><?php esc_html_e( 'OSV.dev (Open Source Vulnerabilities)', 'site-checkup-pro' ); ?></strong><br />
+											<span class="wpsg-consent-desc">
+												<?php esc_html_e( 'Queries Google OSV database (api.osv.dev) for precise semantic version range correlation.', 'site-checkup-pro' ); ?>
+											</span>
+										</span>
+									</label>
+									<div class="wpsg-input-group" style="padding-left: 24px;">
+										<label for="wpsg-page-setting-osv-key"><?php esc_html_e( 'OSV API Key / Token (Optional)', 'site-checkup-pro' ); ?></label>
+										<input type="password" id="wpsg-page-setting-osv-key" class="wpsg-input" placeholder="<?php esc_attr_e( 'Paste key or leave blank for default query', 'site-checkup-pro' ); ?>" autocomplete="off" />
+										<p id="wpsg-page-osv-masked-status" class="wpsg-input-hint"></p>
+									</div>
+								</div>
+
+								<!-- NVD -->
+								<div style="margin-bottom: 16px; padding: 12px; background: var(--wpsg-bg); border: 1px solid var(--wpsg-border); border-radius: 6px;">
+									<label class="wpsg-checkbox-label" style="margin-bottom: 8px;">
+										<input type="checkbox" id="wpsg-page-setting-nvd-optin" />
+										<span>
+											<strong><?php esc_html_e( 'NVD (National Vulnerability Database - NIST)', 'site-checkup-pro' ); ?></strong><br />
+											<span class="wpsg-consent-desc">
+												<?php esc_html_e( 'Queries NIST NVD 2.0 API (services.nvd.nist.gov) for authoritative CVE records.', 'site-checkup-pro' ); ?>
+											</span>
+										</span>
+									</label>
+									<div class="wpsg-input-group" style="padding-left: 24px;">
+										<label for="wpsg-page-setting-nvd-key"><?php esc_html_e( 'NVD 2.0 API Key (Optional)', 'site-checkup-pro' ); ?></label>
+										<input type="password" id="wpsg-page-setting-nvd-key" class="wpsg-input" placeholder="<?php esc_attr_e( 'Paste NIST NVD API key (stored encrypted with HKDF)', 'site-checkup-pro' ); ?>" autocomplete="off" />
+										<p id="wpsg-page-nvd-masked-status" class="wpsg-input-hint"></p>
+									</div>
+								</div>
+
+								<!-- CISA KEV -->
+								<div style="margin-bottom: 16px; padding: 12px; background: var(--wpsg-bg); border: 1px solid var(--wpsg-border); border-radius: 6px;">
+									<label class="wpsg-checkbox-label" style="margin-bottom: 8px;">
+										<input type="checkbox" id="wpsg-page-setting-cisa-kev-optin" />
+										<span>
+											<strong><?php esc_html_e( 'CISA KEV Catalog (Actively Exploited)', 'site-checkup-pro' ); ?></strong><br />
+											<span class="wpsg-consent-desc">
+												<?php esc_html_e( 'Cross-references detected CVEs against the CISA Known Exploited Vulnerabilities catalog (cisa.gov).', 'site-checkup-pro' ); ?>
+											</span>
+										</span>
+									</label>
+									<div class="wpsg-input-group" style="padding-left: 24px;">
+										<label for="wpsg-page-setting-cisa-kev-key"><?php esc_html_e( 'CISA Access / Proxy Token (Optional)', 'site-checkup-pro' ); ?></label>
+										<input type="password" id="wpsg-page-setting-cisa-kev-key" class="wpsg-input" placeholder="<?php esc_attr_e( 'Paste token or leave blank for default feed', 'site-checkup-pro' ); ?>" autocomplete="off" />
+										<p id="wpsg-page-cisa-kev-masked-status" class="wpsg-input-hint"></p>
+									</div>
+								</div>
+
+								<!-- WPScan -->
+								<div style="margin-bottom: 16px; padding: 12px; background: var(--wpsg-bg); border: 1px solid var(--wpsg-border); border-radius: 6px;">
+									<label class="wpsg-checkbox-label" style="margin-bottom: 8px;">
+										<input type="checkbox" id="wpsg-page-setting-wpscan-optin" />
+										<span>
+											<strong><?php esc_html_e( 'WPScan Vulnerability Database API', 'site-checkup-pro' ); ?></strong><br />
+											<span class="wpsg-consent-desc">
+												<?php esc_html_e( 'Queries Automattic WPScan database (wpscan.com/api/v3). Note: Per WPScan terms, vulnerability data from this source is strictly non-cached and never permanently stored.', 'site-checkup-pro' ); ?>
+											</span>
+										</span>
+									</label>
+									<div class="wpsg-input-group" style="padding-left: 24px;">
+										<label for="wpsg-page-setting-wpscan-token"><?php esc_html_e( 'WPScan API Token', 'site-checkup-pro' ); ?></label>
+										<input type="password" id="wpsg-page-setting-wpscan-token" class="wpsg-input" placeholder="<?php esc_attr_e( 'Paste WPScan token (stored encrypted with HKDF)', 'site-checkup-pro' ); ?>" autocomplete="off" />
+										<p id="wpsg-page-wpscan-masked-status" class="wpsg-input-hint"></p>
+									</div>
+								</div>
+
+								<!-- Patchstack -->
+								<div style="padding: 12px; background: var(--wpsg-bg); border: 1px solid var(--wpsg-border); border-radius: 6px;">
+									<label class="wpsg-checkbox-label" style="margin-bottom: 8px;">
+										<input type="checkbox" id="wpsg-page-setting-patchstack-optin" />
+										<span>
+											<strong><?php esc_html_e( 'Patchstack Vulnerability Intelligence API', 'site-checkup-pro' ); ?></strong><br />
+											<span class="wpsg-consent-desc">
+												<?php esc_html_e( 'Cross-reference plugins and themes against Patchstack database (patchstack.com/database/api/v2).', 'site-checkup-pro' ); ?>
+											</span>
+										</span>
+									</label>
+									<div class="wpsg-input-group" style="padding-left: 24px;">
+										<label for="wpsg-page-setting-patchstack-key"><?php esc_html_e( 'Patchstack API Token', 'site-checkup-pro' ); ?></label>
+										<input type="password" id="wpsg-page-setting-patchstack-key" class="wpsg-input" placeholder="<?php esc_attr_e( 'Paste API key or leave blank for default local advisories', 'site-checkup-pro' ); ?>" autocomplete="off" />
+										<p id="wpsg-page-patchstack-masked-status" class="wpsg-input-hint"></p>
+									</div>
 								</div>
 							</div>
 						</div>

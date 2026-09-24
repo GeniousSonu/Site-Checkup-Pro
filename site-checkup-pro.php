@@ -3,7 +3,7 @@
  * Plugin Name:       Site Checkup Pro
  * Plugin URI:        https://www.genioussonu.me/plugin/site-checkup-pro/
  * Description:       Complete security audit, site hardening checklist, and vulnerability scanner for WordPress. One-click safe hardening, login protection, and client reports.
- * Version:           1.2.0
+ * Version:           1.3.0
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            SK Sahinur Islam
@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Plugin Constants.
-define( 'WPSG_VERSION', '1.2.0' );
+define( 'WPSG_VERSION', '1.3.0' );
 define( 'WPSG_PLUGIN_FILE', __FILE__ );
 define( 'WPSG_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WPSG_PLUGIN_URL', plugin_dir_url( __FILE__ ) );

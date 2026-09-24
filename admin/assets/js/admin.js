@@ -390,6 +390,28 @@
 		dom.btnSaveSettings = document.getElementById('wpsg-btn-save-settings');
 		dom.settingPatchstackKey = document.getElementById('wpsg-setting-patchstack-key');
 		dom.settingPatchstackOptin = document.getElementById('wpsg-setting-patchstack-optin');
+		dom.patchstackMaskedStatus = document.getElementById('wpsg-patchstack-masked-status');
+
+		dom.settingGhsaKey = document.getElementById('wpsg-setting-ghsa-key');
+		dom.settingGhsaOptin = document.getElementById('wpsg-setting-ghsa-optin');
+		dom.ghsaMaskedStatus = document.getElementById('wpsg-ghsa-masked-status');
+
+		dom.settingOsvKey = document.getElementById('wpsg-setting-osv-key');
+		dom.settingOsvOptin = document.getElementById('wpsg-setting-osv-optin');
+		dom.osvMaskedStatus = document.getElementById('wpsg-osv-masked-status');
+
+		dom.settingNvdKey = document.getElementById('wpsg-setting-nvd-key');
+		dom.settingNvdOptin = document.getElementById('wpsg-setting-nvd-optin');
+		dom.nvdMaskedStatus = document.getElementById('wpsg-nvd-masked-status');
+
+		dom.settingCisaKevKey = document.getElementById('wpsg-setting-cisa-kev-key');
+		dom.settingCisaKevOptin = document.getElementById('wpsg-setting-cisa-kev-optin');
+		dom.cisaKevMaskedStatus = document.getElementById('wpsg-cisa-kev-masked-status');
+
+		dom.settingWpscanToken = document.getElementById('wpsg-setting-wpscan-token');
+		dom.settingWpscanOptin = document.getElementById('wpsg-setting-wpscan-optin');
+		dom.wpscanMaskedStatus = document.getElementById('wpsg-wpscan-masked-status');
+
 		dom.panelDetectionInfo = document.getElementById('wpsg-panel-detection-info');
 		dom.settingPanelType = document.getElementById('wpsg-setting-panel-type');
 		dom.settingPanelUrl = document.getElementById('wpsg-setting-panel-url');
@@ -398,7 +420,6 @@
 		dom.settingPanelOptin = document.getElementById('wpsg-setting-panel-optin');
 		dom.settingWebhookUrl = document.getElementById('wpsg-setting-webhook-url');
 		dom.settingWebhookOptin = document.getElementById('wpsg-setting-webhook-optin');
-		dom.patchstackMaskedStatus = document.getElementById('wpsg-patchstack-masked-status');
 		dom.settingIncidentName = document.getElementById('wpsg-setting-incident-name');
 		dom.settingIncidentEmail = document.getElementById('wpsg-setting-incident-email');
 		dom.settingIncidentPhone = document.getElementById('wpsg-setting-incident-phone');
@@ -423,6 +444,27 @@
 		dom.pageSettingPatchstackKey = document.getElementById('wpsg-page-setting-patchstack-key');
 		dom.pagePatchstackMaskedStatus = document.getElementById('wpsg-page-patchstack-masked-status');
 		dom.pageSettingPatchstackOptin = document.getElementById('wpsg-page-setting-patchstack-optin');
+
+		dom.pageSettingGhsaKey = document.getElementById('wpsg-page-setting-ghsa-key');
+		dom.pageSettingGhsaOptin = document.getElementById('wpsg-page-setting-ghsa-optin');
+		dom.pageGhsaMaskedStatus = document.getElementById('wpsg-page-ghsa-masked-status');
+
+		dom.pageSettingOsvKey = document.getElementById('wpsg-page-setting-osv-key');
+		dom.pageSettingOsvOptin = document.getElementById('wpsg-page-setting-osv-optin');
+		dom.pageOsvMaskedStatus = document.getElementById('wpsg-page-osv-masked-status');
+
+		dom.pageSettingNvdKey = document.getElementById('wpsg-page-setting-nvd-key');
+		dom.pageSettingNvdOptin = document.getElementById('wpsg-page-setting-nvd-optin');
+		dom.pageNvdMaskedStatus = document.getElementById('wpsg-page-nvd-masked-status');
+
+		dom.pageSettingCisaKevKey = document.getElementById('wpsg-page-setting-cisa-kev-key');
+		dom.pageSettingCisaKevOptin = document.getElementById('wpsg-page-setting-cisa-kev-optin');
+		dom.pageCisaKevMaskedStatus = document.getElementById('wpsg-page-cisa-kev-masked-status');
+
+		dom.pageSettingWpscanToken = document.getElementById('wpsg-page-setting-wpscan-token');
+		dom.pageSettingWpscanOptin = document.getElementById('wpsg-page-setting-wpscan-optin');
+		dom.pageWpscanMaskedStatus = document.getElementById('wpsg-page-wpscan-masked-status');
+
 		dom.pagePanelDetectionInfo = document.getElementById('wpsg-page-panel-detection-info');
 		dom.pageSettingPanelType = document.getElementById('wpsg-page-setting-panel-type');
 		dom.pageSettingPanelUrl = document.getElementById('wpsg-page-setting-panel-url');
@@ -3218,6 +3260,51 @@
 				if (dom.settingPatchstackOptin) dom.settingPatchstackOptin.checked = !!s.patchstack_optin;
 				if (dom.pageSettingPatchstackOptin) dom.pageSettingPatchstackOptin.checked = !!s.patchstack_optin;
 
+				// GitHub Security Advisories
+				if (dom.settingGhsaKey) dom.settingGhsaKey.value = '';
+				if (dom.pageSettingGhsaKey) dom.pageSettingGhsaKey.value = '';
+				const ghsaMasked = s.has_ghsa_key ? 'Token configured & encrypted at rest.' : 'No token set (public rate limits apply).';
+				if (dom.ghsaMaskedStatus) dom.ghsaMaskedStatus.textContent = ghsaMasked;
+				if (dom.pageGhsaMaskedStatus) dom.pageGhsaMaskedStatus.textContent = ghsaMasked;
+				if (dom.settingGhsaOptin) dom.settingGhsaOptin.checked = !!s.ghsa_optin;
+				if (dom.pageSettingGhsaOptin) dom.pageSettingGhsaOptin.checked = !!s.ghsa_optin;
+
+				// OSV
+				if (dom.settingOsvKey) dom.settingOsvKey.value = '';
+				if (dom.pageSettingOsvKey) dom.pageSettingOsvKey.value = '';
+				const osvMasked = s.has_osv_key ? 'API key configured & encrypted at rest.' : 'No API key set (public queries active).';
+				if (dom.osvMaskedStatus) dom.osvMaskedStatus.textContent = osvMasked;
+				if (dom.pageOsvMaskedStatus) dom.pageOsvMaskedStatus.textContent = osvMasked;
+				if (dom.settingOsvOptin) dom.settingOsvOptin.checked = !!s.osv_optin;
+				if (dom.pageSettingOsvOptin) dom.pageSettingOsvOptin.checked = !!s.osv_optin;
+
+				// NVD
+				if (dom.settingNvdKey) dom.settingNvdKey.value = '';
+				if (dom.pageSettingNvdKey) dom.pageSettingNvdKey.value = '';
+				const nvdMasked = s.has_nvd_key ? 'API key configured & encrypted at rest.' : 'No API key set (rate-limited public API active).';
+				if (dom.nvdMaskedStatus) dom.nvdMaskedStatus.textContent = nvdMasked;
+				if (dom.pageNvdMaskedStatus) dom.pageNvdMaskedStatus.textContent = nvdMasked;
+				if (dom.settingNvdOptin) dom.settingNvdOptin.checked = !!s.nvd_optin;
+				if (dom.pageSettingNvdOptin) dom.pageSettingNvdOptin.checked = !!s.nvd_optin;
+
+				// CISA KEV
+				if (dom.settingCisaKevKey) dom.settingCisaKevKey.value = '';
+				if (dom.pageSettingCisaKevKey) dom.pageSettingCisaKevKey.value = '';
+				const cisaKevMasked = s.has_cisa_kev_key ? 'Token configured & encrypted at rest.' : 'No custom token set (public catalog feed active).';
+				if (dom.cisaKevMaskedStatus) dom.cisaKevMaskedStatus.textContent = cisaKevMasked;
+				if (dom.pageCisaKevMaskedStatus) dom.pageCisaKevMaskedStatus.textContent = cisaKevMasked;
+				if (dom.settingCisaKevOptin) dom.settingCisaKevOptin.checked = !!s.cisa_kev_optin;
+				if (dom.pageSettingCisaKevOptin) dom.pageSettingCisaKevOptin.checked = !!s.cisa_kev_optin;
+
+				// WPScan
+				if (dom.settingWpscanToken) dom.settingWpscanToken.value = '';
+				if (dom.pageSettingWpscanToken) dom.pageSettingWpscanToken.value = '';
+				const wpscanMasked = (s.has_wpscan_key || s.wpscan_has_token) ? 'API token configured & encrypted at rest.' : 'No API token configured.';
+				if (dom.wpscanMaskedStatus) dom.wpscanMaskedStatus.textContent = wpscanMasked;
+				if (dom.pageWpscanMaskedStatus) dom.pageWpscanMaskedStatus.textContent = wpscanMasked;
+				if (dom.settingWpscanOptin) dom.settingWpscanOptin.checked = !!s.wpscan_optin;
+				if (dom.pageSettingWpscanOptin) dom.pageSettingWpscanOptin.checked = !!s.wpscan_optin;
+
 				// Hosting Panel Bridge
 				if (dom.settingPanelType) dom.settingPanelType.value = s.hosting_panel_type || '';
 				if (dom.pageSettingPanelType) dom.pageSettingPanelType.value = s.hosting_panel_type || '';
@@ -3306,6 +3393,31 @@
 			}
 			if (dom.pageSettingPatchstackOptin) payload.patchstack_optin = dom.pageSettingPatchstackOptin.checked ? 1 : 0;
 
+			if (dom.pageSettingGhsaKey && dom.pageSettingGhsaKey.value.trim()) {
+				payload.ghsa_api_key = dom.pageSettingGhsaKey.value.trim();
+			}
+			if (dom.pageSettingGhsaOptin) payload.ghsa_optin = dom.pageSettingGhsaOptin.checked ? 1 : 0;
+
+			if (dom.pageSettingOsvKey && dom.pageSettingOsvKey.value.trim()) {
+				payload.osv_api_key = dom.pageSettingOsvKey.value.trim();
+			}
+			if (dom.pageSettingOsvOptin) payload.osv_optin = dom.pageSettingOsvOptin.checked ? 1 : 0;
+
+			if (dom.pageSettingNvdKey && dom.pageSettingNvdKey.value.trim()) {
+				payload.nvd_api_key = dom.pageSettingNvdKey.value.trim();
+			}
+			if (dom.pageSettingNvdOptin) payload.nvd_optin = dom.pageSettingNvdOptin.checked ? 1 : 0;
+
+			if (dom.pageSettingCisaKevKey && dom.pageSettingCisaKevKey.value.trim()) {
+				payload.cisa_kev_api_key = dom.pageSettingCisaKevKey.value.trim();
+			}
+			if (dom.pageSettingCisaKevOptin) payload.cisa_kev_optin = dom.pageSettingCisaKevOptin.checked ? 1 : 0;
+
+			if (dom.pageSettingWpscanToken && dom.pageSettingWpscanToken.value.trim()) {
+				payload.wpscan_token = dom.pageSettingWpscanToken.value.trim();
+			}
+			if (dom.pageSettingWpscanOptin) payload.wpscan_optin = dom.pageSettingWpscanOptin.checked ? 1 : 0;
+
 			if (dom.pageSettingPanelType) payload.hosting_panel_type = dom.pageSettingPanelType.value;
 			if (dom.pageSettingPanelUrl) payload.hosting_panel_url = dom.pageSettingPanelUrl.value.trim();
 			if (dom.pageSettingPanelToken && dom.pageSettingPanelToken.value.trim()) {
@@ -3325,6 +3437,31 @@
 				payload.patchstack_api_key = dom.settingPatchstackKey.value.trim();
 			}
 			if (dom.settingPatchstackOptin) payload.patchstack_optin = dom.settingPatchstackOptin.checked ? 1 : 0;
+
+			if (dom.settingGhsaKey && dom.settingGhsaKey.value.trim()) {
+				payload.ghsa_api_key = dom.settingGhsaKey.value.trim();
+			}
+			if (dom.settingGhsaOptin) payload.ghsa_optin = dom.settingGhsaOptin.checked ? 1 : 0;
+
+			if (dom.settingOsvKey && dom.settingOsvKey.value.trim()) {
+				payload.osv_api_key = dom.settingOsvKey.value.trim();
+			}
+			if (dom.settingOsvOptin) payload.osv_optin = dom.settingOsvOptin.checked ? 1 : 0;
+
+			if (dom.settingNvdKey && dom.settingNvdKey.value.trim()) {
+				payload.nvd_api_key = dom.settingNvdKey.value.trim();
+			}
+			if (dom.settingNvdOptin) payload.nvd_optin = dom.settingNvdOptin.checked ? 1 : 0;
+
+			if (dom.settingCisaKevKey && dom.settingCisaKevKey.value.trim()) {
+				payload.cisa_kev_api_key = dom.settingCisaKevKey.value.trim();
+			}
+			if (dom.settingCisaKevOptin) payload.cisa_kev_optin = dom.settingCisaKevOptin.checked ? 1 : 0;
+
+			if (dom.settingWpscanToken && dom.settingWpscanToken.value.trim()) {
+				payload.wpscan_token = dom.settingWpscanToken.value.trim();
+			}
+			if (dom.settingWpscanOptin) payload.wpscan_optin = dom.settingWpscanOptin.checked ? 1 : 0;
 
 			if (dom.settingPanelType) payload.hosting_panel_type = dom.settingPanelType.value;
 			if (dom.settingPanelUrl) payload.hosting_panel_url = dom.settingPanelUrl.value.trim();

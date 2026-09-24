@@ -43,6 +43,21 @@ class WPSG_Encryption {
 	const HKDF_INFO_PATCHSTACK = 'wpsg_patchstack_encryption_v1';
 
 	/**
+	 * HKDF Info context string for GitHub Advisories token encryption.
+	 */
+	const HKDF_INFO_GHSA = 'wpsg_ghsa_encryption_v1';
+
+	/**
+	 * HKDF Info context string for OSV API key encryption.
+	 */
+	const HKDF_INFO_OSV = 'wpsg_osv_encryption_v1';
+
+	/**
+	 * HKDF Info context string for CISA KEV API key encryption.
+	 */
+	const HKDF_INFO_CISA_KEV = 'wpsg_cisa_kev_encryption_v1';
+
+	/**
 	 * Derive a dedicated 256-bit encryption key using HKDF from a WordPress salt.
 	 *
 	 * Isolates keys across functional domains to prevent key-reuse vulnerabilities.

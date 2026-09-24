@@ -1281,11 +1281,17 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 				'has_patchstack_key'        => ! empty( $settings['patchstack_api_key'] ),
 				'patchstack_optin'          => ! empty( $settings['patchstack_optin'] ),
 				'ghsa_optin'                => ! empty( $settings['ghsa_optin'] ),
+				'has_ghsa_key'              => ! empty( $settings['ghsa_api_key_enc'] ),
+				'ghsa_key_masked'           => ! empty( $settings['ghsa_api_key_enc'] ) ? '••••••••' : '',
 				'osv_optin'                 => ! empty( $settings['osv_optin'] ),
+				'has_osv_key'               => ! empty( $settings['osv_api_key_enc'] ),
+				'osv_key_masked'            => ! empty( $settings['osv_api_key_enc'] ) ? '••••••••' : '',
 				'nvd_optin'                 => ! empty( $settings['nvd_optin'] ),
 				'has_nvd_key'               => ! empty( $settings['nvd_api_key_enc'] ),
 				'nvd_key_masked'            => ! empty( $settings['nvd_api_key_enc'] ) ? '••••••••' : '',
 				'cisa_kev_optin'            => ! empty( $settings['cisa_kev_optin'] ),
+				'has_cisa_kev_key'          => ! empty( $settings['cisa_kev_api_key_enc'] ),
+				'cisa_kev_key_masked'       => ! empty( $settings['cisa_kev_api_key_enc'] ) ? '••••••••' : '',
 				'wporg_api_optin'           => ! empty( $settings['wporg_api_optin'] ),
 				'wpscan_optin'              => ! empty( $settings['wpscan_optin'] ),
 				'has_wpscan_key'            => ! empty( $settings['wpscan_api_key_enc'] ),
@@ -1399,6 +1405,32 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			}
 		}
 
+		// Handle GitHub Advisories API token encrypted storage (never plaintext)
+		$ghsa_input = null;
+		if ( array_key_exists( 'ghsa_token', $params ) ) {
+			$ghsa_input = (string) $params['ghsa_token'];
+		} elseif ( array_key_exists( 'ghsa_api_key', $params ) ) {
+			$ghsa_input = (string) $params['ghsa_api_key'];
+		}
+		if ( null !== $ghsa_input ) {
+			$raw_ghsa_key = trim( $ghsa_input );
+			if ( '' !== $raw_ghsa_key && false === strpos( $raw_ghsa_key, '•' ) ) {
+				$current_settings['ghsa_api_key_enc'] = WPSG_Encryption::encrypt( $raw_ghsa_key, WPSG_Encryption::HKDF_INFO_GHSA );
+			} elseif ( '' === $raw_ghsa_key ) {
+				unset( $current_settings['ghsa_api_key_enc'] );
+			}
+		}
+
+		// Handle OSV API key encrypted storage (never plaintext)
+		if ( array_key_exists( 'osv_api_key', $params ) ) {
+			$raw_osv_key = trim( (string) $params['osv_api_key'] );
+			if ( '' !== $raw_osv_key && false === strpos( $raw_osv_key, '•' ) ) {
+				$current_settings['osv_api_key_enc'] = WPSG_Encryption::encrypt( $raw_osv_key, WPSG_Encryption::HKDF_INFO_OSV );
+			} elseif ( '' === $raw_osv_key ) {
+				unset( $current_settings['osv_api_key_enc'] );
+			}
+		}
+
 		// Handle NVD API key encrypted storage (never plaintext)
 		if ( array_key_exists( 'nvd_api_key', $params ) ) {
 			$raw_nvd_key = trim( (string) $params['nvd_api_key'] );
@@ -1409,10 +1441,20 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			}
 		}
 
+		// Handle CISA KEV API key encrypted storage (never plaintext)
+		if ( array_key_exists( 'cisa_kev_api_key', $params ) ) {
+			$raw_cisa_key = trim( (string) $params['cisa_kev_api_key'] );
+			if ( '' !== $raw_cisa_key && false === strpos( $raw_cisa_key, '•' ) ) {
+				$current_settings['cisa_kev_api_key_enc'] = WPSG_Encryption::encrypt( $raw_cisa_key, WPSG_Encryption::HKDF_INFO_CISA_KEV );
+			} elseif ( '' === $raw_cisa_key ) {
+				unset( $current_settings['cisa_kev_api_key_enc'] );
+			}
+		}
+
 		update_option( 'wpsg_settings', $current_settings );
 
 		// Invalidate vulnerability cache if API keys or opt-ins were updated
-		if ( array_key_exists( 'patchstack_api_key', $params ) || null !== $wpscan_input || array_key_exists( 'nvd_api_key', $params ) ) {
+		if ( array_key_exists( 'patchstack_api_key', $params ) || null !== $wpscan_input || array_key_exists( 'nvd_api_key', $params ) || null !== $ghsa_input || array_key_exists( 'osv_api_key', $params ) || array_key_exists( 'cisa_kev_api_key', $params ) ) {
 			delete_transient( 'wpsg_vulnerability_cache' );
 		}
 
