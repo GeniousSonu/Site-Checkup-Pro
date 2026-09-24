@@ -58,15 +58,15 @@ class WPSG_Task_Runner {
 		set_transient( $lock_key, true, 30 ); // 30-second TTL
 
 		try {
-			// 3. Re-Authentication requirement for destructive / file-modifying tasks.
-			if ( 'writes_files' === $task->sub_type || ! empty( $task->requires_reauth ) ) {
+			// 3. Re-Authentication requirement for destructive tasks.
+			if ( ! empty( $task->requires_reauth ) ) {
 				if ( class_exists( 'WPSG_Session_Manager' ) ) {
 					$valid_reauth = WPSG_Session_Manager::validate_and_consume_reauth_token( $reauth_token );
 					if ( ! $valid_reauth ) {
 						return array(
 							'success'         => false,
 							'reauth_required' => true,
-							'message'         => __( 'Administrator password confirmation is required before executing file modifications.', 'site-checkup-pro' ),
+							'message'         => __( 'Administrator password confirmation is required before executing this destructive action.', 'site-checkup-pro' ),
 						);
 					}
 				}
@@ -256,14 +256,14 @@ class WPSG_Task_Runner {
 
 		try {
 			// Re-Auth check for destructive undos.
-			if ( 'writes_files' === $task->sub_type || ! empty( $task->requires_reauth ) ) {
+			if ( ! empty( $task->requires_reauth ) ) {
 				if ( class_exists( 'WPSG_Session_Manager' ) ) {
 					$valid_reauth = WPSG_Session_Manager::validate_and_consume_reauth_token( $reauth_token );
 					if ( ! $valid_reauth ) {
 						return array(
 							'success'         => false,
 							'reauth_required' => true,
-							'message'         => __( 'Administrator password confirmation is required before undoing file modifications.', 'site-checkup-pro' ),
+							'message'         => __( 'Administrator password confirmation is required before undoing destructive actions.', 'site-checkup-pro' ),
 						);
 					}
 				}
