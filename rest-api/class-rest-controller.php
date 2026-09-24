@@ -336,6 +336,25 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			'permission_callback' => array( $this, 'check_permissions' ),
 		) );
 
+		register_rest_route( $this->namespace, '/vulnerabilities/verify-fix', array(
+			'methods'             => WP_REST_Server::CREATABLE,
+			'callback'            => array( $this, 'verify_vulnerability_fix' ),
+			'permission_callback' => array( $this, 'check_permissions' ),
+			'args'                => array(
+				'slug' => array(
+					'required'          => true,
+					'type'              => 'string',
+					'sanitize_callback' => 'sanitize_key',
+				),
+				'type' => array(
+					'required'          => false,
+					'type'              => 'string',
+					'default'           => 'plugin',
+					'sanitize_callback' => 'sanitize_key',
+				),
+			),
+		) );
+
 		// 26. Generate RFC 9116 security.txt
 		register_rest_route( $this->namespace, '/security-txt/generate', array(
 			'methods'             => WP_REST_Server::CREATABLE,
@@ -1385,6 +1404,36 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			: array( 'status' => 'pending', 'message' => __( 'Vulnerability module unavailable.', 'site-checkup-pro' ) );
 
 		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Verify fix/remediation for a specific vulnerability finding.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function verify_vulnerability_fix( $request ) {
+		$slug = $request->get_param( 'slug' );
+		$type = $request->get_param( 'type' );
+
+		if ( empty( $slug ) ) {
+			return new WP_Error(
+				'wpsg_missing_param',
+				__( 'Component slug is required.', 'site-checkup-pro' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( ! class_exists( 'WPSG_Vulnerability_Checker' ) ) {
+			return new WP_Error(
+				'wpsg_module_missing',
+				__( 'Vulnerability checker module unavailable.', 'site-checkup-pro' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		$result = WPSG_Vulnerability_Checker::verify_fix( $slug, $type ? $type : 'plugin' );
+		return rest_ensure_response( $result );
 	}
 
 	/**

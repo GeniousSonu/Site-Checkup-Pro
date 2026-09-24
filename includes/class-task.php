@@ -284,7 +284,9 @@ class WPSG_Task {
 			$live_message = sprintf( __( 'Overdue reminder: scheduled review was due on %s.', 'site-checkup-pro' ), $next_reminder_at );
 		}
 
-		$can_verify = ( 'writes_files' === $this->sub_type || ! empty( $this->nginx_snippet ) || in_array( $this->id, array( 'block_user_enumeration', 'hide_wordpress_fingerprint', 'security_headers_csp', 'security_txt_check', 'login_url_rename', 'disable_file_edit', 'wp_debug_display_check' ), true ) );
+		$can_verify = ( 'writes_files' === $this->sub_type || ! empty( $this->nginx_snippet ) || in_array( $this->id, array( 'block_user_enumeration', 'hide_wordpress_fingerprint', 'security_headers_csp', 'security_txt_check', 'login_url_rename', 'disable_file_edit', 'wp_debug_display_check', 'vulnerability_database_check' ), true ) );
+
+		$live_data = isset( $live['data'] ) ? $live['data'] : ( isset( $live['plugins'] ) ? array( 'plugins' => $live['plugins'] ) : ( isset( $live['vulnerable'] ) ? array( 'vulnerable' => $live['vulnerable'] ) : null ) );
 
 		return array(
 			'id'                  => $this->id,
@@ -301,6 +303,7 @@ class WPSG_Task {
 			'nginx_snippet'       => $this->nginx_snippet,
 			'status'              => $is_na ? 'not_applicable' : $status,
 			'live_message'        => $live_message,
+			'live_data'           => $live_data,
 			'is_na'               => $is_na,
 			'last_run_at'         => $last_run_at,
 			'note'                => $note,

@@ -180,7 +180,11 @@ if ( ! function_exists( 'delete_plugins' ) ) {
 }
 wp_mkdir_p( WP_PLUGIN_DIR );
 if ( ! function_exists( 'get_bloginfo' ) ) { function get_bloginfo( $show = '' ) { return 'Site Checkup Pro Test'; } }
-if ( ! function_exists( 'get_plugins' ) ) { function get_plugins() { return array(); } }
+if ( ! function_exists( 'get_plugins' ) ) {
+	function get_plugins() {
+		return ( isset( $GLOBALS['_mock_plugins'] ) && is_array( $GLOBALS['_mock_plugins'] ) ) ? $GLOBALS['_mock_plugins'] : array();
+	}
+}
 if ( ! function_exists( 'wp_cache_get' ) ) { function wp_cache_get( $key, $group = '' ) { return false; } }
 if ( ! function_exists( 'wp_cache_set' ) ) { function wp_cache_set( $key, $val, $group = '', $expire = 0 ) { return true; } }
 if ( ! function_exists( 'wp_cache_delete' ) ) { function wp_cache_delete( $key, $group = '' ) { return true; } }
@@ -1094,21 +1098,25 @@ run_test( "Security.txt: Generates strictly at /.well-known/security.txt with do
 
 // TEST 25: Patchstack Vulnerability Intelligence Match Confidence
 run_test( "Vulnerability Intelligence: Match-confidence scoring distinguishes high vs unverified/low", function () {
-	// High confidence slug
-	$slug_normal = 'contact-form-7';
-	$confidence_normal = 'high';
-	if ( strpos( $slug_normal, 'custom' ) !== false || strpos( $slug_normal, 'fork' ) !== false ) {
-		$confidence_normal = 'low';
-	}
+	// Standard WP.org plugin metadata -> high
+	$conf_high = WPSG_Vulnerability_Checker::determine_match_confidence( 'contact-form-7', array(
+		'PluginURI' => 'https://wordpress.org/plugins/contact-form-7/',
+	) );
 
-	// Renamed / forked custom slug
-	$slug_fork = 'my-custom-slider-fork';
-	$confidence_fork = 'high';
-	if ( strpos( $slug_fork, 'custom' ) !== false || strpos( $slug_fork, 'fork' ) !== false ) {
-		$confidence_fork = 'low';
-	}
+	// Valid slug but non-WP.org repository URI -> medium
+	$conf_med = WPSG_Vulnerability_Checker::determine_match_confidence( 'internal-sso', array(
+		'PluginURI' => 'https://internal.mycompany.com/sso',
+	) );
 
-	return ( 'high' === $confidence_normal && 'low' === $confidence_fork );
+	// Renamed / forked custom slug -> low
+	$conf_fork = WPSG_Vulnerability_Checker::determine_match_confidence( 'my-custom-slider-fork', array(
+		'PluginURI' => 'https://wordpress.org/plugins/my-custom-slider-fork/',
+	) );
+
+	// Slug containing 'copy' -> low
+	$conf_copy = WPSG_Vulnerability_Checker::determine_match_confidence( 'woocommerce-copy', array() );
+
+	return ( 'high' === $conf_high && 'medium' === $conf_med && 'low' === $conf_fork && 'low' === $conf_copy );
 } );
 
 // TEST 26: Milestone Review Prompt: Tracks task completion milestone and respects permanent dismissal
@@ -1878,6 +1886,239 @@ run_test( 'Changelog Digest: Aggregates update transient data and dispatches sch
 	}
 
 	delete_site_transient( 'update_plugins' );
+	return true;
+} );
+
+// ------------------------------------------------------------------
+// Test 55: Vulnerability Intelligence Compound & Boundary Version Range Parsing
+// ------------------------------------------------------------------
+run_test( 'Vulnerability Intelligence: Compound and boundary version-range parsing (is_version_affected)', function () {
+	// 1. Compound range: >= 1.0.0, < 2.0.0
+	$range_comp = '>= 1.0.0, < 2.0.0';
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '0.9.9', $range_comp ) !== false ) return false;
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '1.0.0', $range_comp ) !== true ) return false;
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '1.5.2', $range_comp ) !== true ) return false;
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '2.0.0', $range_comp ) !== false ) return false;
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '2.0.1', $range_comp ) !== false ) return false;
+
+	// 2. Hyphen range: 1.2.0 - 2.5.0
+	$range_hyphen = '1.2.0 - 2.5.0';
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '1.1.9', $range_hyphen ) !== false ) return false;
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '1.2.0', $range_hyphen ) !== true ) return false;
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '2.0.0', $range_hyphen ) !== true ) return false;
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '2.5.0', $range_hyphen ) !== true ) return false;
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '2.5.1', $range_hyphen ) !== false ) return false;
+
+	// 3. Disjunction: >= 1.0, < 1.2 || >= 2.0, < 2.2
+	$range_disj = '>= 1.0, < 1.2 || >= 2.0, < 2.2';
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '1.1.0', $range_disj ) !== true ) return false;
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '1.5.0', $range_disj ) !== false ) return false;
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '2.1.0', $range_disj ) !== true ) return false;
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '2.3.0', $range_disj ) !== false ) return false;
+
+	// 4. Boundary equality and inequality checks
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '3.0.0', '<= 3.0.0' ) !== true ) return false;
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '3.0.1', '<= 3.0.0' ) !== false ) return false;
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '3.0.0', '< 3.0.0' ) !== false ) return false;
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '2.9.9', '< 3.0.0' ) !== true ) return false;
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '4.1.0', '= 4.1.0' ) !== true ) return false;
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '4.1.1', '= 4.1.0' ) !== false ) return false;
+
+	// 5. Fixed version ceiling parameter
+	// Even if affected_range matches, installed_ver >= fixed_ver must return false
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '2.4.9', '< 3.0.0', '2.5.0' ) !== true ) return false;
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '2.5.0', '< 3.0.0', '2.5.0' ) !== false ) return false;
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '2.6.0', '< 3.0.0', '2.5.0' ) !== false ) return false;
+
+	// 6. Fixed version provided without range expression
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '1.0.0', '', '1.5.0' ) !== true ) return false;
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '1.5.0', '', '1.5.0' ) !== false ) return false;
+
+	// 7. Edge cases
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '', '< 2.0.0' ) !== false ) return false;
+	if ( WPSG_Vulnerability_Checker::is_version_affected( '1.0.0', '' ) !== false ) return false;
+
+	return true;
+} );
+
+// ------------------------------------------------------------------
+// Test 56: Actionable Remediation Guidance Formatting
+// ------------------------------------------------------------------
+run_test( 'Vulnerability Intelligence: Actionable remediation guidance formatting', function () {
+	// Exact fixed version provided
+	$guide_fixed = WPSG_Vulnerability_Checker::format_remediation_guidance( '2.4.5', '< 2.4.5' );
+	if ( false === strpos( $guide_fixed, '2.4.5 or later' ) ) return false;
+
+	// Fixed version with prefix 'v'
+	$guide_prefix = WPSG_Vulnerability_Checker::format_remediation_guidance( 'v3.1.0', '< 3.1.0' );
+	if ( false === strpos( $guide_prefix, '3.1.0 or later' ) ) return false;
+
+	// No fixed version, but affected range provides upper bound
+	$guide_range = WPSG_Vulnerability_Checker::format_remediation_guidance( '', '< 1.8.0' );
+	if ( false === strpos( $guide_range, '1.8.0 or later' ) ) return false;
+
+	// Zero fixed version and zero upper bound
+	$guide_none = WPSG_Vulnerability_Checker::format_remediation_guidance( '', '' );
+	if ( false === strpos( $guide_none, 'No patched version released yet' ) ) return false;
+
+	return true;
+} );
+
+// ------------------------------------------------------------------
+// Test 57: Vulnerability Fix Verification Three-State Transitions
+// ------------------------------------------------------------------
+run_test( 'Vulnerability Fix Verification: Three-state transitions (done, applied_unverified, not_applied)', function () {
+	$test_slug = 'wpsg-test-target-plugin';
+	$plugin_file = $test_slug . '/' . $test_slug . '.php';
+	$plugin_dir = WP_PLUGIN_DIR . '/' . $test_slug;
+
+	// Cleanup prior state if any
+	delete_transient( WPSG_Vulnerability_Checker::CACHE_KEY );
+	unset( $GLOBALS['_mock_plugins'][ $plugin_file ] );
+	unset( $GLOBALS['_mock_remote_handler'] );
+	if ( is_dir( $plugin_dir ) ) {
+		@unlink( $plugin_dir . '/readme.txt' );
+		@rmdir( $plugin_dir );
+	}
+
+	// -------------------------------------------------------------
+	// State 1A: Component completely removed / not installed -> done
+	// -------------------------------------------------------------
+	$res_removed = WPSG_Vulnerability_Checker::verify_fix( $test_slug, 'plugin' );
+	if ( empty( $res_removed['success'] ) || 'done' !== $res_removed['verification_status'] || 'Applied & Verified' !== $res_removed['state_label'] ) {
+		return false;
+	}
+
+	// -------------------------------------------------------------
+	// State 3: Component installed and still affected -> not_applied
+	// -------------------------------------------------------------
+	wp_mkdir_p( $plugin_dir );
+	$readme_vuln = "=== Plugin Name ===\nPlugin Name: Target Test\n\n== Changelog ==\n= 2.0.0 =\n* Critical security patch for remote code execution vulnerability CVE-2024-8888\n";
+	file_put_contents( $plugin_dir . '/readme.txt', $readme_vuln );
+
+	// Component installed at version 1.5.0 (which is < 2.0.0)
+	$GLOBALS['_mock_plugins'][ $plugin_file ] = array(
+		'Name'    => 'Target Test',
+		'Version' => '1.5.0',
+	);
+
+	// Seed previous finding in cache
+	set_transient( WPSG_Vulnerability_Checker::CACHE_KEY, array(
+		'vulnerable' => array(
+			array(
+				'component'         => $test_slug,
+				'installed_version' => '1.5.0',
+				'cve'               => 'CVE-2024-8888',
+			),
+		),
+	) );
+
+	$res_not_applied = WPSG_Vulnerability_Checker::verify_fix( $test_slug, 'plugin' );
+	if ( ! empty( $res_not_applied['success'] ) || 'not_applied' !== $res_not_applied['verification_status'] || 'Not Applied' !== $res_not_applied['state_label'] ) {
+		@unlink( $plugin_dir . '/readme.txt' );
+		@rmdir( $plugin_dir );
+		return false;
+	}
+
+	// -------------------------------------------------------------
+	// State 1B: Component updated past fixed version -> done
+	// -------------------------------------------------------------
+	$GLOBALS['_mock_plugins'][ $plugin_file ]['Version'] = '2.0.0';
+
+	$res_fixed = WPSG_Vulnerability_Checker::verify_fix( $test_slug, 'plugin' );
+	if ( empty( $res_fixed['success'] ) || 'done' !== $res_fixed['verification_status'] || 'Applied & Verified' !== $res_fixed['state_label'] ) {
+		@unlink( $plugin_dir . '/readme.txt' );
+		@rmdir( $plugin_dir );
+		return false;
+	}
+
+	// -------------------------------------------------------------
+	// State 2: Component version bumped, but outbound live check failed -> applied_unverified
+	// -------------------------------------------------------------
+	// Remove local readme so changelog intelligence does not trigger
+	@unlink( $plugin_dir . '/readme.txt' );
+
+	// Seed previous finding in cache at 2.0.0
+	set_transient( WPSG_Vulnerability_Checker::CACHE_KEY, array(
+		'vulnerable' => array(
+			array(
+				'component'         => $test_slug,
+				'installed_version' => '2.0.0',
+			),
+		),
+	) );
+
+	// Bump version to 2.1.0
+	$GLOBALS['_mock_plugins'][ $plugin_file ]['Version'] = '2.1.0';
+
+	// Enable optin and set API key to force outbound query
+	update_option( 'wpsg_settings', array(
+		'patchstack_optin'   => 1,
+		'patchstack_api_key' => 'mock_api_key_for_testing',
+	) );
+
+	// Set remote handler to fail (e.g. timeout / network unreachable)
+	$GLOBALS['_mock_remote_handler'] = function( $url, $args ) {
+		return new WP_Error( 'http_request_failed', 'cURL error 28: Operation timed out' );
+	};
+
+	$res_unverified = WPSG_Vulnerability_Checker::verify_fix( $test_slug, 'plugin' );
+
+	// Clean up environment
+	unset( $GLOBALS['_mock_plugins'][ $plugin_file ] );
+	unset( $GLOBALS['_mock_remote_handler'] );
+	delete_transient( WPSG_Vulnerability_Checker::CACHE_KEY );
+	delete_option( 'wpsg_settings' );
+	@rmdir( $plugin_dir );
+
+	if ( empty( $res_unverified['success'] ) || 'applied_unverified' !== $res_unverified['verification_status'] || 'Applied, Not Verified' !== $res_unverified['state_label'] ) {
+		return false;
+	}
+
+	return true;
+} );
+
+// ------------------------------------------------------------------
+// Test 58: REST API /vulnerabilities/verify-fix Capability & Parameter Validation
+// ------------------------------------------------------------------
+run_test( 'REST API: /vulnerabilities/verify-fix role capability gating and fix verification dispatch', function () {
+	$controller = WPSG_Rest_Controller::get_instance();
+
+	// 1. Unauthenticated or non-admin permission rejection
+	$GLOBALS['_mock_current_user_can'] = 'read';
+	$perm_check = $controller->check_permissions();
+	if ( ! is_wp_error( $perm_check ) || 403 !== $perm_check->data['status'] ) {
+		return false;
+	}
+
+	// 2. Administrator permission success
+	$GLOBALS['_mock_current_user_can'] = 'manage_options';
+	$perm_check_admin = $controller->check_permissions();
+	if ( true !== $perm_check_admin ) {
+		return false;
+	}
+
+	// 3. Validation: missing required component slug parameter -> 400 error
+	$empty_req = new WP_REST_Request( array() );
+	$res_empty = $controller->verify_vulnerability_fix( $empty_req );
+	if ( ! is_wp_error( $res_empty ) || 'wpsg_missing_param' !== $res_empty->get_error_code() ) {
+		return false;
+	}
+
+	// 4. Valid request dispatch -> returns 200 WP_REST_Response with done status for non-installed slug
+	$valid_req = new WP_REST_Request( array(
+		'slug' => 'non-existent-plugin-slug',
+		'type' => 'plugin',
+	) );
+	$res_valid = $controller->verify_vulnerability_fix( $valid_req );
+	if ( ! ( $res_valid instanceof WP_REST_Response ) ) {
+		return false;
+	}
+	$payload = $res_valid->get_data();
+	if ( empty( $payload['success'] ) || 'done' !== $payload['verification_status'] ) {
+		return false;
+	}
+
 	return true;
 } );
 
