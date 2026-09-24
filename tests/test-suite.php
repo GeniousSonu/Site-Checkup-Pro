@@ -2122,6 +2122,69 @@ run_test( 'REST API: /vulnerabilities/verify-fix role capability gating and fix 
 	return true;
 } );
 
+// Test 59: External Fingerprint & Information Disclosure Scanner
+run_test( 'External Fingerprint: Probes sensitive paths, detects exposed files, and enforces read-only loopback isolation', function() {
+	if ( ! class_exists( 'WPSG_External_Fingerprint' ) ) {
+		require_once dirname( __DIR__ ) . '/includes/class-external-fingerprint.php';
+	}
+
+	WPSG_External_Fingerprint::clear_cache();
+
+	// 1. Clean run: all probe paths return 404
+	$GLOBALS['_mock_remote_handler'] = function( $url, $args ) {
+		return array(
+			'response' => array( 'code' => 404, 'message' => 'Not Found' ),
+			'headers'  => array(),
+			'body'     => 'Not Found',
+		);
+	};
+
+	$clean_res = WPSG_External_Fingerprint::scan( true );
+	if ( empty( $clean_res['success'] ) || 'clean' !== $clean_res['status'] || 0 !== $clean_res['exposed_count'] ) {
+		unset( $GLOBALS['_mock_remote_handler'] );
+		return false;
+	}
+
+	// 2. Vulnerable run: .env is publicly accessible and returns credentials
+	$GLOBALS['_mock_remote_handler'] = function( $url, $args ) {
+		if ( false !== strpos( $url, '.env' ) ) {
+			return array(
+				'response' => array( 'code' => 200, 'message' => 'OK' ),
+				'headers'  => array( 'Content-Type' => 'text/plain' ),
+				'body'     => "DB_NAME=wordpress\nDB_PASSWORD=supersecretpass\n",
+			);
+		}
+		return array(
+			'response' => array( 'code' => 404, 'message' => 'Not Found' ),
+			'headers'  => array(),
+			'body'     => 'Not Found',
+		);
+	};
+
+	$vuln_res = WPSG_External_Fingerprint::scan( true );
+	if ( empty( $vuln_res['success'] ) || 'attention' !== $vuln_res['status'] || 1 !== $vuln_res['exposed_count'] ) {
+		unset( $GLOBALS['_mock_remote_handler'] );
+		return false;
+	}
+
+	$item = $vuln_res['exposed_items'][0];
+	if ( 'env_file' !== $item['id'] || 'critical' !== $item['severity'] ) {
+		unset( $GLOBALS['_mock_remote_handler'] );
+		return false;
+	}
+
+	// 3. Transient caching: subsequent call without force_refresh returns cached results
+	$cached_res = WPSG_External_Fingerprint::scan( false );
+	if ( $cached_res !== $vuln_res ) {
+		unset( $GLOBALS['_mock_remote_handler'] );
+		return false;
+	}
+
+	WPSG_External_Fingerprint::clear_cache();
+	unset( $GLOBALS['_mock_remote_handler'] );
+	return true;
+} );
+
 echo "\n=======================================================\n";
 echo " Test Results: {$tests_passed} Passed, {$tests_failed} Failed\n";
 echo "=======================================================\n";

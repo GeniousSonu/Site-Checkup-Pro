@@ -65,8 +65,10 @@ class WPSG_External_Fingerprint {
 			$scanned++;
 			$target_url = rtrim( $base_url, '/' ) . '/' . ltrim( $probe['path'], '/' );
 
-			// SSRF protection
-			if ( class_exists( 'WPSG_SSRF_Guard' ) && ! WPSG_SSRF_Guard::is_safe_url( $target_url ) ) {
+			// SSRF protection: strictly confine to home_url() host
+			$home_p   = wp_parse_url( $base_url );
+			$target_p = wp_parse_url( $target_url );
+			if ( ! $home_p || ! $target_p || empty( $target_p['host'] ) || strtolower( $home_p['host'] ) !== strtolower( $target_p['host'] ) ) {
 				continue;
 			}
 

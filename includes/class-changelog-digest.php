@@ -103,9 +103,10 @@ class WPSG_Changelog_Digest {
 			foreach ( $theme_updates->response as $theme_slug => $theme_data ) {
 				$cur_ver = 'Unknown';
 				if ( function_exists( 'wp_get_theme' ) ) {
+					/** @var \WP_Theme $th */
 					$th = wp_get_theme( $theme_slug );
-					if ( $th->exists() ) {
-						$cur_ver = $th->get( 'Version' );
+					if ( $th instanceof \WP_Theme && $th->exists() ) {
+						$cur_ver = (string) $th->get( 'Version' );
 					}
 				}
 				$new_ver = is_array( $theme_data ) && isset( $theme_data['new_version'] ) ? $theme_data['new_version'] : ( is_object( $theme_data ) && isset( $theme_data->new_version ) ? $theme_data->new_version : 'New' );

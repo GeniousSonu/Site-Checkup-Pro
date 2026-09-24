@@ -29,7 +29,7 @@ Before committing any changes, always run the automated PHP test suite:
 php tests/test-suite.php
 ```
 
-All 54 tests must pass with zero failures.
+All 59 tests must pass with zero failures.
 
 ---
 
