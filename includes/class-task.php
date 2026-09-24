@@ -204,6 +204,7 @@ class WPSG_Task {
 				error_log( sprintf( '[Site Checkup Pro] Error evaluating live status for task "%s": %s in %s:%d', $this->id, $e->getMessage(), $e->getFile(), $e->getLine() ) );
 				return array(
 					'status'  => 'attention',
+					/* translators: %s: environmental notice / error message */
 					'message' => sprintf( __( 'Check encountered an environmental notice: %s', 'site-checkup-pro' ), $e->getMessage() ),
 				);
 			}
@@ -278,7 +279,8 @@ class WPSG_Task {
 
 		// Overdue reminder check (e.g. 15-day credential rotation or 6-month GSC review)
 		if ( $next_reminder_at && strtotime( $next_reminder_at ) <= time() ) {
-			$status       = 'attention';
+			$status = 'attention';
+			/* translators: %s: due date/time string */
 			$live_message = sprintf( __( 'Overdue reminder: scheduled review was due on %s.', 'site-checkup-pro' ), $next_reminder_at );
 		}
 

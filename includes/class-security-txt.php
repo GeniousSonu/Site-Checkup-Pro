@@ -117,16 +117,18 @@ class WPSG_Security_Txt {
 
 		// Pre-flight write permission checks
 		if ( file_exists( $well_known_dir ) ) {
-			if ( ! is_writable( $well_known_dir ) ) {
+			if ( ! wp_is_writable( $well_known_dir ) ) {
 				return array(
 					'success' => false,
+					/* translators: %s: directory path */
 					'message' => sprintf( __( 'The directory %s is not writable by the web server.', 'site-checkup-pro' ), esc_html( $well_known_dir ) ),
 				);
 			}
 		} else {
-			if ( ! is_writable( $doc_root ) ) {
+			if ( ! wp_is_writable( $doc_root ) ) {
 				return array(
 					'success' => false,
+					/* translators: %s: document root path */
 					'message' => sprintf( __( 'Document root %s is not writable to create /.well-known/.', 'site-checkup-pro' ), esc_html( $doc_root ) ),
 				);
 			}
@@ -182,6 +184,7 @@ class WPSG_Security_Txt {
 		}
 
 		// Set proper 0644 permissions on the newly created file
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
 		@chmod( $target_file, 0644 );
 
 		return array(
@@ -207,6 +210,7 @@ class WPSG_Security_Txt {
 
 		$backup = get_option( 'wpsg_last_security_txt_backup' );
 		if ( ! empty( $backup ) && file_exists( $backup ) ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_copy
 			copy( $backup, $target_file );
 			delete_option( 'wpsg_last_security_txt_backup' );
 			return array(
@@ -215,7 +219,7 @@ class WPSG_Security_Txt {
 			);
 		}
 
-		@unlink( $target_file );
+		wp_delete_file( $target_file );
 		return array(
 			'success' => true,
 			'message' => __( 'security.txt file was removed.', 'site-checkup-pro' ),

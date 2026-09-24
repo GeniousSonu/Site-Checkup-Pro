@@ -162,8 +162,7 @@ class WPSG_Plugin {
 			WPSG_Changelog_Digest::get_instance();
 		}
 
-		// Ensure Auto-Update support is registered in WordPress update transient and background updater.
-		add_filter( 'site_transient_update_plugins', array( $this, 'filter_update_plugins_transient' ) );
+		// Ensure Auto-Update support is registered for background updater.
 		add_filter( 'auto_update_plugin', array( $this, 'filter_auto_update_plugin' ), 10, 2 );
 
 		// Initialize Self-Hosted Update Checker (Excluded from WordPress.org directory releases per Guideline 8).
@@ -272,42 +271,15 @@ class WPSG_Plugin {
 	}
 
 	/**
-	 * Ensure plugin is tracked in update_plugins transient so WordPress lists it as update-supported.
+	 * Filter update transient (delegates to WPSG_Update_Checker if present).
 	 *
-	 * @param object|false $transient The update_plugins transient.
+	 * @param object|false $transient The update transient.
 	 * @return object|false
 	 */
 	public function filter_update_plugins_transient( $transient ) {
-		if ( ! is_object( $transient ) ) {
-			return $transient;
+		if ( class_exists( 'WPSG_Update_Checker' ) ) {
+			return WPSG_Update_Checker::filter_update_plugins_transient( $transient );
 		}
-
-		if ( ! isset( $transient->response ) || ! is_array( $transient->response ) ) {
-			$transient->response = array();
-		}
-
-		if ( ! isset( $transient->no_update ) || ! is_array( $transient->no_update ) ) {
-			$transient->no_update = array();
-		}
-
-		$basename = defined( 'WPSG_BASENAME' ) ? WPSG_BASENAME : 'site-checkup-pro/site-checkup-pro.php';
-
-		if ( ! isset( $transient->response[ $basename ] ) && ! isset( $transient->no_update[ $basename ] ) ) {
-			$transient->no_update[ $basename ] = (object) array(
-				'id'            => 'wpsg-site-checkup-pro',
-				'slug'          => 'site-checkup-pro',
-				'plugin'        => $basename,
-				'new_version'   => defined( 'WPSG_VERSION' ) ? WPSG_VERSION : '1.0.0',
-				'url'           => 'https://www.genioussonu.me/plugin/site-checkup-pro/',
-				'package'       => '',
-				'icons'         => array(),
-				'banners'       => array(),
-				'tested'        => '6.7',
-				'requires_php'  => '7.4',
-				'compatibility' => new \stdClass(),
-			);
-		}
-
 		return $transient;
 	}
 

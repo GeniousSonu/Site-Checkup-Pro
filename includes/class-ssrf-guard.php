@@ -224,18 +224,18 @@ class WPSG_SSRF_Guard {
 
 		// Pin IP and lock down protocols in cURL via filter.
 		$curl_hook = function ( $handle ) use ( $host, $port, $pinned_ip ) {
-			// Zero redirects.
-			curl_setopt( $handle, CURLOPT_FOLLOWLOCATION, false );
+			// Zero redirects (configured directly on core cURL handle via http_api_curl).
+			curl_setopt( $handle, CURLOPT_FOLLOWLOCATION, false ); // phpcs:ignore WordPress.WP.AlternativeFunctions.curl_curl_setopt
 
 			// Strict protocol restrictions: only HTTP and HTTPS.
 			if ( defined( 'CURLPROTO_HTTP' ) && defined( 'CURLPROTO_HTTPS' ) ) {
-				curl_setopt( $handle, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS );
-				curl_setopt( $handle, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS );
+				curl_setopt( $handle, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS ); // phpcs:ignore WordPress.WP.AlternativeFunctions.curl_curl_setopt
+				curl_setopt( $handle, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS ); // phpcs:ignore WordPress.WP.AlternativeFunctions.curl_curl_setopt
 			}
 
 			// Pin connection to the pre-validated IP to eliminate DNS rebinding.
 			if ( defined( 'CURLOPT_RESOLVE' ) ) {
-				curl_setopt( $handle, CURLOPT_RESOLVE, array( "{$host}:{$port}:{$pinned_ip}" ) );
+				curl_setopt( $handle, CURLOPT_RESOLVE, array( "{$host}:{$port}:{$pinned_ip}" ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.curl_curl_setopt
 			}
 		};
 

@@ -133,6 +133,7 @@ class WPSG_Db_Health_Scanner {
 					'total_count'  => $total_revisions,
 					'threshold'    => $threshold,
 					'estimated_kb' => $est_revisions_kb,
+					/* translators: %d: revision threshold */
 					'description'  => sprintf( __( 'Post revisions beyond %d per post.', 'site-checkup-pro' ), $threshold ),
 				),
 			),
@@ -278,6 +279,7 @@ class WPSG_Db_Health_Scanner {
 			'success'        => true,
 			'total_deleted'  => $total_deleted,
 			'deleted_counts' => $deleted_counts,
+			/* translators: %d: number of deleted items */
 			'message'        => sprintf( __( 'Database cleanup complete: %d orphaned items removed safely.', 'site-checkup-pro' ), $total_deleted ),
 		);
 	}

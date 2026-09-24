@@ -166,10 +166,12 @@ class WPSG_Scheduler {
 			printf(
 				'<div class="notice notice-warning is-dismissible"><p><strong>%1$s:</strong> %2$s <a href="%3$s">%4$s &rarr;</a></p></div>',
 				esc_html__( 'Site Checkup Pro Alert', 'site-checkup-pro' ),
-				sprintf(
-					/* translators: %d: count */
-					esc_html__( 'You have %d recurring security task(s) or password rotations due today.', 'site-checkup-pro' ),
-					$due_count
+				esc_html(
+					sprintf(
+						/* translators: %d: count of due tasks */
+						__( 'You have %d recurring security task(s) or password rotations due today.', 'site-checkup-pro' ),
+						$due_count
+					)
 				),
 				esc_url( $url ),
 				esc_html__( 'View Check-up Dashboard', 'site-checkup-pro' )

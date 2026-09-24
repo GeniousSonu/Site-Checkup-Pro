@@ -105,8 +105,11 @@ class WPSG_Integrity_Monitor {
 			'modified_files' => $modified,
 			'missing_files'  => $missing,
 			'last_checked'   => current_time( 'mysql' ),
+			/* translators: %d: total core files scanned */
 			'message'        => $is_clean
+				/* translators: %d: total core files scanned */
 				? sprintf( __( 'All %d WordPress core files verified and matched official WordPress.org checksums.', 'site-checkup-pro' ), $total )
+				/* translators: 1: modified file count, 2: missing file count */
 				: sprintf( __( 'Integrity Alert: %1$d modified core file(s) and %2$d missing file(s) detected!', 'site-checkup-pro' ), count( $modified ), count( $missing ) ),
 		);
 
@@ -173,19 +176,24 @@ class WPSG_Integrity_Monitor {
 
 		$is_clean = empty( $found );
 		if ( ! $is_clean && class_exists( 'WPSG_Alert_Dispatcher' ) ) {
+			/* translators: %d: executable scripts count */
+			$disp_msg = sprintf( __( 'High-Severity Alert: %d executable PHP script(s) discovered inside /wp-content/uploads/!', 'site-checkup-pro' ), count( $found ) );
 			WPSG_Alert_Dispatcher::dispatch(
 				'uploads_php_detected',
-				sprintf( __( 'High-Severity Alert: %d executable PHP script(s) discovered inside /wp-content/uploads/!', 'site-checkup-pro' ), count( $found ) ),
+				$disp_msg,
 				array( 'files' => $found )
 			);
 		}
+
+		/* translators: 1: count of scripts, 2: file list */
+		$crit_msg = sprintf( __( 'Critical Alert: %1$d unauthorized executable PHP script(s) found in /wp-content/uploads/: %2$s', 'site-checkup-pro' ), count( $found ), implode( ', ', $found ) );
 
 		return array(
 			'status'  => $is_clean ? 'done' : 'failed',
 			'files'   => $found,
 			'message' => $is_clean
 				? __( 'Zero executable PHP/phar scripts discovered in /wp-content/uploads/.', 'site-checkup-pro' )
-				: sprintf( __( 'Critical Alert: %1$d unauthorized executable PHP script(s) found in /wp-content/uploads/: %2$s', 'site-checkup-pro' ), count( $found ), implode( ', ', $found ) ),
+				: $crit_msg,
 		);
 	}
 }

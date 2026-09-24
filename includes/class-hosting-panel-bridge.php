@@ -234,6 +234,7 @@ class WPSG_Hosting_Panel_Bridge {
 			if ( is_wp_error( $ssrf_check ) ) {
 				return array(
 					'success' => false,
+					/* translators: %s: error message */
 					'message' => sprintf( __( 'Hosting panel URL violates SSRF security guard: %s', 'site-checkup-pro' ), $ssrf_check->get_error_message() ),
 				);
 			}
@@ -291,6 +292,7 @@ class WPSG_Hosting_Panel_Bridge {
 			);
 		}
 
+		/* translators: %d: HTTP status code */
 		$err_msg = ! empty( $data['message'] ) ? $data['message'] : sprintf( __( 'Hosting panel returned HTTP %d', 'site-checkup-pro' ), $code );
 		return array(
 			'success' => false,

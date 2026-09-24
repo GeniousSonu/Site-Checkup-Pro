@@ -225,6 +225,7 @@ class WPSG_Admin_Menu {
 		try {
 			include WPSG_PLUGIN_DIR . 'admin/views/dashboard.php';
 		} catch ( \Throwable $e ) {
+			/* translators: %s: error message */
 			echo '<div class="notice notice-error"><p>' . esc_html( sprintf( __( 'Site Checkup Pro encountered an unexpected error: %s', 'site-checkup-pro' ), $e->getMessage() ) ) . '</p></div>';
 		}
 	}
@@ -239,6 +240,7 @@ class WPSG_Admin_Menu {
 		try {
 			include WPSG_PLUGIN_DIR . 'admin/views/dashboard.php';
 		} catch ( \Throwable $e ) {
+			/* translators: %s: error message */
 			echo '<div class="notice notice-error"><p>' . esc_html( sprintf( __( 'Site Checkup Pro encountered an unexpected error: %s', 'site-checkup-pro' ), $e->getMessage() ) ) . '</p></div>';
 		}
 	}
@@ -253,6 +255,7 @@ class WPSG_Admin_Menu {
 		try {
 			include WPSG_PLUGIN_DIR . 'admin/views/report.php';
 		} catch ( \Throwable $e ) {
+			/* translators: %s: error message */
 			echo '<div class="notice notice-error"><p>' . esc_html( sprintf( __( 'Site Checkup Pro encountered an unexpected error generating the report: %s', 'site-checkup-pro' ), $e->getMessage() ) ) . '</p></div>';
 		}
 	}

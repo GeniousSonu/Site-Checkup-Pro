@@ -273,6 +273,7 @@ class WPSG_Session_Manager {
 				return new WP_Error(
 					'wpsg_locked_out',
 					sprintf(
+						/* translators: %d: minutes until retry allowed */
 						__( 'Too many failed attempts. Please try again in %d minute(s).', 'site-checkup-pro' ),
 						max( 1, (int) ceil( $lockout['remaining_seconds'] / 60 ) )
 					),

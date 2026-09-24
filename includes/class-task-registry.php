@@ -117,6 +117,7 @@ class WPSG_Task_Registry {
 				return array(
 					'status'  => $b['is_recent'] ? 'done' : 'attention',
 					'message' => $b['is_recent']
+						/* translators: 1: backup plugin name, 2: hours ago */
 						? sprintf( __( 'Verified recent backup (%1$s, %2$s hours ago).', 'site-checkup-pro' ), $b['plugin_name'], $b['age_hours'] )
 						: ( isset( $b['message'] ) ? $b['message'] : __( 'No recent backup found within the last 48 hours.', 'site-checkup-pro' ) ),
 				);
@@ -124,6 +125,7 @@ class WPSG_Task_Registry {
 			'run_callback'     => function () {
 				$b = WPSG_Backup_Guard::get_backup_status();
 				if ( $b['is_recent'] ) {
+					/* translators: %s: backup plugin name */
 					return array( 'success' => true, 'message' => sprintf( __( 'Recent backup verified (%s).', 'site-checkup-pro' ), $b['plugin_name'] ) );
 				}
 				// If manual confirmation was just recorded
@@ -394,12 +396,14 @@ class WPSG_Task_Registry {
 				if ( $high > 0 ) {
 					return array(
 						'status'  => 'attention',
+						/* translators: 1: count of high-risk endpoints, 2: total endpoints */
 						'message' => sprintf( __( '%1$d high-risk or publicly exposed REST endpoint(s) detected across %2$d endpoints.', 'site-checkup-pro' ), $high, $total ),
 						'data'    => $audit['summary'],
 					);
 				}
 				return array(
 					'status'  => 'done',
+					/* translators: %d: total endpoints */
 					'message' => sprintf( __( 'All %d registered REST endpoints audited. No unauthorized public write routes detected.', 'site-checkup-pro' ), $total ),
 					'data'    => $audit['summary'],
 				);
@@ -419,12 +423,14 @@ class WPSG_Task_Registry {
 						$high > 0 ? 'warning' : 'info'
 					);
 				}
+				/* translators: 1: count of high-risk endpoints, 2: total endpoints */
+				$high_msg = sprintf( __( 'Audit complete: %1$d high-risk endpoint(s) identified across %2$d endpoints.', 'site-checkup-pro' ), $high, $total );
+				/* translators: %d: total endpoints */
+				$clean_msg = sprintf( __( 'Audit complete: all %d endpoints verified with proper authorization.', 'site-checkup-pro' ), $total );
 				return array(
 					'success' => true,
 					'status'  => $high > 0 ? 'attention' : 'done',
-					'message' => $high > 0
-						? sprintf( __( 'Audit complete: %1$d high-risk endpoint(s) identified across %2$d endpoints.', 'site-checkup-pro' ), $high, $total )
-						: sprintf( __( 'Audit complete: all %d endpoints verified with proper authorization.', 'site-checkup-pro' ), $total ),
+					'message' => $high > 0 ? $high_msg : $clean_msg,
 					'summary' => $audit['summary'],
 				);
 			},
@@ -447,12 +453,14 @@ class WPSG_Task_Registry {
 				if ( $confirmed ) {
 					return array(
 						'status'  => 'done',
+						/* translators: %s: environment name */
 						'message' => sprintf( __( 'Active environment confirmed: %s (Admin bar badge active).', 'site-checkup-pro' ), ucfirst( $env ) ),
 						'data'    => array( 'environment' => $env, 'confirmed' => true ),
 					);
 				}
 				return array(
 					'status'  => 'pending',
+					/* translators: %s: environment name */
 					'message' => sprintf( __( 'Unconfirmed environment. Domain heuristics suggest: %s. Click Run to confirm.', 'site-checkup-pro' ), ucfirst( $env ) ),
 					'data'    => array( 'environment' => $env, 'confirmed' => false ),
 				);
@@ -474,6 +482,7 @@ class WPSG_Task_Registry {
 				return array(
 					'success' => true,
 					'status'  => 'done',
+					/* translators: %s: environment name */
 					'message' => sprintf( __( 'Environment confirmed as %s. Admin bar badge updated.', 'site-checkup-pro' ), ucfirst( $suggested ) ),
 					'data'    => array( 'environment' => $suggested, 'confirmed' => true ),
 				);
@@ -539,12 +548,14 @@ class WPSG_Task_Registry {
 				if ( $overdue > 0 || $dupes > 0 ) {
 					return array(
 						'status'  => 'attention',
+						/* translators: 1: overdue count, 2: duplicate count, 3: total jobs */
 						'message' => sprintf( __( 'Cron anomalies detected: %1$d overdue task(s), %2$d duplicate registration(s) across %3$d scheduled events.', 'site-checkup-pro' ), $overdue, $dupes, $total ),
 						'data'    => $audit['summary'],
 					);
 				}
 				return array(
 					'status'  => 'done',
+					/* translators: %d: total scheduled jobs */
 					'message' => sprintf( __( 'All %d scheduled WP-Cron jobs running normally. No overdue or duplicate tasks found.', 'site-checkup-pro' ), $total ),
 					'data'    => $audit['summary'],
 				);
@@ -565,12 +576,14 @@ class WPSG_Task_Registry {
 						( $overdue > 0 || $dupes > 0 ) ? 'warning' : 'info'
 					);
 				}
+				/* translators: 1: overdue count, 2: duplicate count */
+				$overdue_msg = sprintf( __( 'Cron scan complete: %1$d overdue task(s), %2$d duplicate(s) found.', 'site-checkup-pro' ), $overdue, $dupes );
+				/* translators: %d: total scheduled jobs */
+				$clean_msg   = sprintf( __( 'Cron scan complete: all %d events verified and scheduled properly.', 'site-checkup-pro' ), $total );
 				return array(
 					'success' => true,
 					'status'  => ( $overdue > 0 || $dupes > 0 ) ? 'attention' : 'done',
-					'message' => ( $overdue > 0 || $dupes > 0 )
-						? sprintf( __( 'Cron scan complete: %1$d overdue task(s), %2$d duplicate(s) found.', 'site-checkup-pro' ), $overdue, $dupes )
-						: sprintf( __( 'Cron scan complete: all %d events verified and scheduled properly.', 'site-checkup-pro' ), $total ),
+					'message' => ( $overdue > 0 || $dupes > 0 ) ? $overdue_msg : $clean_msg,
 					'summary' => $audit['summary'],
 				);
 			},
@@ -594,6 +607,7 @@ class WPSG_Task_Registry {
 				if ( $bloat > 0 ) {
 					return array(
 						'status'  => 'attention',
+						/* translators: 1: bloat items count, 2: estimated megabytes */
 						'message' => sprintf( __( '%1$d orphaned/stale database item(s) found (~%2$s MB overhead). Click Run to inspect.', 'site-checkup-pro' ), $bloat, $mb ),
 						'data'    => $scan['summary'],
 					);
@@ -619,12 +633,12 @@ class WPSG_Task_Registry {
 						$bloat > 0 ? 'warning' : 'info'
 					);
 				}
+				/* translators: 1: bloat items count, 2: estimated megabytes */
+				$bloat_msg = sprintf( __( 'Scan complete: %1$d orphaned/stale item(s) identified (~%2$s MB overhead).', 'site-checkup-pro' ), $bloat, $mb );
 				return array(
 					'success' => true,
 					'status'  => $bloat > 0 ? 'attention' : 'done',
-					'message' => $bloat > 0
-						? sprintf( __( 'Scan complete: %1$d orphaned/stale item(s) identified (~%2$s MB overhead).', 'site-checkup-pro' ), $bloat, $mb )
-						: __( 'Scan complete: database is clean and optimized.', 'site-checkup-pro' ),
+					'message' => $bloat > 0 ? $bloat_msg : __( 'Scan complete: database is clean and optimized.', 'site-checkup-pro' ),
 					'summary' => $scan['summary'],
 					'details' => $scan['details'],
 				);
@@ -648,6 +662,7 @@ class WPSG_Task_Registry {
 				if ( $count > 0 ) {
 					return array(
 						'status'  => 'attention',
+						/* translators: %d: number of serialized database rows */
 						'message' => sprintf( __( '%d serialized database row(s) contain hardcoded domain URLs. Standard SQL export/import will corrupt these strings.', 'site-checkup-pro' ), $count ),
 						'data'    => $scan['summary'],
 					);
@@ -672,12 +687,12 @@ class WPSG_Task_Registry {
 						$count > 0 ? 'warning' : 'info'
 					);
 				}
+				/* translators: %d: number of serialized database rows */
+				$risk_msg = sprintf( __( 'Scan complete: %d serialized row(s) contain absolute URLs. Review WP-CLI guidance.', 'site-checkup-pro' ), $count );
 				return array(
 					'success'  => true,
 					'status'   => $count > 0 ? 'attention' : 'done',
-					'message'  => $count > 0
-						? sprintf( __( 'Scan complete: %d serialized row(s) contain absolute URLs. Review WP-CLI guidance.', 'site-checkup-pro' ), $count )
-						: __( 'Scan complete: no serialized absolute URL risks detected.', 'site-checkup-pro' ),
+					'message'  => $count > 0 ? $risk_msg : __( 'Scan complete: no serialized absolute URL risks detected.', 'site-checkup-pro' ),
 					'summary'  => $scan['summary'],
 					'guidance' => $scan['guidance'],
 				);
@@ -701,6 +716,7 @@ class WPSG_Task_Registry {
 				if ( $total > 0 ) {
 					return array(
 						'status'  => 'attention',
+						/* translators: %d: number of updates */
 						'message' => sprintf( __( '%d plugin/theme update(s) available with changelog summaries ready for review.', 'site-checkup-pro' ), $total ),
 						'data'    => $digest['summary'],
 					);
@@ -725,12 +741,12 @@ class WPSG_Task_Registry {
 						'info'
 					);
 				}
+				/* translators: %d: number of updates */
+				$up_msg = sprintf( __( 'Digest compiled: %d update(s) available with release notes.', 'site-checkup-pro' ), $total );
 				return array(
 					'success' => true,
 					'status'  => $total > 0 ? 'attention' : 'done',
-					'message' => $total > 0
-						? sprintf( __( 'Digest compiled: %d update(s) available with release notes.', 'site-checkup-pro' ), $total )
-						: __( 'Digest compiled: all plugins and themes are current.', 'site-checkup-pro' ),
+					'message' => $total > 0 ? $up_msg : __( 'Digest compiled: all plugins and themes are current.', 'site-checkup-pro' ),
 					'summary' => $digest['summary'],
 					'items'   => $digest['items'],
 				);
@@ -1135,6 +1151,7 @@ class WPSG_Task_Registry {
 					$days = round( ( time() - $last_rotated ) / 86400, 1 );
 					return array(
 						'status'  => 'done',
+						/* translators: %s: number of days */
 						'message' => sprintf( __( 'Salts rotated successfully (%s day(s) ago).', 'site-checkup-pro' ), $days ),
 					);
 				}
@@ -1171,6 +1188,7 @@ class WPSG_Task_Registry {
 					}
 					return array(
 						'status'  => 'applied_unverified',
+						/* translators: %s: custom login slug */
 						'message' => sprintf( __( 'Custom login URL set (/%s/), but live probe could not verify redirection yet.', 'site-checkup-pro' ), $slug ),
 					);
 				}
@@ -1178,6 +1196,7 @@ class WPSG_Task_Registry {
 				if ( false !== $conflict ) {
 					return array(
 						'status'  => 'attention',
+						/* translators: %s: conflicting plugin name */
 						'message' => sprintf( __( 'Managed via %s.', 'site-checkup-pro' ), $conflict ),
 					);
 				}
@@ -1413,11 +1432,11 @@ class WPSG_Task_Registry {
 			'status_callback'  => function () {
 				$s = get_option( 'wpsg_settings', array() );
 				$has_contact = ! empty( $s['incident_contact_email'] ) || ! empty( $s['incident_contact_phone'] );
+				/* translators: %s: contact details */
+				$msg_contact = sprintf( __( 'Incident contact configured: %s', 'site-checkup-pro' ), esc_html( ! empty( $s['incident_contact_name'] ) ? $s['incident_contact_name'] : $s['incident_contact_email'] ) );
 				return array(
 					'status'  => $has_contact ? 'done' : 'attention',
-					'message' => $has_contact
-						? sprintf( __( 'Incident contact configured: %s', 'site-checkup-pro' ), esc_html( ! empty( $s['incident_contact_name'] ) ? $s['incident_contact_name'] : $s['incident_contact_email'] ) )
-						: __( 'No emergency incident contact details recorded. Update in Settings.', 'site-checkup-pro' ),
+					'message' => $has_contact ? $msg_contact : __( 'No emergency incident contact details recorded. Update in Settings.', 'site-checkup-pro' ),
 				);
 			},
 		) ) );
@@ -1499,6 +1518,7 @@ class WPSG_Task_Registry {
 				$count    = count( $sessions );
 				return array(
 					'status'  => ( $count <= 2 ) ? 'done' : 'attention',
+					/* translators: %d: number of active sessions */
 					'message' => sprintf( __( '%d active session(s) recorded for current administrator.', 'site-checkup-pro' ), $count ),
 				);
 			},
@@ -1799,6 +1819,7 @@ class WPSG_Task_Registry {
 				$count     = count( $passwords );
 				return array(
 					'status'  => ( 0 === $count ) ? 'done' : 'attention',
+					/* translators: %d: number of application passwords */
 					'message' => sprintf( __( '%d application password(s) active on this site.', 'site-checkup-pro' ), $count ),
 				);
 			},

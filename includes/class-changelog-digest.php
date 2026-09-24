@@ -92,7 +92,7 @@ class WPSG_Changelog_Digest {
 					'file'            => sanitize_text_field( $plugin_file ),
 					'current_version' => sanitize_text_field( $cur_ver ),
 					'new_version'     => sanitize_text_field( $new_ver ),
-					'upgrade_notice'  => sanitize_text_field( strip_tags( (string) $upgrade_notice ) ),
+					'upgrade_notice'  => sanitize_text_field( wp_strip_all_tags( (string) $upgrade_notice ) ),
 					'tested_wp'       => is_object( $update_data ) && isset( $update_data->tested ) ? $update_data->tested : '',
 				);
 			}
@@ -144,6 +144,7 @@ class WPSG_Changelog_Digest {
 		if ( class_exists( 'WPSG_Alert_Dispatcher' ) ) {
 			$total = $digest['summary']['total_updates'];
 			$msg   = sprintf(
+				/* translators: %d: total available updates */
 				__( 'Weekly Changelog Digest: %d update(s) available for installed plugins and themes.', 'site-checkup-pro' ),
 				$total
 			);

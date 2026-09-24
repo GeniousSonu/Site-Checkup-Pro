@@ -290,7 +290,7 @@ class WPSG_Htaccess_Manager {
 
 		// Fallback: check if .htaccess exists and is writable in ABSPATH.
 		$htaccess_file = self::get_htaccess_path();
-		if ( file_exists( $htaccess_file ) && is_writable( $htaccess_file ) ) {
+		if ( file_exists( $htaccess_file ) && wp_is_writable( $htaccess_file ) ) {
 			return 'apache';
 		}
 
@@ -384,6 +384,7 @@ class WPSG_Htaccess_Manager {
 		if ( ! isset( $registry[ $rule_key ] ) || empty( $registry[ $rule_key ]['nginx'] ) ) {
 			return array(
 				'success' => false,
+				/* translators: %s: rule key */
 				'message' => sprintf( __( 'Unknown or unsupported Nginx rule: %s', 'site-checkup-pro' ), esc_html( $rule_key ) ),
 			);
 		}
@@ -512,6 +513,7 @@ class WPSG_Htaccess_Manager {
 		if ( ! isset( $registry[ $rule_key ] ) ) {
 			return array(
 				'success' => false,
+				/* translators: %s: rule key */
 				'message' => sprintf( __( 'Unknown named rule: %s', 'site-checkup-pro' ), esc_html( $rule_key ) ),
 			);
 		}
@@ -556,6 +558,7 @@ class WPSG_Htaccess_Manager {
 		if ( ! isset( $registry[ $rule_key ] ) ) {
 			return array(
 				'success' => false,
+				/* translators: %s: rule key */
 				'message' => sprintf( __( 'Unknown named rule: %s', 'site-checkup-pro' ), esc_html( $rule_key ) ),
 			);
 		}
@@ -711,7 +714,7 @@ class WPSG_Htaccess_Manager {
 
 		// 3. Write via native insert_with_markers wrapped in flock() file lock.
 		$lock_file = $htaccess_file . '.lock';
-		$lock_fp   = @fopen( $lock_file, 'w+' );
+		$lock_fp   = @fopen( $lock_file, 'w+' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- File locking via flock requires direct stream resource.
 		if ( $lock_fp ) {
 			flock( $lock_fp, LOCK_EX );
 		}
@@ -721,8 +724,8 @@ class WPSG_Htaccess_Manager {
 		} finally {
 			if ( $lock_fp ) {
 				flock( $lock_fp, LOCK_UN );
-				fclose( $lock_fp );
-				@unlink( $lock_file );
+				fclose( $lock_fp ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+				wp_delete_file( $lock_file );
 			}
 		}
 
@@ -785,7 +788,7 @@ class WPSG_Htaccess_Manager {
 
 		// 3. Write via native insert_with_markers wrapped in flock() file lock.
 		$lock_file = $htaccess_file . '.lock';
-		$lock_fp   = @fopen( $lock_file, 'w+' );
+		$lock_fp   = @fopen( $lock_file, 'w+' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- File locking via flock requires direct stream resource.
 		if ( $lock_fp ) {
 			flock( $lock_fp, LOCK_EX );
 		}
@@ -804,8 +807,8 @@ class WPSG_Htaccess_Manager {
 		} finally {
 			if ( $lock_fp ) {
 				flock( $lock_fp, LOCK_UN );
-				fclose( $lock_fp );
-				@unlink( $lock_file );
+				fclose( $lock_fp ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+				wp_delete_file( $lock_file );
 			}
 		}
 

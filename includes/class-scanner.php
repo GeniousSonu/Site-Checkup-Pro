@@ -219,8 +219,8 @@ class WPSG_Scanner {
 			return array(
 				'status'  => 'attention',
 				'message' => sprintf(
-					/* translators: %s: list of options */
-					__( 'Core URLs match baseline. Note: %d oversized autoloaded options found (>100KB): %s', 'site-checkup-pro' ),
+					/* translators: 1: count of oversized options, 2: sample list of option names */
+					__( 'Core URLs match baseline. Note: %1$d oversized autoloaded options found (>100KB): %2$s', 'site-checkup-pro' ),
 					count( $large_options ),
 					implode( ', ', array_slice( $large_options, 0, 3 ) )
 				),
@@ -357,8 +357,8 @@ class WPSG_Scanner {
 				'status' => 'failed',
 				'found'  => $found,
 				'message' => sprintf(
-					/* translators: %s: list of exposed files */
-					__( 'Critical: %d exposed backup/sensitive file(s) found in webroot: %s', 'site-checkup-pro' ),
+					/* translators: 1: count of exposed files, 2: list of exposed files */
+					__( 'Critical: %1$d exposed backup/sensitive file(s) found in webroot: %2$s', 'site-checkup-pro' ),
 					count( $found ),
 					implode( ', ', $found )
 				),
@@ -386,8 +386,10 @@ class WPSG_Scanner {
 
 		// Check PHP.
 		if ( version_compare( $php_version, '7.4', '<' ) ) {
+			/* translators: %s: PHP version */
 			$issues[] = sprintf( __( 'PHP %s is critically outdated and unsupported.', 'site-checkup-pro' ), $php_version );
 		} elseif ( version_compare( $php_version, '8.1', '<' ) ) {
+			/* translators: %s: PHP version */
 			$issues[] = sprintf( __( 'PHP %s has reached end-of-life. Upgrade to PHP 8.1+ recommended.', 'site-checkup-pro' ), $php_version );
 		}
 
@@ -396,8 +398,12 @@ class WPSG_Scanner {
 		if ( ! $is_ssl ) {
 			$issues[] = __( 'Site is not running over HTTPS/SSL.', 'site-checkup-pro' );
 		} elseif ( false !== $ssl_expiry && $ssl_expiry <= 14 ) {
+			/* translators: %d: number of days until SSL expiry */
 			$issues[] = sprintf( __( 'SSL certificate expires in %d day(s)!', 'site-checkup-pro' ), $ssl_expiry );
 		}
+
+		/* translators: %d: days remaining on SSL certificate */
+		$ssl_valid_text = ( false !== $ssl_expiry ) ? sprintf( __( 'Valid (%d days remaining)', 'site-checkup-pro' ), $ssl_expiry ) : __( 'Active', 'site-checkup-pro' );
 
 		$status = empty( $issues ) ? 'done' : ( count( $issues ) > 1 ? 'failed' : 'attention' );
 		$msg    = sprintf(
@@ -405,7 +411,7 @@ class WPSG_Scanner {
 			__( 'WordPress %1$s, PHP %2$s. SSL: %3$s.', 'site-checkup-pro' ),
 			$wp_version,
 			$php_version,
-			$is_ssl ? ( false !== $ssl_expiry ? sprintf( __( 'Valid (%d days remaining)', 'site-checkup-pro' ), $ssl_expiry ) : __( 'Active', 'site-checkup-pro' ) ) : __( 'Inactive', 'site-checkup-pro' )
+			$is_ssl ? $ssl_valid_text : __( 'Inactive', 'site-checkup-pro' )
 		);
 
 		if ( ! empty( $issues ) ) {
@@ -446,6 +452,7 @@ class WPSG_Scanner {
 		}
 
 		$params = stream_context_get_params( $client );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 		fclose( $client );
 
 		if ( empty( $params['options']['ssl']['peer_certificate'] ) ) {
@@ -492,6 +499,7 @@ class WPSG_Scanner {
 					'path'     => 'wp-config.php',
 					'perms'    => $perms_octal,
 					'severity' => 'critical',
+					/* translators: %s: octal file permissions */
 					'message'  => sprintf( __( 'Critical: wp-config.php is world-writable (%s). Permissions must be 0640 or 0600.', 'site-checkup-pro' ), $perms_octal ),
 				);
 			} elseif ( $perms > 0640 ) {
@@ -499,6 +507,7 @@ class WPSG_Scanner {
 					'path'     => 'wp-config.php',
 					'perms'    => $perms_octal,
 					'severity' => 'attention',
+					/* translators: %s: octal file permissions */
 					'message'  => sprintf( __( 'Warning: wp-config.php permissions (%s) exceed recommended baseline (0640 or 0600).', 'site-checkup-pro' ), $perms_octal ),
 				);
 			}
@@ -523,6 +532,7 @@ class WPSG_Scanner {
 						'path'     => $name,
 						'perms'    => $perms_octal,
 						'severity' => 'critical',
+						/* translators: 1: file name, 2: octal file permissions */
 						'message'  => sprintf( __( 'Critical: %1$s is world-writable (%2$s). Target baseline is 0644.', 'site-checkup-pro' ), $name, $perms_octal ),
 					);
 				} elseif ( ( $perms & 0111 ) !== 0 || $perms > 0644 ) {
@@ -531,6 +541,7 @@ class WPSG_Scanner {
 						'path'     => $name,
 						'perms'    => $perms_octal,
 						'severity' => 'attention',
+						/* translators: 1: file name, 2: octal file permissions */
 						'message'  => sprintf( __( 'Warning: File %1$s has executable/relaxed permissions (%2$s). Target baseline is 0644.', 'site-checkup-pro' ), $name, $perms_octal ),
 					);
 				}
@@ -558,6 +569,7 @@ class WPSG_Scanner {
 						'path'     => $label,
 						'perms'    => $perms_octal,
 						'severity' => ( ( $perms & 0002 ) !== 0 ) ? 'critical' : 'attention',
+						/* translators: 1: directory label, 2: octal file permissions */
 						'message'  => sprintf( __( 'Directory %1$s has relaxed/world-writable permissions (%2$s). Baseline must be 0755 or stricter.', 'site-checkup-pro' ), $label, $perms_octal ),
 					);
 				}
@@ -676,9 +688,11 @@ class WPSG_Scanner {
 		$is_default = ( 'wp_' === $prefix );
 
 		$status  = $is_default ? 'attention' : 'done';
-		$message = $is_default
-			? sprintf( __( 'Database tables use the default prefix "%s". A customized prefix reduces automated SQLi payload targeting.', 'site-checkup-pro' ), $prefix )
-			: sprintf( __( 'Database prefix is customized ("%s"), offering resistance to automated generic table targeting.', 'site-checkup-pro' ), $prefix );
+		/* translators: %s: database table prefix */
+		$default_msg = sprintf( __( 'Database tables use the default prefix "%s". A customized prefix reduces automated SQLi payload targeting.', 'site-checkup-pro' ), $prefix );
+		/* translators: %s: database table prefix */
+		$custom_msg = sprintf( __( 'Database prefix is customized ("%s"), offering resistance to automated generic table targeting.', 'site-checkup-pro' ), $prefix );
+		$message = $is_default ? $default_msg : $custom_msg;
 
 		$result = array(
 			'status'       => $status,
@@ -801,6 +815,7 @@ class WPSG_Scanner {
 
 		if ( $client ) {
 			$params = stream_context_get_params( $client );
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 			fclose( $client );
 
 			if ( ! empty( $params['options']['ssl']['peer_certificate_chain'] ) && is_array( $params['options']['ssl']['peer_certificate_chain'] ) ) {
@@ -839,6 +854,7 @@ class WPSG_Scanner {
 				if ( true === $crypto_ok ) {
 					$accepted_protocols[] = $label;
 				}
+				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 				fclose( $tcp_client );
 			}
 		}
@@ -857,6 +873,7 @@ class WPSG_Scanner {
 		}
 
 		if ( false !== $cert_days && $cert_days <= 14 ) {
+			/* translators: %d: days until SSL certificate expiry */
 			$issues[] = sprintf( __( 'SSL certificate expires in %d day(s).', 'site-checkup-pro' ), $cert_days );
 		}
 

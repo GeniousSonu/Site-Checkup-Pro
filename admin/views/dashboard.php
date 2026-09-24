@@ -83,10 +83,12 @@ $login_slug    = WPSG_Login_Renamer::get_login_slug();
 				</h3>
 				<p style="margin: 0; font-size: 13px; color: var(--wpsg-text-secondary);">
 					<?php
-					printf(
-						/* translators: %d: number of completed security tasks */
-						esc_html__( 'You have successfully run %d security hardening and audit checks. Leaving a quick review helps us immensely!', 'site-checkup-pro' ),
-						$wpsg_tasks_done
+					echo esc_html(
+						sprintf(
+							/* translators: %d: number of completed security tasks */
+							__( 'You have successfully run %d security hardening and audit checks. Leaving a quick review helps us immensely!', 'site-checkup-pro' ),
+							$wpsg_tasks_done
+						)
 					);
 					?>
 				</p>
@@ -320,7 +322,12 @@ $login_slug    = WPSG_Login_Renamer::get_login_slug();
 							</p>
 						</div>
 						<div class="wpsg-kpi-card-footer">
-							<span class="wpsg-kpi-footnote"><?php printf( esc_html__( 'PHP %s engine', 'site-checkup-pro' ), esc_html( PHP_VERSION ) ); ?></span>
+							<span class="wpsg-kpi-footnote">
+								<?php
+								/* translators: %s: PHP version */
+								printf( esc_html__( 'PHP %s engine', 'site-checkup-pro' ), esc_html( PHP_VERSION ) );
+								?>
+							</span>
 						</div>
 					</div>
 
@@ -339,7 +346,11 @@ $login_slug    = WPSG_Login_Renamer::get_login_slug();
 							<p class="wpsg-kpi-card-meta">
 								<?php if ( ! empty( $backup_status['is_recent'] ) ) : ?>
 									<span class="wpsg-status-indicator wpsg-status-done">
-										<span class="wpsg-status-dot"></span> <?php printf( esc_html__( 'Verified (%s hrs ago)', 'site-checkup-pro' ), esc_html( $backup_status['age_hours'] ) ); ?>
+										<span class="wpsg-status-dot"></span>
+										<?php
+										/* translators: %s: backup age in hours */
+										printf( esc_html__( 'Verified (%s hrs ago)', 'site-checkup-pro' ), esc_html( $backup_status['age_hours'] ) );
+										?>
 									</span>
 								<?php else : ?>
 									<span class="wpsg-status-indicator wpsg-status-attention">
@@ -366,7 +377,11 @@ $login_slug    = WPSG_Login_Renamer::get_login_slug();
 							<p class="wpsg-kpi-card-meta">
 								<?php if ( ! empty( $login_slug ) ) : ?>
 									<span class="wpsg-status-indicator wpsg-status-done">
-										<span class="wpsg-status-dot"></span> <?php printf( esc_html__( 'Custom Login (/%s/)', 'site-checkup-pro' ), esc_html( $login_slug ) ); ?>
+										<span class="wpsg-status-dot"></span>
+										<?php
+										/* translators: %s: custom login slug */
+										printf( esc_html__( 'Custom Login (/%s/)', 'site-checkup-pro' ), esc_html( $login_slug ) );
+										?>
 									</span>
 								<?php else : ?>
 									<span class="wpsg-status-indicator wpsg-status-attention">
@@ -548,7 +563,7 @@ $login_slug    = WPSG_Login_Renamer::get_login_slug();
 							<h4><?php esc_html_e( 'Custom Login URL', 'site-checkup-pro' ); ?></h4>
 							<p>
 								<?php if ( ! empty( $login_slug ) ) : ?>
-									<span class="wpsg-status-indicator wpsg-status-done"><span class="wpsg-status-dot"></span> <?php printf( esc_html__( 'Active (/%s/)', 'site-checkup-pro' ), esc_html( $login_slug ) ); ?></span>
+									<span class="wpsg-status-indicator wpsg-status-done"><span class="wpsg-status-dot"></span> <?php /* translators: %s: custom login slug */ printf( esc_html__( 'Active (/%s/)', 'site-checkup-pro' ), esc_html( $login_slug ) ); ?></span>
 								<?php else : ?>
 									<span class="wpsg-status-indicator wpsg-status-attention"><span class="wpsg-status-dot"></span> <?php esc_html_e( 'Default /wp-login.php', 'site-checkup-pro' ); ?></span>
 								<?php endif; ?>

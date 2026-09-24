@@ -272,6 +272,7 @@ class WPSG_Login_Guard {
 				WPSG_Alert_Dispatcher::dispatch(
 					'distributed_attack',
 					sprintf(
+						/* translators: %s: username */
 						__( 'Distributed brute-force attack detected on username "%s" (50+ failed attempts). Account temporarily protected.', 'site-checkup-pro' ),
 						$clean_user
 					),
@@ -282,15 +283,18 @@ class WPSG_Login_Guard {
 
 		// 5. Redacted audit log entry (STRICTLY NEVER LOG PASSWORDS)
 		if ( class_exists( 'WPSG_Audit_Log' ) ) {
+			/* translators: 1: client IP address, 2: lockout seconds, 3: attempt count */
+			$locked_msg = sprintf( __( 'IP %1$s locked out for %2$d seconds after %3$d failed login attempts.', 'site-checkup-pro' ), $client_ip, $lock_seconds, $attempts );
+			/* translators: 1: username, 2: client IP address */
+			$failed_msg = sprintf( __( 'Failed login recorded for user "%1$s" from %2$s.', 'site-checkup-pro' ), $clean_user, $client_ip );
+
 			WPSG_Audit_Log::log(
 				'login_guard',
 				'failed_attempt',
 				null,
 				array( 'ip' => $client_ip, 'user' => $clean_user, 'attempts' => $attempts ),
 				$lock_seconds > 0 ? 'failed' : 'attention',
-				$lock_seconds > 0
-					? sprintf( __( 'IP %1$s locked out for %2$d seconds after %3$d failed login attempts.', 'site-checkup-pro' ), $client_ip, $lock_seconds, $attempts )
-					: sprintf( __( 'Failed login recorded for user "%1$s" from %2$s.', 'site-checkup-pro' ), $clean_user, $client_ip )
+				$lock_seconds > 0 ? $locked_msg : $failed_msg
 			);
 		}
 

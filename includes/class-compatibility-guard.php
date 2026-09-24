@@ -135,7 +135,7 @@ class WPSG_Compatibility_Guard {
 	 */
 	public static function check_writable_or_fallback( $file_path, $rule_type = '' ) {
 		$exists   = file_exists( $file_path );
-		$writable = $exists ? is_writable( $file_path ) : is_writable( dirname( $file_path ) );
+		$writable = $exists ? wp_is_writable( $file_path ) : wp_is_writable( dirname( $file_path ) );
 
 		if ( $writable ) {
 			return array(

@@ -98,8 +98,8 @@ class WPSG_Notice_Inbox {
 		// and dump naked CSS code and comments directly onto the screen as text.
 		$styles = array();
 		$clean_html = preg_replace_callback( '#<style\b[^>]*>(.*?)</style>#is', function ( $matches ) use ( &$styles ) {
-			// Sanitize CSS content: strip any HTML or potential script tags inside
-			$css = strip_tags( $matches[1] );
+			// Sanitize CSS content: strip any HTML or potential script tags inside.
+			$css      = wp_strip_all_tags( $matches[1] );
 			$styles[] = '<style>' . $css . '</style>';
 			return '';
 		}, $raw_html );
@@ -131,7 +131,7 @@ class WPSG_Notice_Inbox {
 			return;
 		}
 
-		$notice_hash = hash( 'sha256', strip_tags( $safe_html ) );
+		$notice_hash = hash( 'sha256', wp_strip_all_tags( $safe_html ) );
 
 		if ( in_array( $notice_hash, $dismissed, true ) ) {
 			// Suppress dismissed notice.

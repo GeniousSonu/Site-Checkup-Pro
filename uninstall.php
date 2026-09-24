@@ -23,7 +23,7 @@ $table_status      = $wpdb->prefix . 'wpsg_task_status';
 $table_audit       = $wpdb->prefix . 'wpsg_audit_log';
 $table_rate_limits = $wpdb->prefix . 'wpsg_rate_limits';
 
-// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 $wpdb->query( "DROP TABLE IF EXISTS {$table_status}, {$table_audit}, {$table_rate_limits};" );
 
 // Delete plugin options.

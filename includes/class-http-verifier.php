@@ -279,6 +279,7 @@ class WPSG_HTTP_Verifier {
 			return array(
 				'verified' => true,
 				'status'   => 'done',
+				/* translators: %s: header name */
 				'message'  => sprintf( __( 'Verified live: %s header confirmed.', 'site-checkup-pro' ), $has_x_frame ? "X-Frame-Options: {$x_frame}" : 'CSP frame-ancestors' ),
 			);
 		}
@@ -337,6 +338,7 @@ class WPSG_HTTP_Verifier {
 			return array(
 				'verified' => true,
 				'status'   => 'done',
+				/* translators: %s: header value */
 				'message'  => sprintf( __( 'Verified live: Strict-Transport-Security confirmed (%s).', 'site-checkup-pro' ), $hsts ),
 			);
 		}
@@ -368,6 +370,7 @@ class WPSG_HTTP_Verifier {
 		return array(
 			'verified' => false,
 			'status'   => 'applied_unverified',
+			/* translators: %s: header value */
 			'message'  => sprintf( __( 'X-Powered-By header is still visible in live response (%s).', 'site-checkup-pro' ), $res['headers']['x-powered-by'] ),
 		);
 	}
@@ -388,10 +391,10 @@ class WPSG_HTTP_Verifier {
 
 		// Ensure no index.php or index.html exists in probe directory!
 		if ( file_exists( $probe_dir . '/index.php' ) ) {
-			@unlink( $probe_dir . '/index.php' );
+			wp_delete_file( $probe_dir . '/index.php' );
 		}
 		if ( file_exists( $probe_dir . '/index.html' ) ) {
-			@unlink( $probe_dir . '/index.html' );
+			wp_delete_file( $probe_dir . '/index.html' );
 		}
 
 		$res = self::fetch_loopback( $probe_url, 'GET', array(), $force_fresh );
@@ -423,6 +426,7 @@ class WPSG_HTTP_Verifier {
 			return array(
 				'verified' => true,
 				'status'   => 'done',
+				/* translators: %d: HTTP status code */
 				'message'  => sprintf( __( 'Verified live: Server denied directory listing (HTTP %d).', 'site-checkup-pro' ), $res['code'] ),
 			);
 		}
@@ -475,6 +479,7 @@ class WPSG_HTTP_Verifier {
 		return array(
 			'verified' => false,
 			'status'   => 'applied_unverified',
+			/* translators: %s: evidence list of files */
 			'message'  => sprintf( __( 'Protection could not be confirmed: %s.', 'site-checkup-pro' ), implode( ', ', $evidence ) ),
 		);
 	}
@@ -501,6 +506,7 @@ class WPSG_HTTP_Verifier {
 		return array(
 			'verified' => false,
 			'status'   => 'applied_unverified',
+			/* translators: %d: HTTP status code */
 			'message'  => sprintf( __( 'xmlrpc.php block could not be confirmed (server returned HTTP %d, expected 403).', 'site-checkup-pro' ), $res['code'] ),
 		);
 	}
@@ -531,6 +537,7 @@ class WPSG_HTTP_Verifier {
 		return array(
 			'verified' => false,
 			'status'   => 'applied_unverified',
+			/* translators: %d: HTTP status code */
 			'message'  => sprintf( __( 'Uploads PHP execution block not confirmed: probe returned HTTP %d (expected 403 Forbidden).', 'site-checkup-pro' ), $res['code'] ),
 		);
 	}
@@ -557,6 +564,7 @@ class WPSG_HTTP_Verifier {
 		return array(
 			'verified' => false,
 			'status'   => 'applied_unverified',
+			/* translators: %d: HTTP status code */
 			'message'  => sprintf( __( 'Firewall rule not active: test probe returned HTTP %d (expected 403 Forbidden).', 'site-checkup-pro' ), $res['code'] ),
 		);
 	}
@@ -582,6 +590,7 @@ class WPSG_HTTP_Verifier {
 		return array(
 			'verified' => false,
 			'status'   => 'applied_unverified',
+			/* translators: %d: HTTP status code */
 			'message'  => sprintf( __( 'Bot filter not active: scanner User-Agent returned HTTP %d (expected 403 Forbidden).', 'site-checkup-pro' ), $res['code'] ),
 		);
 	}
@@ -628,6 +637,7 @@ class WPSG_HTTP_Verifier {
 				'verified' => true,
 				'status'   => 'done',
 				'message'  => sprintf(
+					/* translators: %s: CSP mode */
 					__( 'Verified live: CSP active in %s mode.', 'site-checkup-pro' ),
 					$has_ro ? 'Report-Only' : 'Enforce'
 				),
@@ -664,6 +674,7 @@ class WPSG_HTTP_Verifier {
 		return array(
 			'verified' => false,
 			'status'   => 'applied_unverified',
+			/* translators: %d: HTTP status code */
 			'message'  => sprintf( __( 'security.txt probe returned HTTP %d (expected 200 with Contact directive).', 'site-checkup-pro' ), $res['code'] ),
 		);
 	}
@@ -700,6 +711,7 @@ class WPSG_HTTP_Verifier {
 		return array(
 			'verified' => true,
 			'status'   => 'done',
+			/* translators: %s: custom login slug */
 			'message'  => sprintf( __( 'Verified live: Direct /wp-login.php access is protected. Custom slug /%s is active.', 'site-checkup-pro' ), esc_html( $slug ) ),
 		);
 	}
@@ -719,7 +731,8 @@ class WPSG_HTTP_Verifier {
 					return array(
 						'verified' => true,
 						'status'   => 'done',
-						'message'  => sprintf( __( 'Constant %s is verified in current process (%s).', 'site-checkup-pro' ), $constant_name, $val ? 'true' : 'false' ),
+						/* translators: 1: constant name, 2: value */
+						'message'  => sprintf( __( 'Constant %1$s is verified in current process (%2$s).', 'site-checkup-pro' ), $constant_name, $val ? 'true' : 'false' ),
 					);
 				}
 			}
@@ -733,6 +746,7 @@ class WPSG_HTTP_Verifier {
 				return array(
 					'verified' => true,
 					'status'   => 'done',
+					/* translators: 1: constant name, 2: value */
 					'message'  => sprintf( __( 'Verified live in fresh process: %1$s is set to %2$s.', 'site-checkup-pro' ), $constant_name, $actual ? 'true' : 'false' ),
 				);
 			}
@@ -741,6 +755,7 @@ class WPSG_HTTP_Verifier {
 		return array(
 			'verified' => false,
 			'status'   => 'applied_unverified',
+			/* translators: %s: constant name */
 			'message'  => sprintf( __( 'Constant %s could not be verified in fresh runtime process.', 'site-checkup-pro' ), $constant_name ),
 		);
 	}

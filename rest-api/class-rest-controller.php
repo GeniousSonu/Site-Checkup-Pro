@@ -842,6 +842,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 				null,
 				array( 'slug_configured' => true ),
 				'success',
+				/* translators: %s: custom login slug */
 				sprintf( __( 'Custom login URL activated: /%s/', 'site-checkup-pro' ), $result['slug'] )
 			);
 		}

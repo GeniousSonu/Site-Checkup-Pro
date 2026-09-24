@@ -51,7 +51,7 @@ class WPSG_Wp_Config_Manager {
 	 */
 	public static function is_writable() {
 		$path = self::get_config_path();
-		return ( $path && is_writable( $path ) );
+		return ( $path && wp_is_writable( $path ) );
 	}
 
 	/**
@@ -84,7 +84,7 @@ class WPSG_Wp_Config_Manager {
 	 */
 	public static function update_constants( array $constants ) {
 		$config_path = self::get_config_path();
-		if ( ! $config_path || ! is_writable( $config_path ) ) {
+		if ( ! $config_path || ! wp_is_writable( $config_path ) ) {
 			return array(
 				'success' => false,
 				'message' => __( 'wp-config.php is not writable or could not be located.', 'site-checkup-pro' ),
@@ -163,7 +163,7 @@ class WPSG_Wp_Config_Manager {
 	 */
 	public static function rotate_salts() {
 		$config_path = self::get_config_path();
-		if ( ! $config_path || ! is_writable( $config_path ) ) {
+		if ( ! $config_path || ! wp_is_writable( $config_path ) ) {
 			return array(
 				'success' => false,
 				'message' => __( 'wp-config.php is not writable.', 'site-checkup-pro' ),

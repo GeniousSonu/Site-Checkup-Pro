@@ -104,6 +104,7 @@ class WPSG_App_Password_Manager {
 					null,
 					array( 'target_user_id' => $user_id, 'uuid' => $uuid ),
 					'success',
+					/* translators: %s: application password UUID */
 					sprintf( __( 'Application password %s revoked.', 'site-checkup-pro' ), $uuid )
 				);
 			}

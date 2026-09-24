@@ -213,6 +213,7 @@ class WPSG_Nginx_Tier2 {
 			@unlink( $live_file );
 			return array(
 				'success' => false,
+				/* translators: %s: reload error output */
 				'message' => sprintf( __( 'Nginx reload failed: %s. Rule was rolled back.', 'site-checkup-pro' ), $reload_res['output'] ),
 			);
 		}

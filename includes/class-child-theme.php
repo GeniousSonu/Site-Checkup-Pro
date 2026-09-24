@@ -194,10 +194,21 @@ class WPSG_Child_Theme {
 			);
 		}
 
-		// Delete files
-		@unlink( $child_dir . '/style.css' );
-		@unlink( $child_dir . '/functions.php' );
-		@rmdir( $child_dir );
+		// Delete files safely via WordPress filesystem methods.
+		wp_delete_file( $child_dir . '/style.css' );
+		wp_delete_file( $child_dir . '/functions.php' );
+
+		global $wp_filesystem;
+		if ( ! $wp_filesystem ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			WP_Filesystem();
+		}
+
+		if ( $wp_filesystem ) {
+			$wp_filesystem->delete( $child_dir, true );
+		} else {
+			@rmdir( $child_dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+		}
 
 		delete_option( 'wpsg_scaffolded_child_theme' );
 

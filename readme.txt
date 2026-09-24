@@ -1,17 +1,17 @@
-=== Site Checkup Pro – WordPress Security Audit & Site Hardening ===
+=== Site Checkup Pro ===
 Contributors: genioussonu
 Author: SK Sahinur Islam
 Author URI: https://www.genioussonu.me/
 Plugin URI: https://www.genioussonu.me/plugin/site-checkup-pro/
 Tags: security, hardening, security audit, login security, firewall
 Requires at least: 5.8
-Tested up to: 6.7
+Tested up to: 7.1
 Requires PHP: 7.4
 Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Complete security audit, site hardening checklist, and vulnerability scanner for WordPress. One-click safe hardening, login protection, and client reports.
+Security audit, site hardening checklist, and vulnerability scanner for WordPress. One-click safe hardening, login protection, and client reports.
 
 == Description ==
 

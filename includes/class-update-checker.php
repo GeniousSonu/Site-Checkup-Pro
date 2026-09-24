@@ -77,6 +77,8 @@ class WPSG_Update_Checker {
 		$this->plugin_basename = function_exists( 'plugin_basename' ) ? plugin_basename( $plugin_file ) : basename( $plugin_file );
 		$this->current_version = $version;
 
+		add_filter( 'site_transient_update_plugins', array( $this, 'filter_update_plugins_transient' ) );
+
 		$this->init_puc();
 	}
 
@@ -174,5 +176,43 @@ class WPSG_Update_Checker {
 			return ! empty( $info ) ? $info : false;
 		}
 		return false;
+	}
+
+	/**
+	 * Filter update transient to ensure auto-update information is populated for self-hosted releases.
+	 *
+	 * @param object $transient Update transient.
+	 * @return object
+	 */
+	public static function filter_update_plugins_transient( $transient ) {
+		if ( ! is_object( $transient ) ) {
+			$transient = new \stdClass();
+		}
+		if ( ! isset( $transient->response ) || ! is_array( $transient->response ) ) {
+			$transient->response = array();
+		}
+		if ( ! isset( $transient->no_update ) || ! is_array( $transient->no_update ) ) {
+			$transient->no_update = array();
+		}
+
+		$basename = defined( 'WPSG_BASENAME' ) ? WPSG_BASENAME : 'site-checkup-pro/site-checkup-pro.php';
+
+		if ( ! isset( $transient->response[ $basename ] ) && ! isset( $transient->no_update[ $basename ] ) ) {
+			$transient->no_update[ $basename ] = (object) array(
+				'id'            => 'wpsg-site-checkup-pro',
+				'slug'          => 'site-checkup-pro',
+				'plugin'        => $basename,
+				'new_version'   => defined( 'WPSG_VERSION' ) ? WPSG_VERSION : '1.0.0',
+				'url'           => 'https://www.genioussonu.me/plugin/site-checkup-pro/',
+				'package'       => '',
+				'icons'         => array(),
+				'banners'       => array(),
+				'tested'        => '7.1',
+				'requires_php'  => '7.4',
+				'compatibility' => new \stdClass(),
+			);
+		}
+
+		return $transient;
 	}
 }

@@ -166,10 +166,15 @@ class WPSG_Environment_Badge {
 		);
 
 		$label = isset( $labels[ $env ] ) ? $labels[ $env ] : ucfirst( $env );
+		/* translators: %s: environment name */
+		$confirmed_title = sprintf( __( 'Site Environment: %s', 'site-checkup-pro' ), $label );
+		/* translators: %s: environment name */
+		$unconfirmed_title = sprintf( __( 'Suggested Environment: %s (Unconfirmed)', 'site-checkup-pro' ), $label );
+
 		$title = sprintf(
 			'<span class="wpsg-adminbar-badge wpsg-badge-%1$s" title="%2$s"><span class="wpsg-badge-dot"></span>%3$s%4$s</span>',
 			esc_attr( $env ),
-			esc_attr( $confirmed ? sprintf( __( 'Site Environment: %s', 'site-checkup-pro' ), $label ) : sprintf( __( 'Suggested Environment: %s (Unconfirmed)', 'site-checkup-pro' ), $label ) ),
+			esc_attr( $confirmed ? $confirmed_title : $unconfirmed_title ),
 			esc_html( $label ),
 			$confirmed ? '' : ' <span class="wpsg-unconfirmed-mark">?</span>'
 		);

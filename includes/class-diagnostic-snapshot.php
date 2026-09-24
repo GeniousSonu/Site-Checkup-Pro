@@ -81,7 +81,7 @@ class WPSG_Diagnostic_Snapshot {
 					$active_plugins[] = array(
 						'name'    => sanitize_text_field( $all_plugins[ $slug ]['Name'] ),
 						'version' => sanitize_text_field( $all_plugins[ $slug ]['Version'] ),
-						'author'  => sanitize_text_field( strip_tags( $all_plugins[ $slug ]['Author'] ) ),
+						'author'  => sanitize_text_field( wp_strip_all_tags( $all_plugins[ $slug ]['Author'] ) ),
 					);
 				}
 			}
