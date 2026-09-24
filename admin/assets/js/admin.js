@@ -622,6 +622,16 @@
 				openDeletePluginModal(slug, name, path);
 				return;
 			}
+
+			// Table Row Actions: Verify Fix on Vulnerability Finding
+			const verifyVulnBtn = e.target.closest('.wpsg-btn-verify-vuln-fix');
+			if (verifyVulnBtn) {
+				e.preventDefault();
+				const slug = verifyVulnBtn.getAttribute('data-slug');
+				const type = verifyVulnBtn.getAttribute('data-type') || 'plugin';
+				if (slug) verifyVulnerabilityFix(slug, type, verifyVulnBtn);
+				return;
+			}
 		});
 
 		// Close modals on overlay backdrop click
@@ -1427,6 +1437,88 @@
 	}
 
 	/**
+	 * Render Vulnerability Intelligence findings with version-range correlation,
+	 * distinct source badges (GitHub Advisories vs Patchstack/OSV/NVD), remediation guidance,
+	 * and inline "Verify Fix" actions.
+	 */
+	function renderVulnerabilityFindingsHtml(task) {
+		if (task.id !== 'vulnerability_database_check' || !task.live_data) {
+			return '';
+		}
+
+		const vulnerable = Array.isArray(task.live_data.vulnerable) ? task.live_data.vulnerable : [];
+		if (vulnerable.length === 0) {
+			return '';
+		}
+
+		return `
+			<div class="wpsg-vuln-findings-container">
+				${vulnerable.map(v => {
+					const slug = v.component || v.slug || '';
+					const name = v.component_name || v.name || slug;
+					const ver = v.installed_version || v.version || '';
+					const type = v.component_type || v.type || 'plugin';
+					const advId = v.advisory_id || v.cve || 'Advisory';
+					const advTitle = v.advisory_title || v.title || 'Known Security Vulnerability';
+					const range = v.affected_range || '';
+					const fixed = v.fixed_version || '';
+					const remediation = v.remediation || (fixed ? `Update immediately to version ${fixed} or higher.` : 'Deactivate and replace component.');
+					const sources = Array.isArray(v.sources_matched) ? v.sources_matched : (v.source ? [v.source] : ['Vulnerability Database']);
+					const isCorroborated = v.is_corroborated || sources.length >= 2;
+					const status = v.verification_status || 'not_applied';
+
+					let statusBadge = '<span class="wpsg-vuln-badge wpsg-vuln-badge-danger"><span class="wpsg-status-dot"></span> Not Applied</span>';
+					if (status === 'done') {
+						statusBadge = '<span class="wpsg-vuln-badge wpsg-vuln-badge-success"><span class="wpsg-status-dot"></span> Applied &amp; Verified</span>';
+					} else if (status === 'applied_unverified') {
+						statusBadge = '<span class="wpsg-vuln-badge wpsg-vuln-badge-warning"><span class="wpsg-status-dot"></span> Applied (Unverified)</span>';
+					}
+
+					const sourceBadges = sources.map(src => {
+						let cls = 'wpsg-source-tag';
+						if (src === 'GitHub Security Advisories') cls += ' wpsg-source-ghsa';
+						else if (src === 'Patchstack') cls += ' wpsg-source-patchstack';
+						else if (src === 'OSV') cls += ' wpsg-source-osv';
+						else if (src === 'NVD') cls += ' wpsg-source-nvd';
+						else if (src === 'WPScan') cls += ' wpsg-source-wpscan';
+						return `<span class="${cls}">${escapeHtml(src)}</span>`;
+					}).join('');
+
+					return `
+						<div class="wpsg-vuln-card" data-slug="${escapeHtml(slug)}">
+							<div class="wpsg-vuln-card-header">
+								<div class="wpsg-vuln-comp-meta">
+									<strong class="wpsg-vuln-name">${escapeHtml(name)}</strong>
+									<span class="wpsg-vuln-ver">v${escapeHtml(ver)}</span>
+									<span class="wpsg-chip wpsg-chip-sm">${escapeHtml(type)}</span>
+									${isCorroborated ? '<span class="wpsg-badge-corroborated" title="Corroborated across multiple independent advisory sources">2+ Sources Corroborated</span>' : ''}
+								</div>
+								<div class="wpsg-vuln-status-group">
+									${sourceBadges}
+									${statusBadge}
+								</div>
+							</div>
+							<div class="wpsg-vuln-advisory-block">
+								<div class="wpsg-vuln-adv-line">
+									<span class="wpsg-adv-id">${escapeHtml(advId)}</span>
+									<span class="wpsg-adv-title">${escapeHtml(advTitle)}</span>
+								</div>
+								${range ? `<div class="wpsg-vuln-range-line"><span class="wpsg-label-muted">Affected Version Range:</span> <code class="wpsg-range-code">${escapeHtml(range)}</code></div>` : ''}
+								<div class="wpsg-vuln-remediation-line"><span class="wpsg-label-muted">Remediation:</span> <span class="wpsg-remediation-text">${escapeHtml(remediation)}</span></div>
+							</div>
+							<div class="wpsg-vuln-actions">
+								<button type="button" class="wpsg-btn wpsg-btn-xs wpsg-btn-secondary wpsg-btn-verify-vuln-fix" data-slug="${escapeHtml(slug)}" data-type="${escapeHtml(type)}">
+									<span class="dashicons dashicons-yes-alt"></span> Verify Fix
+								</button>
+							</div>
+						</div>
+					`;
+				}).join('')}
+			</div>
+		`;
+	}
+
+	/**
 	 * Render a single task row with accessible badges (Dot + Label + Accessible text)
 	 */
 	function renderTaskRow(task) {
@@ -1465,6 +1557,7 @@
 						${isManualNginx ? `<div class="wpsg-task-evidence wpsg-evidence-notice"><span class="dashicons dashicons-warning" style="font-size:12px;width:12px;height:12px;margin-top:1px;"></span> <span>Cannot be applied automatically on this hosting setup — manual step required.</span></div>` : ''}
 						${task.live_message ? `<div class="wpsg-task-evidence ${evidenceClass}"><span class="dashicons ${evidenceIcon}" style="font-size:12px;width:12px;height:12px;margin-top:1px;"></span> <span>${escapeHtml(task.live_message)}</span></div>` : ''}
 						${task.note ? `<div class="wpsg-task-evidence"><span class="dashicons dashicons-edit" style="font-size:12px;width:12px;height:12px;margin-top:1px;"></span> <span>Note: ${escapeHtml(task.note)}</span></div>` : ''}
+						${renderVulnerabilityFindingsHtml(task)}
 					</div>
 				</td>
 				<td class="wpsg-col-checked">${lastRunText}</td>
@@ -1821,6 +1914,52 @@
 			task.live_message = `Verification error: ${err.message || 'Check failed'}`;
 			state.justUpdatedTaskId = taskId;
 			renderTasksTable();
+		} finally {
+			if (btnElement) {
+				btnElement.disabled = false;
+				btnElement.innerHTML = origHtml;
+			}
+		}
+	}
+
+	/**
+	 * Verify fix for a specific vulnerability finding via REST API
+	 */
+	async function verifyVulnerabilityFix(slug, type, btnElement = null) {
+		let origHtml = '';
+		if (btnElement) {
+			origHtml = btnElement.innerHTML;
+			btnElement.disabled = true;
+			btnElement.innerHTML = '<span class="wpsg-spinner" style="width:12px;height:12px;display:inline-block;vertical-align:middle;margin-right:4px;"></span> Checking Fix...';
+		}
+
+		try {
+			const res = await apiCall({
+				path: '/site-checkup-pro/v1/vulnerabilities/verify-fix',
+				method: 'POST',
+				data: { slug: slug, type: type },
+			});
+
+			if (res && res.verification_status) {
+				if (res.verification_status === 'done') {
+					alert(res.message || `Verified: Vulnerability in "${slug}" is resolved.`);
+				} else if (res.verification_status === 'applied_unverified') {
+					alert(res.message || `Applied, Not Verified: "${slug}" version was updated, but live external check was unreachable.`);
+				} else {
+					alert(res.message || `Verification Failed: "${slug}" remains vulnerable within the affected range.`);
+				}
+
+				// Re-fetch tasks to update live findings state and metrics
+				await loadTasks();
+				if (state.currentTab === 'audit') {
+					await loadAuditLogs();
+				}
+			} else {
+				alert((res && res.message) ? res.message : 'Fix verification failed: Unexpected response.');
+			}
+		} catch (err) {
+			console.error(`Fix verification error for ${slug}:`, err);
+			alert('Fix verification error: ' + (err.message || 'Unknown error'));
 		} finally {
 			if (btnElement) {
 				btnElement.disabled = false;

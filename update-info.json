@@ -9,7 +9,7 @@
     "requires": "5.8",
     "tested": "7.1",
     "requires_php": "7.4",
-    "last_updated": "2026-09-24 11:28:50",
+    "last_updated": "2026-09-24 13:35:34",
     "upgrade_notice": "Recommended update for security audit improvements and bug fixes.",
     "sections": {
         "description": "<p>Complete security audit, site hardening checklist, and vulnerability scanner for WordPress. One-click safe hardening, login protection, and client reports.</p>",
