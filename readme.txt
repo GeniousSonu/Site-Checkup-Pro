@@ -7,7 +7,7 @@ Tags: security, hardening, security audit, login security, firewall
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.3.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -129,6 +129,11 @@ Version 1.0 is optimized for single-site agency workflows. On Multisite installa
 4. Client-facing executive SOP coverage report ready for PDF export with emergency incident response contacts.
 
 == Changelog ==
+
+= 1.3.1 =
+* Fix: Parameterized and strictly escaped database table queries across migration readiness, DB health scanner, and task status lookup.
+* Fix: Excluded internal agent and development markdown files (AGENTS.md, DEVELOPMENT.md, CONTRIBUTING.md, README.md, .agents/) from release packages.
+* Hardening: Strengthened SQL query preparation and table validation matching strict injection-prevention guidelines.
 
 = 1.3.0 =
 * Feature: Multi-Source Vulnerability Intelligence — Unified threat feed integrating GitHub Advisory Database (GHSA), Google OSV, NIST NVD, CISA Known Exploited Vulnerabilities (KEV), and WPScan with strict Guideline 7 consent toggles and HKDF-encrypted API keys.

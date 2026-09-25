@@ -250,7 +250,8 @@ class WPSG_Plugin {
 	 */
 	public function is_task_active( $task_id ) {
 		global $wpdb;
-		$table_name = $wpdb->prefix . 'wpsg_task_status';
+		$raw_table  = preg_match( '/^[a-zA-Z0-9_]+$/', $wpdb->prefix . 'wpsg_task_status' ) ? $wpdb->prefix . 'wpsg_task_status' : 'wp_wpsg_task_status';
+		$table_name = esc_sql( $raw_table );
 
 		// Quick cached check or DB lookup.
 		$cache_key = 'wpsg_task_status_' . $task_id;
@@ -260,6 +261,7 @@ class WPSG_Plugin {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$status = $wpdb->get_var(
 				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is strictly validated via regex and escaped via esc_sql().
 					"SELECT status FROM {$table_name} WHERE task_id = %s LIMIT 1",
 					$task_id
 				)

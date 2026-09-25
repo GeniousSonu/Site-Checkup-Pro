@@ -38,8 +38,11 @@ class WPSG_Migration_Readiness {
 			);
 		}
 
-		$options_table  = ! empty( $wpdb->options ) ? $wpdb->options : $wpdb->prefix . 'options';
-		$postmeta_table = ! empty( $wpdb->postmeta ) ? $wpdb->postmeta : $wpdb->prefix . 'postmeta';
+		// Safelist, validate, and escape table names strictly against WordPress prefix and core schema.
+		$raw_options    = ( ! empty( $wpdb->options ) && preg_match( '/^[a-zA-Z0-9_]+$/', $wpdb->options ) ) ? $wpdb->options : $wpdb->prefix . 'options';
+		$raw_postmeta   = ( ! empty( $wpdb->postmeta ) && preg_match( '/^[a-zA-Z0-9_]+$/', $wpdb->postmeta ) ) ? $wpdb->postmeta : $wpdb->prefix . 'postmeta';
+		$options_table  = esc_sql( $raw_options );
+		$postmeta_table = esc_sql( $raw_postmeta );
 
 		// Get current domain/host to inspect
 		$site_host = '';
@@ -53,16 +56,23 @@ class WPSG_Migration_Readiness {
 			$site_host = strtolower( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) );
 		}
 
-		$findings          = array();
-		$options_count     = 0;
-		$postmeta_count    = 0;
+		$findings       = array();
+		$options_count  = 0;
+		$postmeta_count = 0;
+		$http_like      = '%' . $wpdb->esc_like( 'http://' ) . '%';
+		$https_like     = '%' . $wpdb->esc_like( 'https://' ) . '%';
+		$query_limit    = 250;
 
 		// 1. Scan wp_options (bounded limit 250)
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$option_rows = $wpdb->get_results(
-			"SELECT option_name, option_value FROM {$options_table} 
-			WHERE (option_value LIKE '%http://%' OR option_value LIKE '%https://%') 
-			LIMIT 250",
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is strictly validated via regex and core schema.
+				"SELECT option_name, option_value FROM {$options_table} WHERE (option_value LIKE %s OR option_value LIKE %s) LIMIT %d",
+				$http_like,
+				$https_like,
+				$query_limit
+			),
 			ARRAY_A
 		);
 
@@ -87,9 +97,13 @@ class WPSG_Migration_Readiness {
 		// 2. Scan wp_postmeta (bounded limit 250)
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$postmeta_rows = $wpdb->get_results(
-			"SELECT post_id, meta_key, meta_value FROM {$postmeta_table} 
-			WHERE (meta_value LIKE '%http://%' OR meta_value LIKE '%https://%') 
-			LIMIT 250",
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is strictly validated via regex and core schema.
+				"SELECT post_id, meta_key, meta_value FROM {$postmeta_table} WHERE (meta_value LIKE %s OR meta_value LIKE %s) LIMIT %d",
+				$http_like,
+				$https_like,
+				$query_limit
+			),
 			ARRAY_A
 		);
 

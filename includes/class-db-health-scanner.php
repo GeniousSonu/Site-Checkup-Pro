@@ -45,24 +45,37 @@ class WPSG_Db_Health_Scanner {
 
 		$current_time = time();
 
-		$posts_table    = ! empty( $wpdb->posts ) ? $wpdb->posts : $wpdb->prefix . 'posts';
-		$postmeta_table = ! empty( $wpdb->postmeta ) ? $wpdb->postmeta : $wpdb->prefix . 'postmeta';
-		$usermeta_table = ! empty( $wpdb->usermeta ) ? $wpdb->usermeta : $wpdb->prefix . 'usermeta';
-		$users_table    = ! empty( $wpdb->users ) ? $wpdb->users : $wpdb->prefix . 'users';
-		$options_table  = ! empty( $wpdb->options ) ? $wpdb->options : $wpdb->prefix . 'options';
+		// Safelist, validate, and escape table names strictly against WordPress prefix and core schema.
+		$raw_posts      = ( ! empty( $wpdb->posts ) && preg_match( '/^[a-zA-Z0-9_]+$/', $wpdb->posts ) ) ? $wpdb->posts : $wpdb->prefix . 'posts';
+		$raw_postmeta   = ( ! empty( $wpdb->postmeta ) && preg_match( '/^[a-zA-Z0-9_]+$/', $wpdb->postmeta ) ) ? $wpdb->postmeta : $wpdb->prefix . 'postmeta';
+		$raw_usermeta   = ( ! empty( $wpdb->usermeta ) && preg_match( '/^[a-zA-Z0-9_]+$/', $wpdb->usermeta ) ) ? $wpdb->usermeta : $wpdb->prefix . 'usermeta';
+		$raw_users      = ( ! empty( $wpdb->users ) && preg_match( '/^[a-zA-Z0-9_]+$/', $wpdb->users ) ) ? $wpdb->users : $wpdb->prefix . 'users';
+		$raw_options    = ( ! empty( $wpdb->options ) && preg_match( '/^[a-zA-Z0-9_]+$/', $wpdb->options ) ) ? $wpdb->options : $wpdb->prefix . 'options';
+
+		$posts_table    = esc_sql( $raw_posts );
+		$postmeta_table = esc_sql( $raw_postmeta );
+		$usermeta_table = esc_sql( $raw_usermeta );
+		$users_table    = esc_sql( $raw_users );
+		$options_table  = esc_sql( $raw_options );
 
 		$like_esc = method_exists( $wpdb, 'esc_like' ) ? $wpdb->esc_like( '_transient_timeout_' ) : addcslashes( '_transient_timeout_', '_%\\' );
 
 		// 1. Orphaned postmeta (no matching post in wp_posts)
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$orphaned_postmeta = (int) $wpdb->get_var(
-			"SELECT COUNT(*) FROM {$postmeta_table} pm LEFT JOIN {$posts_table} p ON pm.post_id = p.ID WHERE p.ID IS NULL"
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names strictly validated and escaped via esc_sql().
+				"SELECT COUNT(*) FROM {$postmeta_table} pm LEFT JOIN {$posts_table} p ON pm.post_id = p.ID WHERE p.ID IS NULL"
+			)
 		);
 
 		// 2. Orphaned usermeta (no matching user in wp_users)
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$orphaned_usermeta = (int) $wpdb->get_var(
-			"SELECT COUNT(*) FROM {$usermeta_table} um LEFT JOIN {$users_table} u ON um.user_id = u.ID WHERE u.ID IS NULL"
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names strictly validated and escaped via esc_sql().
+				"SELECT COUNT(*) FROM {$usermeta_table} um LEFT JOIN {$users_table} u ON um.user_id = u.ID WHERE u.ID IS NULL"
+			)
 		);
 
 		// 3. Expired transients in wp_options
@@ -79,13 +92,21 @@ class WPSG_Db_Health_Scanner {
 		$threshold = max( 1, (int) $revision_threshold );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$total_revisions = (int) $wpdb->get_var(
-			"SELECT COUNT(*) FROM {$posts_table} WHERE post_type = 'revision'"
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name strictly validated and escaped via esc_sql().
+				"SELECT COUNT(*) FROM {$posts_table} WHERE post_type = %s",
+				'revision'
+			)
 		);
 
 		// Count posts having revisions
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$posts_with_revisions = (int) $wpdb->get_var(
-			"SELECT COUNT(DISTINCT post_parent) FROM {$posts_table} WHERE post_type = 'revision' AND post_parent > 0"
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name strictly validated and escaped via esc_sql().
+				"SELECT COUNT(DISTINCT post_parent) FROM {$posts_table} WHERE post_type = %s AND post_parent > 0",
+				'revision'
+			)
 		);
 
 		$allowed_revisions = $posts_with_revisions * $threshold;

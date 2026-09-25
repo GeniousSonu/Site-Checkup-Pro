@@ -57,6 +57,18 @@ rm -rf build/wporg/site-checkup-pro/includes/plugin-update-checker/
 # Strip Tier 2 Nginx companion completely from WP.org build target
 rm -f build/wporg/site-checkup-pro/includes/class-nginx-tier2.php
 
+# Strip internal dev and agent files completely from release builds
+rm -rf build/wporg/site-checkup-pro/.agents/
+rm -f build/wporg/site-checkup-pro/AGENTS.md
+rm -f build/wporg/site-checkup-pro/DEVELOPMENT.md
+rm -f build/wporg/site-checkup-pro/CONTRIBUTING.md
+rm -f build/wporg/site-checkup-pro/README.md
+rm -rf build/self-hosted/site-checkup-pro/.agents/
+rm -f build/self-hosted/site-checkup-pro/AGENTS.md
+rm -f build/self-hosted/site-checkup-pro/DEVELOPMENT.md
+rm -f build/self-hosted/site-checkup-pro/CONTRIBUTING.md
+rm -f build/self-hosted/site-checkup-pro/README.md
+
 cd build/wporg
 zip -r ../site-checkup-pro-wporg.zip site-checkup-pro -x "*.DS_Store"
 # Copy the clean, fully compliant WP.org package as the official root release with the actual plugin name

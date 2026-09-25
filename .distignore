@@ -22,3 +22,7 @@ phpunit.xml*
 .vscode/
 vendor/
 DEVELOPMENT.md
+AGENTS.md
+CONTRIBUTING.md
+README.md
+.agents/
