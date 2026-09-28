@@ -28,7 +28,15 @@ function wpsg_create_database_tables() {
 
 	// Table: Task Status
 	// Note dbDelta requirements: 2 spaces after PRIMARY KEY, uppercase types, column per line.
-	$table_status = $wpdb->prefix . 'wpsg_task_status';
+	$table_status = wpsg_get_table_name( 'task_status' );
+	$table_audit  = wpsg_get_table_name( 'audit_log' );
+	$table_rates  = wpsg_get_table_name( 'rate_limits' );
+	if ( false === $table_status || false === $table_audit || false === $table_rates ) {
+		return;
+	}
+	$table_status = esc_sql( $table_status );
+	$table_audit  = esc_sql( $table_audit );
+	$table_rates  = esc_sql( $table_rates );
 	$sql_status   = "CREATE TABLE {$table_status} (
 		id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 		task_id varchar(100) NOT NULL,
@@ -48,7 +56,6 @@ function wpsg_create_database_tables() {
 	dbDelta( $sql_status );
 
 	// Table: Audit Log (Redacted, no plain secrets)
-	$table_audit = $wpdb->prefix . 'wpsg_audit_log';
 	$sql_audit   = "CREATE TABLE {$table_audit} (
 		id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 		task_id varchar(100) NOT NULL,
@@ -68,8 +75,7 @@ function wpsg_create_database_tables() {
 	dbDelta( $sql_audit );
 
 	// Table: Rate Limits (Atomic login/reauth throttling and lockout)
-	$table_rate_limits = $wpdb->prefix . 'wpsg_rate_limits';
-	$sql_rate_limits   = "CREATE TABLE {$table_rate_limits} (
+	$sql_rate_limits   = "CREATE TABLE {$table_rates} (
 		rate_key varchar(64) NOT NULL,
 		attempts int unsigned NOT NULL DEFAULT 1,
 		first_attempt datetime NOT NULL,
@@ -94,11 +100,17 @@ function wpsg_create_database_tables() {
 function wpsg_drop_database_tables() {
 	global $wpdb;
 
-	$table_status      = $wpdb->prefix . 'wpsg_task_status';
-	$table_audit       = $wpdb->prefix . 'wpsg_audit_log';
-	$table_rate_limits = $wpdb->prefix . 'wpsg_rate_limits';
+	$table_status      = wpsg_get_table_name( 'task_status' );
+	$table_audit       = wpsg_get_table_name( 'audit_log' );
+	$table_rate_limits = wpsg_get_table_name( 'rate_limits' );
+	if ( false === $table_status || false === $table_audit || false === $table_rate_limits ) {
+		return;
+	}
+	$table_status      = esc_sql( $table_status );
+	$table_audit       = esc_sql( $table_audit );
+	$table_rate_limits = esc_sql( $table_rate_limits );
 
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Each table identifier is allowlisted and escaped.
 	$wpdb->query( "DROP TABLE IF EXISTS {$table_status}, {$table_audit}, {$table_rate_limits};" );
 
 	delete_option( 'wpsg_db_version' );

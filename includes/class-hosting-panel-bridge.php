@@ -44,7 +44,7 @@ class WPSG_Hosting_Panel_Bridge {
 		if (
 			file_exists( '/usr/local/cpanel' ) ||
 			getenv( 'CPANEL' ) ||
-			( isset( $_SERVER['SERVER_ADMIN'] ) && false !== strpos( $_SERVER['SERVER_ADMIN'], 'cpanel' ) ) ||
+			( isset( $_SERVER['SERVER_ADMIN'] ) && false !== strpos( strtolower( sanitize_text_field( wp_unslash( $_SERVER['SERVER_ADMIN'] ) ) ), 'cpanel' ) ) ||
 			file_exists( '/var/cpanel' )
 		) {
 			return array(

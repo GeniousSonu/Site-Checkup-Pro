@@ -182,7 +182,10 @@ class WPSG_Admin_Menu {
 			try {
 				$initial_catalog = WPSG_Rest_Controller::get_instance()->get_tasks_catalog();
 			} catch ( \Throwable $e ) {
-				error_log( sprintf( '[GeniousSonu Site Checkup] Failed to generate initial tasks catalog: %s in %s:%d', $e->getMessage(), $e->getFile(), $e->getLine() ) );
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+					// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- This call is reachable only when WP_DEBUG is enabled.
+					error_log( sprintf( '[GeniousSonu Site Checkup] Failed to generate initial tasks catalog: %s in %s:%d', $e->getMessage(), $e->getFile(), $e->getLine() ) );
+				}
 				$initial_catalog = null;
 			}
 		}
@@ -341,11 +344,12 @@ class WPSG_Admin_Menu {
 		$action       = $enabled ? 'disable' : 'enable';
 		$text         = $enabled ? __( 'Disable auto-updates', 'genioussonu-site-checkup' ) : __( 'Enable auto-updates', 'genioussonu-site-checkup' );
 
+		// Core verifies its `updates` nonce when it handles the generated action URL.
 		$query_args = array(
 			'action'        => "{$action}-auto-update",
 			'plugin'        => $plugin_file,
-			'paged'         => isset( $_REQUEST['paged'] ) ? absint( $_REQUEST['paged'] ) : 1,
-			'plugin_status' => isset( $_REQUEST['plugin_status'] ) ? sanitize_key( $_REQUEST['plugin_status'] ) : 'all',
+			'paged'         => isset( $_REQUEST['paged'] ) ? absint( wp_unslash( $_REQUEST['paged'] ) ) : 1, // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Core verifies the `updates` nonce for this action.
+			'plugin_status' => isset( $_REQUEST['plugin_status'] ) ? sanitize_key( wp_unslash( $_REQUEST['plugin_status'] ) ) : 'all', // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Core verifies the `updates` nonce for this action.
 		);
 
 		$url = wp_nonce_url( add_query_arg( $query_args, 'plugins.php' ), 'updates' );

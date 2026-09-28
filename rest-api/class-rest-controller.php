@@ -474,11 +474,15 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 		$registry = WPSG_Task_Registry::get_instance();
 		$tasks    = $registry->get_all();
 
-		$status_table = isset( $wpdb->prefix ) ? $wpdb->prefix . 'wpsg_task_status' : 'wp_wpsg_task_status';
+		$status_table = wpsg_get_table_name( 'task_status' );
+		if ( false !== $status_table ) {
+			$status_table = esc_sql( $status_table );
+		}
 		$db_rows      = array();
-		if ( isset( $wpdb ) && is_object( $wpdb ) && method_exists( $wpdb, 'get_results' ) ) {
+		if ( false !== $status_table && isset( $wpdb ) && is_object( $wpdb ) && method_exists( $wpdb, 'get_results' ) ) {
 			$output_type = defined( 'OBJECT_K' ) ? OBJECT_K : 'OBJECT_K';
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifier is allowlisted and escaped; query has no runtime values.
 			$raw = $wpdb->get_results( "SELECT * FROM {$status_table}", $output_type );
 			if ( is_array( $raw ) ) {
 				$db_rows = $raw;
@@ -500,7 +504,10 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			try {
 				$task_data = $task->to_array( $db_record );
 			} catch ( \Throwable $e ) {
-				error_log( sprintf( '[GeniousSonu Site Checkup] Error serializing task "%s": %s in %s:%d', $task->id, $e->getMessage(), $e->getFile(), $e->getLine() ) );
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+					// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- This call is reachable only when WP_DEBUG is enabled.
+					error_log( sprintf( '[GeniousSonu Site Checkup] Error serializing task "%s": %s in %s:%d', $task->id, $e->getMessage(), $e->getFile(), $e->getLine() ) );
+				}
 				$task_data = array(
 					'id'               => $task->id,
 					'section'          => $task->section,

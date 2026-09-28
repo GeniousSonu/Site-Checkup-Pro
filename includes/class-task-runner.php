@@ -357,10 +357,19 @@ class WPSG_Task_Runner {
 	 */
 	public static function get_db_record( $task_id ) {
 		global $wpdb;
-		$table_name = $wpdb->prefix . 'wpsg_task_status';
+		$table_name = wpsg_get_table_name( 'task_status' );
+		if ( false === $table_name ) {
+			return null;
+		}
+		$table_name = esc_sql( $table_name );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; task ID is prepared.
 		return $wpdb->get_row(
-			$wpdb->prepare( "SELECT * FROM {$table_name} WHERE task_id = %s LIMIT 1", $task_id )
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; task ID is prepared.
+				"SELECT * FROM {$table_name} WHERE task_id = %s LIMIT 1",
+				$task_id
+			)
 		);
 	}
 
@@ -378,7 +387,11 @@ class WPSG_Task_Runner {
 	public static function update_db_status( $task_id, $status, $automation_level = 'A', $note = null, $next_reminder_at = null, $metadata = null ) {
 		global $wpdb;
 
-		$table_name = $wpdb->prefix . 'wpsg_task_status';
+		$table_name = wpsg_get_table_name( 'task_status' );
+		if ( false === $table_name ) {
+			return false;
+		}
+		$table_name = esc_sql( $table_name );
 		$user_id    = get_current_user_id();
 		$now        = current_time( 'mysql' );
 
@@ -405,8 +418,13 @@ class WPSG_Task_Runner {
 		wp_cache_delete( 'wpsg_task_status_' . $task_id, 'genioussonu-site-checkup' );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; task ID is prepared.
 		$exists = $wpdb->get_var(
-			$wpdb->prepare( "SELECT id FROM {$table_name} WHERE task_id = %s LIMIT 1", $task_id )
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; task ID is prepared.
+				"SELECT id FROM {$table_name} WHERE task_id = %s LIMIT 1",
+				$task_id
+			)
 		);
 
 		if ( $exists ) {

@@ -32,11 +32,15 @@ class WPSG_Report_Generator {
 		$registry = WPSG_Task_Registry::get_instance();
 		$tasks    = $registry->get_all();
 
-		$status_table = isset( $wpdb->prefix ) ? $wpdb->prefix . 'wpsg_task_status' : 'wp_wpsg_task_status';
+		$status_table = wpsg_get_table_name( 'task_status' );
+		if ( false !== $status_table ) {
+			$status_table = esc_sql( $status_table );
+		}
 		$db_rows      = array();
-		if ( isset( $wpdb ) && is_object( $wpdb ) && method_exists( $wpdb, 'get_results' ) ) {
+		if ( false !== $status_table && isset( $wpdb ) && is_object( $wpdb ) && method_exists( $wpdb, 'get_results' ) ) {
 			$output_type = defined( 'OBJECT_K' ) ? OBJECT_K : 'OBJECT_K';
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifier is allowlisted and escaped; query has no runtime values.
 			$raw = $wpdb->get_results( "SELECT * FROM {$status_table}", $output_type );
 			if ( is_array( $raw ) ) {
 				$db_rows = $raw;

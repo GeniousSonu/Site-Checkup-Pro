@@ -128,15 +128,22 @@ class WPSG_Scheduler {
 	 *
 	 * @return array
 	 */
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- This query interpolates only the allowlisted, escaped table identifier; timestamp value is prepared.
 	public static function get_due_reminders() {
 		global $wpdb;
 
-		$table_name = $wpdb->prefix . 'wpsg_task_status';
+		$table_name = wpsg_get_table_name( 'task_status' );
+		if ( false === $table_name ) {
+			return array();
+		}
+		$table_name = esc_sql( $table_name );
 		$now        = current_time( 'mysql' );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; timestamp is prepared.
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; timestamp is prepared.
 				"SELECT task_id, status, note, next_reminder_at 
 				FROM {$table_name} 
 				WHERE next_reminder_at IS NOT NULL AND next_reminder_at <= %s",
@@ -146,6 +153,7 @@ class WPSG_Scheduler {
 
 		return is_array( $results ) ? $results : array();
 	}
+	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 	/**
 	 * Render admin notification banners if reminders are due.

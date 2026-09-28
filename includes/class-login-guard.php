@@ -172,7 +172,7 @@ class WPSG_Login_Guard {
 		}
 
 		if ( empty( $username ) ) {
-			$username = isset( $_POST['log'] ) ? sanitize_text_field( wp_unslash( $_POST['log'] ) ) : 'unknown';
+			$username = 'unknown';
 		}
 
 		$client_ip = self::get_client_ip();
@@ -186,18 +186,24 @@ class WPSG_Login_Guard {
 	 * @param string $username  Target username.
 	 * @return array Lockout status.
 	 */
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- SQL identifiers cannot be placeholders; table is allowlisted and escaped, all data values are prepared.
 	public static function record_failure( $client_ip, $username ) {
 		global $wpdb;
 
-		$table_name = $wpdb->prefix . 'wpsg_rate_limits';
+		$table_name = wpsg_get_table_name( 'rate_limits' );
+		if ( false === $table_name ) {
+			return array( 'attempts' => 0, 'locked' => false, 'lock_seconds' => 0 );
+		}
+		$table_name = esc_sql( $table_name );
 		$clean_user = strtolower( sanitize_user( $username ) );
 		$rate_key   = self::get_rate_key( $client_ip, $clean_user );
 		$now        = current_time( 'mysql' );
 
 		// 1. Atomic insertion or increment
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; row values use prepare().
 		$wpdb->query(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; row values use placeholders.
 				"INSERT INTO {$table_name} (rate_key, attempts, first_attempt, last_attempt) 
 				VALUES (%s, 1, %s, %s) 
 				ON DUPLICATE KEY UPDATE attempts = attempts + 1, last_attempt = %s",
@@ -210,8 +216,13 @@ class WPSG_Login_Guard {
 
 		// 2. Fetch updated attempts
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; rate key uses prepare().
 		$attempts = (int) $wpdb->get_var(
-			$wpdb->prepare( "SELECT attempts FROM {$table_name} WHERE rate_key = %s LIMIT 1", $rate_key )
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; rate key uses a placeholder.
+				"SELECT attempts FROM {$table_name} WHERE rate_key = %s LIMIT 1",
+				$rate_key
+			)
 		);
 
 		// 3. Evaluate threshold and set locked_until explicitly
@@ -226,9 +237,10 @@ class WPSG_Login_Guard {
 
 		if ( $lock_seconds > 0 ) {
 			$locked_until = gmdate( 'Y-m-d H:i:s', time() + $lock_seconds );
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; row values use prepare().
 			$wpdb->query(
 				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; row values use placeholders.
 					"UPDATE {$table_name} SET locked_until = %s WHERE rate_key = %s",
 					$locked_until,
 					$rate_key
@@ -238,9 +250,10 @@ class WPSG_Login_Guard {
 
 		// 4. Secondary global per-username failure counter (distributed brute force guard)
 		$user_key = hash( 'sha256', 'global_user|' . $clean_user );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; row values use prepare().
 		$wpdb->query(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; row values use placeholders.
 				"INSERT INTO {$table_name} (rate_key, attempts, first_attempt, last_attempt) 
 				VALUES (%s, 1, %s, %s) 
 				ON DUPLICATE KEY UPDATE attempts = attempts + 1, last_attempt = %s",
@@ -252,15 +265,21 @@ class WPSG_Login_Guard {
 		);
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; user key uses prepare().
 		$user_attempts = (int) $wpdb->get_var(
-			$wpdb->prepare( "SELECT attempts FROM {$table_name} WHERE rate_key = %s LIMIT 1", $user_key )
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; user key uses a placeholder.
+				"SELECT attempts FROM {$table_name} WHERE rate_key = %s LIMIT 1",
+				$user_key
+			)
 		);
 
 		if ( $user_attempts >= 50 ) {
 			$locked_until = gmdate( 'Y-m-d H:i:s', time() + 1800 ); // 30 minutes
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; row values use prepare().
 			$wpdb->query(
 				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; row values use placeholders.
 					"UPDATE {$table_name} SET locked_until = %s WHERE rate_key = %s",
 					$locked_until,
 					$user_key
@@ -304,6 +323,7 @@ class WPSG_Login_Guard {
 			'lock_seconds' => $lock_seconds,
 		);
 	}
+	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 	/**
 	 * Check if a rate key is currently locked out.
@@ -311,16 +331,23 @@ class WPSG_Login_Guard {
 	 * @param string $rate_key 64-char SHA-256 hash.
 	 * @return array
 	 */
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- SQL identifiers cannot be placeholders; table is allowlisted and escaped, rate key is prepared.
 	public static function check_lockout( $rate_key ) {
 		global $wpdb;
 		if ( empty( $wpdb ) || ! is_object( $wpdb ) ) {
 			return array( 'is_locked' => false, 'remaining_seconds' => 0 );
 		}
 
-		$table_name = $wpdb->prefix . 'wpsg_rate_limits';
+		$table_name = wpsg_get_table_name( 'rate_limits' );
+		if ( false === $table_name ) {
+			return array( 'is_locked' => false, 'remaining_seconds' => 0 );
+		}
+		$table_name = esc_sql( $table_name );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; rate key uses prepare().
 		$row = $wpdb->get_row(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; rate key uses a placeholder.
 				"SELECT attempts, locked_until FROM {$table_name} WHERE rate_key = %s LIMIT 1",
 				$rate_key
 			)
@@ -343,6 +370,7 @@ class WPSG_Login_Guard {
 
 		return array( 'is_locked' => false, 'remaining_seconds' => 0 );
 	}
+	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 	/**
 	 * Generic rate limiter helper (used for REST /reauth and /csp-report).
@@ -352,16 +380,23 @@ class WPSG_Login_Guard {
 	 * @param int    $window_sec Time window in seconds.
 	 * @return bool True if permitted, false if rate limited.
 	 */
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- SQL identifiers cannot be placeholders; table is allowlisted and escaped, row values are prepared.
 	public static function check_rate_limit( $action_key, $max_limit = 10, $window_sec = 60 ) {
 		global $wpdb;
 
-		$table_name = $wpdb->prefix . 'wpsg_rate_limits';
+		$table_name = wpsg_get_table_name( 'rate_limits' );
+		if ( false === $table_name ) {
+			return false;
+		}
+		$table_name = esc_sql( $table_name );
 		$rate_key   = hash( 'sha256', 'rl_' . $action_key );
 		$now        = current_time( 'mysql' );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; rate key uses prepare().
 		$row = $wpdb->get_row(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; rate key uses a placeholder.
 				"SELECT attempts, first_attempt FROM {$table_name} WHERE rate_key = %s LIMIT 1",
 				$rate_key
 			)
@@ -405,8 +440,10 @@ class WPSG_Login_Guard {
 
 		// Increment
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; timestamp and key use prepare().
 		$wpdb->query(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; row values use placeholders.
 				"UPDATE {$table_name} SET attempts = attempts + 1, last_attempt = %s WHERE rate_key = %s",
 				$now,
 				$rate_key
@@ -415,18 +452,26 @@ class WPSG_Login_Guard {
 
 		return true;
 	}
+	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 	/**
 	 * Prune old expired rate limits. Scheduled daily via WP-Cron.
 	 *
 	 * @return int Number of pruned rows.
 	 */
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- SQL identifiers cannot be placeholders; table is allowlisted and escaped.
 	public static function prune_old_rate_limits() {
 		global $wpdb;
 
-		$table_name = $wpdb->prefix . 'wpsg_rate_limits';
+		$table_name = wpsg_get_table_name( 'rate_limits' );
+		if ( false === $table_name ) {
+			return 0;
+		}
+		$table_name = esc_sql( $table_name );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; query has no runtime values.
 		$deleted = $wpdb->query(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; query has no runtime values.
 			"DELETE FROM {$table_name} 
 			WHERE last_attempt < DATE_SUB(NOW(), INTERVAL 1 DAY) 
 			AND (locked_until IS NULL OR locked_until < NOW())"
@@ -434,6 +479,7 @@ class WPSG_Login_Guard {
 
 		return (int) $deleted;
 	}
+	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 	/**
 	 * Override WordPress default login error messages with a single generic string.

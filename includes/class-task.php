@@ -201,7 +201,10 @@ class WPSG_Task {
 				$res = call_user_func( $this->status_callback, $force_refresh );
 				return is_array( $res ) ? $res : array( 'status' => 'pending', 'message' => '' );
 			} catch ( \Throwable $e ) {
-				error_log( sprintf( '[GeniousSonu Site Checkup] Error evaluating live status for task "%s": %s in %s:%d', $this->id, $e->getMessage(), $e->getFile(), $e->getLine() ) );
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+					// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- This call is reachable only when WP_DEBUG is enabled.
+					error_log( sprintf( '[GeniousSonu Site Checkup] Error evaluating live status for task "%s": %s in %s:%d', $this->id, $e->getMessage(), $e->getFile(), $e->getLine() ) );
+				}
 				return array(
 					'status'  => 'attention',
 					/* translators: %s: environmental notice / error message */

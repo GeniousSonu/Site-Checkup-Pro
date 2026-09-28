@@ -189,21 +189,31 @@ class WPSG_Scanner {
 		// 2. Check for suspicious oversized autoloaded options (> 100 KB).
 		$large_options = array();
 		if ( isset( $wpdb ) && is_object( $wpdb ) && method_exists( $wpdb, 'get_results' ) ) {
-			$options_table = isset( $wpdb->options ) ? $wpdb->options : ( isset( $wpdb->prefix ) ? $wpdb->prefix . 'options' : 'wp_options' );
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$large_autoload = $wpdb->get_results(
-				"SELECT option_name, LENGTH(option_value) AS size_bytes 
-				FROM {$options_table} 
-				WHERE autoload = 'yes' AND LENGTH(option_value) > 102400 
-				ORDER BY size_bytes DESC LIMIT 10"
-			);
+			$options_table = wpsg_get_table_name( 'options' );
+			if ( false === $options_table ) {
+				$options_table = '';
+			}
+			if ( '' !== $options_table ) {
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- This query interpolates only the allowlisted, escaped options table identifier.
+				$options_table = esc_sql( $options_table );
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifier is allowlisted and escaped; remaining query clauses are constants.
+				$large_autoload = $wpdb->get_results(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifier is allowlisted and escaped; query clauses are constants.
+					"SELECT option_name, LENGTH(option_value) AS size_bytes
+					FROM {$options_table}
+					WHERE autoload = 'yes' AND LENGTH(option_value) > 102400
+					ORDER BY size_bytes DESC LIMIT 10"
+				);
 
-			if ( ! empty( $large_autoload ) && is_array( $large_autoload ) ) {
-				foreach ( $large_autoload as $opt ) {
-					if ( is_object( $opt ) && isset( $opt->option_name, $opt->size_bytes ) ) {
-						$large_options[] = sprintf( '%s (%s KB)', $opt->option_name, round( $opt->size_bytes / 1024 ) );
+				if ( ! empty( $large_autoload ) && is_array( $large_autoload ) ) {
+					foreach ( $large_autoload as $opt ) {
+						if ( is_object( $opt ) && isset( $opt->option_name, $opt->size_bytes ) ) {
+							$large_options[] = sprintf( '%s (%s KB)', $opt->option_name, round( $opt->size_bytes / 1024 ) );
+						}
 					}
 				}
+				// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			}
 		}
 

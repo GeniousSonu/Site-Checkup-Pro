@@ -63,7 +63,8 @@ spl_autoload_register( function ( $class ) {
 	}
 } );
 
-// Include Database Schema functions.
+// Include database identifier validation and schema functions.
+require_once WPSG_PLUGIN_DIR . 'includes/class-database.php';
 require_once WPSG_PLUGIN_DIR . 'db/schema.php';
 
 /**

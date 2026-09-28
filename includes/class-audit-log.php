@@ -37,7 +37,11 @@ class WPSG_Audit_Log {
 			return false;
 		}
 
-		$table_name = $wpdb->prefix . 'wpsg_audit_log';
+		$table_name = wpsg_get_table_name( 'audit_log' );
+		if ( false === $table_name ) {
+			return false;
+		}
+		$table_name = esc_sql( $table_name );
 		$user_id    = get_current_user_id();
 
 		// Sanitize snapshots to guarantee zero sensitive keys or passwords are saved.
@@ -149,6 +153,7 @@ class WPSG_Audit_Log {
 	 * @param int $offset Offset.
 	 * @return array
 	 */
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- This query interpolates only allowlisted, escaped table/sort identifiers; data values are prepared.
 	public static function get_logs( $limit = 50, $offset = 0, $orderby = 'created_at', $order = 'DESC' ) {
 		global $wpdb;
 
@@ -156,7 +161,13 @@ class WPSG_Audit_Log {
 			return array();
 		}
 
-		$table_name = $wpdb->prefix . 'wpsg_audit_log';
+		$table_name = wpsg_get_table_name( 'audit_log' );
+		$users_table = wpsg_get_table_name( 'users' );
+		if ( false === $table_name || false === $users_table ) {
+			return array();
+		}
+		$table_name  = esc_sql( $table_name );
+		$users_table = esc_sql( $users_table );
 		$limit      = absint( $limit );
 		$offset     = absint( $offset );
 
@@ -170,12 +181,14 @@ class WPSG_Audit_Log {
 		$sort_dir = 'ASC' === strtoupper( $order ) ? 'ASC' : 'DESC';
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifiers are allowlisted and escaped; pagination values are prepared.
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table and sort identifiers are allowlisted and escaped; pagination values are prepared.
 				"SELECT a.*, u.user_login, u.display_name 
-				FROM {$table_name} a 
-				LEFT JOIN {$wpdb->users} u ON a.user_id = u.ID 
-				ORDER BY {$sort_col} {$sort_dir} 
+				FROM {$table_name} a
+				LEFT JOIN {$users_table} u ON a.user_id = u.ID
+				ORDER BY {$sort_col} {$sort_dir}
 				LIMIT %d OFFSET %d",
 				$limit,
 				$offset
@@ -184,6 +197,7 @@ class WPSG_Audit_Log {
 
 		return is_array( $rows ) ? $rows : array();
 	}
+	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 	/**
 	 * Prune old audit logs older than a specified number of days (default: 365 days / 12 months).
@@ -198,12 +212,18 @@ class WPSG_Audit_Log {
 			return 0;
 		}
 
-		$table_name = $wpdb->prefix . 'wpsg_audit_log';
+		$table_name = wpsg_get_table_name( 'audit_log' );
+		if ( false === $table_name ) {
+			return 0;
+		}
+		$table_name = esc_sql( $table_name );
 		$days       = absint( $days );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; retention days are prepared.
 		$deleted = $wpdb->query(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; retention days are prepared.
 				"DELETE FROM {$table_name} WHERE created_at < DATE_SUB(NOW(), INTERVAL %d DAY)",
 				$days
 			)

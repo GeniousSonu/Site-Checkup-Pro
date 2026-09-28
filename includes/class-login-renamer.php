@@ -309,8 +309,9 @@ class WPSG_Login_Renamer {
 
 		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 
-		// Allow logout, postpass, and registration actions to continue without 404 if needed.
-		$action = isset( $_REQUEST['action'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['action'] ) ) : '';
+		// Core handles nonce/capability validation for these login actions after this routing exception.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only permits core's logout/postpass handlers to run; they validate their own requests.
+		$action = isset( $_REQUEST['action'] ) ? sanitize_key( wp_unslash( $_REQUEST['action'] ) ) : '';
 		if ( in_array( $action, array( 'postpass', 'logout' ), true ) ) {
 			return;
 		}

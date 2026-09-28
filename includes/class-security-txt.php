@@ -30,7 +30,7 @@ class WPSG_Security_Txt {
 		$candidates = array();
 
 		if ( ! empty( $_SERVER['DOCUMENT_ROOT'] ) ) {
-			$candidates[] = realpath( $_SERVER['DOCUMENT_ROOT'] );
+			$candidates[] = realpath( sanitize_text_field( wp_unslash( $_SERVER['DOCUMENT_ROOT'] ) ) );
 		}
 
 		if ( function_exists( 'get_home_path' ) ) {

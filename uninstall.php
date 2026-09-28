@@ -17,14 +17,20 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 }
 
 global $wpdb;
+require_once __DIR__ . '/includes/class-database.php';
 
 // Drop custom database tables.
-$wpsg_table_status      = $wpdb->prefix . 'wpsg_task_status';
-$wpsg_table_audit       = $wpdb->prefix . 'wpsg_audit_log';
-$wpsg_table_rate_limits = $wpdb->prefix . 'wpsg_rate_limits';
+$wpsg_table_status      = wpsg_get_table_name( 'task_status' );
+$wpsg_table_audit       = wpsg_get_table_name( 'audit_log' );
+$wpsg_table_rate_limits = wpsg_get_table_name( 'rate_limits' );
 
-// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-$wpdb->query( "DROP TABLE IF EXISTS {$wpsg_table_status}, {$wpsg_table_audit}, {$wpsg_table_rate_limits};" );
+if ( false !== $wpsg_table_status && false !== $wpsg_table_audit && false !== $wpsg_table_rate_limits ) {
+	$wpsg_table_status      = esc_sql( $wpsg_table_status );
+	$wpsg_table_audit       = esc_sql( $wpsg_table_audit );
+	$wpsg_table_rate_limits = esc_sql( $wpsg_table_rate_limits );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Names are allowlisted and escaped.
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpsg_table_status}, {$wpsg_table_audit}, {$wpsg_table_rate_limits};" );
+}
 
 // Delete plugin options.
 delete_option( 'wpsg_db_version' );

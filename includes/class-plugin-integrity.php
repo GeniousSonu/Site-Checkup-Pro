@@ -344,8 +344,18 @@ class WPSG_Plugin_Integrity {
 
 		$recent_slug = get_option( 'wpsg_latest_deleted_plugin_slug', '' );
 
-		if ( empty( $recent_slug ) && isset( $wpdb->options ) ) {
-			$row = $wpdb->get_row( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE 'wpsg_last_deleted_plugin_%' ORDER BY option_id DESC LIMIT 1" );
+		$options_table = wpsg_get_table_name( 'options' );
+		if ( empty( $recent_slug ) && false !== $options_table ) {
+			$options_table = esc_sql( $options_table );
+			$like = $wpdb->esc_like( 'wpsg_last_deleted_plugin_' ) . '%';
+			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; LIKE pattern is prepared.
+			$row  = $wpdb->get_row(
+				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; LIKE pattern uses a placeholder.
+					"SELECT option_name FROM {$options_table} WHERE option_name LIKE %s ORDER BY option_id DESC LIMIT 1",
+					$like
+				)
+			);
 			if ( is_object( $row ) && isset( $row->option_name ) ) {
 				$recent_slug = str_replace( 'wpsg_last_deleted_plugin_', '', (string) $row->option_name );
 			}

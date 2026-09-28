@@ -38,11 +38,17 @@ class WPSG_Migration_Readiness {
 			);
 		}
 
-		// Safelist, validate, and escape table names strictly against WordPress prefix and core schema.
-		$raw_options    = ( ! empty( $wpdb->options ) && preg_match( '/^[a-zA-Z0-9_]+$/', $wpdb->options ) ) ? $wpdb->options : $wpdb->prefix . 'options';
-		$raw_postmeta   = ( ! empty( $wpdb->postmeta ) && preg_match( '/^[a-zA-Z0-9_]+$/', $wpdb->postmeta ) ) ? $wpdb->postmeta : $wpdb->prefix . 'postmeta';
-		$options_table  = esc_sql( $raw_options );
-		$postmeta_table = esc_sql( $raw_postmeta );
+		$options_table  = wpsg_get_table_name( 'options' );
+		$postmeta_table = wpsg_get_table_name( 'postmeta' );
+		if ( false === $options_table || false === $postmeta_table ) {
+			return array(
+				'summary'  => array( 'total_findings' => 0, 'risk_level' => 'low' ),
+				'findings' => array(),
+				'guidance' => self::get_guidance(),
+			);
+		}
+		$options_table  = esc_sql( $options_table );
+		$postmeta_table = esc_sql( $postmeta_table );
 
 		// Get current domain/host to inspect
 		$site_host = '';
@@ -65,6 +71,7 @@ class WPSG_Migration_Readiness {
 
 		// 1. Scan wp_options (bounded limit 250)
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; LIKE values and limit are prepared.
 		$option_rows = $wpdb->get_results(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is strictly validated via regex and core schema.
@@ -96,6 +103,7 @@ class WPSG_Migration_Readiness {
 
 		// 2. Scan wp_postmeta (bounded limit 250)
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; LIKE values and limit are prepared.
 		$postmeta_rows = $wpdb->get_results(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is strictly validated via regex and core schema.

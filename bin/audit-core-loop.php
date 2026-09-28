@@ -299,7 +299,11 @@ foreach ( $all_tasks as $task_id => $task ) {
 		}
 
 		// C. Check Audit Log Entry for Run
-		$log_table = $wpdb->prefix . 'wpsg_audit_log';
+		$log_table = wpsg_get_table_name( 'audit_log' );
+		if ( false === $log_table ) {
+			fwrite( STDERR, "Unable to resolve the audit log table safely.\n" );
+			exit( 1 );
+		}
 		$log_entry = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$log_table} WHERE task_id = %s AND action = 'run' ORDER BY id DESC LIMIT 1", $task_id ) );
 		if ( $log_entry ) {
 			$res['audit_log_created'] = true;

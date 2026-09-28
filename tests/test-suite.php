@@ -528,6 +528,7 @@ if ( ! function_exists( 'insert_with_markers' ) ) {
 }
 
 // Load plugin classes
+require_once ABSPATH . 'includes/class-database.php';
 require_once ABSPATH . 'includes/class-encryption.php';
 require_once ABSPATH . 'includes/class-hosting-panel-bridge.php';
 require_once ABSPATH . 'includes/class-http-verifier.php';
@@ -582,6 +583,18 @@ function run_test( $name, $callback ) {
 echo "=======================================================\n";
 echo " GeniousSonu Site Checkup — Automated Test Suite\n";
 echo "=======================================================\n\n";
+
+// TEST 0: SQL Table Identifier Allowlist
+run_test( 'Database: table resolver allowlists names and rejects an injected prefix', function () {
+	$original_prefix = $GLOBALS['wpdb']->prefix;
+	$valid_table     = wpsg_get_table_name( 'rate_limits' );
+	$unknown_table   = wpsg_get_table_name( 'users; DROP TABLE wp_users' );
+	$GLOBALS['wpdb']->prefix = 'wp_; DROP TABLE wp_users; --';
+	$invalid_prefix = wpsg_get_table_name( 'rate_limits' );
+	$GLOBALS['wpdb']->prefix = $original_prefix;
+
+	return ( 'wp_wpsg_rate_limits' === $valid_table && false === $unknown_table && false === $invalid_prefix );
+} );
 
 // TEST 1: Secret Redaction on Salt Rotation
 run_test( "Secret Redaction: Salt rotation snapshot contains no keys or plain secrets", function () {
