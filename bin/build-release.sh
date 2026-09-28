@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Site Checkup Pro — Dual Distribution Release Builder
+# GeniousSonu Site Checkup — Dual Distribution Release Builder
 #
 # Builds two distinct release packages:
 # 1. Self-Hosted (genioussonu.me / GitHub Releases):
 #    - Includes in-dashboard update checker (class-update-checker.php).
-#    - Output: site-checkup-pro.zip & site-checkup-pro-selfhosted.zip
+#    - Output: genioussonu-site-checkup.zip & genioussonu-site-checkup-selfhosted.zip
 #
 # 2. WordPress.org Directory Release:
 #    - Complies with Guideline 8: completely strips class-update-checker.php.
-#    - Output: site-checkup-pro-wporg.zip & directory build/wporg/site-checkup-pro/
+#    - Output: genioussonu-site-checkup-wporg.zip & directory build/wporg/genioussonu-site-checkup/
 # ==============================================================================
 
 set -e
@@ -18,7 +18,7 @@ VERSION="${1:-1.0.0}"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 echo "======================================================="
-echo " Building Site Checkup Pro v${VERSION}"
+echo " Building GeniousSonu Site Checkup v${VERSION}"
 echo "======================================================="
 
 cd "${ROOT_DIR}"
@@ -34,51 +34,51 @@ fi
 
 # Clean previous build artifacts and old root zip variants
 rm -rf build/
-rm -f site-checkup-pro-selfhosted.zip site-checkup-pro-wporg.zip
-mkdir -p build/self-hosted/site-checkup-pro
-mkdir -p build/wporg/site-checkup-pro
+rm -f genioussonu-site-checkup-selfhosted.zip genioussonu-site-checkup-wporg.zip
+mkdir -p build/self-hosted/genioussonu-site-checkup
+mkdir -p build/wporg/genioussonu-site-checkup
 
 # 2. Build Target A: Self-Hosted Release (includes Update Checker)
 echo "Packaging Target 1: Self-Hosted (with Update Checker)..."
-rsync -rc --exclude-from='.distignore' ./ build/self-hosted/site-checkup-pro/
+rsync -rc --exclude-from='.distignore' ./ build/self-hosted/genioussonu-site-checkup/
 
 cd build/self-hosted
-zip -r ../site-checkup-pro-selfhosted.zip site-checkup-pro -x "*.DS_Store"
+zip -r ../genioussonu-site-checkup-selfhosted.zip genioussonu-site-checkup -x "*.DS_Store"
 cd "${ROOT_DIR}"
 
 # 3. Build Target B: WordPress.org Release (Guideline 8 Compliant: Strips Update Checker)
 echo "Packaging Target 2: WordPress.org Compliant (stripped update-checker)..."
-rsync -rc --exclude-from='.distignore' ./ build/wporg/site-checkup-pro/
+rsync -rc --exclude-from='.distignore' ./ build/wporg/genioussonu-site-checkup/
 
 # Strip update checker completely from WP.org build target
-rm -f build/wporg/site-checkup-pro/includes/class-update-checker.php
-rm -rf build/wporg/site-checkup-pro/includes/plugin-update-checker/
+rm -f build/wporg/genioussonu-site-checkup/includes/class-update-checker.php
+rm -rf build/wporg/genioussonu-site-checkup/includes/plugin-update-checker/
 
 # Strip Tier 2 Nginx companion completely from WP.org build target
-rm -f build/wporg/site-checkup-pro/includes/class-nginx-tier2.php
+rm -f build/wporg/genioussonu-site-checkup/includes/class-nginx-tier2.php
 
 # Strip internal dev and agent files completely from release builds
-rm -rf build/wporg/site-checkup-pro/.agents/
-rm -f build/wporg/site-checkup-pro/AGENTS.md
-rm -f build/wporg/site-checkup-pro/DEVELOPMENT.md
-rm -f build/wporg/site-checkup-pro/CONTRIBUTING.md
-rm -f build/wporg/site-checkup-pro/README.md
-rm -rf build/self-hosted/site-checkup-pro/.agents/
-rm -f build/self-hosted/site-checkup-pro/AGENTS.md
-rm -f build/self-hosted/site-checkup-pro/DEVELOPMENT.md
-rm -f build/self-hosted/site-checkup-pro/CONTRIBUTING.md
-rm -f build/self-hosted/site-checkup-pro/README.md
+rm -rf build/wporg/genioussonu-site-checkup/.agents/
+rm -f build/wporg/genioussonu-site-checkup/AGENTS.md
+rm -f build/wporg/genioussonu-site-checkup/DEVELOPMENT.md
+rm -f build/wporg/genioussonu-site-checkup/CONTRIBUTING.md
+rm -f build/wporg/genioussonu-site-checkup/README.md
+rm -rf build/self-hosted/genioussonu-site-checkup/.agents/
+rm -f build/self-hosted/genioussonu-site-checkup/AGENTS.md
+rm -f build/self-hosted/genioussonu-site-checkup/DEVELOPMENT.md
+rm -f build/self-hosted/genioussonu-site-checkup/CONTRIBUTING.md
+rm -f build/self-hosted/genioussonu-site-checkup/README.md
 
 cd build/wporg
-zip -r ../site-checkup-pro-wporg.zip site-checkup-pro -x "*.DS_Store"
+zip -r ../genioussonu-site-checkup-wporg.zip genioussonu-site-checkup -x "*.DS_Store"
 # Copy the clean, fully compliant WP.org package as the official root release with the actual plugin name
-cp ../site-checkup-pro-wporg.zip "${ROOT_DIR}/site-checkup-pro.zip"
+cp ../genioussonu-site-checkup-wporg.zip "${ROOT_DIR}/genioussonu-site-checkup.zip"
 cd "${ROOT_DIR}"
 
 echo ""
 echo "======================================================="
 echo " Build Complete:"
-echo " Official Package: site-checkup-pro.zip ($(du -h site-checkup-pro.zip | cut -f1)) [WP.org Compliant, Latest]"
-echo " WP.org Build Dir: build/wporg/site-checkup-pro/"
-echo " Self-Hosted Zip:  build/site-checkup-pro-selfhosted.zip ($(du -h build/site-checkup-pro-selfhosted.zip | cut -f1))"
+echo " Official Package: genioussonu-site-checkup.zip ($(du -h genioussonu-site-checkup.zip | cut -f1)) [WP.org Compliant, Latest]"
+echo " WP.org Build Dir: build/wporg/genioussonu-site-checkup/"
+echo " Self-Hosted Zip:  build/genioussonu-site-checkup-selfhosted.zip ($(du -h build/genioussonu-site-checkup-selfhosted.zip | cut -f1))"
 echo "======================================================="

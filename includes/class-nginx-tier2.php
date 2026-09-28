@@ -59,7 +59,7 @@ class WPSG_Nginx_Tier2 {
 		if ( defined( 'WPSG_NGINX_CONF_DIR' ) && WPSG_NGINX_CONF_DIR ) {
 			return trailingslashit( WPSG_NGINX_CONF_DIR );
 		}
-		return '/etc/nginx/site-checkup-pro/';
+		return '/etc/nginx/genioussonu-site-checkup/';
 	}
 
 	/**
@@ -170,13 +170,13 @@ class WPSG_Nginx_Tier2 {
 		$live_file    = $conf_dir . $safe_key . '.conf';
 
 		// 1. Write rule to staging file.
-		$header  = "# Site Checkup Pro Rule: {$safe_key}\n# Generated: " . gmdate( 'Y-m-d H:i:s' ) . " UTC\n";
+		$header  = "# GeniousSonu Site Checkup Rule: {$safe_key}\n# Generated: " . gmdate( 'Y-m-d H:i:s' ) . " UTC\n";
 		$content = $header . trim( $directive ) . "\n";
 
 		if ( false === @file_put_contents( $staging_file, $content ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Could not write directive to Nginx staging path. Verify directory permissions.', 'site-checkup-pro' ),
+				'message' => __( 'Could not write directive to Nginx staging path. Verify directory permissions.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -188,7 +188,7 @@ class WPSG_Nginx_Tier2 {
 				'success' => false,
 				'message' => sprintf(
 					/* translators: %s: syntax test error message */
-					__( 'Nginx configuration test failed (%s). Rule was safely discarded before going live.', 'site-checkup-pro' ),
+					__( 'Nginx configuration test failed (%s). Rule was safely discarded before going live.', 'genioussonu-site-checkup' ),
 					$test_res['output']
 				),
 			);
@@ -199,7 +199,7 @@ class WPSG_Nginx_Tier2 {
 			@unlink( $staging_file );
 			return array(
 				'success' => false,
-				'message' => __( 'Could not atomically move validated config into live Nginx directory.', 'site-checkup-pro' ),
+				'message' => __( 'Could not atomically move validated config into live Nginx directory.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -214,13 +214,13 @@ class WPSG_Nginx_Tier2 {
 			return array(
 				'success' => false,
 				/* translators: %s: reload error output */
-				'message' => sprintf( __( 'Nginx reload failed: %s. Rule was rolled back.', 'site-checkup-pro' ), $reload_res['output'] ),
+				'message' => sprintf( __( 'Nginx reload failed: %s. Rule was rolled back.', 'genioussonu-site-checkup' ), $reload_res['output'] ),
 			);
 		}
 
 		return array(
 			'success' => true,
-			'message' => __( 'Nginx directive validated and applied successfully (Tier 2).', 'site-checkup-pro' ),
+			'message' => __( 'Nginx directive validated and applied successfully (Tier 2).', 'genioussonu-site-checkup' ),
 		);
 	}
 
@@ -246,7 +246,7 @@ class WPSG_Nginx_Tier2 {
 				@rename( $staging_file, $live_file );
 				return array(
 					'success' => false,
-					'message' => __( 'Nginx configuration test failed after removal attempt. Rolled back.', 'site-checkup-pro' ),
+					'message' => __( 'Nginx configuration test failed after removal attempt. Rolled back.', 'genioussonu-site-checkup' ),
 				);
 			}
 
@@ -256,7 +256,7 @@ class WPSG_Nginx_Tier2 {
 
 		return array(
 			'success' => true,
-			'message' => __( 'Nginx directive removed successfully (Tier 2).', 'site-checkup-pro' ),
+			'message' => __( 'Nginx directive removed successfully (Tier 2).', 'genioussonu-site-checkup' ),
 		);
 	}
 

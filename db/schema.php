@@ -1,9 +1,9 @@
 <?php
 /**
-* Database Schema for Site Checkup Pro
+* Database Schema for GeniousSonu Site Checkup
  *
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0

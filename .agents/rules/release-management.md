@@ -1,10 +1,10 @@
 # Release Management & Version Bumping Protocol
 
-Follow this protocol strictly before creating any tagged release for Site Checkup Pro:
+Follow this protocol strictly before creating any tagged release for GeniousSonu Site Checkup:
 
 ## 1. Four-Point Version Synchronization
 Before creating any git tag, bump and synchronize the version number across all four locations so they match exactly:
-1. **Plugin Header `Version:` field** and `WPSG_VERSION` constant in `site-checkup-pro.php`.
+1. **Plugin Header `Version:` field** and `WPSG_VERSION` constant in `genioussonu-site-checkup.php`.
 2. **`Stable tag:` field** in WordPress.org `readme.txt`.
 3. **`version` field** in `update-info.json` (auto-generated via `php bin/generate-update-info.php`).
 4. **Git Release Tag** itself (prefixed with `v`, e.g., `v1.0.2`).

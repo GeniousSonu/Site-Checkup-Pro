@@ -1,14 +1,14 @@
-# Site Checkup Pro
+# GeniousSonu Site Checkup
 
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 [![WordPress](https://img.shields.io/badge/WordPress-5.8%2B-blue)](https://wordpress.org)
 [![PHP](https://img.shields.io/badge/PHP-7.4%2B-purple)](https://php.net)
 
-**Site Checkup Pro** is an SOP-driven security checklist and hardening orchestrator for WordPress, designed for agencies, maintenance providers, and developers. It translates complex security procedures into an actionable, audited dashboard with automated safe fixes, guided plugin bridges, recurring maintenance tracking, and executive client reports.
+**GeniousSonu Site Checkup** is an SOP-driven security checklist and hardening orchestrator for WordPress, designed for agencies, maintenance providers, and developers. It translates complex security procedures into an actionable, audited dashboard with automated safe fixes, guided plugin bridges, recurring maintenance tracking, and executive client reports.
 
 Developed and maintained by **[SK Sahinur Islam](https://www.genioussonu.me/)**.
 
-Official Plugin Homepage: [https://www.genioussonu.me/plugin/site-checkup-pro/](https://www.genioussonu.me/plugin/site-checkup-pro/)
+Official Plugin Homepage: [https://www.genioussonu.me/plugin/genioussonu-site-checkup/](https://www.genioussonu.me/plugin/genioussonu-site-checkup/)
 
 ---
 
@@ -28,7 +28,7 @@ Official Plugin Homepage: [https://www.genioussonu.me/plugin/site-checkup-pro/](
 
 1. Clone or download this repository into your `/wp-content/plugins/` directory:
    ```bash
-   git clone https://github.com/GeniousSonu/site-checkup-pro.git wp-content/plugins/site-checkup-pro
+   git clone https://github.com/GeniousSonu/Site-Checkup-Pro.git wp-content/plugins/genioussonu-site-checkup
    ```
 2. Activate the plugin in **Plugins** within your WordPress admin dashboard.
 3. Access **Site Checkup** from the admin navigation.
@@ -39,7 +39,7 @@ Official Plugin Homepage: [https://www.genioussonu.me/plugin/site-checkup-pro/](
 
 We treat security with the utmost urgency. If you discover a vulnerability, please do not disclose it publicly. Review our contact information at `/.well-known/security.txt` or report it to:
 - **Email:** `security@genioussonu.me`
-- **Responsible Disclosure:** [https://www.genioussonu.me/plugin/site-checkup-pro/security/](https://www.genioussonu.me/plugin/site-checkup-pro/security/)
+- **Responsible Disclosure:** [https://www.genioussonu.me/plugin/genioussonu-site-checkup/security/](https://www.genioussonu.me/plugin/genioussonu-site-checkup/security/)
 
 ---
 
@@ -54,4 +54,4 @@ We treat security with the utmost urgency. If you discover a vulnerability, plea
 
 ## 📄 License
 
-Site Checkup Pro is open-source software licensed under the [GNU General Public License v2 or later](LICENSE).
+GeniousSonu Site Checkup is open-source software licensed under the [GNU General Public License v2 or later](LICENSE).

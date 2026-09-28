@@ -1,10 +1,10 @@
 # Support & Help
 
-We provide support for **Site Checkup Pro** to ensure smooth deployment across your WordPress sites.
+We provide support for **GeniousSonu Site Checkup** to ensure smooth deployment across your WordPress sites.
 
 ## How to Get Help
 
-- **Community & Bug Tracking:** Open an issue on our [GitHub Repository](https://github.com/GeniousSonu/site-checkup-pro/issues).
+- **Community & Bug Tracking:** Open an issue on our [GitHub Repository](https://github.com/GeniousSonu/Site-Checkup-Pro/issues).
 - **Direct Developer Contact:** Contact **SK Sahinur Islam** at [https://www.genioussonu.me/](https://www.genioussonu.me/) or via email at `support@genioussonu.me`.
 - **WordPress.org Support Forum:** Visit our plugin page on WordPress.org to search existing community threads.
 

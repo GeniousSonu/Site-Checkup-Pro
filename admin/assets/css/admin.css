@@ -1,5 +1,5 @@
 /**
- * Site Checkup Pro — Production Admin Stylesheet
+ * GeniousSonu Site Checkup — Production Admin Stylesheet
  *
  * Designed for trust, precision, safety, and clarity.
  * Built on an 8px grid with Inter typography, neutral surfaces, subtle borders,
@@ -107,21 +107,21 @@
 
 /* ==========================================================================
    Notice Suppression & Workspace Isolation
-   Hide intrusive third-party admin banners and nags on Site Checkup Pro screens.
+   Hide intrusive third-party admin banners and nags on GeniousSonu Site Checkup screens.
    ========================================================================== */
 
-body.toplevel_page_site-checkup-pro .notice:not(.wpsg-notice),
-body.toplevel_page_site-checkup-pro .updated:not(.wpsg-notice),
-body.toplevel_page_site-checkup-pro .error:not(.wpsg-notice),
-body.toplevel_page_site-checkup-pro .update-nag,
-body.toplevel_page_site-checkup-pro .e-notice,
-body.toplevel_page_site-checkup-pro [class*="notice"]:not(.wpsg-notice):not([class*="wpsg-"]),
-body[class*="site-checkup-pro"] .notice:not(.wpsg-notice),
-body[class*="site-checkup-pro"] .updated:not(.wpsg-notice),
-body[class*="site-checkup-pro"] .error:not(.wpsg-notice),
-body[class*="site-checkup-pro"] .update-nag,
-body[class*="site-checkup-pro"] .e-notice,
-body[class*="site-checkup-pro"] [class*="notice"]:not(.wpsg-notice):not([class*="wpsg-"]) {
+body.toplevel_page_genioussonu-site-checkup .notice:not(.wpsg-notice),
+body.toplevel_page_genioussonu-site-checkup .updated:not(.wpsg-notice),
+body.toplevel_page_genioussonu-site-checkup .error:not(.wpsg-notice),
+body.toplevel_page_genioussonu-site-checkup .update-nag,
+body.toplevel_page_genioussonu-site-checkup .e-notice,
+body.toplevel_page_genioussonu-site-checkup [class*="notice"]:not(.wpsg-notice):not([class*="wpsg-"]),
+body[class*="genioussonu-site-checkup"] .notice:not(.wpsg-notice),
+body[class*="genioussonu-site-checkup"] .updated:not(.wpsg-notice),
+body[class*="genioussonu-site-checkup"] .error:not(.wpsg-notice),
+body[class*="genioussonu-site-checkup"] .update-nag,
+body[class*="genioussonu-site-checkup"] .e-notice,
+body[class*="genioussonu-site-checkup"] [class*="notice"]:not(.wpsg-notice):not([class*="wpsg-"]) {
 	display: none !important;
 }
 
@@ -1515,7 +1515,7 @@ body[class*="site-checkup-pro"] [class*="notice"]:not(.wpsg-notice):not([class*=
 }
 
 /* WordPress Admin Menu Icon */
-#adminmenu .toplevel_page_site-checkup-pro .wp-menu-image img {
+#adminmenu .toplevel_page_genioussonu-site-checkup .wp-menu-image img {
 	width: 18px;
 	height: 18px;
 	padding: 8px 0 0 0;
@@ -1523,8 +1523,8 @@ body[class*="site-checkup-pro"] [class*="notice"]:not(.wpsg-notice):not([class*=
 	transition: opacity 0.15s ease;
 }
 
-#adminmenu .toplevel_page_site-checkup-pro:hover .wp-menu-image img,
-#adminmenu .toplevel_page_site-checkup-pro.wp-has-current-submenu .wp-menu-image img {
+#adminmenu .toplevel_page_genioussonu-site-checkup:hover .wp-menu-image img,
+#adminmenu .toplevel_page_genioussonu-site-checkup.wp-has-current-submenu .wp-menu-image img {
 	opacity: 1;
 }
 

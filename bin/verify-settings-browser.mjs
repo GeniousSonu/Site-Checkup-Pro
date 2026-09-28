@@ -66,8 +66,8 @@ async function main() {
     });
     await new Promise(r => setTimeout(r, 2000));
 
-    console.log('Navigating to Site Checkup Pro admin page...');
-    await send('Page.navigate', { url: 'http://test111.local/wp-admin/admin.php?page=site-checkup-pro' });
+    console.log('Navigating to GeniousSonu Site Checkup admin page...');
+    await send('Page.navigate', { url: 'http://test111.local/wp-admin/admin.php?page=genioussonu-site-checkup' });
     await new Promise(r => setTimeout(r, 2500));
 
     console.log('Opening Settings modal...');

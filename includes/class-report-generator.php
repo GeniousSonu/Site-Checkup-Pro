@@ -5,7 +5,7 @@
  * Generates an executive audit report of SOP checklist completion,
  * hardened security controls, pending maintenance tasks, and incident response contacts.
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0

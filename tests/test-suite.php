@@ -1,10 +1,10 @@
 <?php
 /**
- * Automated Verification Test Suite for Site Checkup Pro
+ * Automated Verification Test Suite for GeniousSonu Site Checkup
  *
  * Runs comprehensive assertions on security architecture, scanners, settings allowlists, and role gates.
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -16,10 +16,10 @@ define( 'WPSG_VERSION', '1.0.0' );
 define( 'WP_CONTENT_DIR', sys_get_temp_dir() . '/wp-content' );
 define( 'WP_PLUGIN_DIR', WP_CONTENT_DIR . '/plugins' );
 define( 'WPMU_PLUGIN_DIR', WP_CONTENT_DIR . '/mu-plugins' );
-define( 'WPSG_PLUGIN_FILE', ABSPATH . 'site-checkup-pro.php' );
+define( 'WPSG_PLUGIN_FILE', ABSPATH . 'genioussonu-site-checkup.php' );
 define( 'WPSG_PLUGIN_DIR', ABSPATH );
-define( 'WPSG_PLUGIN_URL', 'https://example.com/wp-content/plugins/site-checkup-pro/' );
-define( 'WPSG_BASENAME', 'site-checkup-pro/site-checkup-pro.php' );
+define( 'WPSG_PLUGIN_URL', 'https://example.com/wp-content/plugins/genioussonu-site-checkup/' );
+define( 'WPSG_BASENAME', 'genioussonu-site-checkup/genioussonu-site-checkup.php' );
 define( 'WPSG_PLUGIN_BASENAME', WPSG_BASENAME );
 if ( ! defined( 'WP_DEBUG' ) ) { define( 'WP_DEBUG', false ); }
 
@@ -180,7 +180,7 @@ if ( ! function_exists( 'delete_plugins' ) ) {
 	}
 }
 wp_mkdir_p( WP_PLUGIN_DIR );
-if ( ! function_exists( 'get_bloginfo' ) ) { function get_bloginfo( $show = '' ) { return 'Site Checkup Pro Test'; } }
+if ( ! function_exists( 'get_bloginfo' ) ) { function get_bloginfo( $show = '' ) { return 'GeniousSonu Site Checkup Test'; } }
 if ( ! function_exists( 'get_plugins' ) ) {
 	function get_plugins() {
 		return ( isset( $GLOBALS['_mock_plugins'] ) && is_array( $GLOBALS['_mock_plugins'] ) ) ? $GLOBALS['_mock_plugins'] : array();
@@ -580,7 +580,7 @@ function run_test( $name, $callback ) {
 }
 
 echo "=======================================================\n";
-echo " Site Checkup Pro — Automated Test Suite\n";
+echo " GeniousSonu Site Checkup — Automated Test Suite\n";
 echo "=======================================================\n\n";
 
 // TEST 1: Secret Redaction on Salt Rotation
@@ -945,10 +945,12 @@ run_test( "Notice Inbox: Prevents raw script and style text leaks from third-par
 	// Output must NOT leak naked JavaScript code as text
 	$no_script_tag = ( false === strpos( $output, '<script>' ) );
 	$no_js_code_leak = ( false === strpos( $output, 'alert("run")' ) );
+	$no_style_tag = ( false === strpos( $output, '<style>' ) );
+	$no_css_leak = ( false === strpos( $output, '#she-pro-launch-notice' ) );
 	// Output should preserve the div
 	$has_notice_div = ( false !== strpos( $output, 'she-pro-launch-notice' ) );
 
-	return ( $no_script_tag && $no_js_code_leak && $has_notice_div );
+	return ( $no_script_tag && $no_js_code_leak && $no_style_tag && $no_css_leak && $has_notice_div );
 } );
 
 // TEST 20: Core Integrity Checksums wp-content Exclusion
@@ -1156,7 +1158,7 @@ run_test( "Compatibility Guard: Provides graceful degradation with manual snippe
 
 // TEST 28: Update Checker Version Comparison
 run_test( "Update Checker: Detects newer remote version and formats update payload", function () {
-	$checker = new WPSG_Update_Checker( ABSPATH . 'site-checkup-pro.php', '1.0.0' );
+	$checker = new WPSG_Update_Checker( ABSPATH . 'genioussonu-site-checkup.php', '1.0.0' );
 
 	// Simulate older version comparing with newer remote
 	$is_newer = version_compare( '1.0.0', '1.0.1', '<' );
@@ -1224,18 +1226,23 @@ run_test( "Guideline 7 Consent: Security webhooks blocked until explicit user op
 // TEST 32: WP.org Guideline 8: Dual Build Separation
 run_test( "Guideline 8 Separation: WordPress.org release build strictly excludes update-checker", function () {
 	$root = dirname( __DIR__ );
-	$wporg_file      = $root . '/build/wporg/site-checkup-pro/includes/class-update-checker.php';
-	$wporg_puc       = $root . '/build/wporg/site-checkup-pro/includes/plugin-update-checker';
-	$selfhosted_file = $root . '/build/self-hosted/site-checkup-pro/includes/class-update-checker.php';
-	$selfhosted_puc  = $root . '/build/self-hosted/site-checkup-pro/includes/plugin-update-checker';
+	$wporg_file      = $root . '/build/wporg/genioussonu-site-checkup/includes/class-update-checker.php';
+	$wporg_puc       = $root . '/build/wporg/genioussonu-site-checkup/includes/plugin-update-checker';
+	$selfhosted_file = $root . '/build/self-hosted/genioussonu-site-checkup/includes/class-update-checker.php';
+	$selfhosted_puc  = $root . '/build/self-hosted/genioussonu-site-checkup/includes/plugin-update-checker';
 
 	// If build directory doesn't exist yet in local run, run builder
 	if ( ! file_exists( $wporg_file ) && ! file_exists( $selfhosted_file ) ) {
-		exec( "bash " . escapeshellarg( $root . '/bin/build-release.sh' ) . " 1.0.2" );
+		$main_file    = $root . '/genioussonu-site-checkup.php';
+		$main_content = file_get_contents( $main_file );
+		if ( ! preg_match( '/^[ \t\/*#]*Version:\s*([0-9]+\.[0-9]+(?:\.[0-9]+)?)/mi', $main_content, $matches ) ) {
+			return false;
+		}
+		exec( 'bash ' . escapeshellarg( $root . '/bin/build-release.sh' ) . ' ' . escapeshellarg( $matches[1] ) );
 	}
 
-	$wporg_tier2       = $root . '/build/wporg/site-checkup-pro/includes/class-nginx-tier2.php';
-	$selfhosted_tier2  = $root . '/build/self-hosted/site-checkup-pro/includes/class-nginx-tier2.php';
+	$wporg_tier2       = $root . '/build/wporg/genioussonu-site-checkup/includes/class-nginx-tier2.php';
+	$selfhosted_tier2  = $root . '/build/self-hosted/genioussonu-site-checkup/includes/class-nginx-tier2.php';
 
 	$wporg_clean       = ! file_exists( $wporg_file ) && ! file_exists( $wporg_puc ) && ! file_exists( $wporg_tier2 );
 	$selfhosted_has_it = file_exists( $selfhosted_file ) && file_exists( $selfhosted_puc ) && file_exists( $selfhosted_tier2 );
@@ -1277,14 +1284,14 @@ run_test( "Type Safety: Session manager and report generator handle numeric/inte
 // TEST 34: Plugins Page Links (Settings, Docs & FAQs, Video Tutorials)
 run_test( "Plugins Screen: Action links and row meta provide Settings, Docs & FAQs, and Video Tutorials", function () {
 	$menu = WPSG_Admin_Menu::get_instance();
-	$basename = defined( 'WPSG_BASENAME' ) ? WPSG_BASENAME : 'site-checkup-pro/site-checkup-pro.php';
+	$basename = defined( 'WPSG_BASENAME' ) ? WPSG_BASENAME : 'genioussonu-site-checkup/genioussonu-site-checkup.php';
 
 	// 1. Action links: Ensure 'Settings' link is prepended
 	$actions = array( 'deactivate' => '<a href="#">Deactivate</a>' );
 	$updated_actions = $menu->add_action_links( $actions );
 	$has_settings_action = false;
 	foreach ( $updated_actions as $action ) {
-		if ( false !== strpos( $action, 'page=site-checkup-pro' ) && false !== strpos( $action, 'Settings' ) ) {
+		if ( false !== strpos( $action, 'page=genioussonu-site-checkup' ) && false !== strpos( $action, 'Settings' ) ) {
 			$has_settings_action = true;
 			break;
 		}
@@ -1299,13 +1306,13 @@ run_test( "Plugins Screen: Action links and row meta provide Settings, Docs & FA
 	$has_tutorials_meta = false;
 
 	foreach ( $updated_meta as $item ) {
-		if ( false !== strpos( $item, 'page=site-checkup-pro' ) && false !== strpos( $item, 'Settings' ) ) {
+		if ( false !== strpos( $item, 'page=genioussonu-site-checkup' ) && false !== strpos( $item, 'Settings' ) ) {
 			$has_settings_meta = true;
 		}
-		if ( false !== strpos( $item, 'site-checkup-pro/docs/' ) && ( false !== strpos( $item, 'Docs &amp; FAQs' ) || false !== strpos( $item, 'Docs & FAQs' ) ) ) {
+		if ( false !== strpos( $item, 'genioussonu-site-checkup/docs/' ) && ( false !== strpos( $item, 'Docs &amp; FAQs' ) || false !== strpos( $item, 'Docs & FAQs' ) ) ) {
 			$has_docs_meta = true;
 		}
-		if ( false !== strpos( $item, 'site-checkup-pro/tutorials/' ) && false !== strpos( $item, 'Video Tutorials' ) ) {
+		if ( false !== strpos( $item, 'genioussonu-site-checkup/tutorials/' ) && false !== strpos( $item, 'Video Tutorials' ) ) {
 			$has_tutorials_meta = true;
 		}
 	}
@@ -1317,7 +1324,7 @@ run_test( "Plugins Screen: Action links and row meta provide Settings, Docs & FA
 run_test( "Auto-Updates: Enables auto-update toggle link and updates transient data", function () {
 	$plugin = WPSG_Plugin::get_instance();
 	$menu = WPSG_Admin_Menu::get_instance();
-	$basename = defined( 'WPSG_BASENAME' ) ? WPSG_BASENAME : 'site-checkup-pro/site-checkup-pro.php';
+	$basename = defined( 'WPSG_BASENAME' ) ? WPSG_BASENAME : 'genioussonu-site-checkup/genioussonu-site-checkup.php';
 
 	// 1. Transient filter sets update-supported data in no_update when up-to-date
 	$mock_transient = new stdClass();
@@ -1325,7 +1332,7 @@ run_test( "Auto-Updates: Enables auto-update toggle link and updates transient d
 	$mock_transient->no_update = array();
 	$filtered_transient = $plugin->filter_update_plugins_transient( $mock_transient );
 
-	$has_no_update_entry = isset( $filtered_transient->no_update[ $basename ] ) && 'site-checkup-pro' === $filtered_transient->no_update[ $basename ]->slug;
+	$has_no_update_entry = isset( $filtered_transient->no_update[ $basename ] ) && 'genioussonu-site-checkup' === $filtered_transient->no_update[ $basename ]->slug;
 
 	// 2. Auto-update setting HTML generates toggle link when disabled
 	update_site_option( 'auto_update_plugins', array() );
@@ -1732,7 +1739,7 @@ run_test( 'Diagnostic Snapshot: Compiles sanitized system state and markdown exp
 	}
 
 	// 3. Markdown format verification
-	if ( false === strpos( $snapshot['markdown'], '### Site Checkup Pro — Developer Diagnostic Snapshot' ) ) return false;
+	if ( false === strpos( $snapshot['markdown'], '### GeniousSonu Site Checkup — Developer Diagnostic Snapshot' ) ) return false;
 	if ( false === strpos( $snapshot['markdown'], '#### WordPress Environment' ) ) return false;
 	if ( false === strpos( $snapshot['markdown'], '#### Server & Database' ) ) return false;
 
@@ -1793,7 +1800,7 @@ run_test( 'Cron Job Auditor: Detects overdue stalled cron events and duplicate h
 	if ( 'WordPress Core' !== $core_source['name'] ) return false;
 
 	$wpsg_source = WPSG_Cron_Auditor::resolve_hook_source( 'wpsg_weekly_integrity' );
-	if ( 'Site Checkup Pro' !== $wpsg_source['name'] ) return false;
+	if ( 'GeniousSonu Site Checkup' !== $wpsg_source['name'] ) return false;
 
 	return true;
 } );

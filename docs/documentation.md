@@ -1,10 +1,10 @@
-# Site Checkup Pro Documentation
+# GeniousSonu Site Checkup Documentation
 
-Welcome to the official documentation for **Site Checkup Pro**, the agency standard operating procedure (SOP) security hardening orchestrator for WordPress.
+Welcome to the official documentation for **GeniousSonu Site Checkup**, the agency standard operating procedure (SOP) security hardening orchestrator for WordPress.
 
 ## Overview
 
-Site Checkup Pro bridges the gap between high-level security checklists and technical execution. It structures WordPress security audits into four clear levels:
+GeniousSonu Site Checkup bridges the gap between high-level security checklists and technical execution. It structures WordPress security audits into four clear levels:
 - **Level A (Safe Automation):** One-click tasks that apply proven hardening measures directly to server configuration (`.htaccess`, `wp-config.php`, HTTP response headers) without risking site breakage.
 - **Level B (Guided Bridges):** Checklists and direct deep links to configure established security plugins (Wordfence, WPS Hide Login, Two-Factor Authentication).
 - **Level C (Manual Audits & Reminders):** Recurring 15-day and 90-day task tracking for credentials, vault backups, and Search Console audits.

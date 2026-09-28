@@ -6,7 +6,7 @@
  * and manages Content-Security-Policy Report-Only headers and violation captures.
  *
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -91,7 +91,7 @@ class WPSG_Fingerprint_Guard {
 		}
 
 		$csp_mode = get_option( 'wpsg_csp_mode', 'report_only' );
-		$report_url = rest_url( 'site-checkup-pro/v1/csp-report' );
+		$report_url = rest_url( 'genioussonu-site-checkup/v1/csp-report' );
 
 		$policy = "default-src 'self'; " .
 			"script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; " .

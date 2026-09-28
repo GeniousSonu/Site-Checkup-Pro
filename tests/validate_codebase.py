@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Comprehensive Codebase & Logic Validator for Site Checkup Pro.
+Comprehensive Codebase & Logic Validator for GeniousSonu Site Checkup.
 
 Performs static analysis across all project PHP and JS files:
 1. Syntax integrity (brackets, quotes, PHP open tags, balanced blocks)
@@ -195,7 +195,7 @@ def verify_single_use_token():
 
 def main():
     print("=======================================================")
-    print(" Site Checkup Pro — Static & Algorithmic Validation")
+    print(" GeniousSonu Site Checkup — Static & Algorithmic Validation")
     print("=======================================================\n")
 
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))

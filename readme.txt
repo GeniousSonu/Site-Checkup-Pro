@@ -1,8 +1,8 @@
-=== Site Checkup Pro ===
+=== GeniousSonu Site Checkup ===
 Contributors: genioussonu
 Author: SK Sahinur Islam
 Author URI: https://www.genioussonu.me/
-Plugin URI: https://www.genioussonu.me/plugin/site-checkup-pro/
+Plugin URI: https://www.genioussonu.me/plugin/genioussonu-site-checkup/
 Tags: security, hardening, security audit, login security, firewall
 Requires at least: 5.8
 Tested up to: 7.1
@@ -15,9 +15,9 @@ Security audit, site hardening checklist, and vulnerability scanner for WordPres
 
 == Description ==
 
-**Site Checkup Pro** delivers professional **WordPress security** auditing and **site hardening** through an actionable, SOP-driven dashboard. Whether you need an instant **security checkup**, automated **hardening** for sensitive files and server headers, or a comprehensive **security audit** checklist across client installations, Site Checkup Pro organizes and executes your entire security workflow.
+**GeniousSonu Site Checkup** delivers professional **WordPress security** auditing and **site hardening** through an actionable, SOP-driven dashboard. Whether you need an instant **security checkup**, automated **hardening** for sensitive files and server headers, or a comprehensive **security audit** checklist across client installations, GeniousSonu Site Checkup organizes and executes your entire security workflow.
 
-Rather than competing with or replacing mature firewalls and backup tools, Site Checkup Pro audits your environment, detects vulnerabilities, and applies verified, reversible **hardening** fixes with zero bloat. Automate safe security tasks, guide complex configurations with seamless plugin bridges, track routine credential rotations, and generate print-ready executive client audit reports:
+Rather than competing with or replacing mature firewalls and backup tools, GeniousSonu Site Checkup audits your environment, detects vulnerabilities, and applies verified, reversible **hardening** fixes with zero bloat. Automate safe security tasks, guide complex configurations with seamless plugin bridges, track routine credential rotations, and generate print-ready executive client audit reports:
 
 * **Level A (Safe Automation & Scanners):** Disable XML-RPC, restrict unauthenticated REST user enumeration, hide PHP versions, enforce clickjacking protection (X-Frame-Options), MIME sniffing protection, HSTS, disable front-end `WP_DEBUG_DISPLAY`, audit file permissions (strict 640 baseline on `wp-config.php`), detect risky PHP `disable_functions` / `open_basedir`, check default `wp_` database prefix, external fingerprint scanner, and probe TLS protocols (`TLSv1.0` through `TLSv1.3`) and certificate chain depth.
 * **Level B (Guided Actions & Bridges):** Seamlessly detects and bridges to mature, audited plugins (WPS Hide Login, Wordfence, Two-Factor Authentication, and Backup plugins) with recommended setting checklists. Generates RFC 9116 `/.well-known/security.txt` responsible disclosure contact files.
@@ -37,7 +37,7 @@ Rather than competing with or replacing mature firewalls and backup tools, Site 
 
 == Third Party Services ==
 
-Site Checkup Pro connects to the following external third-party services to deliver security auditing and alerting functionality:
+GeniousSonu Site Checkup connects to the following external third-party services to deliver security auditing and alerting functionality:
 
 1. **WordPress.org APIs (`https://api.wordpress.org`)**
    - **Service & Purpose:** Used for core checksum validation (`/core/checksums/1.0/`) and verifying plugin directory status (`/plugins/info/1.0/`).
@@ -49,7 +49,7 @@ Site Checkup Pro connects to the following external third-party services to deli
    - **Explicit Consent Required:** Outbound queries to Patchstack require an explicit opt-in checkbox to be enabled in Plugin Settings per WordPress.org Guideline 7. If disabled, local plugin assessments are performed with zero outbound network calls.
    - **Data Sent:** Plugin and theme software slugs and version numbers. If configured by an administrator, an optional API authentication key is transmitted over HTTPS. No site visitor data, user credentials, or database contents are sent.
    - **Privacy Policy:** [Patchstack Privacy Policy](https://patchstack.com/privacy-policy/)
-   - **Terms of Service:** [Patchstack Terms of Service](https://patchstack.com/terms-of-service/)
+   - **Terms of Service:** [Patchstack Terms of Service](https://patchstack.com/terms-and-conditions/)
 
 3. **User-Configured Alert Webhooks (Optional)**
    - **Service & Purpose:** When configured by an administrator, outbound security event notifications (e.g., brute-force lockouts, rogue admin detections) are dispatched to the customer's chosen webhook endpoint (e.g., Slack, Discord, or agency automation endpoint).
@@ -88,19 +88,19 @@ Site Checkup Pro connects to the following external third-party services to deli
    - **Explicit Consent Required:** Disabled by default. Outbound requests require enabling the WPScan toggle and providing an API key in Settings per WordPress.org Guideline 7.
    - **Data Sent:** Plugin and theme slugs and version numbers, along with the encrypted API token in request headers. No site content, visitor data, or user credentials are transmitted.
    - **Data Handling Notice:** In strict compliance with WPScan Terms of Service and data licensing, vulnerability intelligence data retrieved from WPScan is never permanently stored or cached on disk.
-   - **Privacy Policy:** [WPScan Privacy Policy](https://wpscan.com/privacy)
-   - **Terms of Service:** [WPScan Terms of Service](https://wpscan.com/terms)
+   - **Privacy Policy:** [Automattic Privacy Policy](https://automattic.com/privacy/)
+   - **Terms of Service:** [WPScan Terms of Service](https://wpscan.com/terms/)
 
 == Source Code & Development ==
 
-The full, unminified source code for Site Checkup Pro is developed publicly on GitHub:
-https://github.com/GeniousSonu/site-checkup-pro
+The full, unminified source code for GeniousSonu Site Checkup is developed publicly on GitHub:
+https://github.com/GeniousSonu/Site-Checkup-Pro
 
 All JavaScript and CSS distributed in this plugin are 100% human-readable, unminified, locally bundled, and licensed under the GNU General Public License v2 or later per WordPress.org Guidelines 2 and 4.
 
 == Installation ==
 
-1. Upload the `site-checkup-pro` folder to your `/wp-content/plugins/` directory, or upload the `.zip` archive via **Plugins &rarr; Add New &rarr; Upload Plugin**.
+1. Upload the `genioussonu-site-checkup` folder to your `/wp-content/plugins/` directory, or upload the `.zip` archive via **Plugins &rarr; Add New &rarr; Upload Plugin**.
 2. Activate the plugin through the **Plugins** menu in WordPress.
 3. Navigate to the new **Site Checkup** top-level menu in your admin dashboard.
 4. Review your initial SOP Coverage score and click **Run All Safe Tasks** to begin.
@@ -108,14 +108,14 @@ All JavaScript and CSS distributed in this plugin are 100% human-readable, unmin
 == Frequently Asked Questions ==
 
 = What happens if my server runs Nginx instead of Apache? =
-Site Checkup Pro detects Nginx server software (`$_SERVER['SERVER_SOFTWARE']`). Tasks that rely on `.htaccess` are marked as "Not Applicable on this Server" and feature a "View Nginx Snippet" button with 1-click copy for your server configuration.
+GeniousSonu Site Checkup detects Nginx server software (`$_SERVER['SERVER_SOFTWARE']`). Tasks that rely on `.htaccess` are marked as "Not Applicable on this Server" and feature a "View Nginx Snippet" button with 1-click copy for your server configuration.
 
 = What if I get locked out using the custom login URL? =
 Emergency recovery strictly requires filesystem access. Open `wp-config.php` via FTP, SSH, or your hosting control panel and add:
 `define( 'WPSG_DISABLE_LOGIN_RENAME', true );`
 This immediately deactivates the login renamer and restores access to the default `/wp-login.php`.
 
-= Does Site Checkup Pro store my database password or salts in the audit log? =
+= Does GeniousSonu Site Checkup store my database password or salts in the audit log? =
 No. Our audit logging system features an automated secret scrubber. Edits to `wp-config.php` only log constant names and boolean flags (e.g. `{"DISALLOW_FILE_EDIT": true}`). Salt rotations only log `{"salts_rotated": true}` with zero key material.
 
 = Does this plugin work on WordPress Multisite? =
@@ -182,7 +182,7 @@ Version 1.0 is optimized for single-site agency workflows. On Multisite installa
 
 == Credits ==
 
-Site Checkup Pro is built and maintained by **[SK Sahinur Islam](https://www.genioussonu.me/)**.
+GeniousSonu Site Checkup is built and maintained by **[SK Sahinur Islam](https://www.genioussonu.me/)**.
 * Author Website: [https://www.genioussonu.me/](https://www.genioussonu.me/)
 * GitHub: [https://github.com/GeniousSonu/](https://github.com/GeniousSonu/)
 * WordPress.org Profile: [https://profiles.wordpress.org/genioussonu/](https://profiles.wordpress.org/genioussonu/)

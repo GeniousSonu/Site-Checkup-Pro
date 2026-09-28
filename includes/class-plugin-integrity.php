@@ -6,7 +6,7 @@
  * Safely backs up plugin directory to ZIP before deactivating and deleting.
  *
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -85,7 +85,7 @@ class WPSG_Plugin_Integrity {
 				'plugins'  => $found,
 				'message'  => sprintf(
 					/* translators: 1: count of plugins, 2: list of names */
-					__( 'Found %1$d unwanted migration/management plugin(s) installed: %2$s. It is recommended to remove these after use.', 'site-checkup-pro' ),
+					__( 'Found %1$d unwanted migration/management plugin(s) installed: %2$s. It is recommended to remove these after use.', 'genioussonu-site-checkup' ),
 					count( $found ),
 					implode( ', ', $names )
 				),
@@ -95,7 +95,7 @@ class WPSG_Plugin_Integrity {
 		return array(
 			'status'  => 'done',
 			'plugins' => array(),
-			'message' => __( 'No leftover or risky development plugins detected from the denylist.', 'site-checkup-pro' ),
+			'message' => __( 'No leftover or risky development plugins detected from the denylist.', 'genioussonu-site-checkup' ),
 		);
 	}
 
@@ -214,7 +214,7 @@ class WPSG_Plugin_Integrity {
 		if ( ! $real_plugin_parent || ! $real_wp_plugins || 0 !== strpos( $real_plugin_parent, $real_wp_plugins ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Security error: Invalid plugin file path.', 'site-checkup-pro' ),
+				'message' => __( 'Security error: Invalid plugin file path.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -223,7 +223,7 @@ class WPSG_Plugin_Integrity {
 		if ( ! $zip_path ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Could not create a safety zip backup of the plugin directory. Deletion aborted.', 'site-checkup-pro' ),
+				'message' => __( 'Could not create a safety zip backup of the plugin directory. Deletion aborted.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -254,7 +254,7 @@ class WPSG_Plugin_Integrity {
 			'success'  => true,
 			'message'  => sprintf(
 				/* translators: %s: slug */
-				__( 'Plugin %s was backed up to zip and safely deleted.', 'site-checkup-pro' ),
+				__( 'Plugin %s was backed up to zip and safely deleted.', 'genioussonu-site-checkup' ),
 				$slug
 			),
 			'zip_path' => $zip_path,
@@ -273,14 +273,14 @@ class WPSG_Plugin_Integrity {
 		if ( empty( $data ) || empty( $data['zip_path'] ) || ! file_exists( $data['zip_path'] ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'No valid zip backup found to restore this plugin.', 'site-checkup-pro' ),
+				'message' => __( 'No valid zip backup found to restore this plugin.', 'genioussonu-site-checkup' ),
 			);
 		}
 
 		if ( ! class_exists( 'ZipArchive' ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'ZipArchive extension is required for restoration.', 'site-checkup-pro' ),
+				'message' => __( 'ZipArchive extension is required for restoration.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -291,7 +291,7 @@ class WPSG_Plugin_Integrity {
 		if ( ! $real_wp_plugins ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Cannot resolve plugins directory.', 'site-checkup-pro' ),
+				'message' => __( 'Cannot resolve plugins directory.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -304,7 +304,7 @@ class WPSG_Plugin_Integrity {
 					$zip->close();
 					return array(
 						'success' => false,
-						'message' => __( 'Security error: Malicious path traversal entries detected in zip archive.', 'site-checkup-pro' ),
+						'message' => __( 'Security error: Malicious path traversal entries detected in zip archive.', 'genioussonu-site-checkup' ),
 					);
 				}
 			}
@@ -322,7 +322,7 @@ class WPSG_Plugin_Integrity {
 				'success' => true,
 				'message' => sprintf(
 					/* translators: %s: slug */
-					__( 'Plugin %s has been restored from zip backup.', 'site-checkup-pro' ),
+					__( 'Plugin %s has been restored from zip backup.', 'genioussonu-site-checkup' ),
 					$slug
 				),
 			);
@@ -330,7 +330,7 @@ class WPSG_Plugin_Integrity {
 
 		return array(
 			'success' => false,
-			'message' => __( 'Failed to extract plugin zip archive.', 'site-checkup-pro' ),
+			'message' => __( 'Failed to extract plugin zip archive.', 'genioussonu-site-checkup' ),
 		);
 	}
 
@@ -363,7 +363,7 @@ class WPSG_Plugin_Integrity {
 		if ( empty( $recent_slug ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'No recent plugin deletion archive found to restore.', 'site-checkup-pro' ),
+				'message' => __( 'No recent plugin deletion archive found to restore.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -405,7 +405,7 @@ class WPSG_Plugin_Integrity {
 		if ( ! function_exists( 'plugins_api' ) ) {
 			return array(
 				'status'  => 'pending',
-				'message' => __( 'WordPress Plugin Information API is unavailable in this environment.', 'site-checkup-pro' ),
+				'message' => __( 'WordPress Plugin Information API is unavailable in this environment.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -415,7 +415,7 @@ class WPSG_Plugin_Integrity {
 
 		foreach ( $all_plugins as $plugin_file => $data ) {
 			$slug = dirname( $plugin_file );
-			if ( '.' === $slug || empty( $slug ) || 'site-checkup-pro' === $slug ) {
+			if ( '.' === $slug || empty( $slug ) || 'genioussonu-site-checkup' === $slug ) {
 				continue;
 			}
 
@@ -434,7 +434,7 @@ class WPSG_Plugin_Integrity {
 							'slug'    => $slug,
 							'name'    => $data['Name'],
 							'version' => $data['Version'],
-							'reason'  => __( 'Removed or closed on WordPress.org', 'site-checkup-pro' ),
+							'reason'  => __( 'Removed or closed on WordPress.org', 'genioussonu-site-checkup' ),
 						);
 					}
 				}
@@ -451,12 +451,12 @@ class WPSG_Plugin_Integrity {
 			'message'      => empty( $closed )
 				? sprintf(
 					/* translators: %d: count */
-					__( 'All %d installed public plugins are active and verified on WordPress.org.', 'site-checkup-pro' ),
+					__( 'All %d installed public plugins are active and verified on WordPress.org.', 'genioussonu-site-checkup' ),
 					$total
 				)
 				: sprintf(
 					/* translators: %d: count */
-					__( 'Warning: %d plugin(s) appear to be removed or closed on WordPress.org.', 'site-checkup-pro' ),
+					__( 'Warning: %d plugin(s) appear to be removed or closed on WordPress.org.', 'genioussonu-site-checkup' ),
 					count( $closed )
 				),
 		);

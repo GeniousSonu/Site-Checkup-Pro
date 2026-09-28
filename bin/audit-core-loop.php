@@ -1,6 +1,6 @@
 <?php
 /**
- * Site Checkup Pro — Pre-Launch Core Loop Audit Script
+ * GeniousSonu Site Checkup — Pre-Launch Core Loop Audit Script
  *
  * Runs inside WordPress execution environment via WP-CLI eval-file.
  * Systematically tests every SOP section and every task:
@@ -12,7 +12,7 @@
  * 6. Audit log recording verification
  * 7. Level B guide/modal confirmation & Level C note/reminder persistence
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -25,7 +25,7 @@ global $wpdb;
 wp_set_current_user( 1 );
 
 echo "\n=======================================================\n";
-echo " Site Checkup Pro — Core Loop Pre-Launch Audit\n";
+echo " GeniousSonu Site Checkup — Core Loop Pre-Launch Audit\n";
 echo " Site URL: " . get_site_url() . "\n";
 echo " WP Version: " . get_bloginfo( 'version' ) . "\n";
 echo " PHP Version: " . PHP_VERSION . "\n";

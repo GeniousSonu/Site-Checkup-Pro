@@ -5,7 +5,7 @@
  * Enforces a 24-48 hour recency check before executing high-risk or file-modifying tasks.
  *
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -72,7 +72,7 @@ class WPSG_Backup_Guard {
 				'last_backup_time'  => null,
 				'is_recent'         => false,
 				'trigger_url'       => admin_url( 'options-general.php?page=updraftplus' ),
-				'message'           => __( 'UpdraftPlus is active, but no completed backups were found.', 'site-checkup-pro' ),
+				'message'           => __( 'UpdraftPlus is active, but no completed backups were found.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -107,7 +107,7 @@ class WPSG_Backup_Guard {
 				'last_backup_time'  => null,
 				'is_recent'         => false,
 				'trigger_url'       => admin_url( 'admin.php?page=WPvivid' ),
-				'message'           => __( 'WPvivid is active, but no completed backups were found.', 'site-checkup-pro' ),
+				'message'           => __( 'WPvivid is active, but no completed backups were found.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -119,7 +119,7 @@ class WPSG_Backup_Guard {
 				'last_backup_time'  => null,
 				'is_recent'         => false,
 				'trigger_url'       => admin_url( 'admin.php?page=backwpupjobs' ),
-				'message'           => __( 'BackWPup is active. Please verify a recent backup has run.', 'site-checkup-pro' ),
+				'message'           => __( 'BackWPup is active. Please verify a recent backup has run.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -130,7 +130,7 @@ class WPSG_Backup_Guard {
 			if ( $age_hours <= $max_age_hours ) {
 				return array(
 					'has_backup_plugin' => false,
-					'plugin_name'       => __( 'Manual Host/cPanel Backup', 'site-checkup-pro' ),
+					'plugin_name'       => __( 'Manual Host/cPanel Backup', 'genioussonu-site-checkup' ),
 					'last_backup_time'  => $manual_ts,
 					'last_backup_date'  => gmdate( 'Y-m-d H:i:s', $manual_ts ),
 					'age_hours'         => $age_hours,
@@ -147,7 +147,7 @@ class WPSG_Backup_Guard {
 			'last_backup_time'  => null,
 			'is_recent'         => false,
 			'trigger_url'       => admin_url( 'plugin-install.php?s=updraftplus&tab=search&type=term' ),
-			'message'           => __( 'No active backup plugin or recent host backup detected within the last 48 hours.', 'site-checkup-pro' ),
+			'message'           => __( 'No active backup plugin or recent host backup detected within the last 48 hours.', 'genioussonu-site-checkup' ),
 		);
 	}
 

@@ -4,7 +4,7 @@ import fs from 'fs';
 async function main() {
     const outputPath = process.argv[2] || '/tmp/dashboard_current.png';
     const tabToClick = process.argv[3] || null;
-    const targetPage = process.argv[4] || 'site-checkup-pro';
+    const targetPage = process.argv[4] || 'genioussonu-site-checkup';
     const width = parseInt(process.argv[5] || '1280', 10);
     const height = parseInt(process.argv[6] || '900', 10);
 
@@ -87,7 +87,7 @@ async function main() {
         });
         await new Promise(r => setTimeout(r, 1500));
 
-        // Navigate to Site Checkup Pro page
+        // Navigate to GeniousSonu Site Checkup page
         await send('Page.navigate', { url: `http://test111.local/wp-admin/admin.php?page=${targetPage}` });
         await new Promise(r => setTimeout(r, 2000));
 

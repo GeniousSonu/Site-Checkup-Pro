@@ -6,7 +6,7 @@
  * while preserving list_users capability for authenticated administrators.
  *
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -85,12 +85,12 @@ class WPSG_Enumeration_Guard {
 
 		$warnings = array();
 		if ( ! empty( $theme_has_author_template ) ) {
-			$warnings[] = __( 'Active theme contains an author.php template (designed for public author profiles).', 'site-checkup-pro' );
+			$warnings[] = __( 'Active theme contains an author.php template (designed for public author profiles).', 'genioussonu-site-checkup' );
 		}
 		if ( $author_count > 1 ) {
 			$warnings[] = sprintf(
 				/* translators: %d: author count */
-				__( 'Multiple authors detected (%d registered authors). Multi-author blogs usually expect public author archive pages.', 'site-checkup-pro' ),
+				__( 'Multiple authors detected (%d registered authors). Multi-author blogs usually expect public author archive pages.', 'genioussonu-site-checkup' ),
 				$author_count
 			);
 		}
@@ -100,7 +100,7 @@ class WPSG_Enumeration_Guard {
 			'warnings'      => $warnings,
 			'message'       => ! empty( $warnings )
 				? implode( ' ', $warnings )
-				: __( 'Single-author / business site detected. Safe to block author enumeration.', 'site-checkup-pro' ),
+				: __( 'Single-author / business site detected. Safe to block author enumeration.', 'genioussonu-site-checkup' ),
 		);
 	}
 

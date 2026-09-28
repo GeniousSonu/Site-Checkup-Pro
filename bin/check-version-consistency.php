@@ -1,10 +1,10 @@
 <?php
 /**
- * Version Consistency Guard for Site Checkup Pro
+ * Version Consistency Guard for GeniousSonu Site Checkup
  *
  * Verifies that the version string is identical across:
- * 1. Plugin Header in site-checkup-pro.php ('Version: X.Y.Z')
- * 2. PHP Constant in site-checkup-pro.php ('define( "WPSG_VERSION", "X.Y.Z" )')
+ * 1. Plugin Header in genioussonu-site-checkup.php ('Version: X.Y.Z')
+ * 2. PHP Constant in genioussonu-site-checkup.php ('define( "WPSG_VERSION", "X.Y.Z" )')
  * 3. WordPress.org readme.txt ('Stable tag: X.Y.Z')
  * 4. Git Tag (if running in CI or passed via --tag=vX.Y.Z)
  *
@@ -12,12 +12,12 @@
  *   php bin/check-version-consistency.php
  *   php bin/check-version-consistency.php --tag=v1.0.0
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  */
 
 $root_dir = dirname( __DIR__ );
-$main_file = $root_dir . '/site-checkup-pro.php';
+$main_file = $root_dir . '/genioussonu-site-checkup.php';
 $readme_file = $root_dir . '/readme.txt';
 
 if ( ! file_exists( $main_file ) ) {
@@ -82,12 +82,12 @@ if ( ! empty( $expected_tag ) ) {
 }
 
 echo "=======================================================\n";
-echo " Site Checkup Pro — Version Consistency Guard\n";
+echo " GeniousSonu Site Checkup — Version Consistency Guard\n";
 echo "=======================================================\n\n";
 
 $versions = array(
-	'site-checkup-pro.php Header'   => $header_version,
-	'site-checkup-pro.php Constant' => $constant_version,
+	'genioussonu-site-checkup.php Header'   => $header_version,
+	'genioussonu-site-checkup.php Constant' => $constant_version,
 	'readme.txt Stable tag'         => $readme_version,
 	'update-info.json Version'      => $json_version,
 );

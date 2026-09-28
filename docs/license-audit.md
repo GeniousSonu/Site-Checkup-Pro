@@ -1,6 +1,6 @@
-# Site Checkup Pro — Comprehensive License & Asset Audit
+# GeniousSonu Site Checkup — Comprehensive License & Asset Audit
 
-This document fulfills **WordPress.org Plugin Guideline 2** ("Your plugin must be compatible with the GNU General Public License") and records the license audit for every file, asset, and script distributed in Site Checkup Pro.
+This document fulfills **WordPress.org Plugin Guideline 2** ("Your plugin must be compatible with the GNU General Public License") and records the license audit for every file, asset, and script distributed in GeniousSonu Site Checkup.
 
 ---
 
@@ -8,7 +8,7 @@ This document fulfills **WordPress.org Plugin Guideline 2** ("Your plugin must b
 
 | File / Component | License | Author / Copyright | GPLv2+ Compatible | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `site-checkup-pro.php` | GPLv2 or later | SK Sahinur Islam | **YES** | Main plugin bootstrap header |
+| `genioussonu-site-checkup.php` | GPLv2 or later | SK Sahinur Islam | **YES** | Main plugin bootstrap header |
 | `includes/*.php` | GPLv2 or later | SK Sahinur Islam | **YES** | 24 core security scanner & hardening classes |
 | `includes/integrations/*.php` | GPLv2 or later | SK Sahinur Islam | **YES** | Non-invasive plugin bridges (2FA, Wordfence, Backups) |
 | `admin/*.php`, `admin/views/*.php` | GPLv2 or later | SK Sahinur Islam | **YES** | Dashboard, modal templates, report screens |

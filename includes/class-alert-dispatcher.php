@@ -5,7 +5,7 @@
  * Dispatches notifications for security events via wp_mail and SSRF-hardened webhooks.
  *
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -51,7 +51,7 @@ class WPSG_Alert_Dispatcher {
 		// 1. Email notification via wp_mail
 		$subject = sprintf( '[%1$s Security Alert] %2$s', $site_name, sanitize_text_field( $event_type ) );
 		$body    = sprintf(
-			"Site Checkup Pro Security Alert\n" .
+			"GeniousSonu Site Checkup Security Alert\n" .
 			"Website: %s (%s)\n" .
 			"Time: %s\n" .
 			"Event: %s\n\n" .

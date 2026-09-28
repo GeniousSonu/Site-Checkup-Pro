@@ -5,7 +5,7 @@
  * Displays recorded Content-Security-Policy Report-Only violation events.
  *
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -21,30 +21,30 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="wpsg-modal-header">
 			<h3 class="wpsg-modal-title" id="wpsg-csp-modal-title">
 				<span class="dashicons dashicons-shield-alt" aria-hidden="true"></span>
-				<?php esc_html_e( 'Content-Security-Policy Reports (Report-Only Mode)', 'site-checkup-pro' ); ?>
+				<?php esc_html_e( 'Content-Security-Policy Reports (Report-Only Mode)', 'genioussonu-site-checkup' ); ?>
 			</h3>
-			<button type="button" class="wpsg-modal-close" data-close-modal aria-label="<?php esc_attr_e( 'Close', 'site-checkup-pro' ); ?>">&times;</button>
+			<button type="button" class="wpsg-modal-close" data-close-modal aria-label="<?php esc_attr_e( 'Close', 'genioussonu-site-checkup' ); ?>">&times;</button>
 		</div>
 
 		<div class="wpsg-modal-body">
 			<p style="margin-top: 0; color: var(--wpsg-text-secondary); font-size: 13px;">
-				<?php esc_html_e( 'The policy is currently running in Report-Only mode. No resources are blocked. Violations triggered by scripts, styles, or plugins are captured below for review before enforcement.', 'site-checkup-pro' ); ?>
+				<?php esc_html_e( 'The policy is currently running in Report-Only mode. No resources are blocked. Violations triggered by scripts, styles, or plugins are captured below for review before enforcement.', 'genioussonu-site-checkup' ); ?>
 			</p>
 
 			<div class="wpsg-table-container" style="max-height: 350px; overflow-y: auto;">
 				<table class="wpsg-table" id="wpsg-csp-table">
 					<thead>
 						<tr>
-							<th style="width: 140px;"><?php esc_html_e( 'Time', 'site-checkup-pro' ); ?></th>
-							<th><?php esc_html_e( 'Directive', 'site-checkup-pro' ); ?></th>
-							<th><?php esc_html_e( 'Blocked URI', 'site-checkup-pro' ); ?></th>
-							<th><?php esc_html_e( 'Document URI', 'site-checkup-pro' ); ?></th>
+							<th style="width: 140px;"><?php esc_html_e( 'Time', 'genioussonu-site-checkup' ); ?></th>
+							<th><?php esc_html_e( 'Directive', 'genioussonu-site-checkup' ); ?></th>
+							<th><?php esc_html_e( 'Blocked URI', 'genioussonu-site-checkup' ); ?></th>
+							<th><?php esc_html_e( 'Document URI', 'genioussonu-site-checkup' ); ?></th>
 						</tr>
 					</thead>
 					<tbody id="wpsg-csp-tbody">
 						<tr>
 							<td colspan="4" style="text-align: center; padding: 20px;">
-								<span class="wpsg-spinner"></span> <?php esc_html_e( 'Loading CSP violation records...', 'site-checkup-pro' ); ?>
+								<span class="wpsg-spinner"></span> <?php esc_html_e( 'Loading CSP violation records...', 'genioussonu-site-checkup' ); ?>
 							</td>
 						</tr>
 					</tbody>
@@ -54,7 +54,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<div class="wpsg-modal-footer">
 			<button type="button" class="wpsg-btn wpsg-btn-secondary" data-close-modal>
-				<?php esc_html_e( 'Close', 'site-checkup-pro' ); ?>
+				<?php esc_html_e( 'Close', 'genioussonu-site-checkup' ); ?>
 			</button>
 		</div>
 	</div>

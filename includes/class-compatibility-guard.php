@@ -6,7 +6,7 @@
  * to prevent hook contention or duplicate .htaccess rules, and provides graceful
  * degradation on read-only managed hosting environments.
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -55,7 +55,7 @@ class WPSG_Compatibility_Guard {
 
 	/**
 	 * Detect if an active security plugin provides an overlapping feature.
-	 * Allows Site Checkup Pro to offer deferral rather than fighting over hooks or rules.
+	 * Allows GeniousSonu Site Checkup to offer deferral rather than fighting over hooks or rules.
 	 *
 	 * @param string $feature_key Feature identifier (e.g. 'xmlrpc', 'login_protection', 'security_headers').
 	 * @return array Status indicating whether an overlapping provider was detected.
@@ -80,7 +80,7 @@ class WPSG_Compatibility_Guard {
 						'provider'    => $names,
 						'advice'      => sprintf(
 							/* translators: %s: active plugin names */
-							__( 'Active security plugin(s) (%s) may already manage XML-RPC restrictions. Deferring to external rules prevents rule conflicts.', 'site-checkup-pro' ),
+							__( 'Active security plugin(s) (%s) may already manage XML-RPC restrictions. Deferring to external rules prevents rule conflicts.', 'genioussonu-site-checkup' ),
 							$names
 						),
 					);
@@ -95,7 +95,7 @@ class WPSG_Compatibility_Guard {
 						'provider'    => $names,
 						'advice'      => sprintf(
 							/* translators: %s: active plugin names */
-							__( 'Active security plugin(s) (%s) already enforce login rate limiting. Site Checkup Pro rate limits will operate as a secondary defense layer.', 'site-checkup-pro' ),
+							__( 'Active security plugin(s) (%s) already enforce login rate limiting. GeniousSonu Site Checkup rate limits will operate as a secondary defense layer.', 'genioussonu-site-checkup' ),
 							$names
 						),
 					);
@@ -110,7 +110,7 @@ class WPSG_Compatibility_Guard {
 						'provider'    => $names,
 						'advice'      => sprintf(
 							/* translators: %s: active plugin names */
-							__( 'Active plugin(s) (%s) may already write security headers. Verify headers via browser devtools to avoid duplicate HTTP headers.', 'site-checkup-pro' ),
+							__( 'Active plugin(s) (%s) may already write security headers. Verify headers via browser devtools to avoid duplicate HTTP headers.', 'genioussonu-site-checkup' ),
 							$names
 						),
 					);
@@ -155,7 +155,7 @@ class WPSG_Compatibility_Guard {
 			'file'                  => $filename,
 			'message'               => sprintf(
 				/* translators: %s: file name */
-				__( 'Managed Hosting Notice: %s is read-only in this hosting environment. Automatic file modification is disabled to protect server stability. Please provide this configuration snippet to your hosting support or add it via your control panel.', 'site-checkup-pro' ),
+				__( 'Managed Hosting Notice: %s is read-only in this hosting environment. Automatic file modification is disabled to protect server stability. Please provide this configuration snippet to your hosting support or add it via your control panel.', 'genioussonu-site-checkup' ),
 				$filename
 			),
 		);

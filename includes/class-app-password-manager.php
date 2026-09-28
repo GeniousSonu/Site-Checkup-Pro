@@ -6,7 +6,7 @@
  * and gates revocations behind manage_options and session-bound re-authentication.
  *
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -50,8 +50,8 @@ class WPSG_App_Password_Manager {
 						'user_login'   => $u->user_login,
 						'display_name' => $u->display_name,
 						'created'      => ! empty( $p['created'] ) ? gmdate( 'Y-m-d H:i:s', $p['created'] ) : '',
-						'last_used'    => ! empty( $p['last_used'] ) ? gmdate( 'Y-m-d H:i:s', $p['last_used'] ) : __( 'Never', 'site-checkup-pro' ),
-						'last_ip'      => ! empty( $p['last_ip'] ) ? $p['last_ip'] : __( 'N/A', 'site-checkup-pro' ),
+						'last_used'    => ! empty( $p['last_used'] ) ? gmdate( 'Y-m-d H:i:s', $p['last_used'] ) : __( 'Never', 'genioussonu-site-checkup' ),
+						'last_ip'      => ! empty( $p['last_ip'] ) ? $p['last_ip'] : __( 'N/A', 'genioussonu-site-checkup' ),
 					);
 				}
 			}
@@ -72,7 +72,7 @@ class WPSG_App_Password_Manager {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Permission denied. Administrator capabilities required.', 'site-checkup-pro' ),
+				'message' => __( 'Permission denied. Administrator capabilities required.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -82,7 +82,7 @@ class WPSG_App_Password_Manager {
 				return array(
 					'success'         => false,
 					'reauth_required' => true,
-					'message'         => __( 'Re-authentication required: please confirm your password to revoke credentials.', 'site-checkup-pro' ),
+					'message'         => __( 'Re-authentication required: please confirm your password to revoke credentials.', 'genioussonu-site-checkup' ),
 				);
 			}
 		}
@@ -90,7 +90,7 @@ class WPSG_App_Password_Manager {
 		if ( ! class_exists( 'WP_Application_Passwords' ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Application Passwords not supported on this WordPress installation.', 'site-checkup-pro' ),
+				'message' => __( 'Application Passwords not supported on this WordPress installation.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -105,19 +105,19 @@ class WPSG_App_Password_Manager {
 					array( 'target_user_id' => $user_id, 'uuid' => $uuid ),
 					'success',
 					/* translators: %s: application password UUID */
-					sprintf( __( 'Application password %s revoked.', 'site-checkup-pro' ), $uuid )
+					sprintf( __( 'Application password %s revoked.', 'genioussonu-site-checkup' ), $uuid )
 				);
 			}
 
 			return array(
 				'success' => true,
-				'message' => __( 'Application password revoked successfully.', 'site-checkup-pro' ),
+				'message' => __( 'Application password revoked successfully.', 'genioussonu-site-checkup' ),
 			);
 		}
 
 		return array(
 			'success' => false,
-			'message' => __( 'Could not revoke specified application password.', 'site-checkup-pro' ),
+			'message' => __( 'Could not revoke specified application password.', 'genioussonu-site-checkup' ),
 		);
 	}
 }

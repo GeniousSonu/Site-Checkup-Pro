@@ -1,11 +1,11 @@
 <?php
 /**
- * Translation Template (POT) Generator for Site Checkup Pro
+ * Translation Template (POT) Generator for GeniousSonu Site Checkup
  *
  * Scans all plugin PHP files for __(), _e(), esc_html__(), esc_attr__(), esc_html_e(),
- * and esc_attr_e() using text domain 'site-checkup-pro' and compiles languages/site-checkup-pro.pot.
+ * and esc_attr_e() using text domain 'genioussonu-site-checkup' and compiles languages/genioussonu-site-checkup.pot.
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -18,7 +18,7 @@ if ( php_sapi_name() !== 'cli' ) {
 
 $root_dir   = dirname( __DIR__ );
 $lang_dir   = $root_dir . '/languages';
-$output_pot = $lang_dir . '/site-checkup-pro.pot';
+$output_pot = $lang_dir . '/genioussonu-site-checkup.pot';
 
 if ( ! is_dir( $lang_dir ) ) {
 	mkdir( $lang_dir, 0755, true );
@@ -43,7 +43,7 @@ foreach ( $iterator as $file ) {
 
 $entries = array(); // msgid => array of references [file:line]
 
-$pattern = '/(?:__|_e|esc_html__|esc_attr__|esc_html_e|esc_attr_e)\s*\(\s*([\'"])(.*?)\1\s*,\s*[\'"]site-checkup-pro[\'"]\s*\)/s';
+$pattern = '/(?:__|_e|esc_html__|esc_attr__|esc_html_e|esc_attr_e)\s*\(\s*([\'"])(.*?)\1\s*,\s*[\'"]genioussonu-site-checkup[\'"]\s*\)/s';
 
 foreach ( $files_to_scan as $file_path ) {
 	$content = file_get_contents( $file_path );
@@ -75,8 +75,8 @@ $pot  = <<<POT
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Site Checkup Pro 1.0.0\\n"
-"Report-Msgid-Bugs-To: https://github.com/GeniousSonu/site-checkup-pro/issues\\n"
+"Project-Id-Version: GeniousSonu Site Checkup 1.0.0\\n"
+"Report-Msgid-Bugs-To: https://github.com/GeniousSonu/Site-Checkup-Pro/issues\\n"
 "POT-Creation-Date: {$date}\\n"
 "MIME-Version: 1.0\\n"
 "Content-Type: text/plain; charset=UTF-8\\n"
@@ -84,8 +84,8 @@ msgstr ""
 "PO-Revision-Date: 2026-YEAR-MO-DA HO:MI+ZONE\\n"
 "Last-Translator: SK Sahinur Islam <https://www.genioussonu.me/>\\n"
 "Language-Team: English <support@genioussonu.me>\\n"
-"X-Generator: Site Checkup Pro POT Generator\\n"
-"X-Domain: site-checkup-pro\\n"
+"X-Generator: GeniousSonu Site Checkup POT Generator\\n"
+"X-Domain: genioussonu-site-checkup\\n"
 
 POT;
 

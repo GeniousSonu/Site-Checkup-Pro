@@ -5,7 +5,7 @@
  * Provides manual environment tagging (Production, Staging, Development) with smart domain
  * heuristics and displays a persistent color-coded safety badge in the WordPress admin bar.
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.2.0
@@ -50,8 +50,8 @@ class WPSG_Environment_Badge {
 	 */
 	public function __construct() {
 		add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_badge' ), 90 );
-		add_action( 'admin_head', array( $this, 'output_badge_styles' ) );
-		add_action( 'wp_head', array( $this, 'output_badge_styles' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_badge_styles' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_badge_styles' ) );
 	}
 
 	/**
@@ -160,16 +160,16 @@ class WPSG_Environment_Badge {
 		$confirmed = self::is_confirmed();
 
 		$labels = array(
-			'production'  => __( 'Production', 'site-checkup-pro' ),
-			'staging'     => __( 'Staging', 'site-checkup-pro' ),
-			'development' => __( 'Development', 'site-checkup-pro' ),
+			'production'  => __( 'Production', 'genioussonu-site-checkup' ),
+			'staging'     => __( 'Staging', 'genioussonu-site-checkup' ),
+			'development' => __( 'Development', 'genioussonu-site-checkup' ),
 		);
 
 		$label = isset( $labels[ $env ] ) ? $labels[ $env ] : ucfirst( $env );
 		/* translators: %s: environment name */
-		$confirmed_title = sprintf( __( 'Site Environment: %s', 'site-checkup-pro' ), $label );
+		$confirmed_title = sprintf( __( 'Site Environment: %s', 'genioussonu-site-checkup' ), $label );
 		/* translators: %s: environment name */
-		$unconfirmed_title = sprintf( __( 'Suggested Environment: %s (Unconfirmed)', 'site-checkup-pro' ), $label );
+		$unconfirmed_title = sprintf( __( 'Suggested Environment: %s (Unconfirmed)', 'genioussonu-site-checkup' ), $label );
 
 		$title = sprintf(
 			'<span class="wpsg-adminbar-badge wpsg-badge-%1$s" title="%2$s"><span class="wpsg-badge-dot"></span>%3$s%4$s</span>',
@@ -182,7 +182,7 @@ class WPSG_Environment_Badge {
 		$wp_admin_bar->add_node( array(
 			'id'    => 'wpsg-env-badge',
 			'title' => $title,
-			'href'  => admin_url( 'admin.php?page=site-checkup-pro#settings' ),
+			'href'  => admin_url( 'admin.php?page=genioussonu-site-checkup#settings' ),
 			'meta'  => array(
 				'class' => 'wpsg-env-badge-item',
 			),
@@ -192,70 +192,25 @@ class WPSG_Environment_Badge {
 	/**
 	 * Output inline CSS styles for admin bar badge.
 	 */
-	public function output_badge_styles() {
+	public function enqueue_badge_styles() {
 		if ( ! is_admin_bar_showing() ) {
 			return;
 		}
-		?>
-		<style id="wpsg-env-badge-css">
-			#wpadminbar .wpsg-env-badge-item > a {
-				padding: 0 8px !important;
-				display: flex !important;
-				align-items: center !important;
-			}
-			.wpsg-adminbar-badge {
-				display: inline-flex;
-				align-items: center;
-				gap: 5px;
-				font-size: 11px;
-				font-weight: 700;
-				letter-spacing: 0.04em;
-				text-transform: uppercase;
-				padding: 2px 7px;
-				border-radius: 4px;
-				line-height: 1.4;
-			}
-			.wpsg-badge-dot {
-				width: 6px;
-				height: 6px;
-				border-radius: 50%;
-				display: inline-block;
-			}
-			/* Red for Production */
-			.wpsg-badge-production {
-				background: rgba(239, 68, 68, 0.18);
-				color: #fca5a5;
-				border: 1px solid rgba(239, 68, 68, 0.4);
-			}
-			.wpsg-badge-production .wpsg-badge-dot {
-				background: #ef4444;
-				box-shadow: 0 0 6px #ef4444;
-			}
-			/* Amber for Staging */
-			.wpsg-badge-staging {
-				background: rgba(245, 158, 11, 0.18);
-				color: #fde68a;
-				border: 1px solid rgba(245, 158, 11, 0.4);
-			}
-			.wpsg-badge-staging .wpsg-badge-dot {
-				background: #f59e0b;
-				box-shadow: 0 0 6px #f59e0b;
-			}
-			/* Gray for Development */
-			.wpsg-badge-development {
-				background: rgba(107, 114, 128, 0.22);
-				color: #e5e7eb;
-				border: 1px solid rgba(156, 163, 175, 0.35);
-			}
-			.wpsg-badge-development .wpsg-badge-dot {
-				background: #9ca3af;
-			}
-			.wpsg-unconfirmed-mark {
-				font-size: 10px;
-				opacity: 0.75;
-				margin-left: 2px;
-			}
-		</style>
-		<?php
+		$handle = 'wpsg-environment-badge-styles';
+		wp_register_style( $handle, false, array(), WPSG_VERSION );
+		wp_enqueue_style( $handle );
+		wp_add_inline_style(
+			$handle,
+			'#wpadminbar .wpsg-env-badge-item > a { padding: 0 8px !important; display: flex !important; align-items: center !important; }' .
+			'.wpsg-adminbar-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; line-height: 1.4; }' .
+			'.wpsg-badge-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }' .
+			'.wpsg-badge-production { background: rgba(239, 68, 68, 0.18); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }' .
+			'.wpsg-badge-production .wpsg-badge-dot { background: #ef4444; box-shadow: 0 0 6px #ef4444; }' .
+			'.wpsg-badge-staging { background: rgba(245, 158, 11, 0.18); color: #fde68a; border: 1px solid rgba(245, 158, 11, 0.4); }' .
+			'.wpsg-badge-staging .wpsg-badge-dot { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }' .
+			'.wpsg-badge-development { background: rgba(107, 114, 128, 0.22); color: #e5e7eb; border: 1px solid rgba(156, 163, 175, 0.35); }' .
+			'.wpsg-badge-development .wpsg-badge-dot { background: #9ca3af; }' .
+			'.wpsg-unconfirmed-mark { font-size: 10px; opacity: 0.75; margin-left: 2px; }'
+		);
 	}
 }

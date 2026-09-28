@@ -94,12 +94,12 @@ jobs:
       - name: Create GitHub Release & Upload Assets
         uses: softprops/action-gh-release@v2
         with:
-          name: "Site Checkup Pro v${{ steps.get_version.outputs.version }}"
+          name: "GeniousSonu Site Checkup v${{ steps.get_version.outputs.version }}"
           body_path: /tmp/release_notes.txt
           files: |
-            site-checkup-pro.zip
-            site-checkup-pro-selfhosted.zip
-            site-checkup-pro-wporg.zip
+            genioussonu-site-checkup.zip
+            genioussonu-site-checkup-selfhosted.zip
+            genioussonu-site-checkup-wporg.zip
           draft: false
           prerelease: false
         env:
@@ -118,6 +118,6 @@ jobs:
         env:
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-          SLUG: site-checkup-pro
-          BUILD_DIR: 'build/wporg/site-checkup-pro'
+          SLUG: genioussonu-site-checkup
+          BUILD_DIR: 'build/wporg/genioussonu-site-checkup'
           ASSETS_DIR: 'media'

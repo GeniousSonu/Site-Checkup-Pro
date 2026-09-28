@@ -3,7 +3,7 @@
 * Task Value Object
  *
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -169,7 +169,7 @@ class WPSG_Task {
 
 		return array(
 			'success' => false,
-			'message' => __( 'No run callback registered for this task.', 'site-checkup-pro' ),
+			'message' => __( 'No run callback registered for this task.', 'genioussonu-site-checkup' ),
 		);
 	}
 
@@ -185,7 +185,7 @@ class WPSG_Task {
 
 		return array(
 			'success' => false,
-			'message' => __( 'No undo callback registered for this task.', 'site-checkup-pro' ),
+			'message' => __( 'No undo callback registered for this task.', 'genioussonu-site-checkup' ),
 		);
 	}
 
@@ -201,11 +201,11 @@ class WPSG_Task {
 				$res = call_user_func( $this->status_callback, $force_refresh );
 				return is_array( $res ) ? $res : array( 'status' => 'pending', 'message' => '' );
 			} catch ( \Throwable $e ) {
-				error_log( sprintf( '[Site Checkup Pro] Error evaluating live status for task "%s": %s in %s:%d', $this->id, $e->getMessage(), $e->getFile(), $e->getLine() ) );
+				error_log( sprintf( '[GeniousSonu Site Checkup] Error evaluating live status for task "%s": %s in %s:%d', $this->id, $e->getMessage(), $e->getFile(), $e->getLine() ) );
 				return array(
 					'status'  => 'attention',
 					/* translators: %s: environmental notice / error message */
-					'message' => sprintf( __( 'Check encountered an environmental notice: %s', 'site-checkup-pro' ), $e->getMessage() ),
+					'message' => sprintf( __( 'Check encountered an environmental notice: %s', 'genioussonu-site-checkup' ), $e->getMessage() ),
 				);
 			}
 		}
@@ -264,7 +264,7 @@ class WPSG_Task {
 				$can_apply_automated = false;
 				$is_na               = false;
 				if ( empty( $live_message ) || 'not_applicable' === $status ) {
-					$live_message = __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'site-checkup-pro' );
+					$live_message = __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-site-checkup' );
 				}
 				if ( 'not_applicable' === $status || 'pending' === $status ) {
 					$status = ( $db_obj && in_array( $db_obj->status, array( 'done', 'applied_unverified' ), true ) ) ? $db_obj->status : 'pending';
@@ -281,7 +281,7 @@ class WPSG_Task {
 		if ( $next_reminder_at && strtotime( $next_reminder_at ) <= time() ) {
 			$status = 'attention';
 			/* translators: %s: due date/time string */
-			$live_message = sprintf( __( 'Overdue reminder: scheduled review was due on %s.', 'site-checkup-pro' ), $next_reminder_at );
+			$live_message = sprintf( __( 'Overdue reminder: scheduled review was due on %s.', 'genioussonu-site-checkup' ), $next_reminder_at );
 		}
 
 		$can_verify = ( 'writes_files' === $this->sub_type || ! empty( $this->nginx_snippet ) || in_array( $this->id, array( 'block_user_enumeration', 'hide_wordpress_fingerprint', 'security_headers_csp', 'security_txt_check', 'login_url_rename', 'disable_file_edit', 'wp_debug_display_check', 'vulnerability_database_check' ), true ) );

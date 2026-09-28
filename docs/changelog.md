@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to **Site Checkup Pro** will be documented in this file.
+All notable changes to **GeniousSonu Site Checkup** will be documented in this file.
 
 ## [1.0.0] - 2026-09-17
 ### Added

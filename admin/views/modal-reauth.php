@@ -7,7 +7,7 @@
  * Bound to current user session token and strictly single-use.
  *
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -23,14 +23,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="wpsg-modal-header">
 			<h3 class="wpsg-modal-title" id="wpsg-reauth-modal-title">
 				<span class="dashicons dashicons-lock" aria-hidden="true" style="color: var(--wpsg-accent-blue);"></span>
-				<?php esc_html_e( 'Confirm Administrator Password', 'site-checkup-pro' ); ?>
+				<?php esc_html_e( 'Confirm Administrator Password', 'genioussonu-site-checkup' ); ?>
 			</h3>
-			<button type="button" class="wpsg-modal-close" data-close-modal aria-label="<?php esc_attr_e( 'Close', 'site-checkup-pro' ); ?>">&times;</button>
+			<button type="button" class="wpsg-modal-close" data-close-modal aria-label="<?php esc_attr_e( 'Close', 'genioussonu-site-checkup' ); ?>">&times;</button>
 		</div>
 
 		<div class="wpsg-modal-body">
 			<p style="margin-top: 0; color: var(--wpsg-text-secondary); font-size: 13px;">
-				<?php esc_html_e( 'This operation modifies core server configurations or active credentials. Please confirm your administrator password to proceed.', 'site-checkup-pro' ); ?>
+				<?php esc_html_e( 'This operation modifies core server configurations or active credentials. Please confirm your administrator password to proceed.', 'genioussonu-site-checkup' ); ?>
 			</p>
 
 			<div class="wpsg-notice wpsg-notice-critical" id="wpsg-reauth-error-box" style="display: none; margin-bottom: 14px;">
@@ -40,25 +40,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			<div class="wpsg-form-row">
 				<label for="wpsg-reauth-password" class="wpsg-form-label">
-					<?php esc_html_e( 'Current Password', 'site-checkup-pro' ); ?>
+					<?php esc_html_e( 'Current Password', 'genioussonu-site-checkup' ); ?>
 				</label>
 				<input
 					type="password"
 					id="wpsg-reauth-password"
 					class="wpsg-input"
 					autocomplete="current-password"
-					placeholder="<?php esc_attr_e( 'Enter your password...', 'site-checkup-pro' ); ?>"
+					placeholder="<?php esc_attr_e( 'Enter your password...', 'genioussonu-site-checkup' ); ?>"
 				/>
 			</div>
 		</div>
 
 		<div class="wpsg-modal-footer">
 			<button type="button" class="wpsg-btn wpsg-btn-secondary" data-close-modal>
-				<?php esc_html_e( 'Cancel', 'site-checkup-pro' ); ?>
+				<?php esc_html_e( 'Cancel', 'genioussonu-site-checkup' ); ?>
 			</button>
 			<button type="button" class="wpsg-btn wpsg-btn-primary" id="wpsg-btn-reauth-submit">
 				<span class="dashicons dashicons-unlock" aria-hidden="true"></span>
-				<?php esc_html_e( 'Verify & Proceed', 'site-checkup-pro' ); ?>
+				<?php esc_html_e( 'Verify & Proceed', 'genioussonu-site-checkup' ); ?>
 			</button>
 		</div>
 	</div>

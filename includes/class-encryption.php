@@ -6,7 +6,7 @@
  * (e.g. Hosting Panel API tokens) using sodium_crypto_secretbox with HKDF key derivation,
  * falling back to OpenSSL AES-256-GCM / AES-256-CBC with HMAC-SHA256 authentication.
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0

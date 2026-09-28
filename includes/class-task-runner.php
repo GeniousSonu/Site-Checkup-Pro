@@ -7,7 +7,7 @@
  * state snapshot HMAC integrity verification, redacted audit logging, and undo operations.
  *
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -36,7 +36,7 @@ class WPSG_Task_Runner {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Permission denied. Administrator capabilities required.', 'site-checkup-pro' ),
+				'message' => __( 'Permission denied. Administrator capabilities required.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -44,7 +44,7 @@ class WPSG_Task_Runner {
 		if ( ! $task ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Task not found in registry.', 'site-checkup-pro' ),
+				'message' => __( 'Task not found in registry.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -64,7 +64,7 @@ class WPSG_Task_Runner {
 			if ( isset( $cache_transients[ $task_id ] ) ) {
 				delete_transient( $cache_transients[ $task_id ] );
 			}
-			wp_cache_delete( 'wpsg_task_status_' . $task_id, 'site-checkup-pro' );
+			wp_cache_delete( 'wpsg_task_status_' . $task_id, 'genioussonu-site-checkup' );
 		}
 
 		// 2. Concurrency Mutex Lock: Prevent concurrent executions of the same task.
@@ -72,7 +72,7 @@ class WPSG_Task_Runner {
 		if ( get_transient( $lock_key ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'This task is currently being executed by another process. Please wait.', 'site-checkup-pro' ),
+				'message' => __( 'This task is currently being executed by another process. Please wait.', 'genioussonu-site-checkup' ),
 			);
 		}
 		set_transient( $lock_key, true, 30 ); // 30-second TTL
@@ -86,7 +86,7 @@ class WPSG_Task_Runner {
 						return array(
 							'success'         => false,
 							'reauth_required' => true,
-							'message'         => __( 'Administrator password confirmation is required before executing this destructive action.', 'site-checkup-pro' ),
+							'message'         => __( 'Administrator password confirmation is required before executing this destructive action.', 'genioussonu-site-checkup' ),
 						);
 					}
 				}
@@ -100,7 +100,7 @@ class WPSG_Task_Runner {
 						'success'         => false,
 						'backup_required' => true,
 						'backup_info'     => $backup_info,
-						'message'         => __( 'A verified backup taken within the last 48 hours is required before running this file-modifying task.', 'site-checkup-pro' ),
+						'message'         => __( 'A verified backup taken within the last 48 hours is required before running this file-modifying task.', 'genioussonu-site-checkup' ),
 					);
 				}
 			}
@@ -259,7 +259,7 @@ class WPSG_Task_Runner {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Permission denied. Administrator capabilities required.', 'site-checkup-pro' ),
+				'message' => __( 'Permission denied. Administrator capabilities required.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -267,7 +267,7 @@ class WPSG_Task_Runner {
 		if ( ! $task || ! $task->has_undo ) {
 			return array(
 				'success' => false,
-				'message' => __( 'This task does not support undo operations.', 'site-checkup-pro' ),
+				'message' => __( 'This task does not support undo operations.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -275,7 +275,7 @@ class WPSG_Task_Runner {
 		if ( get_transient( $lock_key ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'This task is currently being modified. Please wait.', 'site-checkup-pro' ),
+				'message' => __( 'This task is currently being modified. Please wait.', 'genioussonu-site-checkup' ),
 			);
 		}
 		set_transient( $lock_key, true, 30 );
@@ -289,7 +289,7 @@ class WPSG_Task_Runner {
 						return array(
 							'success'         => false,
 							'reauth_required' => true,
-							'message'         => __( 'Administrator password confirmation is required before undoing destructive actions.', 'site-checkup-pro' ),
+							'message'         => __( 'Administrator password confirmation is required before undoing destructive actions.', 'genioussonu-site-checkup' ),
 						);
 					}
 				}
@@ -305,7 +305,7 @@ class WPSG_Task_Runner {
 				if ( ! hash_equals( (string) $expected_hash, (string) $metadata['snapshot_hash'] ) ) {
 					return array(
 						'success' => false,
-						'message' => __( 'Security error: Snapshot integrity check failed (tampered snapshot detected). Undo aborted.', 'site-checkup-pro' ),
+						'message' => __( 'Security error: Snapshot integrity check failed (tampered snapshot detected). Undo aborted.', 'genioussonu-site-checkup' ),
 					);
 				}
 			}
@@ -402,7 +402,7 @@ class WPSG_Task_Runner {
 			$data['metadata'] = wp_json_encode( $metadata );
 		}
 
-		wp_cache_delete( 'wpsg_task_status_' . $task_id, 'site-checkup-pro' );
+		wp_cache_delete( 'wpsg_task_status_' . $task_id, 'genioussonu-site-checkup' );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$exists = $wpdb->get_var(

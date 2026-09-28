@@ -5,7 +5,7 @@
  * Inspects all scheduled WordPress WP-Cron events via _get_cron_array(), resolves
  * originating plugins/themes, detects overdue stalled events, and flags duplicate schedules.
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.2.0
@@ -147,9 +147,9 @@ class WPSG_Cron_Auditor {
 			return array( 'name' => 'WordPress Core', 'type' => 'core' );
 		}
 
-		// Site Checkup Pro
+		// GeniousSonu Site Checkup
 		if ( 0 === strpos( $hook, 'wpsg_' ) ) {
-			return array( 'name' => 'Site Checkup Pro', 'type' => 'plugin' );
+			return array( 'name' => 'GeniousSonu Site Checkup', 'type' => 'plugin' );
 		}
 
 		// WooCommerce / Action Scheduler

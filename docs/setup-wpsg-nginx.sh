@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Site Checkup Pro — Tier 2 Nginx Setup Companion Script
+# GeniousSonu Site Checkup — Tier 2 Nginx Setup Companion Script
 # ==============================================================================
 #
 # PURPOSE:
 # Configures a dedicated, narrowly-scoped directory and sudoers rule allowing
-# Site Checkup Pro to safely write Nginx hardening directives and trigger
+# GeniousSonu Site Checkup to safely write Nginx hardening directives and trigger
 # syntax-validated configuration reloads (Tier 2 automated apply).
 #
 # SECURITY BOUNDARY:
@@ -25,7 +25,7 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 echo "======================================================="
-echo " Site Checkup Pro — Nginx Tier 2 Companion Setup"
+echo " GeniousSonu Site Checkup — Nginx Tier 2 Companion Setup"
 echo "======================================================="
 
 # Detect active web server user
@@ -48,7 +48,7 @@ fi
 echo "[1/4] Web server user identified as: ${WEB_USER}"
 
 # Define paths
-CONF_DIR="/etc/nginx/site-checkup-pro"
+CONF_DIR="/etc/nginx/genioussonu-site-checkup"
 STAGING_DIR="${CONF_DIR}/.staging"
 MARKER_FILE="${CONF_DIR}/.wpsg-tier2-active"
 SUDOERS_FILE="/etc/sudoers.d/wpsg-nginx"
@@ -69,7 +69,7 @@ chmod 0644 "${MARKER_FILE}"
 # 3. Create narrowly-scoped sudoers entry
 echo "[4/4] Creating scoped sudoers rule in ${SUDOERS_FILE}..."
 cat << EOF > "${SUDOERS_FILE}"
-# Site Checkup Pro — Restricted Nginx Reload Permissions
+# GeniousSonu Site Checkup — Restricted Nginx Reload Permissions
 # Strictly scoped to root execution of syntax-check and reload ONLY.
 ${WEB_USER} ALL=(root) NOPASSWD: /usr/sbin/nginx -t, /bin/systemctl reload nginx, /usr/sbin/service nginx reload
 EOF

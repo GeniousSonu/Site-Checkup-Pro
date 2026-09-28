@@ -1,21 +1,21 @@
 <?php
 /**
- * Update Metadata JSON Generator for Site Checkup Pro
+ * Update Metadata JSON Generator for GeniousSonu Site Checkup
  *
- * Automatically generates `update-info.json` from `readme.txt` and `site-checkup-pro.php`.
+ * Automatically generates `update-info.json` from `readme.txt` and `genioussonu-site-checkup.php`.
  * Provides the single source of truth for self-hosted distribution updates and the
  * in-dashboard Thickbox version details modal.
  *
  * Usage:
  *   php bin/generate-update-info.php
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  */
 
 $root_dir    = dirname( __DIR__ );
 $readme_file = $root_dir . '/readme.txt';
-$main_file   = $root_dir . '/site-checkup-pro.php';
+$main_file   = $root_dir . '/genioussonu-site-checkup.php';
 $output_file = $root_dir . '/update-info.json';
 
 if ( ! file_exists( $readme_file ) ) {
@@ -23,7 +23,7 @@ if ( ! file_exists( $readme_file ) ) {
 	exit( 1 );
 }
 if ( ! file_exists( $main_file ) ) {
-	fwrite( STDERR, "[ERROR] site-checkup-pro.php not found at {$main_file}\n" );
+	fwrite( STDERR, "[ERROR] genioussonu-site-checkup.php not found at {$main_file}\n" );
 	exit( 1 );
 }
 
@@ -108,11 +108,11 @@ if ( empty( $changelog_html ) ) {
 
 // 5. Build Metadata Structure
 $metadata = array(
-	'name'           => 'Site Checkup Pro',
-	'slug'           => 'site-checkup-pro',
+	'name'           => 'GeniousSonu Site Checkup',
+	'slug'           => 'genioussonu-site-checkup',
 	'version'        => $version,
-	'download_url'   => "https://github.com/GeniousSonu/Site-Checkup-Pro/releases/download/v{$version}/site-checkup-pro-selfhosted.zip",
-	'homepage'       => 'https://www.genioussonu.me/plugin/site-checkup-pro/',
+	'download_url'   => "https://github.com/GeniousSonu/Site-Checkup-Pro/releases/download/v{$version}/genioussonu-site-checkup-selfhosted.zip",
+	'homepage'       => 'https://www.genioussonu.me/plugin/genioussonu-site-checkup/',
 	'author'         => '<a href="https://www.genioussonu.me/">SK Sahinur Islam</a>',
 	'author_profile' => 'https://profiles.wordpress.org/genioussonu/',
 	'requires'       => $requires,
@@ -122,7 +122,7 @@ $metadata = array(
 	'upgrade_notice' => 'Recommended update for security audit improvements and bug fixes.',
 	'sections'       => array(
 		'description'  => '<p>' . htmlspecialchars( $short_desc, ENT_QUOTES, 'UTF-8' ) . '</p>',
-		'installation' => '<p>Upload the ZIP file through the WordPress admin (Plugins &rarr; Add New &rarr; Upload Plugin), or extract to <code>wp-content/plugins/site-checkup-pro</code>.</p>',
+		'installation' => '<p>Upload the ZIP file through the WordPress admin (Plugins &rarr; Add New &rarr; Upload Plugin), or extract to <code>wp-content/plugins/genioussonu-site-checkup</code>.</p>',
 		'changelog'    => $changelog_html,
 	),
 	'icons'          => array(
@@ -130,8 +130,8 @@ $metadata = array(
 		'1x'  => 'https://raw.githubusercontent.com/GeniousSonu/Site-Checkup-Pro/main/media/icon.svg',
 	),
 	'banners'        => array(
-		'low'  => 'https://raw.githubusercontent.com/GeniousSonu/Site-Checkup-Pro/main/media/site-checkup-pro-logo.svg',
-		'high' => 'https://raw.githubusercontent.com/GeniousSonu/Site-Checkup-Pro/main/media/site-checkup-pro-logo.svg',
+		'low'  => 'https://raw.githubusercontent.com/GeniousSonu/Site-Checkup-Pro/main/media/genioussonu-site-checkup-logo.svg',
+		'high' => 'https://raw.githubusercontent.com/GeniousSonu/Site-Checkup-Pro/main/media/genioussonu-site-checkup-logo.svg',
 	),
 );
 

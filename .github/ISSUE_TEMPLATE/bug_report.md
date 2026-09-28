@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Create a report to help us improve Site Checkup Pro
+about: Create a report to help us improve GeniousSonu Site Checkup
 title: '[BUG] '
 labels: bug
 assignees: GeniousSonu

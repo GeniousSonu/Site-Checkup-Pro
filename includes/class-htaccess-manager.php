@@ -4,7 +4,7 @@
  * Server Detection & Staging-Safe Health Checks
  *
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -35,7 +35,7 @@ class WPSG_Htaccess_Manager {
 		return array(
 			// 1. Hide PHP Version Header
 			'HidePHPVersion' => array(
-				'title'       => __( 'Hide PHP Version (X-Powered-By)', 'site-checkup-pro' ),
+				'title'       => __( 'Hide PHP Version (X-Powered-By)', 'genioussonu-site-checkup' ),
 				'marker'      => 'HidePHPVersion',
 				'rules'       => array(
 					'<IfModule mod_headers.c>',
@@ -49,7 +49,7 @@ class WPSG_Htaccess_Manager {
 
 			// 2. Clickjacking (X-Frame-Options)
 			'Clickjacking' => array(
-				'title'       => __( 'Clickjacking Protection (X-Frame-Options: SAMEORIGIN)', 'site-checkup-pro' ),
+				'title'       => __( 'Clickjacking Protection (X-Frame-Options: SAMEORIGIN)', 'genioussonu-site-checkup' ),
 				'marker'      => 'Clickjacking',
 				'rules'       => array(
 					'<IfModule mod_headers.c>',
@@ -62,7 +62,7 @@ class WPSG_Htaccess_Manager {
 
 			// 3. MIME Sniffing (X-Content-Type-Options)
 			'MimeSniffing' => array(
-				'title'       => __( 'MIME-Type Sniffing Protection (nosniff)', 'site-checkup-pro' ),
+				'title'       => __( 'MIME-Type Sniffing Protection (nosniff)', 'genioussonu-site-checkup' ),
 				'marker'      => 'MimeSniffing',
 				'rules'       => array(
 					'<IfModule mod_headers.c>',
@@ -75,7 +75,7 @@ class WPSG_Htaccess_Manager {
 
 			// 4. HSTS (Strict-Transport-Security) — Staged Rollout Pre-Flight (300s)
 			'HSTS' => array(
-				'title'       => __( 'HSTS Header Enforcement (Staged Pre-Flight: 300s)', 'site-checkup-pro' ),
+				'title'       => __( 'HSTS Header Enforcement (Staged Pre-Flight: 300s)', 'genioussonu-site-checkup' ),
 				'marker'      => 'HSTS',
 				'rules'       => array(
 					'<IfModule mod_headers.c>',
@@ -86,7 +86,7 @@ class WPSG_Htaccess_Manager {
 				'opt_in'      => false,
 			),
 			'HSTS_Production' => array(
-				'title'       => __( 'HSTS Header Enforcement (Production: 1-Year Preload)', 'site-checkup-pro' ),
+				'title'       => __( 'HSTS Header Enforcement (Production: 1-Year Preload)', 'genioussonu-site-checkup' ),
 				'marker'      => 'HSTS',
 				'rules'       => array(
 					'<IfModule mod_headers.c>',
@@ -99,7 +99,7 @@ class WPSG_Htaccess_Manager {
 
 			// 5. Disable Directory Browsing
 			'DisableIndexes' => array(
-				'title'       => __( 'Disable Directory Browsing (Options -Indexes)', 'site-checkup-pro' ),
+				'title'       => __( 'Disable Directory Browsing (Options -Indexes)', 'genioussonu-site-checkup' ),
 				'marker'      => 'DisableIndexes',
 				'rules'       => array(
 					'Options -Indexes',
@@ -110,7 +110,7 @@ class WPSG_Htaccess_Manager {
 
 			// 6. Protect System & Sensitive Files (readme, license, sample, htaccess, wp-config)
 			'ProtectSensitiveFiles' => array(
-				'title'       => __( 'Protect Sensitive & System Files', 'site-checkup-pro' ),
+				'title'       => __( 'Protect Sensitive & System Files', 'genioussonu-site-checkup' ),
 				'marker'      => 'ProtectSensitiveFiles',
 				'rules'       => array(
 					'<FilesMatch "^(readme\.html|license\.txt|wp-config-sample\.php|wp-config\.php|\.htaccess|\.env)">',
@@ -124,7 +124,7 @@ class WPSG_Htaccess_Manager {
 
 			// 7. Block Direct XML-RPC via .htaccess
 			'BlockXMLRPC' => array(
-				'title'       => __( 'Block XML-RPC Access via Web Server', 'site-checkup-pro' ),
+				'title'       => __( 'Block XML-RPC Access via Web Server', 'genioussonu-site-checkup' ),
 				'marker'      => 'BlockXMLRPC',
 				'rules'       => array(
 					'<Files xmlrpc.php>',
@@ -138,7 +138,7 @@ class WPSG_Htaccess_Manager {
 
 			// 8. Block PHP Execution in Uploads Directory
 			'deny_uploads_php' => array(
-				'title'       => __( 'Block PHP Execution in /wp-content/uploads/', 'site-checkup-pro' ),
+				'title'       => __( 'Block PHP Execution in /wp-content/uploads/', 'genioussonu-site-checkup' ),
 				'marker'      => 'DenyUploadsPHP',
 				'rules'       => array(
 					'<IfModule mod_rewrite.c>',
@@ -153,7 +153,7 @@ class WPSG_Htaccess_Manager {
 
 			// 9. Basic Firewall: SQL Injection Pattern
 			'basic_firewall_sqli' => array(
-				'title'       => __( 'Lightweight Firewall: Block SQL Injection Signatures', 'site-checkup-pro' ),
+				'title'       => __( 'Lightweight Firewall: Block SQL Injection Signatures', 'genioussonu-site-checkup' ),
 				'marker'      => 'FirewallSQLi',
 				'rules'       => array(
 					'<IfModule mod_rewrite.c>',
@@ -168,7 +168,7 @@ class WPSG_Htaccess_Manager {
 
 			// 10. Basic Firewall: XSS Pattern
 			'basic_firewall_xss' => array(
-				'title'       => __( 'Lightweight Firewall: Block Script Injection Signatures', 'site-checkup-pro' ),
+				'title'       => __( 'Lightweight Firewall: Block Script Injection Signatures', 'genioussonu-site-checkup' ),
 				'marker'      => 'FirewallXSS',
 				'rules'       => array(
 					'<IfModule mod_rewrite.c>',
@@ -183,7 +183,7 @@ class WPSG_Htaccess_Manager {
 
 			// 11. Basic Firewall: Path Traversal
 			'basic_firewall_traversal' => array(
-				'title'       => __( 'Lightweight Firewall: Block Path Traversal (../)', 'site-checkup-pro' ),
+				'title'       => __( 'Lightweight Firewall: Block Path Traversal (../)', 'genioussonu-site-checkup' ),
 				'marker'      => 'FirewallTraversal',
 				'rules'       => array(
 					'<IfModule mod_rewrite.c>',
@@ -198,7 +198,7 @@ class WPSG_Htaccess_Manager {
 
 			// 12. Basic Firewall: Remote Code Execution / Eval Signatures
 			'basic_firewall_rce' => array(
-				'title'       => __( 'Lightweight Firewall: Block RCE Signatures', 'site-checkup-pro' ),
+				'title'       => __( 'Lightweight Firewall: Block RCE Signatures', 'genioussonu-site-checkup' ),
 				'marker'      => 'FirewallRCE',
 				'rules'       => array(
 					'<IfModule mod_rewrite.c>',
@@ -213,7 +213,7 @@ class WPSG_Htaccess_Manager {
 
 			// 13. Bad Bot Scanners (Explicitly labeled as Noise Reduction)
 			'bad_bots' => array(
-				'title'       => __( 'Noise Reduction: Block Known Automated Scanners User-Agents', 'site-checkup-pro' ),
+				'title'       => __( 'Noise Reduction: Block Known Automated Scanners User-Agents', 'genioussonu-site-checkup' ),
 				'marker'      => 'BadBotsNoiseReduction',
 				'rules'       => array(
 					'<IfModule mod_rewrite.c>',
@@ -228,20 +228,20 @@ class WPSG_Htaccess_Manager {
 
 			// 14. Content-Security-Policy (Report-Only Mode First)
 			'csp_report_only' => array(
-				'title'       => __( 'Content-Security-Policy (Report-Only Mode)', 'site-checkup-pro' ),
+				'title'       => __( 'Content-Security-Policy (Report-Only Mode)', 'genioussonu-site-checkup' ),
 				'marker'      => 'CSPReportOnly',
 				'rules'       => array(
 					'<IfModule mod_headers.c>',
-					'  Header always set Content-Security-Policy-Report-Only "default-src \'self\'; script-src \'self\' \'unsafe-inline\' \'unsafe-eval\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data: https:; font-src \'self\' data:; connect-src \'self\'; report-uri /wp-json/site-checkup-pro/v1/csp-report"',
+					'  Header always set Content-Security-Policy-Report-Only "default-src \'self\'; script-src \'self\' \'unsafe-inline\' \'unsafe-eval\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data: https:; font-src \'self\' data:; connect-src \'self\'; report-uri /wp-json/genioussonu-site-checkup/v1/csp-report"',
 					'</IfModule>',
 				),
-				'nginx'       => 'add_header Content-Security-Policy-Report-Only "default-src \'self\'; script-src \'self\' \'unsafe-inline\' \'unsafe-eval\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data: https:; font-src \'self\' data:; connect-src \'self\'; report-uri /wp-json/site-checkup-pro/v1/csp-report" always;',
+				'nginx'       => 'add_header Content-Security-Policy-Report-Only "default-src \'self\'; script-src \'self\' \'unsafe-inline\' \'unsafe-eval\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data: https:; font-src \'self\' data:; connect-src \'self\'; report-uri /wp-json/genioussonu-site-checkup/v1/csp-report" always;',
 				'opt_in'      => true,
 			),
 
 			// 15. Referrer-Policy
 			'referrer_policy' => array(
-				'title'       => __( 'Referrer-Policy: strict-origin-when-cross-origin', 'site-checkup-pro' ),
+				'title'       => __( 'Referrer-Policy: strict-origin-when-cross-origin', 'genioussonu-site-checkup' ),
 				'marker'      => 'ReferrerPolicy',
 				'rules'       => array(
 					'<IfModule mod_headers.c>',
@@ -254,7 +254,7 @@ class WPSG_Htaccess_Manager {
 
 			// 16. Permissions-Policy
 			'permissions_policy' => array(
-				'title'       => __( 'Permissions-Policy Header', 'site-checkup-pro' ),
+				'title'       => __( 'Permissions-Policy Header', 'genioussonu-site-checkup' ),
 				'marker'      => 'PermissionsPolicy',
 				'rules'       => array(
 					'<IfModule mod_headers.c>',
@@ -385,7 +385,7 @@ class WPSG_Htaccess_Manager {
 			return array(
 				'success' => false,
 				/* translators: %s: rule key */
-				'message' => sprintf( __( 'Unknown or unsupported Nginx rule: %s', 'site-checkup-pro' ), esc_html( $rule_key ) ),
+				'message' => sprintf( __( 'Unknown or unsupported Nginx rule: %s', 'genioussonu-site-checkup' ), esc_html( $rule_key ) ),
 			);
 		}
 
@@ -403,7 +403,7 @@ class WPSG_Htaccess_Manager {
 
 		return array(
 			'success' => false,
-			'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'site-checkup-pro' ),
+			'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-site-checkup' ),
 		);
 	}
 
@@ -424,7 +424,7 @@ class WPSG_Htaccess_Manager {
 
 		return array(
 			'success' => true,
-			'message' => __( 'Manual removal required on this hosting setup.', 'site-checkup-pro' ),
+			'message' => __( 'Manual removal required on this hosting setup.', 'genioussonu-site-checkup' ),
 		);
 	}
 
@@ -514,7 +514,7 @@ class WPSG_Htaccess_Manager {
 			return array(
 				'success' => false,
 				/* translators: %s: rule key */
-				'message' => sprintf( __( 'Unknown named rule: %s', 'site-checkup-pro' ), esc_html( $rule_key ) ),
+				'message' => sprintf( __( 'Unknown named rule: %s', 'genioussonu-site-checkup' ), esc_html( $rule_key ) ),
 			);
 		}
 
@@ -540,7 +540,7 @@ class WPSG_Htaccess_Manager {
 			return array(
 				'success' => false,
 				'is_na'   => true,
-				'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'site-checkup-pro' ),
+				'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -559,7 +559,7 @@ class WPSG_Htaccess_Manager {
 			return array(
 				'success' => false,
 				/* translators: %s: rule key */
-				'message' => sprintf( __( 'Unknown named rule: %s', 'site-checkup-pro' ), esc_html( $rule_key ) ),
+				'message' => sprintf( __( 'Unknown named rule: %s', 'genioussonu-site-checkup' ), esc_html( $rule_key ) ),
 			);
 		}
 
@@ -569,7 +569,7 @@ class WPSG_Htaccess_Manager {
 			}
 			return array(
 				'success' => true,
-				'message' => __( 'Manual removal required on this hosting setup.', 'site-checkup-pro' ),
+				'message' => __( 'Manual removal required on this hosting setup.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -658,11 +658,11 @@ class WPSG_Htaccess_Manager {
 			'message' => ! empty( $found )
 				? sprintf(
 					/* translators: 1: count, 2: sample files */
-					__( 'Compatibility Warning: %1$d existing PHP file(s) found in /uploads/ (%2$s). Blocking execution may break plugins relying on these scripts.', 'site-checkup-pro' ),
+					__( 'Compatibility Warning: %1$d existing PHP file(s) found in /uploads/ (%2$s). Blocking execution may break plugins relying on these scripts.', 'genioussonu-site-checkup' ),
 					count( $found ),
 					implode( ', ', array_slice( $found, 0, 3 ) )
 				)
-				: __( 'No PHP files detected in /wp-content/uploads/. Safe to apply rule.', 'site-checkup-pro' ),
+				: __( 'No PHP files detected in /wp-content/uploads/. Safe to apply rule.', 'genioussonu-site-checkup' ),
 		);
 	}
 
@@ -681,7 +681,7 @@ class WPSG_Htaccess_Manager {
 				'is_na'   => true,
 				'message' => sprintf(
 					/* translators: %s: server software name */
-					__( 'Not applicable on this server (%s). Your web server does not process .htaccess rules.', 'site-checkup-pro' ),
+					__( 'Not applicable on this server (%s). Your web server does not process .htaccess rules.', 'genioussonu-site-checkup' ),
 					strtoupper( self::get_server_type() )
 				),
 			);
@@ -702,7 +702,7 @@ class WPSG_Htaccess_Manager {
 		if ( ! $backup_path && file_exists( $htaccess_file ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Could not create safety backup of .htaccess before writing.', 'site-checkup-pro' ),
+				'message' => __( 'Could not create safety backup of .htaccess before writing.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -732,7 +732,7 @@ class WPSG_Htaccess_Manager {
 		if ( ! $written ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Failed to write to .htaccess. Please verify file permissions.', 'site-checkup-pro' ),
+				'message' => __( 'Failed to write to .htaccess. Please verify file permissions.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -747,7 +747,7 @@ class WPSG_Htaccess_Manager {
 				'success' => false,
 				'message' => sprintf(
 					/* translators: %s: health check error message */
-					__( 'Self-test failed: %s. Rule was automatically rolled back to prevent site downtime.', 'site-checkup-pro' ),
+					__( 'Self-test failed: %s. Rule was automatically rolled back to prevent site downtime.', 'genioussonu-site-checkup' ),
 					$health['message']
 				),
 			);
@@ -755,7 +755,7 @@ class WPSG_Htaccess_Manager {
 
 		return array(
 			'success' => true,
-			'message' => __( 'Rule applied and verified successfully.', 'site-checkup-pro' ),
+			'message' => __( 'Rule applied and verified successfully.', 'genioussonu-site-checkup' ),
 		);
 	}
 
@@ -769,7 +769,7 @@ class WPSG_Htaccess_Manager {
 		if ( ! self::supports_htaccess() ) {
 			return array(
 				'success' => true,
-				'message' => __( 'Not applicable on this server.', 'site-checkup-pro' ),
+				'message' => __( 'Not applicable on this server.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -815,7 +815,7 @@ class WPSG_Htaccess_Manager {
 		if ( ! $removed ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Failed to remove rule from .htaccess.', 'site-checkup-pro' ),
+				'message' => __( 'Failed to remove rule from .htaccess.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -825,13 +825,13 @@ class WPSG_Htaccess_Manager {
 			copy( $backup_path, $htaccess_file );
 			return array(
 				'success' => false,
-				'message' => __( 'Self-test failed after rule removal. Rolled back.', 'site-checkup-pro' ),
+				'message' => __( 'Self-test failed after rule removal. Rolled back.', 'genioussonu-site-checkup' ),
 			);
 		}
 
 		return array(
 			'success' => true,
-			'message' => __( 'Rule removed successfully.', 'site-checkup-pro' ),
+			'message' => __( 'Rule removed successfully.', 'genioussonu-site-checkup' ),
 		);
 	}
 

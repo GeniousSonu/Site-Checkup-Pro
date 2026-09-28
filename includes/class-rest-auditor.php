@@ -5,7 +5,7 @@
  * Enumerates all registered WordPress REST API routes, analyzes permission callbacks,
  * resolves originating plugins/themes, and flags potential security exposure.
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.2.0
@@ -135,32 +135,32 @@ class WPSG_Rest_Auditor {
 		if ( empty( $callback ) ) {
 			return array(
 				'type'   => 'public',
-				'label'  => __( 'Publicly Accessible', 'site-checkup-pro' ),
-				'detail' => __( 'No permission_callback registered (open to unauthenticated access).', 'site-checkup-pro' ),
+				'label'  => __( 'Publicly Accessible', 'genioussonu-site-checkup' ),
+				'detail' => __( 'No permission_callback registered (open to unauthenticated access).', 'genioussonu-site-checkup' ),
 			);
 		}
 
 		if ( is_string( $callback ) && '__return_true' === $callback ) {
 			return array(
 				'type'   => 'public',
-				'label'  => __( 'Publicly Accessible', 'site-checkup-pro' ),
-				'detail' => __( 'Explicit __return_true callback registered.', 'site-checkup-pro' ),
+				'label'  => __( 'Publicly Accessible', 'genioussonu-site-checkup' ),
+				'detail' => __( 'Explicit __return_true callback registered.', 'genioussonu-site-checkup' ),
 			);
 		}
 
 		if ( is_string( $callback ) && '__return_false' === $callback ) {
 			return array(
 				'type'   => 'protected',
-				'label'  => __( 'Protected', 'site-checkup-pro' ),
-				'detail' => __( 'Explicit __return_false callback registered (always forbidden).', 'site-checkup-pro' ),
+				'label'  => __( 'Protected', 'genioussonu-site-checkup' ),
+				'detail' => __( 'Explicit __return_false callback registered (always forbidden).', 'genioussonu-site-checkup' ),
 			);
 		}
 
 		if ( is_string( $callback ) && 'is_user_logged_in' === $callback ) {
 			return array(
 				'type'   => 'protected',
-				'label'  => __( 'Protected', 'site-checkup-pro' ),
-				'detail' => __( 'Requires logged-in WordPress user.', 'site-checkup-pro' ),
+				'label'  => __( 'Protected', 'genioussonu-site-checkup' ),
+				'detail' => __( 'Requires logged-in WordPress user.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -179,21 +179,21 @@ class WPSG_Rest_Auditor {
 						if ( false !== strpos( $class_name, 'Posts' ) || false !== strpos( $class_name, 'Terms' ) || false !== strpos( $class_name, 'Attachments' ) ) {
 							return array(
 								'type'   => 'public',
-								'label'  => __( 'Publicly Accessible', 'site-checkup-pro' ),
+								'label'  => __( 'Publicly Accessible', 'genioussonu-site-checkup' ),
 								'detail' => sprintf( '%s::%s (Core public read check)', $class_name, $method ),
 							);
 						}
 					}
 					return array(
 						'type'   => 'protected',
-						'label'  => __( 'Protected', 'site-checkup-pro' ),
+						'label'  => __( 'Protected', 'genioussonu-site-checkup' ),
 						'detail' => sprintf( '%s::%s (WP_REST_Controller capability guard)', $class_name, $method ),
 					);
 				}
 
 				return array(
 					'type'   => 'protected',
-					'label'  => __( 'Protected', 'site-checkup-pro' ),
+					'label'  => __( 'Protected', 'genioussonu-site-checkup' ),
 					'detail' => sprintf( '%s::%s', $class_name, $method ),
 				);
 			}
@@ -206,7 +206,7 @@ class WPSG_Rest_Auditor {
 					if ( false !== stripos( $code, 'current_user_can' ) || false !== stripos( $code, 'user_can' ) || false !== stripos( $code, 'is_user_logged_in' ) ) {
 						return array(
 							'type'   => 'protected',
-							'label'  => __( 'Protected', 'site-checkup-pro' ),
+							'label'  => __( 'Protected', 'genioussonu-site-checkup' ),
 							'detail' => sprintf( '%s::%s (Verified capability check)', $class_name, $method ),
 						);
 					}
@@ -217,7 +217,7 @@ class WPSG_Rest_Auditor {
 
 			return array(
 				'type'   => 'needs_review',
-				'label'  => __( 'Needs Review', 'site-checkup-pro' ),
+				'label'  => __( 'Needs Review', 'genioussonu-site-checkup' ),
 				'detail' => sprintf( '%s::%s (Custom verification callback)', $class_name, $method ),
 			);
 		}
@@ -230,15 +230,15 @@ class WPSG_Rest_Auditor {
 				if ( false !== stripos( $code, 'current_user_can' ) || false !== stripos( $code, 'user_can' ) || false !== stripos( $code, 'is_user_logged_in' ) ) {
 					return array(
 						'type'   => 'protected',
-						'label'  => __( 'Protected', 'site-checkup-pro' ),
-						'detail' => __( 'Closure with capability/auth verification check', 'site-checkup-pro' ),
+						'label'  => __( 'Protected', 'genioussonu-site-checkup' ),
+						'detail' => __( 'Closure with capability/auth verification check', 'genioussonu-site-checkup' ),
 					);
 				}
 				if ( false !== stripos( $code, 'return true' ) && false === stripos( $code, 'current_user_can' ) ) {
 					return array(
 						'type'   => 'public',
-						'label'  => __( 'Publicly Accessible', 'site-checkup-pro' ),
-						'detail' => __( 'Closure unconditionally returning true', 'site-checkup-pro' ),
+						'label'  => __( 'Publicly Accessible', 'genioussonu-site-checkup' ),
+						'detail' => __( 'Closure unconditionally returning true', 'genioussonu-site-checkup' ),
 					);
 				}
 			} catch ( Exception $e ) {
@@ -247,15 +247,15 @@ class WPSG_Rest_Auditor {
 
 			return array(
 				'type'   => 'needs_review',
-				'label'  => __( 'Needs Review', 'site-checkup-pro' ),
-				'detail' => __( 'Anonymous closure callback (inspect code)', 'site-checkup-pro' ),
+				'label'  => __( 'Needs Review', 'genioussonu-site-checkup' ),
+				'detail' => __( 'Anonymous closure callback (inspect code)', 'genioussonu-site-checkup' ),
 			);
 		}
 
 		return array(
 			'type'   => 'needs_review',
-			'label'  => __( 'Needs Review', 'site-checkup-pro' ),
-			'detail' => is_string( $callback ) ? $callback : __( 'Dynamic callback', 'site-checkup-pro' ),
+			'label'  => __( 'Needs Review', 'genioussonu-site-checkup' ),
+			'detail' => is_string( $callback ) ? $callback : __( 'Dynamic callback', 'genioussonu-site-checkup' ),
 		);
 	}
 
@@ -272,9 +272,9 @@ class WPSG_Rest_Auditor {
 			return array( 'source' => 'WordPress Core', 'type' => 'core' );
 		}
 
-		// Site Checkup Pro
-		if ( 0 === strpos( $route, '/site-checkup-pro' ) ) {
-			return array( 'source' => 'Site Checkup Pro', 'type' => 'plugin' );
+		// GeniousSonu Site Checkup
+		if ( 0 === strpos( $route, '/genioussonu-site-checkup' ) ) {
+			return array( 'source' => 'GeniousSonu Site Checkup', 'type' => 'plugin' );
 		}
 
 		// Inspect callback file path via reflection

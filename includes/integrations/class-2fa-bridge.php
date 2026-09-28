@@ -5,7 +5,7 @@
  * Checks for known 2FA implementations and provides setup deep-links.
  *
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -76,7 +76,7 @@ class WPSG_2fa_Bridge {
 				'config_url'  => $active_provider['link'],
 				'message'     => sprintf(
 					/* translators: %s: provider name */
-					__( 'Two-Factor Authentication is active via %s.', 'site-checkup-pro' ),
+					__( 'Two-Factor Authentication is active via %s.', 'genioussonu-site-checkup' ),
 					$active_provider['name']
 				),
 			);
@@ -87,7 +87,7 @@ class WPSG_2fa_Bridge {
 			'has_2fa'     => false,
 			'provider'    => '',
 			'install_url' => admin_url( 'plugin-install.php?s=two-factor&tab=search&type=term' ),
-			'message'     => __( 'No active Two-Factor Authentication plugin detected. Enforcing 2FA for administrators is strongly recommended in the SOP.', 'site-checkup-pro' ),
+			'message'     => __( 'No active Two-Factor Authentication plugin detected. Enforcing 2FA for administrators is strongly recommended in the SOP.', 'genioussonu-site-checkup' ),
 		);
 	}
 }

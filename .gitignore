@@ -1,6 +1,6 @@
 # Build and distribution artifacts
 build/
-site-checkup-pro-*.zip
+genioussonu-site-checkup-*.zip
 *.log
 *.tmp
 .DS_Store

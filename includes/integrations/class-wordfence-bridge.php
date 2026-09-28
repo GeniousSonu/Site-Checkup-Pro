@@ -6,7 +6,7 @@
  * Complies with WordPress.org guidelines: no remote code execution or proprietary config writes.
  *
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -56,7 +56,7 @@ class WPSG_Wordfence_Bridge {
 				'is_active'   => false,
 				'waf_status'  => 'inactive',
 				'install_url' => admin_url( 'plugin-install.php?s=wordfence&tab=search&type=term' ),
-				'message'     => __( 'Wordfence is not active. Install and activate it to enable web application firewall and malware scanning.', 'site-checkup-pro' ),
+				'message'     => __( 'Wordfence is not active. Install and activate it to enable web application firewall and malware scanning.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -79,18 +79,18 @@ class WPSG_Wordfence_Bridge {
 		// Recommended settings guidelines from Agency SOP
 		$recommendations = array(
 			array(
-				'title' => __( 'Web Application Firewall (WAF)', 'site-checkup-pro' ),
-				'desc'  => __( 'Optimize WAF to Extended Protection (user.ini/php.ini setup).', 'site-checkup-pro' ),
+				'title' => __( 'Web Application Firewall (WAF)', 'genioussonu-site-checkup' ),
+				'desc'  => __( 'Optimize WAF to Extended Protection (user.ini/php.ini setup).', 'genioussonu-site-checkup' ),
 				'link'  => admin_url( 'admin.php?page=WordfenceWAF' ),
 			),
 			array(
-				'title' => __( 'Brute Force Protection', 'site-checkup-pro' ),
-				'desc'  => __( 'Enforce max 5 login failures and lock out immediately.', 'site-checkup-pro' ),
+				'title' => __( 'Brute Force Protection', 'genioussonu-site-checkup' ),
+				'desc'  => __( 'Enforce max 5 login failures and lock out immediately.', 'genioussonu-site-checkup' ),
 				'link'  => admin_url( 'admin.php?page=WordfenceWAF#waf-options-login-security' ),
 			),
 			array(
-				'title' => __( 'Email Alert Monitoring', 'site-checkup-pro' ),
-				'desc'  => __( 'Ensure alert emails route to designated agency monitoring inbox.', 'site-checkup-pro' ),
+				'title' => __( 'Email Alert Monitoring', 'genioussonu-site-checkup' ),
+				'desc'  => __( 'Ensure alert emails route to designated agency monitoring inbox.', 'genioussonu-site-checkup' ),
 				'link'  => admin_url( 'admin.php?page=WordfenceGlobalOptions#global-options-email-preferences' ),
 			),
 		);
@@ -106,7 +106,7 @@ class WPSG_Wordfence_Bridge {
 			'recommendations' => $recommendations,
 			'message'         => sprintf(
 				/* translators: %s: WAF status */
-				__( 'Wordfence is active (%s). Review agency recommended settings.', 'site-checkup-pro' ),
+				__( 'Wordfence is active (%s). Review agency recommended settings.', 'genioussonu-site-checkup' ),
 				$waf_status
 			),
 		);

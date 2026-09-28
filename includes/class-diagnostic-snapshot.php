@@ -6,7 +6,7 @@
  * database, active theme, plugins, and boolean wp-config constants) formatted for
  * on-screen inspection and copyable Markdown for GitHub issues / support tickets.
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.2.0
@@ -147,7 +147,7 @@ class WPSG_Diagnostic_Snapshot {
 	 * @return string
 	 */
 	public static function format_markdown( array $data ) {
-		$md  = "### Site Checkup Pro — Developer Diagnostic Snapshot\n";
+		$md  = "### GeniousSonu Site Checkup — Developer Diagnostic Snapshot\n";
 		$md .= '**Generated:** `' . esc_html( $data['generated_at'] ) . "`\n\n";
 
 		// WordPress

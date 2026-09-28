@@ -1,4 +1,4 @@
-# Distribution Ignore for Site Checkup Pro
+# Distribution Ignore for GeniousSonu Site Checkup
 .git/
 .github/
 .gitignore
@@ -12,7 +12,7 @@ package.json
 package-lock.json
 node_modules/
 build/
-site-checkup-pro*.zip
+*.zip
 media/*.png
 *.bak
 *.log

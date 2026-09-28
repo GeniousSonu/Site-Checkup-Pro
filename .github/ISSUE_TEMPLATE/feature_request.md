@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest an idea or new checklist audit for Site Checkup Pro
+about: Suggest an idea or new checklist audit for GeniousSonu Site Checkup
 title: '[FEATURE] '
 labels: enhancement
 assignees: GeniousSonu

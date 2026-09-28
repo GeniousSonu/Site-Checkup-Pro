@@ -1,5 +1,5 @@
 /**
- * Site Checkup Pro Client Report Helper
+ * GeniousSonu Site Checkup Client Report Helper
  *
  * @package SiteCheckupPro
  * @version 1.0.0

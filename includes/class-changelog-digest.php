@@ -6,7 +6,7 @@
  * extracts available changelog notes, delivers weekly alerts via WPSG_Alert_Dispatcher,
  * and renders live update intelligence in the dashboard.
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.2.0
@@ -146,7 +146,7 @@ class WPSG_Changelog_Digest {
 			$total = $digest['summary']['total_updates'];
 			$msg   = sprintf(
 				/* translators: %d: total available updates */
-				__( 'Weekly Changelog Digest: %d update(s) available for installed plugins and themes.', 'site-checkup-pro' ),
+				__( 'Weekly Changelog Digest: %d update(s) available for installed plugins and themes.', 'genioussonu-site-checkup' ),
 				$total
 			);
 			return WPSG_Alert_Dispatcher::dispatch( 'weekly_changelog_digest', $msg, $digest['items'] );

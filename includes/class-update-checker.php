@@ -6,9 +6,9 @@
  * channel, fetching version metadata from update-info.json.
  * Excluded from WordPress.org directory releases per Guideline 8.
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
- * @link    https://github.com/GeniousSonu/site-checkup-pro
+ * @link    https://github.com/GeniousSonu/Site-Checkup-Pro
  * @since   1.0.0
  */
 
@@ -50,7 +50,7 @@ class WPSG_Update_Checker {
 	 *
 	 * @var string
 	 */
-	private $plugin_slug = 'site-checkup-pro';
+	private $plugin_slug = 'genioussonu-site-checkup';
 
 	/**
 	 * Current plugin version.
@@ -195,15 +195,15 @@ class WPSG_Update_Checker {
 			$transient->no_update = array();
 		}
 
-		$basename = defined( 'WPSG_BASENAME' ) ? WPSG_BASENAME : 'site-checkup-pro/site-checkup-pro.php';
+		$basename = defined( 'WPSG_BASENAME' ) ? WPSG_BASENAME : 'genioussonu-site-checkup/genioussonu-site-checkup.php';
 
 		if ( ! isset( $transient->response[ $basename ] ) && ! isset( $transient->no_update[ $basename ] ) ) {
 			$transient->no_update[ $basename ] = (object) array(
-				'id'            => 'wpsg-site-checkup-pro',
-				'slug'          => 'site-checkup-pro',
+				'id'            => 'wpsg-genioussonu-site-checkup',
+				'slug'          => 'genioussonu-site-checkup',
 				'plugin'        => $basename,
 				'new_version'   => defined( 'WPSG_VERSION' ) ? WPSG_VERSION : '1.0.0',
-				'url'           => 'https://www.genioussonu.me/plugin/site-checkup-pro/',
+				'url'           => 'https://www.genioussonu.me/plugin/genioussonu-site-checkup/',
 				'package'       => '',
 				'icons'         => array(),
 				'banners'       => array(),

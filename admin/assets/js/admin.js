@@ -1,5 +1,5 @@
 /**
- * Site Checkup Pro Admin Application
+ * GeniousSonu Site Checkup Admin Application
  *
  * Handles client-driven sequential batch execution, optimistic task updates,
  * accessible status badges, diff preview modals, and Nginx snippet exports.
@@ -162,8 +162,8 @@
 		// Native fetch fallback
 		const baseUrl = (window.wpsgData && window.wpsgData.restUrl)
 			? window.wpsgData.restUrl.replace(/\/$/, '')
-			: '/wp-json/site-checkup-pro/v1';
-		const relativePath = path.replace(/^\/site-checkup-pro\/v1/, '');
+			: '/wp-json/genioussonu-site-checkup/v1';
+		const relativePath = path.replace(/^\/genioussonu-site-checkup\/v1/, '');
 		const fullUrl = baseUrl + relativePath;
 
 		const fetchOptions = {
@@ -961,11 +961,11 @@
 			state.loading = true;
 			state.loadError = null;
 			const res = await apiCall({
-				path: '/site-checkup-pro/v1/tasks',
+				path: '/genioussonu-site-checkup/v1/tasks',
 			});
 			applyTasksPayload(res);
 		} catch (err) {
-			console.error('Failed to load Site Checkup Pro tasks:', err);
+			console.error('Failed to load GeniousSonu Site Checkup tasks:', err);
 			state.loading = false;
 			state.loadError = err.message || 'Error communicating with REST API.';
 			if (dom.tbody && (!state.tasks || state.tasks.length === 0)) {
@@ -1155,7 +1155,7 @@
 		try {
 			dom.btnSaveFeatLogin.disabled = true;
 			const res = await apiCall({
-				path: '/site-checkup-pro/v1/tasks/set-login-slug',
+				path: '/genioussonu-site-checkup/v1/tasks/set-login-slug',
 				method: 'POST',
 				headers: (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.set_login_slug) ? { 'X-WPSG-Nonce': window.wpsgData.nonces.set_login_slug } : {},
 				data: { slug, confirm: 'CHANGE' },
@@ -1201,7 +1201,7 @@
 
 		try {
 			const res = await apiCall({
-				path: '/site-checkup-pro/v1/tasks/set-login-slug',
+				path: '/genioussonu-site-checkup/v1/tasks/set-login-slug',
 				method: 'POST',
 				headers: (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.set_login_slug) ? { 'X-WPSG-Nonce': window.wpsgData.nonces.set_login_slug } : {},
 				data: { slug: '', confirm: 'CHANGE' },
@@ -1798,7 +1798,7 @@
 			}
 
 			const res = await apiCall({
-				path: `/site-checkup-pro/v1/tasks/${taskId}/run`,
+				path: `/genioussonu-site-checkup/v1/tasks/${taskId}/run`,
 				method: 'POST',
 				headers: headers,
 				data: Object.assign(
@@ -1886,7 +1886,7 @@
 			}
 
 			const res = await apiCall({
-				path: `/site-checkup-pro/v1/tasks/${taskId}/undo`,
+				path: `/genioussonu-site-checkup/v1/tasks/${taskId}/undo`,
 				method: 'POST',
 				headers: headers,
 				data: token ? { reauth_token: token } : {},
@@ -1936,7 +1936,7 @@
 
 		try {
 			const res = await apiCall({
-				path: `/site-checkup-pro/v1/tasks/${taskId}/verify`,
+				path: `/genioussonu-site-checkup/v1/tasks/${taskId}/verify`,
 				method: 'POST',
 				data: { force_fresh: true },
 			});
@@ -1977,7 +1977,7 @@
 
 		try {
 			const res = await apiCall({
-				path: '/site-checkup-pro/v1/vulnerabilities/verify-fix',
+				path: '/genioussonu-site-checkup/v1/vulnerabilities/verify-fix',
 				method: 'POST',
 				data: { slug: slug, type: type },
 			});
@@ -2068,7 +2068,7 @@
 
 		try {
 			const res = await apiCall({
-				path: `/site-checkup-pro/v1/tasks/${taskId}/run`,
+				path: `/genioussonu-site-checkup/v1/tasks/${taskId}/run`,
 				method: 'POST',
 			});
 
@@ -2153,7 +2153,7 @@
 
 		try {
 			const res = await apiCall({
-				path: `/site-checkup-pro/v1/tasks/${taskId}/diff`,
+				path: `/genioussonu-site-checkup/v1/tasks/${taskId}/diff`,
 			});
 
 			if (res.diff && res.diff.insert_block) {
@@ -2231,7 +2231,7 @@
 
 		try {
 			await apiCall({
-				path: `/site-checkup-pro/v1/tasks/${taskId}/status`,
+				path: `/genioussonu-site-checkup/v1/tasks/${taskId}/status`,
 				method: 'POST',
 				headers: (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.update_status) ? { 'X-WPSG-Nonce': window.wpsgData.nonces.update_status } : {},
 				data: {
@@ -2269,7 +2269,7 @@
 
 		try {
 			const res = await apiCall({
-				path: '/site-checkup-pro/v1/tasks/set-login-slug',
+				path: '/genioussonu-site-checkup/v1/tasks/set-login-slug',
 				method: 'POST',
 				headers: (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.set_login_slug) ? { 'X-WPSG-Nonce': window.wpsgData.nonces.set_login_slug } : {},
 				data: { slug, confirm },
@@ -2334,7 +2334,7 @@
 			}
 
 			const res = await apiCall({
-				path: '/site-checkup-pro/v1/tasks/delete-plugin',
+				path: '/genioussonu-site-checkup/v1/tasks/delete-plugin',
 				method: 'POST',
 				headers: headers,
 				data: {
@@ -2378,7 +2378,7 @@
 	async function confirmManualBackup(callback = null) {
 		try {
 			await apiCall({
-				path: '/site-checkup-pro/v1/tasks/confirm-backup',
+				path: '/genioussonu-site-checkup/v1/tasks/confirm-backup',
 				method: 'POST',
 				headers: (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.confirm_backup) ? { 'X-WPSG-Nonce': window.wpsgData.nonces.confirm_backup } : {},
 			});
@@ -2409,7 +2409,7 @@
 
 		try {
 			const res = await apiCall({
-				path: '/site-checkup-pro/v1/tasks/update-baseline',
+				path: '/genioussonu-site-checkup/v1/tasks/update-baseline',
 				method: 'POST',
 				headers: (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.update_baseline) ? { 'X-WPSG-Nonce': window.wpsgData.nonces.update_baseline } : {},
 			});
@@ -2458,7 +2458,7 @@
 
 		try {
 			const res = await apiCall({
-				path: '/site-checkup-pro/v1/reauth',
+				path: '/genioussonu-site-checkup/v1/reauth',
 				method: 'POST',
 				headers: (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.reauth) ? { 'X-WPSG-Nonce': window.wpsgData.nonces.reauth } : {},
 				data: { password },
@@ -2496,7 +2496,7 @@
 
 		try {
 			const res = await apiCall({
-				path: '/site-checkup-pro/v1/sessions',
+				path: '/genioussonu-site-checkup/v1/sessions',
 			});
 
 			const sessions = (res && Array.isArray(res.sessions)) ? res.sessions : [];
@@ -2535,7 +2535,7 @@
 					btn.disabled = true;
 					try {
 						await apiCall({
-							path: '/site-checkup-pro/v1/sessions/destroy',
+							path: '/genioussonu-site-checkup/v1/sessions/destroy',
 							method: 'POST',
 							headers: (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.destroy_session) ? { 'X-WPSG-Nonce': window.wpsgData.nonces.destroy_session } : {},
 							data: { verifier },
@@ -2566,7 +2566,7 @@
 
 		try {
 			await apiCall({
-				path: '/site-checkup-pro/v1/sessions/destroy-others',
+				path: '/genioussonu-site-checkup/v1/sessions/destroy-others',
 				method: 'POST',
 				headers: (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.destroy_session) ? { 'X-WPSG-Nonce': window.wpsgData.nonces.destroy_session } : {},
 			});
@@ -2589,7 +2589,7 @@
 
 		try {
 			const res = await apiCall({
-				path: '/site-checkup-pro/v1/app-passwords',
+				path: '/genioussonu-site-checkup/v1/app-passwords',
 			});
 
 			const passwords = (res && Array.isArray(res.passwords)) ? res.passwords : [];
@@ -2631,7 +2631,7 @@
 						btn.disabled = true;
 						try {
 							const revRes = await apiCall({
-								path: '/site-checkup-pro/v1/app-passwords/revoke',
+								path: '/genioussonu-site-checkup/v1/app-passwords/revoke',
 								method: 'POST',
 								headers: {
 									'X-WPSG-Nonce': (window.wpsgData && window.wpsgData.nonces && window.wpsgData.nonces.revoke_app_pass) || '',
@@ -2673,7 +2673,7 @@
 
 		try {
 			const res = await apiCall({
-				path: '/site-checkup-pro/v1/csp-reports',
+				path: '/genioussonu-site-checkup/v1/csp-reports',
 			});
 
 			const reports = (res && Array.isArray(res.reports)) ? res.reports : [];
@@ -2705,7 +2705,7 @@
 
 		try {
 			const res = await apiCall({
-				path: '/site-checkup-pro/v1/audit-log',
+				path: '/genioussonu-site-checkup/v1/audit-log',
 			});
 
 			const logs = (res && Array.isArray(res.logs)) ? res.logs : [];
@@ -2829,7 +2829,7 @@
 
 		try {
 			state.restLoading = true;
-			const res = await apiCall({ path: '/site-checkup-pro/v1/developer/rest-audit' });
+			const res = await apiCall({ path: '/genioussonu-site-checkup/v1/developer/rest-audit' });
 			const data = (res && res.data) ? res.data : res;
 			if (data && Array.isArray(data.endpoints)) {
 				state.restData = data;
@@ -2977,7 +2977,7 @@
 
 		try {
 			const res = await apiCall({
-				path: '/site-checkup-pro/v1/settings',
+				path: '/genioussonu-site-checkup/v1/settings',
 				method: 'POST',
 				data: { wpsg_environment_type: env },
 			});
@@ -3003,7 +3003,7 @@
 
 	async function getDiagnosticSnapshot() {
 		if (state.diagnosticMarkdown) return state.diagnosticMarkdown;
-		const res = await apiCall({ path: '/site-checkup-pro/v1/developer/diagnostic-snapshot' });
+		const res = await apiCall({ path: '/genioussonu-site-checkup/v1/developer/diagnostic-snapshot' });
 		if (res && res.markdown) {
 			state.diagnosticMarkdown = res.markdown;
 			return res.markdown;
@@ -3071,7 +3071,7 @@
 		if (force) dom.devCronSummary.textContent = 'Scanning WP-Cron schedules and hooks...';
 
 		try {
-			const res = await apiCall({ path: '/site-checkup-pro/v1/developer/cron-audit' });
+			const res = await apiCall({ path: '/genioussonu-site-checkup/v1/developer/cron-audit' });
 			const data = (res && res.data) ? res.data : res;
 			const sum = (data && data.summary) ? data.summary : data;
 			if (sum) {
@@ -3098,7 +3098,7 @@
 		if (force) dom.devDbSummary.textContent = 'Scanning database for bloat and orphaned records...';
 
 		try {
-			const res = await apiCall({ path: '/site-checkup-pro/v1/developer/db-health' });
+			const res = await apiCall({ path: '/genioussonu-site-checkup/v1/developer/db-health' });
 			const data = (res && res.data) ? res.data : res;
 			const sum = (data && data.summary) ? data.summary : data;
 			const details = (data && data.details) ? data.details : {};
@@ -3141,7 +3141,7 @@
 
 			try {
 				const res = await apiCall({
-					path: '/site-checkup-pro/v1/developer/db-health/clean',
+					path: '/genioussonu-site-checkup/v1/developer/db-health/clean',
 					method: 'POST',
 					data: {
 						type: 'all',
@@ -3174,7 +3174,7 @@
 		if (force) dom.devMigrationSummary.textContent = 'Scanning options and postmeta for serialized URL hazards...';
 
 		try {
-			const res = await apiCall({ path: '/site-checkup-pro/v1/developer/migration-readiness' });
+			const res = await apiCall({ path: '/genioussonu-site-checkup/v1/developer/migration-readiness' });
 			const data = (res && res.data) ? res.data : res;
 			if (data) {
 				const sum = data.summary || {};
@@ -3195,7 +3195,7 @@
 		if (force) dom.devChangelogSummary.textContent = 'Compiling changelog notices from active updates...';
 
 		try {
-			const res = await apiCall({ path: '/site-checkup-pro/v1/developer/changelog-digest' });
+			const res = await apiCall({ path: '/genioussonu-site-checkup/v1/developer/changelog-digest' });
 			const d = (res && res.data) ? res.data : res;
 			if (d) {
 				const items = Array.isArray(d.items) ? d.items : [];
@@ -3243,7 +3243,7 @@
 		const statusEl = isPage ? dom.pageSettingsSaveStatus : dom.settingsSaveStatus;
 		if (statusEl) statusEl.textContent = 'Loading settings...';
 		try {
-			const res = await apiCall({ path: '/site-checkup-pro/v1/settings' });
+			const res = await apiCall({ path: '/genioussonu-site-checkup/v1/settings' });
 			if (res && res.settings) {
 				const s = res.settings;
 
@@ -3481,7 +3481,7 @@
 
 		try {
 			const res = await apiCall({
-				path: '/site-checkup-pro/v1/settings',
+				path: '/genioussonu-site-checkup/v1/settings',
 				method: 'POST',
 				data: payload,
 			});
@@ -3545,7 +3545,7 @@
 			promptEl.style.display = 'none';
 			try {
 				await apiCall({
-					path: '/site-checkup-pro/v1/review-prompt/dismiss',
+					path: '/genioussonu-site-checkup/v1/review-prompt/dismiss',
 					method: 'POST',
 				});
 			} catch (e) {

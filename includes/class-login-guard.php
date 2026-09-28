@@ -7,7 +7,7 @@
  * and secondary global per-username brute-force defense.
  *
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -134,7 +134,7 @@ class WPSG_Login_Guard {
 				'wpsg_locked_out',
 				sprintf(
 					/* translators: %d: remaining minutes */
-					__( 'Too many failed login attempts. Please wait %d minute(s) before trying again.', 'site-checkup-pro' ),
+					__( 'Too many failed login attempts. Please wait %d minute(s) before trying again.', 'genioussonu-site-checkup' ),
 					$remaining_minutes
 				)
 			);
@@ -150,7 +150,7 @@ class WPSG_Login_Guard {
 				'wpsg_global_locked_out',
 				sprintf(
 					/* translators: %d: remaining minutes */
-					__( 'Account temporarily protected due to suspicious activity. Please wait %d minute(s).', 'site-checkup-pro' ),
+					__( 'Account temporarily protected due to suspicious activity. Please wait %d minute(s).', 'genioussonu-site-checkup' ),
 					$remaining_minutes
 				)
 			);
@@ -273,7 +273,7 @@ class WPSG_Login_Guard {
 					'distributed_attack',
 					sprintf(
 						/* translators: %s: username */
-						__( 'Distributed brute-force attack detected on username "%s" (50+ failed attempts). Account temporarily protected.', 'site-checkup-pro' ),
+						__( 'Distributed brute-force attack detected on username "%s" (50+ failed attempts). Account temporarily protected.', 'genioussonu-site-checkup' ),
 						$clean_user
 					),
 					array( 'target_user' => $clean_user, 'total_attempts' => $user_attempts )
@@ -284,9 +284,9 @@ class WPSG_Login_Guard {
 		// 5. Redacted audit log entry (STRICTLY NEVER LOG PASSWORDS)
 		if ( class_exists( 'WPSG_Audit_Log' ) ) {
 			/* translators: 1: client IP address, 2: lockout seconds, 3: attempt count */
-			$locked_msg = sprintf( __( 'IP %1$s locked out for %2$d seconds after %3$d failed login attempts.', 'site-checkup-pro' ), $client_ip, $lock_seconds, $attempts );
+			$locked_msg = sprintf( __( 'IP %1$s locked out for %2$d seconds after %3$d failed login attempts.', 'genioussonu-site-checkup' ), $client_ip, $lock_seconds, $attempts );
 			/* translators: 1: username, 2: client IP address */
-			$failed_msg = sprintf( __( 'Failed login recorded for user "%1$s" from %2$s.', 'site-checkup-pro' ), $clean_user, $client_ip );
+			$failed_msg = sprintf( __( 'Failed login recorded for user "%1$s" from %2$s.', 'genioussonu-site-checkup' ), $clean_user, $client_ip );
 
 			WPSG_Audit_Log::log(
 				'login_guard',
@@ -443,7 +443,7 @@ class WPSG_Login_Guard {
 	 */
 	public function mask_login_errors( $errors ) {
 		if ( ! empty( $errors ) && false === strpos( $errors, 'wpsg_locked_out' ) ) {
-			return '<strong>' . esc_html__( 'Error:', 'site-checkup-pro' ) . '</strong> ' . esc_html__( 'Invalid username or password.', 'site-checkup-pro' );
+			return '<strong>' . esc_html__( 'Error:', 'genioussonu-site-checkup' ) . '</strong> ' . esc_html__( 'Invalid username or password.', 'genioussonu-site-checkup' );
 		}
 		return $errors;
 	}

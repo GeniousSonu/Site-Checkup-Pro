@@ -6,7 +6,7 @@
  * and dashboard notification notices.
  *
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -162,19 +162,19 @@ class WPSG_Scheduler {
 		}
 
 		if ( $due_count > 0 ) {
-			$url = admin_url( 'admin.php?page=site-checkup-pro' );
+			$url = admin_url( 'admin.php?page=genioussonu-site-checkup' );
 			printf(
 				'<div class="notice notice-warning is-dismissible"><p><strong>%1$s:</strong> %2$s <a href="%3$s">%4$s &rarr;</a></p></div>',
-				esc_html__( 'Site Checkup Pro Alert', 'site-checkup-pro' ),
+				esc_html__( 'GeniousSonu Site Checkup Alert', 'genioussonu-site-checkup' ),
 				esc_html(
 					sprintf(
 						/* translators: %d: count of due tasks */
-						__( 'You have %d recurring security task(s) or password rotations due today.', 'site-checkup-pro' ),
+						__( 'You have %d recurring security task(s) or password rotations due today.', 'genioussonu-site-checkup' ),
 						$due_count
 					)
 				),
 				esc_url( $url ),
-				esc_html__( 'View Check-up Dashboard', 'site-checkup-pro' )
+				esc_html__( 'View Check-up Dashboard', 'genioussonu-site-checkup' )
 			);
 		}
 	}

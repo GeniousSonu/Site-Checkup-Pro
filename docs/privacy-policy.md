@@ -1,13 +1,13 @@
-# Privacy Policy for Site Checkup Pro
+# Privacy Policy for GeniousSonu Site Checkup
 
 *Last Updated: September 17, 2026*  
-*Website: [https://www.genioussonu.me/plugin/site-checkup-pro/](https://www.genioussonu.me/plugin/site-checkup-pro/)*
+*Website: [https://www.genioussonu.me/plugin/genioussonu-site-checkup/](https://www.genioussonu.me/plugin/genioussonu-site-checkup/)*
 
-This Privacy Policy explains what information is collected, processed, or transmitted by **Site Checkup Pro**, a WordPress security and SOP hardening orchestrator developed by **SK Sahinur Islam** ([https://www.genioussonu.me/](https://www.genioussonu.me/)).
+This Privacy Policy explains what information is collected, processed, or transmitted by **GeniousSonu Site Checkup**, a WordPress security and SOP hardening orchestrator developed by **SK Sahinur Islam** ([https://www.genioussonu.me/](https://www.genioussonu.me/)).
 
 ## 1. Zero Tracking & Local Operation
 
-Site Checkup Pro operates almost exclusively on your local WordPress installation. We do **not** run telemetry, tracking beacons, usage analytics, or remote diagnostics. We do not sell, rent, or collect any personal information about your website visitors, registered users, or administrators.
+GeniousSonu Site Checkup operates almost exclusively on your local WordPress installation. We do **not** run telemetry, tracking beacons, usage analytics, or remote diagnostics. We do not sell, rent, or collect any personal information about your website visitors, registered users, or administrators.
 
 ## 2. Outbound Network Requests & Third-Party Services
 

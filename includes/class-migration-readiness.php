@@ -6,7 +6,7 @@
  * specifically inside PHP serialized data. Surfaces affected tables/rows and provides
  * actionable WP-CLI guidance without modifying any data.
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.2.0
@@ -87,7 +87,7 @@ class WPSG_Migration_Readiness {
 							'table'      => 'options',
 							'identifier' => sanitize_key( $row['option_name'] ),
 							'sample'     => self::extract_url_snippet( $val ),
-							'issue'      => __( 'Absolute URL inside serialized option value', 'site-checkup-pro' ),
+							'issue'      => __( 'Absolute URL inside serialized option value', 'genioussonu-site-checkup' ),
 						);
 					}
 				}
@@ -117,7 +117,7 @@ class WPSG_Migration_Readiness {
 							'table'      => 'postmeta',
 							'identifier' => 'Post #' . absint( $row['post_id'] ) . ' (' . sanitize_key( $row['meta_key'] ) . ')',
 							'sample'     => self::extract_url_snippet( $val ),
-							'issue'      => __( 'Absolute URL inside serialized postmeta', 'site-checkup-pro' ),
+							'issue'      => __( 'Absolute URL inside serialized postmeta', 'genioussonu-site-checkup' ),
 						);
 					}
 				}
@@ -208,8 +208,8 @@ class WPSG_Migration_Readiness {
 	public static function get_guidance( $site_host = '' ) {
 		$old_url = $site_host ? 'https://' . $site_host : 'https://oldsite.com';
 		return array(
-			'title'       => __( 'Why Serialized URLs Break Migrations', 'site-checkup-pro' ),
-			'explanation' => __( 'PHP serialized strings encode exact character counts (e.g. s:21:"https://oldsite.com"). If you perform a standard SQL search-and-replace, the new domain length will mismatch the declared byte count, causing PHP unserialize() to fail silently. This corrupts widgets, page builders, and theme options.', 'site-checkup-pro' ),
+			'title'       => __( 'Why Serialized URLs Break Migrations', 'genioussonu-site-checkup' ),
+			'explanation' => __( 'PHP serialized strings encode exact character counts (e.g. s:21:"https://oldsite.com"). If you perform a standard SQL search-and-replace, the new domain length will mismatch the declared byte count, causing PHP unserialize() to fail silently. This corrupts widgets, page builders, and theme options.', 'genioussonu-site-checkup' ),
 			'cli_command' => sprintf( 'wp search-replace "%s" "https://newsite.com" --all-tables --precise', esc_attr( $old_url ) ),
 			'recommended_tools' => array(
 				'WP-CLI search-replace (Official CLI method with serialization recalculation)',

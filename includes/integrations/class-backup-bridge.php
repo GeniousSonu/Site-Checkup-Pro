@@ -5,7 +5,7 @@
  * Provides status and safe triggers for established backup solutions.
  *
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -44,15 +44,15 @@ class WPSG_Backup_Bridge {
 				'redirect_url'=> $status['trigger_url'],
 				'message'     => sprintf(
 					/* translators: %s: plugin name */
-					__( 'Please trigger a full backup via %s before continuing.', 'site-checkup-pro' ),
-					$status['plugin_name'] ? $status['plugin_name'] : __( 'your backup plugin', 'site-checkup-pro' )
+					__( 'Please trigger a full backup via %s before continuing.', 'genioussonu-site-checkup' ),
+					$status['plugin_name'] ? $status['plugin_name'] : __( 'your backup plugin', 'genioussonu-site-checkup' )
 				),
 			);
 		}
 
 		return array(
 			'success' => false,
-			'message' => __( 'No supported backup plugin detected to trigger automatic backup.', 'site-checkup-pro' ),
+			'message' => __( 'No supported backup plugin detected to trigger automatic backup.', 'genioussonu-site-checkup' ),
 		);
 	}
 }

@@ -5,7 +5,7 @@
  * Exposes endpoints for task listing, running, undoing, diff previews,
  * baseline updates, reports, re-authentication, session control, scoped settings, and CSP reporting.
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -35,7 +35,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'site-checkup-pro/v1';
+	protected $namespace = 'genioussonu-site-checkup/v1';
 
 	/**
 	 * Singleton instance.
@@ -432,7 +432,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return new WP_Error(
 				'rest_forbidden',
-				__( 'You do not have administrative permissions to access Site Checkup Pro.', 'site-checkup-pro' ),
+				__( 'You do not have administrative permissions to access GeniousSonu Site Checkup.', 'genioussonu-site-checkup' ),
 				array( 'status' => rest_authorization_required_code() )
 			);
 		}
@@ -455,7 +455,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 		if ( $nonce && ! wp_verify_nonce( $nonce, 'wpsg_' . $action ) ) {
 			return new WP_Error(
 				'invalid_action_nonce',
-				__( 'Invalid or expired security token for this action.', 'site-checkup-pro' ),
+				__( 'Invalid or expired security token for this action.', 'genioussonu-site-checkup' ),
 				array( 'status' => 403 )
 			);
 		}
@@ -500,7 +500,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			try {
 				$task_data = $task->to_array( $db_record );
 			} catch ( \Throwable $e ) {
-				error_log( sprintf( '[Site Checkup Pro] Error serializing task "%s": %s in %s:%d', $task->id, $e->getMessage(), $e->getFile(), $e->getLine() ) );
+				error_log( sprintf( '[GeniousSonu Site Checkup] Error serializing task "%s": %s in %s:%d', $task->id, $e->getMessage(), $e->getFile(), $e->getLine() ) );
 				$task_data = array(
 					'id'               => $task->id,
 					'section'          => $task->section,
@@ -574,7 +574,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			if ( ! $allowed ) {
 				return new WP_Error(
 					'rate_limited',
-					__( 'Too many task execution requests. Please pause a moment.', 'site-checkup-pro' ),
+					__( 'Too many task execution requests. Please pause a moment.', 'genioussonu-site-checkup' ),
 					array( 'status' => 429 )
 				);
 			}
@@ -631,7 +631,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 		$task    = WPSG_Task_Registry::get_instance()->get( $task_id );
 
 		if ( ! $task ) {
-			return new WP_Error( 'not_found', __( 'Task not found.', 'site-checkup-pro' ), array( 'status' => 404 ) );
+			return new WP_Error( 'not_found', __( 'Task not found.', 'genioussonu-site-checkup' ), array( 'status' => 404 ) );
 		}
 
 		$verification = class_exists( 'WPSG_HTTP_Verifier' )
@@ -677,7 +677,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			return true;
 		}
 
-		return new WP_Error( 'rest_forbidden', __( 'Access denied.', 'site-checkup-pro' ), array( 'status' => 403 ) );
+		return new WP_Error( 'rest_forbidden', __( 'Access denied.', 'genioussonu-site-checkup' ), array( 'status' => 403 ) );
 	}
 
 	/**
@@ -709,7 +709,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 		$task    = WPSG_Task_Registry::get_instance()->get( $task_id );
 
 		if ( ! $task ) {
-			return new WP_Error( 'not_found', __( 'Task not found.', 'site-checkup-pro' ), array( 'status' => 404 ) );
+			return new WP_Error( 'not_found', __( 'Task not found.', 'genioussonu-site-checkup' ), array( 'status' => 404 ) );
 		}
 
 		$diff = $task->get_diff();
@@ -739,14 +739,14 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 
 		$task = WPSG_Task_Registry::get_instance()->get( $task_id );
 		if ( ! $task ) {
-			return new WP_Error( 'not_found', __( 'Task not found.', 'site-checkup-pro' ), array( 'status' => 404 ) );
+			return new WP_Error( 'not_found', __( 'Task not found.', 'genioussonu-site-checkup' ), array( 'status' => 404 ) );
 		}
 
 		// Security constraint: Only Level C manual checklist tasks may have their status updated directly!
 		if ( 'C' !== $task->automation_level ) {
 			return new WP_Error(
 				'invalid_level',
-				__( 'Automated Level A and guided Level B tasks cannot be manually marked done. They must be executed or verified through their respective procedures.', 'site-checkup-pro' ),
+				__( 'Automated Level A and guided Level B tasks cannot be manually marked done. They must be executed or verified through their respective procedures.', 'genioussonu-site-checkup' ),
 				array( 'status' => 403 )
 			);
 		}
@@ -765,7 +765,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			null,
 			array( 'status' => $status, 'note' => $note ),
 			'success',
-			__( 'Manual SOP checklist item updated.', 'site-checkup-pro' )
+			__( 'Manual SOP checklist item updated.', 'genioussonu-site-checkup' )
 		);
 
 		return rest_ensure_response( array(
@@ -791,7 +791,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 
 		return rest_ensure_response( array(
 			'success' => true,
-			'message' => __( 'Manual backup confirmation recorded.', 'site-checkup-pro' ),
+			'message' => __( 'Manual backup confirmation recorded.', 'genioussonu-site-checkup' ),
 		) );
 	}
 
@@ -815,12 +815,12 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			null,
 			null,
 			'success',
-			__( 'Security baseline snapshot updated with current administrators and options.', 'site-checkup-pro' )
+			__( 'Security baseline snapshot updated with current administrators and options.', 'genioussonu-site-checkup' )
 		);
 
 		return rest_ensure_response( array(
 			'success' => $updated,
-			'message' => __( 'Baseline updated successfully.', 'site-checkup-pro' ),
+			'message' => __( 'Baseline updated successfully.', 'genioussonu-site-checkup' ),
 		) );
 	}
 
@@ -845,7 +845,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			return rest_ensure_response( array(
 				'success'         => false,
 				'reauth_required' => true,
-				'message'         => __( 'Administrator password confirmation is required before changing the login URL.', 'site-checkup-pro' ),
+				'message'         => __( 'Administrator password confirmation is required before changing the login URL.', 'genioussonu-site-checkup' ),
 			) );
 		}
 
@@ -862,7 +862,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 				array( 'slug_configured' => true ),
 				'success',
 				/* translators: %s: custom login slug */
-				sprintf( __( 'Custom login URL activated: /%s/', 'site-checkup-pro' ), $result['slug'] )
+				sprintf( __( 'Custom login URL activated: /%s/', 'genioussonu-site-checkup' ), $result['slug'] )
 			);
 		}
 
@@ -890,7 +890,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			return rest_ensure_response( array(
 				'success'         => false,
 				'reauth_required' => true,
-				'message'         => __( 'Administrator password confirmation is required before deleting plugins.', 'site-checkup-pro' ),
+				'message'         => __( 'Administrator password confirmation is required before deleting plugins.', 'genioussonu-site-checkup' ),
 			) );
 		}
 
@@ -993,11 +993,11 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 
 		$password = $request->get_param( 'password' );
 		if ( empty( $password ) || ! is_string( $password ) ) {
-			return new WP_Error( 'missing_password', __( 'Password is required.', 'site-checkup-pro' ), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_password', __( 'Password is required.', 'genioussonu-site-checkup' ), array( 'status' => 400 ) );
 		}
 
 		if ( ! class_exists( 'WPSG_Session_Manager' ) ) {
-			return new WP_Error( 'unavailable', __( 'Session manager is not available.', 'site-checkup-pro' ), array( 'status' => 500 ) );
+			return new WP_Error( 'unavailable', __( 'Session manager is not available.', 'genioussonu-site-checkup' ), array( 'status' => 500 ) );
 		}
 
 		$result = WPSG_Session_Manager::verify_password_and_grant_reauth( $password );
@@ -1021,7 +1021,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 
 		// IDOR guard: viewing another user's sessions requires edit_users capability
 		if ( $target_user_id !== $current_user_id && ! current_user_can( 'edit_users' ) ) {
-			return new WP_Error( 'rest_forbidden', __( 'You cannot inspect sessions for other users.', 'site-checkup-pro' ), array( 'status' => 403 ) );
+			return new WP_Error( 'rest_forbidden', __( 'You cannot inspect sessions for other users.', 'genioussonu-site-checkup' ), array( 'status' => 403 ) );
 		}
 
 		$sessions = WPSG_Session_Manager::get_user_sessions( $target_user_id );
@@ -1049,7 +1049,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 		$verifier        = sanitize_text_field( $request->get_param( 'verifier' ) );
 
 		if ( empty( $verifier ) ) {
-			return new WP_Error( 'missing_verifier', __( 'Session verifier required.', 'site-checkup-pro' ), array( 'status' => 400 ) );
+			return new WP_Error( 'missing_verifier', __( 'Session verifier required.', 'genioussonu-site-checkup' ), array( 'status' => 400 ) );
 		}
 
 		$result = WPSG_Session_Manager::destroy_session( $target_user_id, $verifier );
@@ -1132,7 +1132,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 			if ( ! $allowed ) {
 				return new WP_Error(
 					'rate_limited',
-					__( 'Too many reports from this IP.', 'site-checkup-pro' ),
+					__( 'Too many reports from this IP.', 'genioussonu-site-checkup' ),
 					array( 'status' => 429 )
 				);
 			}
@@ -1144,7 +1144,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 		if ( strlen( $body ) > 10240 ) {
 			return new WP_Error(
 				'payload_too_large',
-				__( 'CSP report payload exceeds 10KB size limit.', 'site-checkup-pro' ),
+				__( 'CSP report payload exceeds 10KB size limit.', 'genioussonu-site-checkup' ),
 				array( 'status' => 413 )
 			);
 		}
@@ -1153,7 +1153,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 		if ( ! is_array( $data ) ) {
 			return new WP_Error(
 				'invalid_json',
-				__( 'Invalid JSON payload.', 'site-checkup-pro' ),
+				__( 'Invalid JSON payload.', 'genioussonu-site-checkup' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -1460,7 +1460,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 
 		return rest_ensure_response( array(
 			'success' => true,
-			'message' => __( 'Plugin settings updated successfully.', 'site-checkup-pro' ),
+			'message' => __( 'Plugin settings updated successfully.', 'genioussonu-site-checkup' ),
 		) );
 	}
 
@@ -1473,7 +1473,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 	public function get_vulnerabilities( $request ) {
 		$data = class_exists( 'WPSG_Vulnerability_Checker' )
 			? WPSG_Vulnerability_Checker::get_vulnerability_status( false )
-			: array( 'status' => 'pending', 'message' => __( 'Vulnerability module unavailable.', 'site-checkup-pro' ) );
+			: array( 'status' => 'pending', 'message' => __( 'Vulnerability module unavailable.', 'genioussonu-site-checkup' ) );
 
 		return rest_ensure_response( $data );
 	}
@@ -1487,7 +1487,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 	public function scan_vulnerabilities( $request ) {
 		$data = class_exists( 'WPSG_Vulnerability_Checker' )
 			? WPSG_Vulnerability_Checker::get_vulnerability_status( true )
-			: array( 'status' => 'pending', 'message' => __( 'Vulnerability module unavailable.', 'site-checkup-pro' ) );
+			: array( 'status' => 'pending', 'message' => __( 'Vulnerability module unavailable.', 'genioussonu-site-checkup' ) );
 
 		return rest_ensure_response( $data );
 	}
@@ -1505,7 +1505,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 		if ( empty( $slug ) ) {
 			return new WP_Error(
 				'wpsg_missing_param',
-				__( 'Component slug is required.', 'site-checkup-pro' ),
+				__( 'Component slug is required.', 'genioussonu-site-checkup' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -1513,7 +1513,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 		if ( ! class_exists( 'WPSG_Vulnerability_Checker' ) ) {
 			return new WP_Error(
 				'wpsg_module_missing',
-				__( 'Vulnerability checker module unavailable.', 'site-checkup-pro' ),
+				__( 'Vulnerability checker module unavailable.', 'genioussonu-site-checkup' ),
 				array( 'status' => 500 )
 			);
 		}
@@ -1532,7 +1532,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 		$contact = $request->get_param( 'contact' );
 		$result  = class_exists( 'WPSG_Security_Txt' )
 			? WPSG_Security_Txt::generate( $contact )
-			: array( 'success' => false, 'message' => __( 'Security.txt module unavailable.', 'site-checkup-pro' ) );
+			: array( 'success' => false, 'message' => __( 'Security.txt module unavailable.', 'genioussonu-site-checkup' ) );
 
 		return rest_ensure_response( $result );
 	}
@@ -1546,7 +1546,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 		update_option( 'wpsg_review_prompt_dismissed', true );
 		return rest_ensure_response( array(
 			'success' => true,
-			'message' => __( 'Review prompt dismissed.', 'site-checkup-pro' ),
+			'message' => __( 'Review prompt dismissed.', 'genioussonu-site-checkup' ),
 		) );
 	}
 
@@ -1558,7 +1558,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 	 */
 	public function get_rest_audit( $request ) {
 		if ( ! class_exists( 'WPSG_Rest_Auditor' ) ) {
-			return new WP_Error( 'wpsg_class_missing', __( 'REST API Auditor component missing.', 'site-checkup-pro' ), array( 'status' => 500 ) );
+			return new WP_Error( 'wpsg_class_missing', __( 'REST API Auditor component missing.', 'genioussonu-site-checkup' ), array( 'status' => 500 ) );
 		}
 
 		$results = WPSG_Rest_Auditor::audit_routes();
@@ -1576,7 +1576,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 	 */
 	public function get_diagnostic_snapshot( $request ) {
 		if ( ! class_exists( 'WPSG_Diagnostic_Snapshot' ) ) {
-			return new WP_Error( 'wpsg_class_missing', __( 'Diagnostic Snapshot component missing.', 'site-checkup-pro' ), array( 'status' => 500 ) );
+			return new WP_Error( 'wpsg_class_missing', __( 'Diagnostic Snapshot component missing.', 'genioussonu-site-checkup' ), array( 'status' => 500 ) );
 		}
 
 		$snapshot = WPSG_Diagnostic_Snapshot::compile();
@@ -1594,7 +1594,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 	 */
 	public function get_cron_audit( $request ) {
 		if ( ! class_exists( 'WPSG_Cron_Auditor' ) ) {
-			return new WP_Error( 'wpsg_class_missing', __( 'Cron Auditor component missing.', 'site-checkup-pro' ), array( 'status' => 500 ) );
+			return new WP_Error( 'wpsg_class_missing', __( 'Cron Auditor component missing.', 'genioussonu-site-checkup' ), array( 'status' => 500 ) );
 		}
 
 		$audit = WPSG_Cron_Auditor::audit_cron_jobs();
@@ -1612,7 +1612,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 	 */
 	public function get_db_health( $request ) {
 		if ( ! class_exists( 'WPSG_Db_Health_Scanner' ) ) {
-			return new WP_Error( 'wpsg_class_missing', __( 'Database Health Scanner component missing.', 'site-checkup-pro' ), array( 'status' => 500 ) );
+			return new WP_Error( 'wpsg_class_missing', __( 'Database Health Scanner component missing.', 'genioussonu-site-checkup' ), array( 'status' => 500 ) );
 		}
 
 		$scan = WPSG_Db_Health_Scanner::scan();
@@ -1630,7 +1630,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 	 */
 	public function clean_db_health( $request ) {
 		if ( ! class_exists( 'WPSG_Db_Health_Scanner' ) ) {
-			return new WP_Error( 'wpsg_class_missing', __( 'Database Health Scanner component missing.', 'site-checkup-pro' ), array( 'status' => 500 ) );
+			return new WP_Error( 'wpsg_class_missing', __( 'Database Health Scanner component missing.', 'genioussonu-site-checkup' ), array( 'status' => 500 ) );
 		}
 
 		$type = $request->get_param( 'type' );
@@ -1665,7 +1665,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 	 */
 	public function get_migration_readiness( $request ) {
 		if ( ! class_exists( 'WPSG_Migration_Readiness' ) ) {
-			return new WP_Error( 'wpsg_class_missing', __( 'Migration Readiness component missing.', 'site-checkup-pro' ), array( 'status' => 500 ) );
+			return new WP_Error( 'wpsg_class_missing', __( 'Migration Readiness component missing.', 'genioussonu-site-checkup' ), array( 'status' => 500 ) );
 		}
 
 		$scan = WPSG_Migration_Readiness::scan();
@@ -1683,7 +1683,7 @@ class WPSG_Rest_Controller extends WP_REST_Controller {
 	 */
 	public function get_changelog_digest( $request ) {
 		if ( ! class_exists( 'WPSG_Changelog_Digest' ) ) {
-			return new WP_Error( 'wpsg_class_missing', __( 'Changelog Digest component missing.', 'site-checkup-pro' ), array( 'status' => 500 ) );
+			return new WP_Error( 'wpsg_class_missing', __( 'Changelog Digest component missing.', 'genioussonu-site-checkup' ), array( 'status' => 500 ) );
 		}
 
 		$digest = WPSG_Changelog_Digest::compile_digest();

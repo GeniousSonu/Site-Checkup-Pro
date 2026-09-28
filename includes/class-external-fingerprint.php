@@ -5,7 +5,7 @@
  * Conducts safe, non-destructive loopback HTTP probes against the site's origin
  * to detect exposed sensitive files, version disclosures, backup artifacts, and debug logs.
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.2.0
@@ -109,12 +109,12 @@ class WPSG_External_Fingerprint {
 		$message = empty( $exposed )
 			? sprintf(
 				/* translators: %d: count */
-				__( 'External fingerprint probe clean: %d sensitive paths checked with zero exposures.', 'site-checkup-pro' ),
+				__( 'External fingerprint probe clean: %d sensitive paths checked with zero exposures.', 'genioussonu-site-checkup' ),
 				$scanned
 			)
 			: sprintf(
 				/* translators: 1: exposed count, 2: total count */
-				__( 'Alert: %1$d external exposure(s) detected out of %2$d paths probed.', 'site-checkup-pro' ),
+				__( 'Alert: %1$d external exposure(s) detected out of %2$d paths probed.', 'genioussonu-site-checkup' ),
 				count( $exposed ),
 				$scanned
 			);
@@ -142,51 +142,51 @@ class WPSG_External_Fingerprint {
 		return array(
 			'git_head' => array(
 				'path'        => '.git/HEAD',
-				'title'       => __( 'Exposed Git Repository Metadata', 'site-checkup-pro' ),
+				'title'       => __( 'Exposed Git Repository Metadata', 'genioussonu-site-checkup' ),
 				'severity'    => 'critical',
 				'pattern'     => '/ref:\s*refs\//i',
-				'description' => __( 'The .git repository directory is publicly accessible, allowing complete source code and history extraction.', 'site-checkup-pro' ),
-				'remediation' => __( 'Block access to .git directories via server rules or remove .git from public document root.', 'site-checkup-pro' ),
+				'description' => __( 'The .git repository directory is publicly accessible, allowing complete source code and history extraction.', 'genioussonu-site-checkup' ),
+				'remediation' => __( 'Block access to .git directories via server rules or remove .git from public document root.', 'genioussonu-site-checkup' ),
 			),
 			'env_file' => array(
 				'path'        => '.env',
-				'title'       => __( 'Exposed Environment File (.env)', 'site-checkup-pro' ),
+				'title'       => __( 'Exposed Environment File (.env)', 'genioussonu-site-checkup' ),
 				'severity'    => 'critical',
 				'pattern'     => '/(?:DB_|APP_|API_KEY|SECRET|PASSWORD)/i',
-				'description' => __( 'Environment configuration file containing plain secrets is publicly readable.', 'site-checkup-pro' ),
-				'remediation' => __( 'Block web access to .env files or move outside the document root immediately.', 'site-checkup-pro' ),
+				'description' => __( 'Environment configuration file containing plain secrets is publicly readable.', 'genioussonu-site-checkup' ),
+				'remediation' => __( 'Block web access to .env files or move outside the document root immediately.', 'genioussonu-site-checkup' ),
 			),
 			'wp_config_backup' => array(
 				'path'        => 'wp-config.php~',
-				'title'       => __( 'Exposed wp-config Backup File', 'site-checkup-pro' ),
+				'title'       => __( 'Exposed wp-config Backup File', 'genioussonu-site-checkup' ),
 				'severity'    => 'critical',
 				'pattern'     => '/DB_PASSWORD/i',
-				'description' => __( 'A text editor backup of wp-config.php is publicly served without PHP interpretation.', 'site-checkup-pro' ),
-				'remediation' => __( 'Delete editor backup files (e.g. wp-config.php~, wp-config.old, wp-config.php.bak) from the server.', 'site-checkup-pro' ),
+				'description' => __( 'A text editor backup of wp-config.php is publicly served without PHP interpretation.', 'genioussonu-site-checkup' ),
+				'remediation' => __( 'Delete editor backup files (e.g. wp-config.php~, wp-config.old, wp-config.php.bak) from the server.', 'genioussonu-site-checkup' ),
 			),
 			'debug_log' => array(
 				'path'        => 'wp-content/debug.log',
-				'title'       => __( 'Publicly Accessible WordPress Debug Log', 'site-checkup-pro' ),
+				'title'       => __( 'Publicly Accessible WordPress Debug Log', 'genioussonu-site-checkup' ),
 				'severity'    => 'high',
 				'pattern'     => '/(?:PHP Notice|PHP Fatal|Stack trace|\[\d{2}-[A-Za-z]{3}-\d{4})/i',
-				'description' => __( 'The WordPress debug.log file is publicly readable, exposing internal paths, queries, or error states.', 'site-checkup-pro' ),
-				'remediation' => __( 'Disable WP_DEBUG_LOG or block direct web requests to *.log files.', 'site-checkup-pro' ),
+				'description' => __( 'The WordPress debug.log file is publicly readable, exposing internal paths, queries, or error states.', 'genioussonu-site-checkup' ),
+				'remediation' => __( 'Disable WP_DEBUG_LOG or block direct web requests to *.log files.', 'genioussonu-site-checkup' ),
 			),
 			'readme_version' => array(
 				'path'        => 'readme.html',
-				'title'       => __( 'WordPress Version Leak via readme.html', 'site-checkup-pro' ),
+				'title'       => __( 'WordPress Version Leak via readme.html', 'genioussonu-site-checkup' ),
 				'severity'    => 'medium',
 				'pattern'     => '/Version\s+[0-9]+/i',
-				'description' => __( 'Default WordPress readme.html file reveals the exact core version installed.', 'site-checkup-pro' ),
-				'remediation' => __( 'Delete readme.html from the WordPress root directory.', 'site-checkup-pro' ),
+				'description' => __( 'Default WordPress readme.html file reveals the exact core version installed.', 'genioussonu-site-checkup' ),
+				'remediation' => __( 'Delete readme.html from the WordPress root directory.', 'genioussonu-site-checkup' ),
 			),
 			'license_txt' => array(
 				'path'        => 'license.txt',
-				'title'       => __( 'Exposed license.txt File', 'site-checkup-pro' ),
+				'title'       => __( 'Exposed license.txt File', 'genioussonu-site-checkup' ),
 				'severity'    => 'low',
 				'pattern'     => '/GNU GENERAL PUBLIC LICENSE/i',
-				'description' => __( 'Default license.txt file helps automated bots fingerprint WordPress installation.', 'site-checkup-pro' ),
-				'remediation' => __( 'Remove or restrict access to license.txt.', 'site-checkup-pro' ),
+				'description' => __( 'Default license.txt file helps automated bots fingerprint WordPress installation.', 'genioussonu-site-checkup' ),
+				'remediation' => __( 'Remove or restrict access to license.txt.', 'genioussonu-site-checkup' ),
 			),
 		);
 	}

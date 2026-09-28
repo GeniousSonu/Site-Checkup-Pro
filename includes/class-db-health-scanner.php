@@ -6,7 +6,7 @@
  * expired transients, excess post revisions), calculates storage impact, and provides
  * a protected Level-B cleanup action gated by password re-auth and recent backup verification.
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.2.0
@@ -131,31 +131,31 @@ class WPSG_Db_Health_Scanner {
 			),
 			'details' => array(
 				'orphaned_postmeta'  => array(
-					'label'        => __( 'Orphaned Post Metadata', 'site-checkup-pro' ),
+					'label'        => __( 'Orphaned Post Metadata', 'genioussonu-site-checkup' ),
 					'count'        => $orphaned_postmeta,
 					'estimated_kb' => $est_postmeta_kb,
-					'description'  => __( 'Meta keys referencing posts that no longer exist.', 'site-checkup-pro' ),
+					'description'  => __( 'Meta keys referencing posts that no longer exist.', 'genioussonu-site-checkup' ),
 				),
 				'orphaned_usermeta'  => array(
-					'label'        => __( 'Orphaned User Metadata', 'site-checkup-pro' ),
+					'label'        => __( 'Orphaned User Metadata', 'genioussonu-site-checkup' ),
 					'count'        => $orphaned_usermeta,
 					'estimated_kb' => $est_usermeta_kb,
-					'description'  => __( 'Meta keys referencing deleted user accounts.', 'site-checkup-pro' ),
+					'description'  => __( 'Meta keys referencing deleted user accounts.', 'genioussonu-site-checkup' ),
 				),
 				'expired_transients' => array(
-					'label'        => __( 'Expired Transients', 'site-checkup-pro' ),
+					'label'        => __( 'Expired Transients', 'genioussonu-site-checkup' ),
 					'count'        => $expired_transients,
 					'estimated_kb' => $est_transients_kb,
-					'description'  => __( 'Stale transient cache rows remaining in the options table.', 'site-checkup-pro' ),
+					'description'  => __( 'Stale transient cache rows remaining in the options table.', 'genioussonu-site-checkup' ),
 				),
 				'excess_revisions'   => array(
-					'label'        => __( 'Excess Post Revisions', 'site-checkup-pro' ),
+					'label'        => __( 'Excess Post Revisions', 'genioussonu-site-checkup' ),
 					'count'        => $excess_revisions,
 					'total_count'  => $total_revisions,
 					'threshold'    => $threshold,
 					'estimated_kb' => $est_revisions_kb,
 					/* translators: %d: revision threshold */
-					'description'  => sprintf( __( 'Post revisions beyond %d per post.', 'site-checkup-pro' ), $threshold ),
+					'description'  => sprintf( __( 'Post revisions beyond %d per post.', 'genioussonu-site-checkup' ), $threshold ),
 				),
 			),
 			'scanned_at' => current_time( 'mysql' ),
@@ -175,7 +175,7 @@ class WPSG_Db_Health_Scanner {
 
 		// 1. Authorization check
 		if ( ! current_user_can( 'manage_options' ) ) {
-			return array( 'success' => false, 'message' => __( 'Insufficient permissions to perform database cleanup.', 'site-checkup-pro' ) );
+			return array( 'success' => false, 'message' => __( 'Insufficient permissions to perform database cleanup.', 'genioussonu-site-checkup' ) );
 		}
 
 		// 2. Re-authentication verification
@@ -184,7 +184,7 @@ class WPSG_Db_Health_Scanner {
 				return array(
 					'success'      => false,
 					'needs_reauth' => true,
-					'message'      => __( 'Database cleanup requires fresh administrator password verification.', 'site-checkup-pro' ),
+					'message'      => __( 'Database cleanup requires fresh administrator password verification.', 'genioussonu-site-checkup' ),
 				);
 			}
 		}
@@ -196,7 +196,7 @@ class WPSG_Db_Health_Scanner {
 				return array(
 					'success'      => false,
 					'needs_backup' => true,
-					'message'      => __( 'Database cleanup blocked: No verified backup within 48 hours. Please verify or take a backup first.', 'site-checkup-pro' ),
+					'message'      => __( 'Database cleanup blocked: No verified backup within 48 hours. Please verify or take a backup first.', 'genioussonu-site-checkup' ),
 				);
 			}
 		}
@@ -301,7 +301,7 @@ class WPSG_Db_Health_Scanner {
 			'total_deleted'  => $total_deleted,
 			'deleted_counts' => $deleted_counts,
 			/* translators: %d: number of deleted items */
-			'message'        => sprintf( __( 'Database cleanup complete: %d orphaned items removed safely.', 'site-checkup-pro' ), $total_deleted ),
+			'message'        => sprintf( __( 'Database cleanup complete: %d orphaned items removed safely.', 'genioussonu-site-checkup' ), $total_deleted ),
 		);
 	}
 }

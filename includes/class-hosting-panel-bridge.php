@@ -6,7 +6,7 @@
  * (cPanel, Plesk, CloudPanel, RunCloud, CyberPanel) with strict consent gating,
  * HKDF-encrypted credentials, SSRF destination validation, and sslverify => true.
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -106,7 +106,7 @@ class WPSG_Hosting_Panel_Bridge {
 
 		return array(
 			'panel'      => 'none',
-			'label'      => __( 'Standard / Unmanaged Server', 'site-checkup-pro' ),
+			'label'      => __( 'Standard / Unmanaged Server', 'genioussonu-site-checkup' ),
 			'confidence' => 'none',
 		);
 	}
@@ -124,7 +124,7 @@ class WPSG_Hosting_Panel_Bridge {
 			'cloudpanel' => 'CloudPanel',
 			'runcloud'   => 'RunCloud',
 			'cyberpanel' => 'CyberPanel',
-			'none'       => __( 'None / Manual', 'site-checkup-pro' ),
+			'none'       => __( 'None / Manual', 'genioussonu-site-checkup' ),
 		);
 
 		return isset( $labels[ $panel ] ) ? $labels[ $panel ] : ucfirst( $panel );
@@ -160,7 +160,7 @@ class WPSG_Hosting_Panel_Bridge {
 		if ( ! self::is_configured() ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Hosting panel integration is not configured or lacks opt-in consent.', 'site-checkup-pro' ),
+				'message' => __( 'Hosting panel integration is not configured or lacks opt-in consent.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -177,7 +177,7 @@ class WPSG_Hosting_Panel_Bridge {
 		if ( ! self::is_configured() ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Hosting panel integration is not configured or lacks opt-in consent.', 'site-checkup-pro' ),
+				'message' => __( 'Hosting panel integration is not configured or lacks opt-in consent.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -207,7 +207,7 @@ class WPSG_Hosting_Panel_Bridge {
 		if ( ! $parsed || empty( $parsed['host'] ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Configured hosting panel URL is malformed or missing a valid host.', 'site-checkup-pro' ),
+				'message' => __( 'Configured hosting panel URL is malformed or missing a valid host.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -215,7 +215,7 @@ class WPSG_Hosting_Panel_Bridge {
 		if ( empty( $parsed['scheme'] ) || ( 'https' !== $parsed['scheme'] && 'localhost' !== $parsed['host'] && '127.0.0.1' !== $parsed['host'] ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Hosting panel API calls strictly require an HTTPS endpoint.', 'site-checkup-pro' ),
+				'message' => __( 'Hosting panel API calls strictly require an HTTPS endpoint.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -223,11 +223,11 @@ class WPSG_Hosting_Panel_Bridge {
 		if ( empty( $api_key ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Could not decrypt hosting panel credentials. Please re-enter them in Settings.', 'site-checkup-pro' ),
+				'message' => __( 'Could not decrypt hosting panel credentials. Please re-enter them in Settings.', 'genioussonu-site-checkup' ),
 			);
 		}
 
-		$endpoint = trailingslashit( $raw_url ) . 'api/v1/site-checkup-pro';
+		$endpoint = trailingslashit( $raw_url ) . 'api/v1/genioussonu-site-checkup';
 
 		if ( class_exists( 'WPSG_SSRF_Guard' ) ) {
 			$ssrf_check = WPSG_SSRF_Guard::validate_url( $endpoint );
@@ -235,7 +235,7 @@ class WPSG_Hosting_Panel_Bridge {
 				return array(
 					'success' => false,
 					/* translators: %s: error message */
-					'message' => sprintf( __( 'Hosting panel URL violates SSRF security guard: %s', 'site-checkup-pro' ), $ssrf_check->get_error_message() ),
+					'message' => sprintf( __( 'Hosting panel URL violates SSRF security guard: %s', 'genioussonu-site-checkup' ), $ssrf_check->get_error_message() ),
 				);
 			}
 		}
@@ -275,7 +275,7 @@ class WPSG_Hosting_Panel_Bridge {
 				'success' => false,
 				'message' => sprintf(
 					/* translators: %s: error message */
-					__( 'Hosting panel API communication failed: %s', 'site-checkup-pro' ),
+					__( 'Hosting panel API communication failed: %s', 'genioussonu-site-checkup' ),
 					$response->get_error_message()
 				),
 			);
@@ -288,12 +288,12 @@ class WPSG_Hosting_Panel_Bridge {
 		if ( $code >= 200 && $code < 300 && ! empty( $data['success'] ) ) {
 			return array(
 				'success' => true,
-				'message' => ! empty( $data['message'] ) ? $data['message'] : __( 'Directive updated via hosting panel API.', 'site-checkup-pro' ),
+				'message' => ! empty( $data['message'] ) ? $data['message'] : __( 'Directive updated via hosting panel API.', 'genioussonu-site-checkup' ),
 			);
 		}
 
 		/* translators: %d: HTTP status code */
-		$err_msg = ! empty( $data['message'] ) ? $data['message'] : sprintf( __( 'Hosting panel returned HTTP %d', 'site-checkup-pro' ), $code );
+		$err_msg = ! empty( $data['message'] ) ? $data['message'] : sprintf( __( 'Hosting panel returned HTTP %d', 'genioussonu-site-checkup' ), $code );
 		return array(
 			'success' => false,
 			'message' => $err_msg,

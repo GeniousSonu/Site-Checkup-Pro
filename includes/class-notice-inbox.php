@@ -6,7 +6,7 @@
  * protects core update/security notices from dismissal, and declutters dashboard widgets.
  *
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -94,15 +94,8 @@ class WPSG_Notice_Inbox {
 			return;
 		}
 
-		// Extract and isolate any <style>...</style> blocks so wp_kses_post doesn't strip the tags
-		// and dump naked CSS code and comments directly onto the screen as text.
-		$styles = array();
-		$clean_html = preg_replace_callback( '#<style\b[^>]*>(.*?)</style>#is', function ( $matches ) use ( &$styles ) {
-			// Sanitize CSS content: strip any HTML or potential script tags inside.
-			$css      = wp_strip_all_tags( $matches[1] );
-			$styles[] = '<style>' . $css . '</style>';
-			return '';
-		}, $raw_html );
+		// Remove embedded third-party styles to avoid raw CSS leaks and unqueued styles.
+		$clean_html = preg_replace( '#<style\b[^>]*>.*?</style>#is', '', $raw_html );
 
 		// Completely remove any <script>...</script> tags AND their inner JavaScript code
 		// so that executable JS does not leak as raw plain text on the admin screen.
@@ -111,19 +104,14 @@ class WPSG_Notice_Inbox {
 		// Sanitize all captured notice HTML before storage or display.
 		$safe_html = wp_kses_post( $clean_html );
 
-		// Re-attach safe CSS styles.
-		if ( ! empty( $styles ) ) {
-			$safe_html = implode( "\n", $styles ) . "\n" . $safe_html;
-		}
-
 		$dismissed = get_option( 'wpsg_dismissed_notices', array() );
 		if ( ! is_array( $dismissed ) ) {
 			$dismissed = array();
 		}
 
-		// Hard allowlist: Core updates and Site Checkup Pro alerts must NEVER be dismissed!
+		// Hard allowlist: Core updates and GeniousSonu Site Checkup alerts must NEVER be dismissed!
 		$is_core_update = ( false !== strpos( $safe_html, 'update-nag' ) || ( false !== strpos( $safe_html, 'WordPress' ) && false !== strpos( $safe_html, 'update' ) ) );
-		$is_site_checkup = ( false !== strpos( $safe_html, 'site-checkup-pro' ) || false !== strpos( $safe_html, 'wpsg-' ) );
+		$is_site_checkup = ( false !== strpos( $safe_html, 'genioussonu-site-checkup' ) || false !== strpos( $safe_html, 'wpsg-' ) );
 
 		if ( $is_core_update || $is_site_checkup ) {
 			// Always echo protected notices directly!

@@ -6,7 +6,7 @@
  * and detects dangerous executable PHP files inside /wp-content/uploads/.
  *
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -57,7 +57,7 @@ class WPSG_Integrity_Monitor {
 		if ( is_wp_error( $response ) ) {
 			return array(
 				'status'  => 'attention',
-				'message' => __( 'Could not connect to WordPress.org checksums API.', 'site-checkup-pro' ),
+				'message' => __( 'Could not connect to WordPress.org checksums API.', 'genioussonu-site-checkup' ),
 				'details' => array(),
 			);
 		}
@@ -66,7 +66,7 @@ class WPSG_Integrity_Monitor {
 		if ( empty( $body['checksums'] ) || ! is_array( $body['checksums'] ) ) {
 			return array(
 				'status'  => 'attention',
-				'message' => __( 'Invalid checksum data received from WordPress.org.', 'site-checkup-pro' ),
+				'message' => __( 'Invalid checksum data received from WordPress.org.', 'genioussonu-site-checkup' ),
 				'details' => array(),
 			);
 		}
@@ -108,9 +108,9 @@ class WPSG_Integrity_Monitor {
 			/* translators: %d: total core files scanned */
 			'message'        => $is_clean
 				/* translators: %d: total core files scanned */
-				? sprintf( __( 'All %d WordPress core files verified and matched official WordPress.org checksums.', 'site-checkup-pro' ), $total )
+				? sprintf( __( 'All %d WordPress core files verified and matched official WordPress.org checksums.', 'genioussonu-site-checkup' ), $total )
 				/* translators: 1: modified file count, 2: missing file count */
-				: sprintf( __( 'Integrity Alert: %1$d modified core file(s) and %2$d missing file(s) detected!', 'site-checkup-pro' ), count( $modified ), count( $missing ) ),
+				: sprintf( __( 'Integrity Alert: %1$d modified core file(s) and %2$d missing file(s) detected!', 'genioussonu-site-checkup' ), count( $modified ), count( $missing ) ),
 		);
 
 		// Cache for 24 hours
@@ -139,7 +139,7 @@ class WPSG_Integrity_Monitor {
 			return array(
 				'status'  => 'done',
 				'files'   => array(),
-				'message' => __( 'Uploads directory does not exist.', 'site-checkup-pro' ),
+				'message' => __( 'Uploads directory does not exist.', 'genioussonu-site-checkup' ),
 			);
 		}
 
@@ -177,7 +177,7 @@ class WPSG_Integrity_Monitor {
 		$is_clean = empty( $found );
 		if ( ! $is_clean && class_exists( 'WPSG_Alert_Dispatcher' ) ) {
 			/* translators: %d: executable scripts count */
-			$disp_msg = sprintf( __( 'High-Severity Alert: %d executable PHP script(s) discovered inside /wp-content/uploads/!', 'site-checkup-pro' ), count( $found ) );
+			$disp_msg = sprintf( __( 'High-Severity Alert: %d executable PHP script(s) discovered inside /wp-content/uploads/!', 'genioussonu-site-checkup' ), count( $found ) );
 			WPSG_Alert_Dispatcher::dispatch(
 				'uploads_php_detected',
 				$disp_msg,
@@ -186,13 +186,13 @@ class WPSG_Integrity_Monitor {
 		}
 
 		/* translators: 1: count of scripts, 2: file list */
-		$crit_msg = sprintf( __( 'Critical Alert: %1$d unauthorized executable PHP script(s) found in /wp-content/uploads/: %2$s', 'site-checkup-pro' ), count( $found ), implode( ', ', $found ) );
+		$crit_msg = sprintf( __( 'Critical Alert: %1$d unauthorized executable PHP script(s) found in /wp-content/uploads/: %2$s', 'genioussonu-site-checkup' ), count( $found ), implode( ', ', $found ) );
 
 		return array(
 			'status'  => $is_clean ? 'done' : 'failed',
 			'files'   => $found,
 			'message' => $is_clean
-				? __( 'Zero executable PHP/phar scripts discovered in /wp-content/uploads/.', 'site-checkup-pro' )
+				? __( 'Zero executable PHP/phar scripts discovered in /wp-content/uploads/.', 'genioussonu-site-checkup' )
 				: $crit_msg,
 		);
 	}

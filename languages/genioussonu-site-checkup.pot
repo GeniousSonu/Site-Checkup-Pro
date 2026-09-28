@@ -2,8 +2,8 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Site Checkup Pro 1.2.0\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/Site Checkup Pro\n"
+"Project-Id-Version: GeniousSonu Site Checkup 1.2.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/GeniousSonu Site Checkup\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -12,32 +12,32 @@ msgstr ""
 "POT-Creation-Date: 2026-09-24T11:19:48+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
-"X-Domain: site-checkup-pro\n"
+"X-Domain: genioussonu-site-checkup\n"
 
 #. Plugin Name of the plugin
-#: site-checkup-pro.php
+#: genioussonu-site-checkup.php
 #: admin/class-admin-menu.php:91
 #: admin/views/dashboard.php:35
-msgid "Site Checkup Pro"
+msgid "GeniousSonu Site Checkup"
 msgstr ""
 
 #. Plugin URI of the plugin
-#: site-checkup-pro.php
-msgid "https://www.genioussonu.me/plugin/site-checkup-pro/"
+#: genioussonu-site-checkup.php
+msgid "https://www.genioussonu.me/plugin/genioussonu-site-checkup/"
 msgstr ""
 
 #. Description of the plugin
-#: site-checkup-pro.php
+#: genioussonu-site-checkup.php
 msgid "Complete security audit, site hardening checklist, and vulnerability scanner for WordPress. One-click safe hardening, login protection, and client reports."
 msgstr ""
 
 #. Author of the plugin
-#: site-checkup-pro.php
+#: genioussonu-site-checkup.php
 msgid "SK Sahinur Islam"
 msgstr ""
 
 #. Author URI of the plugin
-#: site-checkup-pro.php
+#: genioussonu-site-checkup.php
 msgid "https://www.genioussonu.me/"
 msgstr ""
 
@@ -81,13 +81,13 @@ msgstr ""
 #: admin/class-admin-menu.php:229
 #: admin/class-admin-menu.php:244
 #, php-format
-msgid "Site Checkup Pro encountered an unexpected error: %s"
+msgid "GeniousSonu Site Checkup encountered an unexpected error: %s"
 msgstr ""
 
 #. translators: %s: error message
 #: admin/class-admin-menu.php:259
 #, php-format
-msgid "Site Checkup Pro encountered an unexpected error generating the report: %s"
+msgid "GeniousSonu Site Checkup encountered an unexpected error generating the report: %s"
 msgstr ""
 
 #: admin/class-admin-menu.php:274
@@ -150,7 +150,7 @@ msgid "Stop"
 msgstr ""
 
 #: admin/views/dashboard.php:82
-msgid "Loving Site Checkup Pro? Help us grow with a 5-star review!"
+msgid "Loving GeniousSonu Site Checkup? Help us grow with a 5-star review!"
 msgstr ""
 
 #. translators: %d: number of completed security tasks
@@ -176,7 +176,7 @@ msgid "Maybe Later"
 msgstr ""
 
 #: admin/views/dashboard.php:115
-msgid "Site Checkup Pro Navigation"
+msgid "GeniousSonu Site Checkup Navigation"
 msgstr ""
 
 #: admin/views/dashboard.php:121
@@ -392,7 +392,7 @@ msgid "Integrated Security Tools"
 msgstr ""
 
 #: admin/views/dashboard.php:554
-msgid "Key defensive mechanisms built directly into Site Checkup Pro."
+msgid "Key defensive mechanisms built directly into GeniousSonu Site Checkup."
 msgstr ""
 
 #: admin/views/dashboard.php:563
@@ -1015,7 +1015,7 @@ msgid "Authorize API Directive Application (Explicit Consent)"
 msgstr ""
 
 #: admin/views/dashboard.php:1182
-msgid "Authorizes Site Checkup Pro to transmit authenticated Nginx directive configurations to the specified control panel API endpoint. Token is never logged or exported."
+msgid "Authorizes GeniousSonu Site Checkup to transmit authenticated Nginx directive configurations to the specified control panel API endpoint. Token is never logged or exported."
 msgstr ""
 
 #: admin/views/dashboard.php:1195
@@ -1555,7 +1555,7 @@ msgid "Loading active sessions..."
 msgstr ""
 
 #: admin/views/modal-settings.php:22
-msgid "Site Checkup Pro Settings"
+msgid "GeniousSonu Site Checkup Settings"
 msgstr ""
 
 #: admin/views/modal-settings.php:24
@@ -1571,7 +1571,7 @@ msgid "Paste API key or leave blank for default check"
 msgstr ""
 
 #: admin/views/modal-settings.php:49
-msgid "Per WordPress.org Guideline 7, outbound network calls require explicit user consent. When enabled, Site Checkup Pro transmits installed plugin/theme slugs and version numbers to Patchstack (https://patchstack.com/database/api/v2/vulnerabilities) to query public CVE advisories. No personal data, user credentials, or database records are ever transmitted."
+msgid "Per WordPress.org Guideline 7, outbound network calls require explicit user consent. When enabled, GeniousSonu Site Checkup transmits installed plugin/theme slugs and version numbers to Patchstack (https://patchstack.com/database/api/v2/vulnerabilities) to query public CVE advisories. No personal data, user credentials, or database records are ever transmitted."
 msgstr ""
 
 #: admin/views/modal-settings.php:59
@@ -1591,7 +1591,7 @@ msgid "Paste panel API token (stored encrypted)"
 msgstr ""
 
 #: admin/views/modal-settings.php:99
-msgid "Per WordPress.org Guideline 7, authorizing this panel bridge allows Site Checkup Pro to transmit authenticated Nginx directive configurations to the specified control panel API endpoint. Token is never logged or exported."
+msgid "Per WordPress.org Guideline 7, authorizing this panel bridge allows GeniousSonu Site Checkup to transmit authenticated Nginx directive configurations to the specified control panel API endpoint. Token is never logged or exported."
 msgstr ""
 
 #: admin/views/modal-settings.php:109
@@ -1783,7 +1783,7 @@ msgstr ""
 #. translators: 1: generation date/time, 2: site URL
 #: admin/views/report.php:264
 #, php-format
-msgid "Generated by Site Checkup Pro on %1$s for %2$s."
+msgid "Generated by GeniousSonu Site Checkup on %1$s for %2$s."
 msgstr ""
 
 #: includes/class-app-password-manager.php:53
@@ -1911,7 +1911,7 @@ msgstr ""
 #. translators: %s: active plugin names
 #: includes/class-compatibility-guard.php:98
 #, php-format
-msgid "Active security plugin(s) (%s) already enforce login rate limiting. Site Checkup Pro rate limits will operate as a secondary defense layer."
+msgid "Active security plugin(s) (%s) already enforce login rate limiting. GeniousSonu Site Checkup rate limits will operate as a secondary defense layer."
 msgstr ""
 
 #. translators: %s: active plugin names
@@ -2907,7 +2907,7 @@ msgid "Domain email health for %1$s: %2$s (Note: Custom DKIM selectors cannot be
 msgstr ""
 
 #: includes/class-scheduler.php:168
-msgid "Site Checkup Pro Alert"
+msgid "GeniousSonu Site Checkup Alert"
 msgstr ""
 
 #. translators: %d: count of due tasks
@@ -4185,7 +4185,7 @@ msgid "Wordfence is active (%s). Review agency recommended settings."
 msgstr ""
 
 #: rest-api/class-rest-controller.php:416
-msgid "You do not have administrative permissions to access Site Checkup Pro."
+msgid "You do not have administrative permissions to access GeniousSonu Site Checkup."
 msgstr ""
 
 #: rest-api/class-rest-controller.php:439
@@ -4310,14 +4310,14 @@ msgstr ""
 msgid "Changelog Digest component missing."
 msgstr ""
 
-#: site-checkup-pro.php:109
-msgid "Site Checkup Pro requires PHP 7.4 or higher. Please upgrade your PHP version."
+#: genioussonu-site-checkup.php:109
+msgid "GeniousSonu Site Checkup requires PHP 7.4 or higher. Please upgrade your PHP version."
 msgstr ""
 
-#: site-checkup-pro.php:126
-msgid "Site Checkup Pro (Multisite Notice)"
+#: genioussonu-site-checkup.php:126
+msgid "GeniousSonu Site Checkup (Multisite Notice)"
 msgstr ""
 
-#: site-checkup-pro.php:127
-msgid "Version 1.0 of Site Checkup Pro is configured for single-site audits. Network-wide operations are restricted to Super Administrators."
+#: genioussonu-site-checkup.php:127
+msgid "Version 1.0 of GeniousSonu Site Checkup is configured for single-site audits. Network-wide operations are restricted to Super Administrators."
 msgstr ""

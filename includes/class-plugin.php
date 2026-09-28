@@ -3,7 +3,7 @@
 * Main Plugin Orchestrator Class
  *
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -234,7 +234,7 @@ class WPSG_Plugin {
 		if ( false !== strpos( $rest_route, '/wp/v2/users' ) ) {
 			return new WP_Error(
 				'rest_forbidden_user_enumeration',
-				__( 'User enumeration via REST API is disabled for unauthenticated visitors.', 'site-checkup-pro' ),
+				__( 'User enumeration via REST API is disabled for unauthenticated visitors.', 'genioussonu-site-checkup' ),
 				array( 'status' => rest_authorization_required_code() )
 			);
 		}
@@ -255,7 +255,7 @@ class WPSG_Plugin {
 
 		// Quick cached check or DB lookup.
 		$cache_key = 'wpsg_task_status_' . $task_id;
-		$status    = wp_cache_get( $cache_key, 'site-checkup-pro' );
+		$status    = wp_cache_get( $cache_key, 'genioussonu-site-checkup' );
 
 		if ( false === $status ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -266,7 +266,7 @@ class WPSG_Plugin {
 					$task_id
 				)
 			);
-			wp_cache_set( $cache_key, $status, 'site-checkup-pro', 300 );
+			wp_cache_set( $cache_key, $status, 'genioussonu-site-checkup', 300 );
 		}
 
 		return ( 'done' === $status );
@@ -294,7 +294,7 @@ class WPSG_Plugin {
 	 * @return bool|null
 	 */
 	public function filter_auto_update_plugin( $update, $item ) {
-		$basename = defined( 'WPSG_BASENAME' ) ? WPSG_BASENAME : 'site-checkup-pro/site-checkup-pro.php';
+		$basename = defined( 'WPSG_BASENAME' ) ? WPSG_BASENAME : 'genioussonu-site-checkup/genioussonu-site-checkup.php';
 		if ( isset( $item->plugin ) && $basename === $item->plugin ) {
 			$auto_updates = (array) get_site_option( 'auto_update_plugins', array() );
 			return in_array( $basename, $auto_updates, true );

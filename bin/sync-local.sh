@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Site Checkup Pro — Local Environment Synchronizer
+# GeniousSonu Site Checkup — Local Environment Synchronizer
 #
 # Copies files from this Git repository into LocalWP site directories.
 # NOTE: Do NOT use symlinks to external directories because LocalWP's web server
@@ -13,9 +13,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 TARGETS=(
-  "/home/dayshift/Local Sites/test111/app/public/wp-content/plugins/site-checkup-pro"
-  "/home/dayshift/Local Sites/test111/app/public/site2/wp-content/plugins/site-checkup-pro"
-  "/home/dayshift/Local Sites/test/app/public/wp-content/plugins/site-checkup-pro"
+  "/home/dayshift/Local Sites/test111/app/public/wp-content/plugins/genioussonu-site-checkup"
+  "/home/dayshift/Local Sites/test111/app/public/site2/wp-content/plugins/genioussonu-site-checkup"
+  "/home/dayshift/Local Sites/test/app/public/wp-content/plugins/genioussonu-site-checkup"
 )
 
 SYNCED=0

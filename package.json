@@ -1,15 +1,15 @@
 {
-  "name": "site-checkup-pro",
+  "name": "genioussonu-site-checkup",
   "version": "1.0.0",
   "description": "SOP-driven security checklist & hardening orchestrator for WordPress.",
   "author": {
     "name": "SK Sahinur Islam",
     "url": "https://www.genioussonu.me/"
   },
-  "homepage": "https://www.genioussonu.me/plugin/site-checkup-pro/",
+  "homepage": "https://www.genioussonu.me/plugin/genioussonu-site-checkup/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/GeniousSonu/site-checkup-pro"
+    "url": "https://github.com/GeniousSonu/Site-Checkup-Pro"
   },
   "license": "GPL-2.0-or-later"
 }

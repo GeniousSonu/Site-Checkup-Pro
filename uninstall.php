@@ -1,11 +1,11 @@
 <?php
 /**
- * Site Checkup Pro Uninstall Handler
+ * GeniousSonu Site Checkup Uninstall Handler
  *
  * Triggered when the plugin is deleted via the WordPress admin plugins screen.
  * Thoroughly purges all custom database tables, options, transients, and cron hooks.
  *
- * @package Site_Checkup_Pro
+ * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
  * @link    https://github.com/GeniousSonu/
  * @since   1.0.0
@@ -19,12 +19,12 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 global $wpdb;
 
 // Drop custom database tables.
-$table_status      = $wpdb->prefix . 'wpsg_task_status';
-$table_audit       = $wpdb->prefix . 'wpsg_audit_log';
-$table_rate_limits = $wpdb->prefix . 'wpsg_rate_limits';
+$wpsg_table_status      = $wpdb->prefix . 'wpsg_task_status';
+$wpsg_table_audit       = $wpdb->prefix . 'wpsg_audit_log';
+$wpsg_table_rate_limits = $wpdb->prefix . 'wpsg_rate_limits';
 
 // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-$wpdb->query( "DROP TABLE IF EXISTS {$table_status}, {$table_audit}, {$table_rate_limits};" );
+$wpdb->query( "DROP TABLE IF EXISTS {$wpsg_table_status}, {$wpsg_table_audit}, {$wpsg_table_rate_limits};" );
 
 // Delete plugin options.
 delete_option( 'wpsg_db_version' );
