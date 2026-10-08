@@ -34,7 +34,7 @@ fi
 
 # Clean previous build artifacts and old root zip variants
 rm -rf build/
-rm -f genioussonu-site-checkup-selfhosted.zip genioussonu-site-checkup-wporg.zip genioussonu-security-hardening-audit*.zip
+rm -f genioussonu-site-checkup*.zip site-checkup-pro*.zip genioussonu-security-hardening-audit*.zip
 mkdir -p build/self-hosted/genioussonu-site-checkup
 mkdir -p build/wporg/genioussonu-security-hardening-audit
 
@@ -72,15 +72,13 @@ rm -f build/self-hosted/genioussonu-site-checkup/README.md
 
 cd build/wporg
 zip -r ../genioussonu-security-hardening-audit-wporg.zip genioussonu-security-hardening-audit -x "*.DS_Store"
-# Copy the clean, fully compliant WP.org package
+# Copy the single official package for WordPress.org publication
 cp ../genioussonu-security-hardening-audit-wporg.zip "${ROOT_DIR}/genioussonu-security-hardening-audit.zip"
-cp ../genioussonu-security-hardening-audit-wporg.zip "${ROOT_DIR}/genioussonu-site-checkup.zip"
 cd "${ROOT_DIR}"
 
 echo ""
 echo "======================================================="
 echo " Build Complete:"
-echo " Official WP.org Package: genioussonu-security-hardening-audit.zip ($(du -h genioussonu-security-hardening-audit.zip | cut -f1)) [WP.org Compliant, Latest]"
-echo " WP.org Build Dir:        build/wporg/genioussonu-security-hardening-audit/"
-echo " Self-Hosted Zip:         build/genioussonu-site-checkup-selfhosted.zip ($(du -h build/genioussonu-site-checkup-selfhosted.zip | cut -f1))"
+echo " Official Package for Publish: genioussonu-security-hardening-audit.zip ($(du -h genioussonu-security-hardening-audit.zip | cut -f1)) [WP.org Compliant, Latest]"
+echo " WP.org Build Dir:             build/wporg/genioussonu-security-hardening-audit/"
 echo "======================================================="
