@@ -24,7 +24,7 @@ function wpsg_create_database_tables() {
 
 	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
-	$charset_collate = $wpdb->get_charset_collate();
+	$charset_collate = method_exists( $wpdb, 'get_charset_collate' ) ? $wpdb->get_charset_collate() : '';
 
 	// Table: Task Status
 	// Note dbDelta requirements: 2 spaces after PRIMARY KEY, uppercase types, column per line.

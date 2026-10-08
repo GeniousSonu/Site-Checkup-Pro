@@ -209,6 +209,7 @@ if ( ! class_exists( 'Mock_WPDB' ) ) {
 		public function insert( $table, $data ) { return true; }
 		public function update( $table, $data, $where ) { return true; }
 		public function esc_like( $text ) { return addcslashes( $text, '_%\\' ); }
+		public function get_charset_collate() { return 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci'; }
 	}
 }
 $GLOBALS['wpdb'] = new Mock_WPDB();

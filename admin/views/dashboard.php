@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $wpsg_registry      = WPSG_Task_Registry::get_instance();
-$wpsg_sections      = WPSG_Task_Registry::$wpsg_sections;
+$wpsg_sections      = WPSG_Task_Registry::$sections;
 $wpsg_server_type   = WPSG_Htaccess_Manager::get_server_type();
 $wpsg_has_htaccess  = WPSG_Htaccess_Manager::supports_htaccess();
 $wpsg_backup_status = WPSG_Backup_Guard::get_backup_status();

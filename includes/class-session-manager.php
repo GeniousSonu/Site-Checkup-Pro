@@ -217,12 +217,19 @@ class WPSG_Session_Manager {
 	/**
 	 * Invalidate all other sessions when password is changed on profile update.
 	 *
-	 * @param int   $user_id       User ID.
-	 * @param array $old_user_data Old user data.
+	 * @param int                   $user_id       User ID.
+	 * @param \WP_User|array<string, mixed> $old_user_data Old user data.
 	 */
 	public function on_profile_update( $user_id, $old_user_data ) {
-		$user = get_userdata( $user_id );
-		if ( $user && $old_user_data && $user->user_pass !== $old_user_data->user_pass ) {
+		$user     = get_userdata( $user_id );
+		$old_pass = '';
+		if ( is_object( $old_user_data ) && isset( $old_user_data->user_pass ) ) {
+			$old_pass = $old_user_data->user_pass;
+		} elseif ( is_array( $old_user_data ) && isset( $old_user_data['user_pass'] ) ) {
+			$old_pass = $old_user_data['user_pass'];
+		}
+
+		if ( $user && $old_pass && $user->user_pass !== $old_pass ) {
 			if ( class_exists( 'WP_Session_Tokens' ) ) {
 				$manager = WP_Session_Tokens::get_instance( $user_id );
 				$token   = function_exists( 'wp_get_session_token' ) ? wp_get_session_token() : '';
