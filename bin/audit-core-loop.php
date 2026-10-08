@@ -75,6 +75,7 @@ function wpsg_audit_get_reauth_token() {
 $audit_results = array();
 
 foreach ( $all_tasks as $task_id => $task ) {
+	$log_entry = null;
 	$res = array(
 		'id'                    => $task_id,
 		'section'               => $task->section,
@@ -299,17 +300,20 @@ foreach ( $all_tasks as $task_id => $task ) {
 		}
 
 		// C. Check Audit Log Entry for Run
+		$log_entry = null;
 		$log_table = wpsg_get_table_name( 'audit_log' );
 		if ( false === $log_table ) {
 			fwrite( STDERR, "Unable to resolve the audit log table safely.\n" );
 			exit( 1 );
 		}
 		$log_table = esc_sql( $log_table );
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$log_entry = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$log_table} WHERE task_id = %s AND action = 'run' ORDER BY id DESC LIMIT 1", $task_id ) );
-		if ( $log_entry ) {
+		if ( $wpdb ) {
+			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$log_entry = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$log_table} WHERE task_id = %s AND action = 'run' ORDER BY id DESC LIMIT 1", $task_id ) );
+		}
+		if ( ! empty( $log_entry ) && is_object( $log_entry ) && isset( $log_entry->id ) ) {
 			$res['audit_log_created'] = true;
-			$res['evidence'][] = 'Audit Log: Entry #' . $log_entry->id . ' logged at ' . $log_entry->created_at . ' (result: ' . $log_entry->result . ')';
+			$res['evidence'][] = 'Audit Log: Entry #' . $log_entry->id . ' logged at ' . ( $log_entry->created_at ?? '' ) . ' (result: ' . ( $log_entry->result ?? '' ) . ')';
 		} else {
 			$res['audit_log_created'] = false;
 			$res['status'] = 'FAIL';
