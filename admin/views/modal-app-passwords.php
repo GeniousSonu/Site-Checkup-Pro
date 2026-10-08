@@ -22,17 +22,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="wpsg-modal-header">
 			<h3 class="wpsg-modal-title" id="wpsg-app-passwords-modal-title">
 				<span class="dashicons dashicons-admin-network" aria-hidden="true"></span>
-				<?php esc_html_e( 'Application Passwords Governance', 'genioussonu-site-checkup' ); ?>
+				<?php esc_html_e( 'Application Passwords Governance', 'genioussonu-security-hardening-audit' ); ?>
 			</h3>
-			<button type="button" class="wpsg-modal-close" data-close-modal aria-label="<?php esc_attr_e( 'Close', 'genioussonu-site-checkup' ); ?>">&times;</button>
+			<button type="button" class="wpsg-modal-close" data-close-modal aria-label="<?php esc_attr_e( 'Close', 'genioussonu-security-hardening-audit' ); ?>">&times;</button>
 		</div>
 
 		<div class="wpsg-modal-body">
 			<div class="wpsg-notice wpsg-notice-info" style="margin-bottom: 14px;">
 				<span class="dashicons dashicons-info"></span>
 				<div>
-					<strong><?php esc_html_e( 'Application Credentials Review:', 'genioussonu-site-checkup' ); ?></strong>
-					<p style="margin: 2px 0 0 0;"><?php esc_html_e( 'Application passwords allow external systems, scripts, and mobile apps to authenticate via the WordPress REST API without exposing your master account password. Stale or unused credentials should be revoked immediately.', 'genioussonu-site-checkup' ); ?></p>
+					<strong><?php esc_html_e( 'Application Credentials Review:', 'genioussonu-security-hardening-audit' ); ?></strong>
+					<p style="margin: 2px 0 0 0;"><?php esc_html_e( 'Application passwords allow external systems, scripts, and mobile apps to authenticate via the WordPress REST API without exposing your master account password. Stale or unused credentials should be revoked immediately.', 'genioussonu-security-hardening-audit' ); ?></p>
 				</div>
 			</div>
 
@@ -40,17 +40,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<table class="wpsg-table" id="wpsg-app-passwords-table">
 					<thead>
 						<tr>
-							<th><?php esc_html_e( 'Application / Label', 'genioussonu-site-checkup' ); ?></th>
-							<th><?php esc_html_e( 'Owner User', 'genioussonu-site-checkup' ); ?></th>
-							<th><?php esc_html_e( 'Created', 'genioussonu-site-checkup' ); ?></th>
-							<th><?php esc_html_e( 'Last Used', 'genioussonu-site-checkup' ); ?></th>
-							<th><?php esc_html_e( 'Action', 'genioussonu-site-checkup' ); ?></th>
+							<th><?php esc_html_e( 'Application / Label', 'genioussonu-security-hardening-audit' ); ?></th>
+							<th><?php esc_html_e( 'Owner User', 'genioussonu-security-hardening-audit' ); ?></th>
+							<th><?php esc_html_e( 'Created', 'genioussonu-security-hardening-audit' ); ?></th>
+							<th><?php esc_html_e( 'Last Used', 'genioussonu-security-hardening-audit' ); ?></th>
+							<th><?php esc_html_e( 'Action', 'genioussonu-security-hardening-audit' ); ?></th>
 						</tr>
 					</thead>
 					<tbody id="wpsg-app-passwords-tbody">
 						<tr>
 							<td colspan="5" style="text-align: center; padding: 20px;">
-								<span class="wpsg-spinner"></span> <?php esc_html_e( 'Loading application passwords...', 'genioussonu-site-checkup' ); ?>
+								<span class="wpsg-spinner"></span> <?php esc_html_e( 'Loading application passwords...', 'genioussonu-security-hardening-audit' ); ?>
 							</td>
 						</tr>
 					</tbody>
@@ -60,7 +60,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<div class="wpsg-modal-footer">
 			<button type="button" class="wpsg-btn wpsg-btn-secondary" data-close-modal>
-				<?php esc_html_e( 'Close', 'genioussonu-site-checkup' ); ?>
+				<?php esc_html_e( 'Close', 'genioussonu-security-hardening-audit' ); ?>
 			</button>
 		</div>
 	</div>

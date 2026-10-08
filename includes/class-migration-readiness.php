@@ -70,8 +70,7 @@ class WPSG_Migration_Readiness {
 		$query_limit    = 250;
 
 		// 1. Scan wp_options (bounded limit 250)
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; LIKE values and limit are prepared.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; LIKE values and limit are prepared.
 		$option_rows = $wpdb->get_results(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is strictly validated via regex and core schema.
@@ -94,7 +93,7 @@ class WPSG_Migration_Readiness {
 							'table'      => 'options',
 							'identifier' => sanitize_key( $row['option_name'] ),
 							'sample'     => self::extract_url_snippet( $val ),
-							'issue'      => __( 'Absolute URL inside serialized option value', 'genioussonu-site-checkup' ),
+							'issue'      => __( 'Absolute URL inside serialized option value', 'genioussonu-security-hardening-audit' ),
 						);
 					}
 				}
@@ -102,8 +101,7 @@ class WPSG_Migration_Readiness {
 		}
 
 		// 2. Scan wp_postmeta (bounded limit 250)
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; LIKE values and limit are prepared.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; LIKE values and limit are prepared.
 		$postmeta_rows = $wpdb->get_results(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is strictly validated via regex and core schema.
@@ -125,7 +123,7 @@ class WPSG_Migration_Readiness {
 							'table'      => 'postmeta',
 							'identifier' => 'Post #' . absint( $row['post_id'] ) . ' (' . sanitize_key( $row['meta_key'] ) . ')',
 							'sample'     => self::extract_url_snippet( $val ),
-							'issue'      => __( 'Absolute URL inside serialized postmeta', 'genioussonu-site-checkup' ),
+							'issue'      => __( 'Absolute URL inside serialized postmeta', 'genioussonu-security-hardening-audit' ),
 						);
 					}
 				}
@@ -216,8 +214,8 @@ class WPSG_Migration_Readiness {
 	public static function get_guidance( $site_host = '' ) {
 		$old_url = $site_host ? 'https://' . $site_host : 'https://oldsite.com';
 		return array(
-			'title'       => __( 'Why Serialized URLs Break Migrations', 'genioussonu-site-checkup' ),
-			'explanation' => __( 'PHP serialized strings encode exact character counts (e.g. s:21:"https://oldsite.com"). If you perform a standard SQL search-and-replace, the new domain length will mismatch the declared byte count, causing PHP unserialize() to fail silently. This corrupts widgets, page builders, and theme options.', 'genioussonu-site-checkup' ),
+			'title'       => __( 'Why Serialized URLs Break Migrations', 'genioussonu-security-hardening-audit' ),
+			'explanation' => __( 'PHP serialized strings encode exact character counts (e.g. s:21:"https://oldsite.com"). If you perform a standard SQL search-and-replace, the new domain length will mismatch the declared byte count, causing PHP unserialize() to fail silently. This corrupts widgets, page builders, and theme options.', 'genioussonu-security-hardening-audit' ),
 			'cli_command' => sprintf( 'wp search-replace "%s" "https://newsite.com" --all-tables --precise', esc_attr( $old_url ) ),
 			'recommended_tools' => array(
 				'WP-CLI search-replace (Official CLI method with serialization recalculation)',

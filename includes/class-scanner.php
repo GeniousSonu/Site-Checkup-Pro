@@ -111,7 +111,7 @@ class WPSG_Scanner {
 				'rogue_admins' => array(),
 				'message'      => sprintf(
 					/* translators: %d: count of admins */
-					__( 'Baseline initialized with %d recognized administrator(s).', 'genioussonu-site-checkup' ),
+					__( 'Baseline initialized with %d recognized administrator(s).', 'genioussonu-security-hardening-audit' ),
 					count( $current )
 				),
 			);
@@ -123,10 +123,10 @@ class WPSG_Scanner {
 		foreach ( $current as $user_id => $admin_data ) {
 			if ( ! isset( $trusted_admins[ $user_id ] ) ) {
 				// Brand new admin account created since baseline.
-				$rogue_admins[] = array_merge( $admin_data, array( 'reason' => __( 'Created after baseline snapshot', 'genioussonu-site-checkup' ) ) );
+				$rogue_admins[] = array_merge( $admin_data, array( 'reason' => __( 'Created after baseline snapshot', 'genioussonu-security-hardening-audit' ) ) );
 			} elseif ( $trusted_admins[ $user_id ]['email'] !== $admin_data['email'] ) {
 				// Admin email was altered.
-				$rogue_admins[] = array_merge( $admin_data, array( 'reason' => __( 'Email address was changed', 'genioussonu-site-checkup' ) ) );
+				$rogue_admins[] = array_merge( $admin_data, array( 'reason' => __( 'Email address was changed', 'genioussonu-security-hardening-audit' ) ) );
 			}
 		}
 
@@ -136,7 +136,7 @@ class WPSG_Scanner {
 				'rogue_admins' => $rogue_admins,
 				'message'      => sprintf(
 					/* translators: %d: count of untrusted admins */
-					__( 'Warning: %d untrusted administrator account(s) detected since last baseline!', 'genioussonu-site-checkup' ),
+					__( 'Warning: %d untrusted administrator account(s) detected since last baseline!', 'genioussonu-security-hardening-audit' ),
 					count( $rogue_admins )
 				),
 			);
@@ -147,7 +147,7 @@ class WPSG_Scanner {
 			'rogue_admins' => array(),
 			'message'      => sprintf(
 				/* translators: %d: count of admins */
-				__( 'All %d administrator accounts match the verified baseline.', 'genioussonu-site-checkup' ),
+				__( 'All %d administrator accounts match the verified baseline.', 'genioussonu-security-hardening-audit' ),
 				count( $current )
 			),
 		);
@@ -171,7 +171,7 @@ class WPSG_Scanner {
 		if ( ! empty( $baseline['siteurl'] ) && $baseline['siteurl'] !== $current_siteurl ) {
 			$issues[] = sprintf(
 				/* translators: 1: original URL, 2: current URL */
-				__( 'siteurl changed from %1$s to %2$s', 'genioussonu-site-checkup' ),
+				__( 'siteurl changed from %1$s to %2$s', 'genioussonu-security-hardening-audit' ),
 				esc_url( $baseline['siteurl'] ),
 				esc_url( $current_siteurl )
 			);
@@ -180,7 +180,7 @@ class WPSG_Scanner {
 		if ( ! empty( $baseline['home'] ) && $baseline['home'] !== $current_home ) {
 			$issues[] = sprintf(
 				/* translators: 1: original URL, 2: current URL */
-				__( 'home URL changed from %1$s to %2$s', 'genioussonu-site-checkup' ),
+				__( 'home URL changed from %1$s to %2$s', 'genioussonu-security-hardening-audit' ),
 				esc_url( $baseline['home'] ),
 				esc_url( $current_home )
 			);
@@ -196,8 +196,7 @@ class WPSG_Scanner {
 			if ( '' !== $options_table ) {
 				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- This query interpolates only the allowlisted, escaped options table identifier.
 				$options_table = esc_sql( $options_table );
-				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-				// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifier is allowlisted and escaped; remaining query clauses are constants.
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifier is allowlisted and escaped; remaining query clauses are constants.
 				$large_autoload = $wpdb->get_results(
 					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifier is allowlisted and escaped; query clauses are constants.
 					"SELECT option_name, LENGTH(option_value) AS size_bytes
@@ -230,7 +229,7 @@ class WPSG_Scanner {
 				'status'  => 'attention',
 				'message' => sprintf(
 					/* translators: 1: count of oversized options, 2: sample list of option names */
-					__( 'Core URLs match baseline. Note: %1$d oversized autoloaded options found (>100KB): %2$s', 'genioussonu-site-checkup' ),
+					__( 'Core URLs match baseline. Note: %1$d oversized autoloaded options found (>100KB): %2$s', 'genioussonu-security-hardening-audit' ),
 					count( $large_options ),
 					implode( ', ', array_slice( $large_options, 0, 3 ) )
 				),
@@ -239,7 +238,7 @@ class WPSG_Scanner {
 
 		return array(
 			'status'  => 'done',
-			'message' => __( 'siteurl and home match baseline. No suspicious autoload bloat detected.', 'genioussonu-site-checkup' ),
+			'message' => __( 'siteurl and home match baseline. No suspicious autoload bloat detected.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 
@@ -282,7 +281,7 @@ class WPSG_Scanner {
 			return array(
 				'status'  => 'done',
 				'files'   => array(),
-				'message' => __( 'No mu-plugins installed in wp-content/mu-plugins.', 'genioussonu-site-checkup' ),
+				'message' => __( 'No mu-plugins installed in wp-content/mu-plugins.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -301,7 +300,7 @@ class WPSG_Scanner {
 				'files'   => array_keys( $current ),
 				'message' => sprintf(
 					/* translators: 1: count of total files, 2: list of new files */
-					__( '%1$d mu-plugin(s) active. New/unrecognized files found since baseline: %2$s', 'genioussonu-site-checkup' ),
+					__( '%1$d mu-plugin(s) active. New/unrecognized files found since baseline: %2$s', 'genioussonu-security-hardening-audit' ),
 					count( $current ),
 					implode( ', ', $unrecognized )
 				),
@@ -313,7 +312,7 @@ class WPSG_Scanner {
 			'files'   => array_keys( $current ),
 			'message' => sprintf(
 				/* translators: %d: count of files */
-				__( '%d mu-plugin(s) active and verified against baseline.', 'genioussonu-site-checkup' ),
+				__( '%d mu-plugin(s) active and verified against baseline.', 'genioussonu-security-hardening-audit' ),
 				count( $current )
 			),
 		);
@@ -368,7 +367,7 @@ class WPSG_Scanner {
 				'found'  => $found,
 				'message' => sprintf(
 					/* translators: 1: count of exposed files, 2: list of exposed files */
-					__( 'Critical: %1$d exposed backup/sensitive file(s) found in webroot: %2$s', 'genioussonu-site-checkup' ),
+					__( 'Critical: %1$d exposed backup/sensitive file(s) found in webroot: %2$s', 'genioussonu-security-hardening-audit' ),
 					count( $found ),
 					implode( ', ', $found )
 				),
@@ -378,7 +377,7 @@ class WPSG_Scanner {
 		return array(
 			'status'  => 'done',
 			'found'   => array(),
-			'message' => __( 'No exposed backup files, database dumps, or .env files found in webroot.', 'genioussonu-site-checkup' ),
+			'message' => __( 'No exposed backup files, database dumps, or .env files found in webroot.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 
@@ -397,31 +396,31 @@ class WPSG_Scanner {
 		// Check PHP.
 		if ( version_compare( $php_version, '7.4', '<' ) ) {
 			/* translators: %s: PHP version */
-			$issues[] = sprintf( __( 'PHP %s is critically outdated and unsupported.', 'genioussonu-site-checkup' ), $php_version );
+			$issues[] = sprintf( __( 'PHP %s is critically outdated and unsupported.', 'genioussonu-security-hardening-audit' ), $php_version );
 		} elseif ( version_compare( $php_version, '8.1', '<' ) ) {
 			/* translators: %s: PHP version */
-			$issues[] = sprintf( __( 'PHP %s has reached end-of-life. Upgrade to PHP 8.1+ recommended.', 'genioussonu-site-checkup' ), $php_version );
+			$issues[] = sprintf( __( 'PHP %s has reached end-of-life. Upgrade to PHP 8.1+ recommended.', 'genioussonu-security-hardening-audit' ), $php_version );
 		}
 
 		// Check SSL.
 		$is_ssl = is_ssl();
 		if ( ! $is_ssl ) {
-			$issues[] = __( 'Site is not running over HTTPS/SSL.', 'genioussonu-site-checkup' );
+			$issues[] = __( 'Site is not running over HTTPS/SSL.', 'genioussonu-security-hardening-audit' );
 		} elseif ( false !== $ssl_expiry && $ssl_expiry <= 14 ) {
 			/* translators: %d: number of days until SSL expiry */
-			$issues[] = sprintf( __( 'SSL certificate expires in %d day(s)!', 'genioussonu-site-checkup' ), $ssl_expiry );
+			$issues[] = sprintf( __( 'SSL certificate expires in %d day(s)!', 'genioussonu-security-hardening-audit' ), $ssl_expiry );
 		}
 
 		/* translators: %d: days remaining on SSL certificate */
-		$ssl_valid_text = ( false !== $ssl_expiry ) ? sprintf( __( 'Valid (%d days remaining)', 'genioussonu-site-checkup' ), $ssl_expiry ) : __( 'Active', 'genioussonu-site-checkup' );
+		$ssl_valid_text = ( false !== $ssl_expiry ) ? sprintf( __( 'Valid (%d days remaining)', 'genioussonu-security-hardening-audit' ), $ssl_expiry ) : __( 'Active', 'genioussonu-security-hardening-audit' );
 
 		$status = empty( $issues ) ? 'done' : ( count( $issues ) > 1 ? 'failed' : 'attention' );
 		$msg    = sprintf(
 			/* translators: 1: WP version, 2: PHP version, 3: SSL info */
-			__( 'WordPress %1$s, PHP %2$s. SSL: %3$s.', 'genioussonu-site-checkup' ),
+			__( 'WordPress %1$s, PHP %2$s. SSL: %3$s.', 'genioussonu-security-hardening-audit' ),
 			$wp_version,
 			$php_version,
-			$is_ssl ? $ssl_valid_text : __( 'Inactive', 'genioussonu-site-checkup' )
+			$is_ssl ? $ssl_valid_text : __( 'Inactive', 'genioussonu-security-hardening-audit' )
 		);
 
 		if ( ! empty( $issues ) ) {
@@ -510,7 +509,7 @@ class WPSG_Scanner {
 					'perms'    => $perms_octal,
 					'severity' => 'critical',
 					/* translators: %s: octal file permissions */
-					'message'  => sprintf( __( 'Critical: wp-config.php is world-writable (%s). Permissions must be 0640 or 0600.', 'genioussonu-site-checkup' ), $perms_octal ),
+					'message'  => sprintf( __( 'Critical: wp-config.php is world-writable (%s). Permissions must be 0640 or 0600.', 'genioussonu-security-hardening-audit' ), $perms_octal ),
 				);
 			} elseif ( $perms > 0640 ) {
 				$issues[] = array(
@@ -518,7 +517,7 @@ class WPSG_Scanner {
 					'perms'    => $perms_octal,
 					'severity' => 'attention',
 					/* translators: %s: octal file permissions */
-					'message'  => sprintf( __( 'Warning: wp-config.php permissions (%s) exceed recommended baseline (0640 or 0600).', 'genioussonu-site-checkup' ), $perms_octal ),
+					'message'  => sprintf( __( 'Warning: wp-config.php permissions (%s) exceed recommended baseline (0640 or 0600).', 'genioussonu-security-hardening-audit' ), $perms_octal ),
 				);
 			}
 		}
@@ -543,7 +542,7 @@ class WPSG_Scanner {
 						'perms'    => $perms_octal,
 						'severity' => 'critical',
 						/* translators: 1: file name, 2: octal file permissions */
-						'message'  => sprintf( __( 'Critical: %1$s is world-writable (%2$s). Target baseline is 0644.', 'genioussonu-site-checkup' ), $name, $perms_octal ),
+						'message'  => sprintf( __( 'Critical: %1$s is world-writable (%2$s). Target baseline is 0644.', 'genioussonu-security-hardening-audit' ), $name, $perms_octal ),
 					);
 				} elseif ( ( $perms & 0111 ) !== 0 || $perms > 0644 ) {
 					// Flag execution bit on root files or permissions above 0644 (e.g. 0755 on files)
@@ -552,7 +551,7 @@ class WPSG_Scanner {
 						'perms'    => $perms_octal,
 						'severity' => 'attention',
 						/* translators: 1: file name, 2: octal file permissions */
-						'message'  => sprintf( __( 'Warning: File %1$s has executable/relaxed permissions (%2$s). Target baseline is 0644.', 'genioussonu-site-checkup' ), $name, $perms_octal ),
+						'message'  => sprintf( __( 'Warning: File %1$s has executable/relaxed permissions (%2$s). Target baseline is 0644.', 'genioussonu-security-hardening-audit' ), $name, $perms_octal ),
 					);
 				}
 			}
@@ -580,7 +579,7 @@ class WPSG_Scanner {
 						'perms'    => $perms_octal,
 						'severity' => ( ( $perms & 0002 ) !== 0 ) ? 'critical' : 'attention',
 						/* translators: 1: directory label, 2: octal file permissions */
-						'message'  => sprintf( __( 'Directory %1$s has relaxed/world-writable permissions (%2$s). Baseline must be 0755 or stricter.', 'genioussonu-site-checkup' ), $label, $perms_octal ),
+						'message'  => sprintf( __( 'Directory %1$s has relaxed/world-writable permissions (%2$s). Baseline must be 0755 or stricter.', 'genioussonu-security-hardening-audit' ), $label, $perms_octal ),
 					);
 				}
 			}
@@ -596,10 +595,10 @@ class WPSG_Scanner {
 
 		$status = empty( $issues ) ? 'done' : ( $has_critical ? 'failed' : 'attention' );
 		$msg    = empty( $issues )
-			? __( 'File permissions verified against strict baselines (wp-config <= 0640, files 0644, directories 0755).', 'genioussonu-site-checkup' )
+			? __( 'File permissions verified against strict baselines (wp-config <= 0640, files 0644, directories 0755).', 'genioussonu-security-hardening-audit' )
 			: sprintf(
 				/* translators: %d: issue count */
-				__( '%d permission anomaly(s) detected across monitored files and directories.', 'genioussonu-site-checkup' ),
+				__( '%d permission anomaly(s) detected across monitored files and directories.', 'genioussonu-security-hardening-audit' ),
 				count( $issues )
 			);
 
@@ -649,18 +648,18 @@ class WPSG_Scanner {
 		if ( ! empty( $unprotected ) ) {
 			$warnings[] = sprintf(
 				/* translators: %s: list of dangerous functions */
-				__( 'Dangerous shell execution functions are active in php.ini: %s.', 'genioussonu-site-checkup' ),
+				__( 'Dangerous shell execution functions are active in php.ini: %s.', 'genioussonu-security-hardening-audit' ),
 				implode( ', ', $unprotected )
 			);
 		}
 
 		if ( ! $is_obd_set ) {
-			$warnings[] = __( 'open_basedir is not configured in php.ini, allowing filesystem traversal outside site root if a breach occurs.', 'genioussonu-site-checkup' );
+			$warnings[] = __( 'open_basedir is not configured in php.ini, allowing filesystem traversal outside site root if a breach occurs.', 'genioussonu-security-hardening-audit' );
 		}
 
 		$status = empty( $warnings ) ? 'done' : 'attention';
 		$msg    = empty( $warnings )
-			? __( 'Server php.ini restrictions verified: critical execution functions disabled and open_basedir active.', 'genioussonu-site-checkup' )
+			? __( 'Server php.ini restrictions verified: critical execution functions disabled and open_basedir active.', 'genioussonu-security-hardening-audit' )
 			: implode( ' ', $warnings );
 
 		$result = array(
@@ -699,9 +698,9 @@ class WPSG_Scanner {
 
 		$status  = $is_default ? 'attention' : 'done';
 		/* translators: %s: database table prefix */
-		$default_msg = sprintf( __( 'Database tables use the default prefix "%s". A customized prefix reduces automated SQLi payload targeting.', 'genioussonu-site-checkup' ), $prefix );
+		$default_msg = sprintf( __( 'Database tables use the default prefix "%s". A customized prefix reduces automated SQLi payload targeting.', 'genioussonu-security-hardening-audit' ), $prefix );
 		/* translators: %s: database table prefix */
-		$custom_msg = sprintf( __( 'Database prefix is customized ("%s"), offering resistance to automated generic table targeting.', 'genioussonu-site-checkup' ), $prefix );
+		$custom_msg = sprintf( __( 'Database prefix is customized ("%s"), offering resistance to automated generic table targeting.', 'genioussonu-security-hardening-audit' ), $prefix );
 		$message = $is_default ? $default_msg : $custom_msg;
 
 		$result = array(
@@ -745,7 +744,7 @@ class WPSG_Scanner {
 				$config_content = @file_get_contents( $config_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 				if ( false !== $config_content ) {
 					// Check if our marker block defines WP_DEBUG_DISPLAY as false.
-					if ( preg_match( '/BEGIN SiteCheckupPro-Config[\s\S]*?define\s*\(\s*[\'"]WP_DEBUG_DISPLAY[\'"]\s*,\s*false\s*\)[\s\S]*?END SiteCheckupPro-Config/i', $config_content ) ) {
+					if ( preg_match( '/BEGIN (GeniousSonuSiteCheckup|SiteCheckupPro)-Config[\s\S]*?define\s*\(\s*[\'"]WP_DEBUG_DISPLAY[\'"]\s*,\s*false\s*\)[\s\S]*?END \1-Config/i', $config_content ) ) {
 						$config_written_false = true;
 					}
 				}
@@ -764,8 +763,8 @@ class WPSG_Scanner {
 
 		$status  = $is_display_on ? 'attention' : 'done';
 		$message = $is_display_on
-			? __( 'WP_DEBUG_DISPLAY or display_errors is enabled, exposing database errors and stack traces to visitors.', 'genioussonu-site-checkup' )
-			: __( 'Front-end debug display is disabled (WP_DEBUG_DISPLAY off), preventing sensitive database leakage.', 'genioussonu-site-checkup' );
+			? __( 'WP_DEBUG_DISPLAY or display_errors is enabled, exposing database errors and stack traces to visitors.', 'genioussonu-security-hardening-audit' )
+			: __( 'Front-end debug display is disabled (WP_DEBUG_DISPLAY off), preventing sensitive database leakage.', 'genioussonu-security-hardening-audit' );
 
 		$result = array(
 			'status'              => $status,
@@ -802,7 +801,7 @@ class WPSG_Scanner {
 		if ( ! $host || ! is_ssl() ) {
 			$result = array(
 				'status'       => 'attention',
-				'message'      => __( 'Site is not running over HTTPS. SSL/TLS depth inspection requires an active SSL connection.', 'genioussonu-site-checkup' ),
+				'message'      => __( 'Site is not running over HTTPS. SSL/TLS depth inspection requires an active SSL connection.', 'genioussonu-security-hardening-audit' ),
 				'last_checked' => current_time( 'mysql' ),
 			);
 			set_transient( $cache_key, $result, 12 * HOUR_IN_SECONDS );
@@ -873,25 +872,25 @@ class WPSG_Scanner {
 		if ( in_array( 'TLSv1.0', $accepted_protocols, true ) || in_array( 'TLSv1.1', $accepted_protocols, true ) ) {
 			$issues[] = sprintf(
 				/* translators: %s: accepted weak protocols */
-				__( 'Insecure legacy protocols (%s) are still accepted by the server. Disable TLS 1.0 and 1.1 at the server/CDN level.', 'genioussonu-site-checkup' ),
+				__( 'Insecure legacy protocols (%s) are still accepted by the server. Disable TLS 1.0 and 1.1 at the server/CDN level.', 'genioussonu-security-hardening-audit' ),
 				implode( ', ', array_intersect( $accepted_protocols, array( 'TLSv1.0', 'TLSv1.1' ) ) )
 			);
 		}
 
 		if ( $chain_count === 1 ) {
-			$issues[] = __( 'Incomplete certificate chain detected (missing intermediate CA certificate). May cause trust errors on mobile/older clients.', 'genioussonu-site-checkup' );
+			$issues[] = __( 'Incomplete certificate chain detected (missing intermediate CA certificate). May cause trust errors on mobile/older clients.', 'genioussonu-security-hardening-audit' );
 		}
 
 		if ( false !== $cert_days && $cert_days <= 14 ) {
 			/* translators: %d: days until SSL certificate expiry */
-			$issues[] = sprintf( __( 'SSL certificate expires in %d day(s).', 'genioussonu-site-checkup' ), $cert_days );
+			$issues[] = sprintf( __( 'SSL certificate expires in %d day(s).', 'genioussonu-security-hardening-audit' ), $cert_days );
 		}
 
 		$status = empty( $issues ) ? 'done' : 'attention';
 		$msg    = empty( $issues )
 			? sprintf(
 				/* translators: 1: days remaining, 2: accepted protocols */
-				__( 'TLS configuration verified: Strong protocols active (%2$s), complete certificate chain (%1$d certs).', 'genioussonu-site-checkup' ),
+				__( 'TLS configuration verified: Strong protocols active (%2$s), complete certificate chain (%1$d certs).', 'genioussonu-security-hardening-audit' ),
 				$chain_count,
 				implode( ', ', $accepted_protocols )
 			)
@@ -970,20 +969,20 @@ class WPSG_Scanner {
 		// Informational status determination
 		$notes = array();
 		if ( $has_spf ) {
-			$notes[] = __( 'SPF record found.', 'genioussonu-site-checkup' );
+			$notes[] = __( 'SPF record found.', 'genioussonu-security-hardening-audit' );
 		} else {
-			$notes[] = __( 'No SPF record detected on root domain.', 'genioussonu-site-checkup' );
+			$notes[] = __( 'No SPF record detected on root domain.', 'genioussonu-security-hardening-audit' );
 		}
 
 		if ( $has_dmarc ) {
-			$notes[] = __( 'DMARC policy active.', 'genioussonu-site-checkup' );
+			$notes[] = __( 'DMARC policy active.', 'genioussonu-security-hardening-audit' );
 		} else {
-			$notes[] = __( 'No DMARC policy found.', 'genioussonu-site-checkup' );
+			$notes[] = __( 'No DMARC policy found.', 'genioussonu-security-hardening-audit' );
 		}
 
 		$msg = sprintf(
 			/* translators: 1: domain, 2: notes */
-			__( 'Domain email health for %1$s: %2$s (Note: Custom DKIM selectors cannot be discovered via domain scanning. If mail is handled via third-party relays like SendGrid or Google Workspace, confirm their DNS records are configured.)', 'genioussonu-site-checkup' ),
+			__( 'Domain email health for %1$s: %2$s (Note: Custom DKIM selectors cannot be discovered via domain scanning. If mail is handled via third-party relays like SendGrid or Google Workspace, confirm their DNS records are configured.)', 'genioussonu-security-hardening-audit' ),
 			$domain,
 			implode( ' ', $notes )
 		);

@@ -80,7 +80,7 @@ class WPSG_Compatibility_Guard {
 						'provider'    => $names,
 						'advice'      => sprintf(
 							/* translators: %s: active plugin names */
-							__( 'Active security plugin(s) (%s) may already manage XML-RPC restrictions. Deferring to external rules prevents rule conflicts.', 'genioussonu-site-checkup' ),
+							__( 'Active security plugin(s) (%s) may already manage XML-RPC restrictions. Deferring to external rules prevents rule conflicts.', 'genioussonu-security-hardening-audit' ),
 							$names
 						),
 					);
@@ -95,7 +95,7 @@ class WPSG_Compatibility_Guard {
 						'provider'    => $names,
 						'advice'      => sprintf(
 							/* translators: %s: active plugin names */
-							__( 'Active security plugin(s) (%s) already enforce login rate limiting. GeniousSonu Site Checkup rate limits will operate as a secondary defense layer.', 'genioussonu-site-checkup' ),
+							__( 'Active security plugin(s) (%s) already enforce login rate limiting. GeniousSonu Site Checkup rate limits will operate as a secondary defense layer.', 'genioussonu-security-hardening-audit' ),
 							$names
 						),
 					);
@@ -110,7 +110,7 @@ class WPSG_Compatibility_Guard {
 						'provider'    => $names,
 						'advice'      => sprintf(
 							/* translators: %s: active plugin names */
-							__( 'Active plugin(s) (%s) may already write security headers. Verify headers via browser devtools to avoid duplicate HTTP headers.', 'genioussonu-site-checkup' ),
+							__( 'Active plugin(s) (%s) may already write security headers. Verify headers via browser devtools to avoid duplicate HTTP headers.', 'genioussonu-security-hardening-audit' ),
 							$names
 						),
 					);
@@ -155,7 +155,7 @@ class WPSG_Compatibility_Guard {
 			'file'                  => $filename,
 			'message'               => sprintf(
 				/* translators: %s: file name */
-				__( 'Managed Hosting Notice: %s is read-only in this hosting environment. Automatic file modification is disabled to protect server stability. Please provide this configuration snippet to your hosting support or add it via your control panel.', 'genioussonu-site-checkup' ),
+				__( 'Managed Hosting Notice: %s is read-only in this hosting environment. Automatic file modification is disabled to protect server stability. Please provide this configuration snippet to your hosting support or add it via your control panel.', 'genioussonu-security-hardening-audit' ),
 				$filename
 			),
 		);

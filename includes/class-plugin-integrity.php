@@ -85,7 +85,7 @@ class WPSG_Plugin_Integrity {
 				'plugins'  => $found,
 				'message'  => sprintf(
 					/* translators: 1: count of plugins, 2: list of names */
-					__( 'Found %1$d unwanted migration/management plugin(s) installed: %2$s. It is recommended to remove these after use.', 'genioussonu-site-checkup' ),
+					__( 'Found %1$d unwanted migration/management plugin(s) installed: %2$s. It is recommended to remove these after use.', 'genioussonu-security-hardening-audit' ),
 					count( $found ),
 					implode( ', ', $names )
 				),
@@ -95,7 +95,7 @@ class WPSG_Plugin_Integrity {
 		return array(
 			'status'  => 'done',
 			'plugins' => array(),
-			'message' => __( 'No leftover or risky development plugins detected from the denylist.', 'genioussonu-site-checkup' ),
+			'message' => __( 'No leftover or risky development plugins detected from the denylist.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 
@@ -214,7 +214,7 @@ class WPSG_Plugin_Integrity {
 		if ( ! $real_plugin_parent || ! $real_wp_plugins || 0 !== strpos( $real_plugin_parent, $real_wp_plugins ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Security error: Invalid plugin file path.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Security error: Invalid plugin file path.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -223,7 +223,7 @@ class WPSG_Plugin_Integrity {
 		if ( ! $zip_path ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Could not create a safety zip backup of the plugin directory. Deletion aborted.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Could not create a safety zip backup of the plugin directory. Deletion aborted.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -254,7 +254,7 @@ class WPSG_Plugin_Integrity {
 			'success'  => true,
 			'message'  => sprintf(
 				/* translators: %s: slug */
-				__( 'Plugin %s was backed up to zip and safely deleted.', 'genioussonu-site-checkup' ),
+				__( 'Plugin %s was backed up to zip and safely deleted.', 'genioussonu-security-hardening-audit' ),
 				$slug
 			),
 			'zip_path' => $zip_path,
@@ -273,14 +273,14 @@ class WPSG_Plugin_Integrity {
 		if ( empty( $data ) || empty( $data['zip_path'] ) || ! file_exists( $data['zip_path'] ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'No valid zip backup found to restore this plugin.', 'genioussonu-site-checkup' ),
+				'message' => __( 'No valid zip backup found to restore this plugin.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
 		if ( ! class_exists( 'ZipArchive' ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'ZipArchive extension is required for restoration.', 'genioussonu-site-checkup' ),
+				'message' => __( 'ZipArchive extension is required for restoration.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -291,7 +291,7 @@ class WPSG_Plugin_Integrity {
 		if ( ! $real_wp_plugins ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Cannot resolve plugins directory.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Cannot resolve plugins directory.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -304,7 +304,7 @@ class WPSG_Plugin_Integrity {
 					$zip->close();
 					return array(
 						'success' => false,
-						'message' => __( 'Security error: Malicious path traversal entries detected in zip archive.', 'genioussonu-site-checkup' ),
+						'message' => __( 'Security error: Malicious path traversal entries detected in zip archive.', 'genioussonu-security-hardening-audit' ),
 					);
 				}
 			}
@@ -322,7 +322,7 @@ class WPSG_Plugin_Integrity {
 				'success' => true,
 				'message' => sprintf(
 					/* translators: %s: slug */
-					__( 'Plugin %s has been restored from zip backup.', 'genioussonu-site-checkup' ),
+					__( 'Plugin %s has been restored from zip backup.', 'genioussonu-security-hardening-audit' ),
 					$slug
 				),
 			);
@@ -330,7 +330,7 @@ class WPSG_Plugin_Integrity {
 
 		return array(
 			'success' => false,
-			'message' => __( 'Failed to extract plugin zip archive.', 'genioussonu-site-checkup' ),
+			'message' => __( 'Failed to extract plugin zip archive.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 
@@ -348,7 +348,7 @@ class WPSG_Plugin_Integrity {
 		if ( empty( $recent_slug ) && false !== $options_table ) {
 			$options_table = esc_sql( $options_table );
 			$like = $wpdb->esc_like( 'wpsg_last_deleted_plugin_' ) . '%';
-			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; LIKE pattern is prepared.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; LIKE pattern is prepared.
 			$row  = $wpdb->get_row(
 				$wpdb->prepare(
 					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; LIKE pattern uses a placeholder.
@@ -373,7 +373,7 @@ class WPSG_Plugin_Integrity {
 		if ( empty( $recent_slug ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'No recent plugin deletion archive found to restore.', 'genioussonu-site-checkup' ),
+				'message' => __( 'No recent plugin deletion archive found to restore.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -415,7 +415,16 @@ class WPSG_Plugin_Integrity {
 		if ( ! function_exists( 'plugins_api' ) ) {
 			return array(
 				'status'  => 'pending',
-				'message' => __( 'WordPress Plugin Information API is unavailable in this environment.', 'genioussonu-site-checkup' ),
+				'message' => __( 'WordPress Plugin Information API is unavailable in this environment.', 'genioussonu-security-hardening-audit' ),
+			);
+		}
+
+		$settings = get_option( 'wpsg_settings', array() );
+		if ( empty( $settings['wporg_api_optin'] ) ) {
+			return array(
+				'status'  => 'pending',
+				'message' => __( 'WordPress.org API integration is disabled in settings. Enable it under Settings to check for closed plugins.', 'genioussonu-security-hardening-audit' ),
+				'details' => array(),
 			);
 		}
 
@@ -425,7 +434,7 @@ class WPSG_Plugin_Integrity {
 
 		foreach ( $all_plugins as $plugin_file => $data ) {
 			$slug = dirname( $plugin_file );
-			if ( '.' === $slug || empty( $slug ) || 'genioussonu-site-checkup' === $slug ) {
+			if ( '.' === $slug || empty( $slug ) || 'genioussonu-security-hardening-audit' === $slug ) {
 				continue;
 			}
 
@@ -444,7 +453,7 @@ class WPSG_Plugin_Integrity {
 							'slug'    => $slug,
 							'name'    => $data['Name'],
 							'version' => $data['Version'],
-							'reason'  => __( 'Removed or closed on WordPress.org', 'genioussonu-site-checkup' ),
+							'reason'  => __( 'Removed or closed on WordPress.org', 'genioussonu-security-hardening-audit' ),
 						);
 					}
 				}
@@ -461,12 +470,12 @@ class WPSG_Plugin_Integrity {
 			'message'      => empty( $closed )
 				? sprintf(
 					/* translators: %d: count */
-					__( 'All %d installed public plugins are active and verified on WordPress.org.', 'genioussonu-site-checkup' ),
+					__( 'All %d installed public plugins are active and verified on WordPress.org.', 'genioussonu-security-hardening-audit' ),
 					$total
 				)
 				: sprintf(
 					/* translators: %d: count */
-					__( 'Warning: %d plugin(s) appear to be removed or closed on WordPress.org.', 'genioussonu-site-checkup' ),
+					__( 'Warning: %d plugin(s) appear to be removed or closed on WordPress.org.', 'genioussonu-security-hardening-audit' ),
 					count( $closed )
 				),
 		);

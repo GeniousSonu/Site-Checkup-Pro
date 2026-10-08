@@ -134,7 +134,7 @@ class WPSG_Login_Guard {
 				'wpsg_locked_out',
 				sprintf(
 					/* translators: %d: remaining minutes */
-					__( 'Too many failed login attempts. Please wait %d minute(s) before trying again.', 'genioussonu-site-checkup' ),
+					__( 'Too many failed login attempts. Please wait %d minute(s) before trying again.', 'genioussonu-security-hardening-audit' ),
 					$remaining_minutes
 				)
 			);
@@ -150,7 +150,7 @@ class WPSG_Login_Guard {
 				'wpsg_global_locked_out',
 				sprintf(
 					/* translators: %d: remaining minutes */
-					__( 'Account temporarily protected due to suspicious activity. Please wait %d minute(s).', 'genioussonu-site-checkup' ),
+					__( 'Account temporarily protected due to suspicious activity. Please wait %d minute(s).', 'genioussonu-security-hardening-audit' ),
 					$remaining_minutes
 				)
 			);
@@ -200,7 +200,7 @@ class WPSG_Login_Guard {
 		$now        = current_time( 'mysql' );
 
 		// 1. Atomic insertion or increment
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; row values use prepare().
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; row values use prepare().
 		$wpdb->query(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; row values use placeholders.
@@ -215,8 +215,7 @@ class WPSG_Login_Guard {
 		);
 
 		// 2. Fetch updated attempts
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; rate key uses prepare().
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; rate key uses prepare().
 		$attempts = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; rate key uses a placeholder.
@@ -237,7 +236,7 @@ class WPSG_Login_Guard {
 
 		if ( $lock_seconds > 0 ) {
 			$locked_until = gmdate( 'Y-m-d H:i:s', time() + $lock_seconds );
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; row values use prepare().
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; row values use prepare().
 			$wpdb->query(
 				$wpdb->prepare(
 					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; row values use placeholders.
@@ -250,7 +249,7 @@ class WPSG_Login_Guard {
 
 		// 4. Secondary global per-username failure counter (distributed brute force guard)
 		$user_key = hash( 'sha256', 'global_user|' . $clean_user );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; row values use prepare().
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; row values use prepare().
 		$wpdb->query(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; row values use placeholders.
@@ -264,8 +263,7 @@ class WPSG_Login_Guard {
 			)
 		);
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; user key uses prepare().
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; user key uses prepare().
 		$user_attempts = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; user key uses a placeholder.
@@ -276,7 +274,7 @@ class WPSG_Login_Guard {
 
 		if ( $user_attempts >= 50 ) {
 			$locked_until = gmdate( 'Y-m-d H:i:s', time() + 1800 ); // 30 minutes
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; row values use prepare().
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; row values use prepare().
 			$wpdb->query(
 				$wpdb->prepare(
 					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; row values use placeholders.
@@ -292,7 +290,7 @@ class WPSG_Login_Guard {
 					'distributed_attack',
 					sprintf(
 						/* translators: %s: username */
-						__( 'Distributed brute-force attack detected on username "%s" (50+ failed attempts). Account temporarily protected.', 'genioussonu-site-checkup' ),
+						__( 'Distributed brute-force attack detected on username "%s" (50+ failed attempts). Account temporarily protected.', 'genioussonu-security-hardening-audit' ),
 						$clean_user
 					),
 					array( 'target_user' => $clean_user, 'total_attempts' => $user_attempts )
@@ -303,9 +301,9 @@ class WPSG_Login_Guard {
 		// 5. Redacted audit log entry (STRICTLY NEVER LOG PASSWORDS)
 		if ( class_exists( 'WPSG_Audit_Log' ) ) {
 			/* translators: 1: client IP address, 2: lockout seconds, 3: attempt count */
-			$locked_msg = sprintf( __( 'IP %1$s locked out for %2$d seconds after %3$d failed login attempts.', 'genioussonu-site-checkup' ), $client_ip, $lock_seconds, $attempts );
+			$locked_msg = sprintf( __( 'IP %1$s locked out for %2$d seconds after %3$d failed login attempts.', 'genioussonu-security-hardening-audit' ), $client_ip, $lock_seconds, $attempts );
 			/* translators: 1: username, 2: client IP address */
-			$failed_msg = sprintf( __( 'Failed login recorded for user "%1$s" from %2$s.', 'genioussonu-site-checkup' ), $clean_user, $client_ip );
+			$failed_msg = sprintf( __( 'Failed login recorded for user "%1$s" from %2$s.', 'genioussonu-security-hardening-audit' ), $clean_user, $client_ip );
 
 			WPSG_Audit_Log::log(
 				'login_guard',
@@ -343,8 +341,7 @@ class WPSG_Login_Guard {
 			return array( 'is_locked' => false, 'remaining_seconds' => 0 );
 		}
 		$table_name = esc_sql( $table_name );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; rate key uses prepare().
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; rate key uses prepare().
 		$row = $wpdb->get_row(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; rate key uses a placeholder.
@@ -392,8 +389,7 @@ class WPSG_Login_Guard {
 		$rate_key   = hash( 'sha256', 'rl_' . $action_key );
 		$now        = current_time( 'mysql' );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; rate key uses prepare().
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; rate key uses prepare().
 		$row = $wpdb->get_row(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; rate key uses a placeholder.
@@ -403,7 +399,7 @@ class WPSG_Login_Guard {
 		);
 
 		if ( ! $row ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->insert(
 				$table_name,
 				array(
@@ -420,7 +416,7 @@ class WPSG_Login_Guard {
 		$window_start = strtotime( $row->first_attempt );
 		if ( ( time() - $window_start ) > $window_sec ) {
 			// Window elapsed: reset counter
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->update(
 				$table_name,
 				array(
@@ -439,8 +435,7 @@ class WPSG_Login_Guard {
 		}
 
 		// Increment
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; timestamp and key use prepare().
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; timestamp and key use prepare().
 		$wpdb->query(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; row values use placeholders.
@@ -468,8 +463,7 @@ class WPSG_Login_Guard {
 			return 0;
 		}
 		$table_name = esc_sql( $table_name );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; query has no runtime values.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; query has no runtime values.
 		$deleted = $wpdb->query(
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; query has no runtime values.
 			"DELETE FROM {$table_name} 
@@ -489,7 +483,7 @@ class WPSG_Login_Guard {
 	 */
 	public function mask_login_errors( $errors ) {
 		if ( ! empty( $errors ) && false === strpos( $errors, 'wpsg_locked_out' ) ) {
-			return '<strong>' . esc_html__( 'Error:', 'genioussonu-site-checkup' ) . '</strong> ' . esc_html__( 'Invalid username or password.', 'genioussonu-site-checkup' );
+			return '<strong>' . esc_html__( 'Error:', 'genioussonu-security-hardening-audit' ) . '</strong> ' . esc_html__( 'Invalid username or password.', 'genioussonu-security-hardening-audit' );
 		}
 		return $errors;
 	}

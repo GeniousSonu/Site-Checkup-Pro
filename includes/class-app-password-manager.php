@@ -50,8 +50,8 @@ class WPSG_App_Password_Manager {
 						'user_login'   => $u->user_login,
 						'display_name' => $u->display_name,
 						'created'      => ! empty( $p['created'] ) ? gmdate( 'Y-m-d H:i:s', $p['created'] ) : '',
-						'last_used'    => ! empty( $p['last_used'] ) ? gmdate( 'Y-m-d H:i:s', $p['last_used'] ) : __( 'Never', 'genioussonu-site-checkup' ),
-						'last_ip'      => ! empty( $p['last_ip'] ) ? $p['last_ip'] : __( 'N/A', 'genioussonu-site-checkup' ),
+						'last_used'    => ! empty( $p['last_used'] ) ? gmdate( 'Y-m-d H:i:s', $p['last_used'] ) : __( 'Never', 'genioussonu-security-hardening-audit' ),
+						'last_ip'      => ! empty( $p['last_ip'] ) ? $p['last_ip'] : __( 'N/A', 'genioussonu-security-hardening-audit' ),
 					);
 				}
 			}
@@ -72,7 +72,7 @@ class WPSG_App_Password_Manager {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Permission denied. Administrator capabilities required.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Permission denied. Administrator capabilities required.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -82,7 +82,7 @@ class WPSG_App_Password_Manager {
 				return array(
 					'success'         => false,
 					'reauth_required' => true,
-					'message'         => __( 'Re-authentication required: please confirm your password to revoke credentials.', 'genioussonu-site-checkup' ),
+					'message'         => __( 'Re-authentication required: please confirm your password to revoke credentials.', 'genioussonu-security-hardening-audit' ),
 				);
 			}
 		}
@@ -90,7 +90,7 @@ class WPSG_App_Password_Manager {
 		if ( ! class_exists( 'WP_Application_Passwords' ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Application Passwords not supported on this WordPress installation.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Application Passwords not supported on this WordPress installation.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -105,19 +105,19 @@ class WPSG_App_Password_Manager {
 					array( 'target_user_id' => $user_id, 'uuid' => $uuid ),
 					'success',
 					/* translators: %s: application password UUID */
-					sprintf( __( 'Application password %s revoked.', 'genioussonu-site-checkup' ), $uuid )
+					sprintf( __( 'Application password %s revoked.', 'genioussonu-security-hardening-audit' ), $uuid )
 				);
 			}
 
 			return array(
 				'success' => true,
-				'message' => __( 'Application password revoked successfully.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Application password revoked successfully.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
 		return array(
 			'success' => false,
-			'message' => __( 'Could not revoke specified application password.', 'genioussonu-site-checkup' ),
+			'message' => __( 'Could not revoke specified application password.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 }

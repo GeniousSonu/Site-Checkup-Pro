@@ -56,7 +56,7 @@ class WPSG_Wordfence_Bridge {
 				'is_active'   => false,
 				'waf_status'  => 'inactive',
 				'install_url' => admin_url( 'plugin-install.php?s=wordfence&tab=search&type=term' ),
-				'message'     => __( 'Wordfence is not active. Install and activate it to enable web application firewall and malware scanning.', 'genioussonu-site-checkup' ),
+				'message'     => __( 'Wordfence is not active. Install and activate it to enable web application firewall and malware scanning.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -79,18 +79,18 @@ class WPSG_Wordfence_Bridge {
 		// Recommended settings guidelines from Agency SOP
 		$recommendations = array(
 			array(
-				'title' => __( 'Web Application Firewall (WAF)', 'genioussonu-site-checkup' ),
-				'desc'  => __( 'Optimize WAF to Extended Protection (user.ini/php.ini setup).', 'genioussonu-site-checkup' ),
+				'title' => __( 'Web Application Firewall (WAF)', 'genioussonu-security-hardening-audit' ),
+				'desc'  => __( 'Optimize WAF to Extended Protection (user.ini/php.ini setup).', 'genioussonu-security-hardening-audit' ),
 				'link'  => admin_url( 'admin.php?page=WordfenceWAF' ),
 			),
 			array(
-				'title' => __( 'Brute Force Protection', 'genioussonu-site-checkup' ),
-				'desc'  => __( 'Enforce max 5 login failures and lock out immediately.', 'genioussonu-site-checkup' ),
+				'title' => __( 'Brute Force Protection', 'genioussonu-security-hardening-audit' ),
+				'desc'  => __( 'Enforce max 5 login failures and lock out immediately.', 'genioussonu-security-hardening-audit' ),
 				'link'  => admin_url( 'admin.php?page=WordfenceWAF#waf-options-login-security' ),
 			),
 			array(
-				'title' => __( 'Email Alert Monitoring', 'genioussonu-site-checkup' ),
-				'desc'  => __( 'Ensure alert emails route to designated agency monitoring inbox.', 'genioussonu-site-checkup' ),
+				'title' => __( 'Email Alert Monitoring', 'genioussonu-security-hardening-audit' ),
+				'desc'  => __( 'Ensure alert emails route to designated agency monitoring inbox.', 'genioussonu-security-hardening-audit' ),
 				'link'  => admin_url( 'admin.php?page=WordfenceGlobalOptions#global-options-email-preferences' ),
 			),
 		);
@@ -106,7 +106,7 @@ class WPSG_Wordfence_Bridge {
 			'recommendations' => $recommendations,
 			'message'         => sprintf(
 				/* translators: %s: WAF status */
-				__( 'Wordfence is active (%s). Review agency recommended settings.', 'genioussonu-site-checkup' ),
+				__( 'Wordfence is active (%s). Review agency recommended settings.', 'genioussonu-security-hardening-audit' ),
 				$waf_status
 			),
 		);

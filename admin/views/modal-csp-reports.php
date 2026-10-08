@@ -21,30 +21,30 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="wpsg-modal-header">
 			<h3 class="wpsg-modal-title" id="wpsg-csp-modal-title">
 				<span class="dashicons dashicons-shield-alt" aria-hidden="true"></span>
-				<?php esc_html_e( 'Content-Security-Policy Reports (Report-Only Mode)', 'genioussonu-site-checkup' ); ?>
+				<?php esc_html_e( 'Content-Security-Policy Reports (Report-Only Mode)', 'genioussonu-security-hardening-audit' ); ?>
 			</h3>
-			<button type="button" class="wpsg-modal-close" data-close-modal aria-label="<?php esc_attr_e( 'Close', 'genioussonu-site-checkup' ); ?>">&times;</button>
+			<button type="button" class="wpsg-modal-close" data-close-modal aria-label="<?php esc_attr_e( 'Close', 'genioussonu-security-hardening-audit' ); ?>">&times;</button>
 		</div>
 
 		<div class="wpsg-modal-body">
 			<p style="margin-top: 0; color: var(--wpsg-text-secondary); font-size: 13px;">
-				<?php esc_html_e( 'The policy is currently running in Report-Only mode. No resources are blocked. Violations triggered by scripts, styles, or plugins are captured below for review before enforcement.', 'genioussonu-site-checkup' ); ?>
+				<?php esc_html_e( 'The policy is currently running in Report-Only mode. No resources are blocked. Violations triggered by scripts, styles, or plugins are captured below for review before enforcement.', 'genioussonu-security-hardening-audit' ); ?>
 			</p>
 
 			<div class="wpsg-table-container" style="max-height: 350px; overflow-y: auto;">
 				<table class="wpsg-table" id="wpsg-csp-table">
 					<thead>
 						<tr>
-							<th style="width: 140px;"><?php esc_html_e( 'Time', 'genioussonu-site-checkup' ); ?></th>
-							<th><?php esc_html_e( 'Directive', 'genioussonu-site-checkup' ); ?></th>
-							<th><?php esc_html_e( 'Blocked URI', 'genioussonu-site-checkup' ); ?></th>
-							<th><?php esc_html_e( 'Document URI', 'genioussonu-site-checkup' ); ?></th>
+							<th style="width: 140px;"><?php esc_html_e( 'Time', 'genioussonu-security-hardening-audit' ); ?></th>
+							<th><?php esc_html_e( 'Directive', 'genioussonu-security-hardening-audit' ); ?></th>
+							<th><?php esc_html_e( 'Blocked URI', 'genioussonu-security-hardening-audit' ); ?></th>
+							<th><?php esc_html_e( 'Document URI', 'genioussonu-security-hardening-audit' ); ?></th>
 						</tr>
 					</thead>
 					<tbody id="wpsg-csp-tbody">
 						<tr>
 							<td colspan="4" style="text-align: center; padding: 20px;">
-								<span class="wpsg-spinner"></span> <?php esc_html_e( 'Loading CSP violation records...', 'genioussonu-site-checkup' ); ?>
+								<span class="wpsg-spinner"></span> <?php esc_html_e( 'Loading CSP violation records...', 'genioussonu-security-hardening-audit' ); ?>
 							</td>
 						</tr>
 					</tbody>
@@ -54,7 +54,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<div class="wpsg-modal-footer">
 			<button type="button" class="wpsg-btn wpsg-btn-secondary" data-close-modal>
-				<?php esc_html_e( 'Close', 'genioussonu-site-checkup' ); ?>
+				<?php esc_html_e( 'Close', 'genioussonu-security-hardening-audit' ); ?>
 			</button>
 		</div>
 	</div>

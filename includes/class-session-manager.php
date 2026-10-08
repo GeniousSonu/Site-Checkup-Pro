@@ -119,7 +119,7 @@ class WPSG_Session_Manager {
 			if ( ! current_user_can( 'edit_users' ) ) {
 				return array(
 					'success' => false,
-					'message' => __( 'Permission denied. You cannot modify sessions for other users.', 'genioussonu-site-checkup' ),
+					'message' => __( 'Permission denied. You cannot modify sessions for other users.', 'genioussonu-security-hardening-audit' ),
 				);
 			}
 		}
@@ -127,7 +127,7 @@ class WPSG_Session_Manager {
 		if ( ! class_exists( 'WP_Session_Tokens' ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'WP_Session_Tokens not available.', 'genioussonu-site-checkup' ),
+				'message' => __( 'WP_Session_Tokens not available.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -138,7 +138,7 @@ class WPSG_Session_Manager {
 		if ( ! isset( $sessions[ $verifier ] ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Specified session not found for this user account.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Specified session not found for this user account.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -151,7 +151,7 @@ class WPSG_Session_Manager {
 				'session_terminated',
 				sprintf(
 					/* translators: 1: admin user, 2: target user */
-					__( 'Admin user #%1$d terminated a remote session for user "%2$s".', 'genioussonu-site-checkup' ),
+					__( 'Admin user #%1$d terminated a remote session for user "%2$s".', 'genioussonu-security-hardening-audit' ),
 					$current_user_id,
 					$target_user ? $target_user->user_login : $target_user_id
 				),
@@ -161,7 +161,7 @@ class WPSG_Session_Manager {
 
 		return array(
 			'success' => true,
-			'message' => __( 'Session terminated successfully.', 'genioussonu-site-checkup' ),
+			'message' => __( 'Session terminated successfully.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 
@@ -178,12 +178,12 @@ class WPSG_Session_Manager {
 		if ( $current_user_id !== $target_user_id && ! current_user_can( 'edit_users' ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Permission denied.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Permission denied.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
 		if ( ! class_exists( 'WP_Session_Tokens' ) ) {
-			return array( 'success' => false, 'message' => __( 'WP_Session_Tokens not available.', 'genioussonu-site-checkup' ) );
+			return array( 'success' => false, 'message' => __( 'WP_Session_Tokens not available.', 'genioussonu-security-hardening-audit' ) );
 		}
 
 		$manager = WP_Session_Tokens::get_instance( $target_user_id );
@@ -197,7 +197,7 @@ class WPSG_Session_Manager {
 
 		return array(
 			'success' => true,
-			'message' => __( 'All other sessions have been logged out.', 'genioussonu-site-checkup' ),
+			'message' => __( 'All other sessions have been logged out.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 
@@ -267,7 +267,7 @@ class WPSG_Session_Manager {
 	public static function verify_password_and_grant_reauth( $password ) {
 		$current_user = wp_get_current_user();
 		if ( ! $current_user || ! $current_user->exists() ) {
-			return new WP_Error( 'not_authenticated', __( 'User session not found.', 'genioussonu-site-checkup' ), array( 'status' => 401 ) );
+			return new WP_Error( 'not_authenticated', __( 'User session not found.', 'genioussonu-security-hardening-audit' ), array( 'status' => 401 ) );
 		}
 
 		$client_ip = class_exists( 'WPSG_Login_Guard' ) ? WPSG_Login_Guard::get_client_ip() : '127.0.0.1';
@@ -281,7 +281,7 @@ class WPSG_Session_Manager {
 					'wpsg_locked_out',
 					sprintf(
 						/* translators: %d: minutes until retry allowed */
-						__( 'Too many failed attempts. Please try again in %d minute(s).', 'genioussonu-site-checkup' ),
+						__( 'Too many failed attempts. Please try again in %d minute(s).', 'genioussonu-security-hardening-audit' ),
 						max( 1, (int) ceil( $lockout['remaining_seconds'] / 60 ) )
 					),
 					array( 'status' => 429 )
@@ -298,7 +298,7 @@ class WPSG_Session_Manager {
 
 			return new WP_Error(
 				'invalid_password',
-				__( 'Incorrect administrator password.', 'genioussonu-site-checkup' ),
+				__( 'Incorrect administrator password.', 'genioussonu-security-hardening-audit' ),
 				array( 'status' => 403 )
 			);
 		}
@@ -325,7 +325,7 @@ class WPSG_Session_Manager {
 			'success'      => true,
 			'reauth_token' => $random_token,
 			'expires_in'   => self::REAUTH_WINDOW_SECONDS,
-			'message'      => __( 'Password verified successfully.', 'genioussonu-site-checkup' ),
+			'message'      => __( 'Password verified successfully.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 

@@ -50,7 +50,7 @@ class WPSG_Update_Checker {
 	 *
 	 * @var string
 	 */
-	private $plugin_slug = 'genioussonu-site-checkup';
+	private $plugin_slug = 'genioussonu-security-hardening-audit';
 
 	/**
 	 * Current plugin version.
@@ -200,7 +200,7 @@ class WPSG_Update_Checker {
 		if ( ! isset( $transient->response[ $basename ] ) && ! isset( $transient->no_update[ $basename ] ) ) {
 			$transient->no_update[ $basename ] = (object) array(
 				'id'            => 'wpsg-genioussonu-site-checkup',
-				'slug'          => 'genioussonu-site-checkup',
+				'slug'          => 'genioussonu-security-hardening-audit',
 				'plugin'        => $basename,
 				'new_version'   => defined( 'WPSG_VERSION' ) ? WPSG_VERSION : '1.0.0',
 				'url'           => 'https://www.genioussonu.me/plugin/genioussonu-site-checkup/',

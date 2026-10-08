@@ -53,9 +53,6 @@ class WPSG_Admin_Menu {
 		add_filter( 'plugin_action_links_' . $basename, array( $this, 'add_action_links' ) );
 		add_filter( 'plugin_row_meta', array( $this, 'add_row_meta' ), 10, 2 );
 
-		// Auto-updates column fallback rendering on plugins.php.
-		add_filter( 'plugin_auto_update_setting_html', array( $this, 'filter_auto_update_setting_html' ), 10, 3 );
-
 		// Clean, isolated workspace: Suppress external admin notices on GeniousSonu Site Checkup screens.
 		add_action( 'in_admin_header', array( $this, 'suppress_foreign_admin_notices' ), 100 );
 	}
@@ -66,7 +63,7 @@ class WPSG_Admin_Menu {
 	 */
 	public function suppress_foreign_admin_notices() {
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		if ( ! $screen || false === strpos( $screen->id, 'genioussonu-site-checkup' ) ) {
+		if ( ! $screen || false === strpos( $screen->id, 'genioussonu-security-hardening-audit' ) ) {
 			return;
 		}
 
@@ -88,37 +85,37 @@ class WPSG_Admin_Menu {
 		}
 
 		$hook = add_menu_page(
-			__( 'GeniousSonu Site Checkup', 'genioussonu-site-checkup' ),
-			__( 'Site Checkup', 'genioussonu-site-checkup' ),
+			__( 'GeniousSonu Site Checkup', 'genioussonu-security-hardening-audit' ),
+			__( 'Site Checkup', 'genioussonu-security-hardening-audit' ),
 			'manage_options',
-			'genioussonu-site-checkup',
+			'genioussonu-security-hardening-audit',
 			array( $this, 'render_dashboard' ),
 			$icon,
 			75
 		);
 
 		add_submenu_page(
-			'genioussonu-site-checkup',
-			__( 'Check-up Dashboard', 'genioussonu-site-checkup' ),
-			__( 'Dashboard', 'genioussonu-site-checkup' ),
+			'genioussonu-security-hardening-audit',
+			__( 'Check-up Dashboard', 'genioussonu-security-hardening-audit' ),
+			__( 'Dashboard', 'genioussonu-security-hardening-audit' ),
 			'manage_options',
-			'genioussonu-site-checkup',
+			'genioussonu-security-hardening-audit',
 			array( $this, 'render_dashboard' )
 		);
 
 		add_submenu_page(
-			'genioussonu-site-checkup',
-			__( 'Security Audit Log', 'genioussonu-site-checkup' ),
-			__( 'Audit Log', 'genioussonu-site-checkup' ),
+			'genioussonu-security-hardening-audit',
+			__( 'Security Audit Log', 'genioussonu-security-hardening-audit' ),
+			__( 'Audit Log', 'genioussonu-security-hardening-audit' ),
 			'manage_options',
 			'genioussonu-site-checkup-audit',
 			array( $this, 'render_audit_log' )
 		);
 
 		add_submenu_page(
-			'genioussonu-site-checkup',
-			__( 'SOP Coverage Report', 'genioussonu-site-checkup' ),
-			__( 'Client Report', 'genioussonu-site-checkup' ),
+			'genioussonu-security-hardening-audit',
+			__( 'SOP Coverage Report', 'genioussonu-security-hardening-audit' ),
+			__( 'Client Report', 'genioussonu-security-hardening-audit' ),
 			'manage_options',
 			'genioussonu-site-checkup-report',
 			array( $this, 'render_report' )
@@ -133,8 +130,8 @@ class WPSG_Admin_Menu {
 	public function enqueue_assets( $hook ) {
 		// Strict screen check: Only enqueue on GeniousSonu Site Checkup admin screens!
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		if ( ! $screen || false === strpos( $screen->id, 'genioussonu-site-checkup' ) ) {
-			if ( false === strpos( $hook, 'genioussonu-site-checkup' ) ) {
+		if ( ! $screen || false === strpos( $screen->id, 'genioussonu-security-hardening-audit' ) ) {
+			if ( false === strpos( $hook, 'genioussonu-security-hardening-audit' ) ) {
 				return;
 			}
 		}
@@ -223,13 +220,13 @@ class WPSG_Admin_Menu {
 	 */
 	public function render_dashboard() {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'genioussonu-site-checkup' ) );
+			wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'genioussonu-security-hardening-audit' ) );
 		}
 		try {
 			include WPSG_PLUGIN_DIR . 'admin/views/dashboard.php';
 		} catch ( \Throwable $e ) {
 			/* translators: %s: error message */
-			echo '<div class="notice notice-error"><p>' . esc_html( sprintf( __( 'GeniousSonu Site Checkup encountered an unexpected error: %s', 'genioussonu-site-checkup' ), $e->getMessage() ) ) . '</p></div>';
+			echo '<div class="notice notice-error"><p>' . esc_html( sprintf( __( 'GeniousSonu Site Checkup encountered an unexpected error: %s', 'genioussonu-security-hardening-audit' ), $e->getMessage() ) ) . '</p></div>';
 		}
 	}
 
@@ -238,13 +235,13 @@ class WPSG_Admin_Menu {
 	 */
 	public function render_audit_log() {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'genioussonu-site-checkup' ) );
+			wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'genioussonu-security-hardening-audit' ) );
 		}
 		try {
 			include WPSG_PLUGIN_DIR . 'admin/views/dashboard.php';
 		} catch ( \Throwable $e ) {
 			/* translators: %s: error message */
-			echo '<div class="notice notice-error"><p>' . esc_html( sprintf( __( 'GeniousSonu Site Checkup encountered an unexpected error: %s', 'genioussonu-site-checkup' ), $e->getMessage() ) ) . '</p></div>';
+			echo '<div class="notice notice-error"><p>' . esc_html( sprintf( __( 'GeniousSonu Site Checkup encountered an unexpected error: %s', 'genioussonu-security-hardening-audit' ), $e->getMessage() ) ) . '</p></div>';
 		}
 	}
 
@@ -253,13 +250,13 @@ class WPSG_Admin_Menu {
 	 */
 	public function render_report() {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'genioussonu-site-checkup' ) );
+			wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'genioussonu-security-hardening-audit' ) );
 		}
 		try {
 			include WPSG_PLUGIN_DIR . 'admin/views/report.php';
 		} catch ( \Throwable $e ) {
 			/* translators: %s: error message */
-			echo '<div class="notice notice-error"><p>' . esc_html( sprintf( __( 'GeniousSonu Site Checkup encountered an unexpected error generating the report: %s', 'genioussonu-site-checkup' ), $e->getMessage() ) ) . '</p></div>';
+			echo '<div class="notice notice-error"><p>' . esc_html( sprintf( __( 'GeniousSonu Site Checkup encountered an unexpected error generating the report: %s', 'genioussonu-security-hardening-audit' ), $e->getMessage() ) ) . '</p></div>';
 		}
 	}
 
@@ -274,7 +271,7 @@ class WPSG_Admin_Menu {
 		$settings_link = sprintf(
 			'<a href="%s">%s</a>',
 			esc_url( $settings_url ),
-			esc_html__( 'Settings', 'genioussonu-site-checkup' )
+			esc_html__( 'Settings', 'genioussonu-security-hardening-audit' )
 		);
 		array_unshift( $actions, $settings_link );
 		return $actions;
@@ -302,65 +299,23 @@ class WPSG_Admin_Menu {
 			sprintf(
 				'<a href="%s">%s</a>',
 				esc_url( admin_url( 'admin.php?page=genioussonu-site-checkup' ) ),
-				esc_html__( 'Settings', 'genioussonu-site-checkup' )
+				esc_html__( 'Settings', 'genioussonu-security-hardening-audit' )
 			),
 			sprintf(
 				'<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
 				esc_url( $docs_url ),
-				esc_html__( 'Docs & FAQs', 'genioussonu-site-checkup' )
+				esc_html__( 'Docs & FAQs', 'genioussonu-security-hardening-audit' )
 			),
 			sprintf(
 				'<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
 				esc_url( $tutorials_url ),
-				esc_html__( 'Video Tutorials', 'genioussonu-site-checkup' )
+				esc_html__( 'Video Tutorials', 'genioussonu-security-hardening-audit' )
 			),
 		);
 
 		return array_merge( $meta, $links );
 	}
 
-	/**
-	 * Filters the HTML of the auto-updates column for GeniousSonu Site Checkup.
-	 * Ensures the Enable / Disable auto-updates link is always displayed and functional.
-	 *
-	 * @param string $html        The HTML of the auto-update column content.
-	 * @param string $plugin_file Path to the plugin file relative to the plugins directory.
-	 * @param array  $plugin_data Array of plugin data.
-	 * @return string
-	 */
-	public function filter_auto_update_setting_html( $html, $plugin_file, $plugin_data ) {
-		$basename = defined( 'WPSG_BASENAME' ) ? WPSG_BASENAME : 'genioussonu-site-checkup/genioussonu-site-checkup.php';
-		if ( $basename !== $plugin_file ) {
-			return $html;
-		}
-
-		// If core already produced a valid toggle link, preserve it.
-		if ( ! empty( $html ) && false !== strpos( $html, 'toggle-auto-update' ) ) {
-			return $html;
-		}
-
-		$auto_updates = (array) get_site_option( 'auto_update_plugins', array() );
-		$enabled      = in_array( $plugin_file, $auto_updates, true );
-		$action       = $enabled ? 'disable' : 'enable';
-		$text         = $enabled ? __( 'Disable auto-updates', 'genioussonu-site-checkup' ) : __( 'Enable auto-updates', 'genioussonu-site-checkup' );
-
-		// Core verifies its `updates` nonce when it handles the generated action URL.
-		$query_args = array(
-			'action'        => "{$action}-auto-update",
-			'plugin'        => $plugin_file,
-			'paged'         => isset( $_REQUEST['paged'] ) ? absint( wp_unslash( $_REQUEST['paged'] ) ) : 1, // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Core verifies the `updates` nonce for this action.
-			'plugin_status' => isset( $_REQUEST['plugin_status'] ) ? sanitize_key( wp_unslash( $_REQUEST['plugin_status'] ) ) : 'all', // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Core verifies the `updates` nonce for this action.
-		);
-
-		$url = wp_nonce_url( add_query_arg( $query_args, 'plugins.php' ), 'updates' );
-
-		return sprintf(
-			'<a href="%s" class="toggle-auto-update aria-button-if-js" data-wp-action="%s"><span class="dashicons dashicons-update spin hidden" aria-hidden="true"></span><span class="label">%s</span></a>',
-			esc_url( $url ),
-			esc_attr( $action ),
-			esc_html( $text )
-		);
-	}
 
 	/**
 	 * Output crisp menu icon styles across all admin pages.

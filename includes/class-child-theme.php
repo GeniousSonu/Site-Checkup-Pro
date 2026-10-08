@@ -37,7 +37,7 @@ class WPSG_Child_Theme {
 				'parent_name'  => $theme->parent()->get( 'Name' ),
 				'message'      => sprintf(
 					/* translators: 1: theme name, 2: parent theme name */
-					__( 'Child theme is active: "%1$s" (Parent: %2$s).', 'genioussonu-site-checkup' ),
+					__( 'Child theme is active: "%1$s" (Parent: %2$s).', 'genioussonu-security-hardening-audit' ),
 					$theme->get( 'Name' ),
 					$theme->parent()->get( 'Name' )
 				),
@@ -59,7 +59,7 @@ class WPSG_Child_Theme {
 				'child_slug'   => $child_slug,
 				'message'      => sprintf(
 					/* translators: 1: child slug, 2: themes URL */
-					__( 'Child theme "%1$s" scaffolded. Activate it under <a href="%2$s">Appearance &rarr; Themes</a> to complete setup.', 'genioussonu-site-checkup' ),
+					__( 'Child theme "%1$s" scaffolded. Activate it under <a href="%2$s">Appearance &rarr; Themes</a> to complete setup.', 'genioussonu-security-hardening-audit' ),
 					esc_html( $child_slug ),
 					admin_url( 'themes.php' )
 				),
@@ -73,7 +73,7 @@ class WPSG_Child_Theme {
 			'parent_slug'  => $theme->get_stylesheet(),
 			'message'      => sprintf(
 				/* translators: %s: theme name */
-				__( 'Active theme "%s" is not a child theme. Modifications to parent theme will be overwritten during updates.', 'genioussonu-site-checkup' ),
+				__( 'Active theme "%s" is not a child theme. Modifications to parent theme will be overwritten during updates.', 'genioussonu-security-hardening-audit' ),
 				$theme->get( 'Name' )
 			),
 		);
@@ -90,7 +90,7 @@ class WPSG_Child_Theme {
 		if ( $theme->parent() ) {
 			return array(
 				'success' => true,
-				'message' => __( 'Active theme is already a child theme.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Active theme is already a child theme.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -107,7 +107,7 @@ class WPSG_Child_Theme {
 				'themes_url' => admin_url( 'themes.php' ),
 				'message'    => sprintf(
 					/* translators: 1: child slug, 2: themes url */
-					__( 'Child theme "%1$s" already exists. Activate it under <a href="%2$s">Appearance &rarr; Themes</a>.', 'genioussonu-site-checkup' ),
+					__( 'Child theme "%1$s" already exists. Activate it under <a href="%2$s">Appearance &rarr; Themes</a>.', 'genioussonu-security-hardening-audit' ),
 					$child_slug,
 					admin_url( 'themes.php' )
 				),
@@ -117,7 +117,7 @@ class WPSG_Child_Theme {
 		if ( ! wp_mkdir_p( $child_dir ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Failed to create child theme directory. Check filesystem permissions.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Failed to create child theme directory. Check filesystem permissions.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -155,7 +155,7 @@ class WPSG_Child_Theme {
 			'themes_url' => admin_url( 'themes.php' ),
 			'message'    => sprintf(
 				/* translators: 1: child slug, 2: themes url */
-				__( 'Child theme "%1$s" successfully created! You can now activate it under <a href="%2$s">Appearance &rarr; Themes</a>.', 'genioussonu-site-checkup' ),
+				__( 'Child theme "%1$s" successfully created! You can now activate it under <a href="%2$s">Appearance &rarr; Themes</a>.', 'genioussonu-security-hardening-audit' ),
 				$child_slug,
 				admin_url( 'themes.php' )
 			),
@@ -172,7 +172,7 @@ class WPSG_Child_Theme {
 		if ( empty( $child_dir ) || ! is_dir( $child_dir ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'No scaffolded child theme found to remove.', 'genioussonu-site-checkup' ),
+				'message' => __( 'No scaffolded child theme found to remove.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -180,7 +180,7 @@ class WPSG_Child_Theme {
 		if ( realpath( $current ) === realpath( $child_dir ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Cannot delete child theme because it is currently the active theme.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Cannot delete child theme because it is currently the active theme.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -190,7 +190,7 @@ class WPSG_Child_Theme {
 		if ( ! $real_child || ! $real_themes || 0 !== strpos( $real_child, $real_themes ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Security error: Invalid child theme directory location.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Security error: Invalid child theme directory location.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -214,7 +214,7 @@ class WPSG_Child_Theme {
 
 		return array(
 			'success' => true,
-			'message' => __( 'Scaffolded child theme files removed.', 'genioussonu-site-checkup' ),
+			'message' => __( 'Scaffolded child theme files removed.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 }

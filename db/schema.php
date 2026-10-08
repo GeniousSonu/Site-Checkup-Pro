@@ -110,7 +110,7 @@ function wpsg_drop_database_tables() {
 	$table_audit       = esc_sql( $table_audit );
 	$table_rate_limits = esc_sql( $table_rate_limits );
 
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Each table identifier is allowlisted and escaped.
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Each table identifier is allowlisted and escaped.
 	$wpdb->query( "DROP TABLE IF EXISTS {$table_status}, {$table_audit}, {$table_rate_limits};" );
 
 	delete_option( 'wpsg_db_version' );

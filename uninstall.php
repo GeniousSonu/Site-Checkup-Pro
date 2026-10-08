@@ -28,7 +28,7 @@ if ( false !== $wpsg_table_status && false !== $wpsg_table_audit && false !== $w
 	$wpsg_table_status      = esc_sql( $wpsg_table_status );
 	$wpsg_table_audit       = esc_sql( $wpsg_table_audit );
 	$wpsg_table_rate_limits = esc_sql( $wpsg_table_rate_limits );
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Names are allowlisted and escaped.
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Names are allowlisted and escaped.
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpsg_table_status}, {$wpsg_table_audit}, {$wpsg_table_rate_limits};" );
 }
 
@@ -48,6 +48,21 @@ delete_option( 'wpsg_strip_ver' );
 delete_option( 'wpsg_csp_mode' );
 delete_option( 'wpsg_alert_settings' );
 delete_option( 'wpsg_last_security_txt_backup' );
+delete_option( 'wpsg_completed_tasks_count' );
+delete_option( 'wpsg_environment_type' );
+delete_option( 'wpsg_focus_mode' );
+delete_option( 'wpsg_manual_backup_confirmed_at' );
+delete_option( 'wpsg_salts_last_rotated' );
+delete_option( 'wpsg_scaffolded_child_theme' );
+delete_option( 'wpsg_review_prompt_dismissed' );
+
+// Purge any remaining wpsg_ prefixed options and transients from the database.
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( 'wpsg_' ) . '%' ) );
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( '_transient_wpsg_' ) . '%' ) );
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( '_transient_timeout_wpsg_' ) . '%' ) );
 
 // Delete transients.
 delete_transient( 'wpsg_plugin_integrity_cache' );

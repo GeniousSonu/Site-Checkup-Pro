@@ -226,7 +226,7 @@ class WPSG_Login_Renamer {
 		if ( 'CHANGE' !== trim( $confirm ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Confirmation token mismatch. You must type "CHANGE" to confirm altering the login URL.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Confirmation token mismatch. You must type "CHANGE" to confirm altering the login URL.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -236,7 +236,7 @@ class WPSG_Login_Renamer {
 				'success' => false,
 				'message' => sprintf(
 					/* translators: %s: plugin name */
-					__( 'Cannot activate built-in login renamer: conflicting security plugin detected (%s). Please use that plugin to manage login URLs.', 'genioussonu-site-checkup' ),
+					__( 'Cannot activate built-in login renamer: conflicting security plugin detected (%s). Please use that plugin to manage login URLs.', 'genioussonu-security-hardening-audit' ),
 					$conflict
 				),
 			);
@@ -246,7 +246,7 @@ class WPSG_Login_Renamer {
 		if ( empty( $clean_slug ) || in_array( $clean_slug, array( 'admin', 'wp-admin', 'login', 'wp-login', 'dashboard' ), true ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Please specify a valid, unique custom slug (cannot use default WordPress reserved paths).', 'genioussonu-site-checkup' ),
+				'message' => __( 'Please specify a valid, unique custom slug (cannot use default WordPress reserved paths).', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -258,7 +258,7 @@ class WPSG_Login_Renamer {
 			'login_url' => home_url( '/' . $clean_slug . '/' ),
 			'message'   => sprintf(
 				/* translators: %s: new login URL */
-				__( 'Login URL successfully changed to: %s. In case of emergency, define("WPSG_DISABLE_LOGIN_RENAME", true); in wp-config.php to restore default login.', 'genioussonu-site-checkup' ),
+				__( 'Login URL successfully changed to: %s. In case of emergency, define("WPSG_DISABLE_LOGIN_RENAME", true); in wp-config.php to restore default login.', 'genioussonu-security-hardening-audit' ),
 				home_url( '/' . $clean_slug . '/' )
 			),
 		);
@@ -274,7 +274,7 @@ class WPSG_Login_Renamer {
 
 		return array(
 			'success' => true,
-			'message' => __( 'Custom login URL disabled. Default wp-login.php restored.', 'genioussonu-site-checkup' ),
+			'message' => __( 'Custom login URL disabled. Default wp-login.php restored.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 
@@ -328,7 +328,7 @@ class WPSG_Login_Renamer {
 			if ( $template && file_exists( $template ) ) {
 				include $template;
 			} else {
-				wp_die( esc_html__( 'Page not found.', 'genioussonu-site-checkup' ), '', array( 'response' => 404 ) );
+				wp_die( esc_html__( 'Page not found.', 'genioussonu-security-hardening-audit' ), '', array( 'response' => 404 ) );
 			}
 			exit;
 		}

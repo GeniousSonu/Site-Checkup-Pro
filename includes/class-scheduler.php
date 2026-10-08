@@ -139,8 +139,7 @@ class WPSG_Scheduler {
 		$table_name = esc_sql( $table_name );
 		$now        = current_time( 'mysql' );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; timestamp is prepared.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; timestamp is prepared.
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; timestamp is prepared.
@@ -173,16 +172,16 @@ class WPSG_Scheduler {
 			$url = admin_url( 'admin.php?page=genioussonu-site-checkup' );
 			printf(
 				'<div class="notice notice-warning is-dismissible"><p><strong>%1$s:</strong> %2$s <a href="%3$s">%4$s &rarr;</a></p></div>',
-				esc_html__( 'GeniousSonu Site Checkup Alert', 'genioussonu-site-checkup' ),
+				esc_html__( 'GeniousSonu Site Checkup Alert', 'genioussonu-security-hardening-audit' ),
 				esc_html(
 					sprintf(
 						/* translators: %d: count of due tasks */
-						__( 'You have %d recurring security task(s) or password rotations due today.', 'genioussonu-site-checkup' ),
+						__( 'You have %d recurring security task(s) or password rotations due today.', 'genioussonu-security-hardening-audit' ),
 						$due_count
 					)
 				),
 				esc_url( $url ),
-				esc_html__( 'View Check-up Dashboard', 'genioussonu-site-checkup' )
+				esc_html__( 'View Check-up Dashboard', 'genioussonu-security-hardening-audit' )
 			);
 		}
 	}

@@ -36,7 +36,7 @@ class WPSG_Task_Runner {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Permission denied. Administrator capabilities required.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Permission denied. Administrator capabilities required.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -44,7 +44,7 @@ class WPSG_Task_Runner {
 		if ( ! $task ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Task not found in registry.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Task not found in registry.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -64,7 +64,7 @@ class WPSG_Task_Runner {
 			if ( isset( $cache_transients[ $task_id ] ) ) {
 				delete_transient( $cache_transients[ $task_id ] );
 			}
-			wp_cache_delete( 'wpsg_task_status_' . $task_id, 'genioussonu-site-checkup' );
+			wp_cache_delete( 'wpsg_task_status_' . $task_id, 'genioussonu-security-hardening-audit' );
 		}
 
 		// 2. Concurrency Mutex Lock: Prevent concurrent executions of the same task.
@@ -72,7 +72,7 @@ class WPSG_Task_Runner {
 		if ( get_transient( $lock_key ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'This task is currently being executed by another process. Please wait.', 'genioussonu-site-checkup' ),
+				'message' => __( 'This task is currently being executed by another process. Please wait.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 		set_transient( $lock_key, true, 30 ); // 30-second TTL
@@ -86,7 +86,7 @@ class WPSG_Task_Runner {
 						return array(
 							'success'         => false,
 							'reauth_required' => true,
-							'message'         => __( 'Administrator password confirmation is required before executing this destructive action.', 'genioussonu-site-checkup' ),
+							'message'         => __( 'Administrator password confirmation is required before executing this destructive action.', 'genioussonu-security-hardening-audit' ),
 						);
 					}
 				}
@@ -100,7 +100,7 @@ class WPSG_Task_Runner {
 						'success'         => false,
 						'backup_required' => true,
 						'backup_info'     => $backup_info,
-						'message'         => __( 'A verified backup taken within the last 48 hours is required before running this file-modifying task.', 'genioussonu-site-checkup' ),
+						'message'         => __( 'A verified backup taken within the last 48 hours is required before running this file-modifying task.', 'genioussonu-security-hardening-audit' ),
 					);
 				}
 			}
@@ -259,7 +259,7 @@ class WPSG_Task_Runner {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Permission denied. Administrator capabilities required.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Permission denied. Administrator capabilities required.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -267,7 +267,7 @@ class WPSG_Task_Runner {
 		if ( ! $task || ! $task->has_undo ) {
 			return array(
 				'success' => false,
-				'message' => __( 'This task does not support undo operations.', 'genioussonu-site-checkup' ),
+				'message' => __( 'This task does not support undo operations.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -275,7 +275,7 @@ class WPSG_Task_Runner {
 		if ( get_transient( $lock_key ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'This task is currently being modified. Please wait.', 'genioussonu-site-checkup' ),
+				'message' => __( 'This task is currently being modified. Please wait.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 		set_transient( $lock_key, true, 30 );
@@ -289,7 +289,7 @@ class WPSG_Task_Runner {
 						return array(
 							'success'         => false,
 							'reauth_required' => true,
-							'message'         => __( 'Administrator password confirmation is required before undoing destructive actions.', 'genioussonu-site-checkup' ),
+							'message'         => __( 'Administrator password confirmation is required before undoing destructive actions.', 'genioussonu-security-hardening-audit' ),
 						);
 					}
 				}
@@ -305,7 +305,7 @@ class WPSG_Task_Runner {
 				if ( ! hash_equals( (string) $expected_hash, (string) $metadata['snapshot_hash'] ) ) {
 					return array(
 						'success' => false,
-						'message' => __( 'Security error: Snapshot integrity check failed (tampered snapshot detected). Undo aborted.', 'genioussonu-site-checkup' ),
+						'message' => __( 'Security error: Snapshot integrity check failed (tampered snapshot detected). Undo aborted.', 'genioussonu-security-hardening-audit' ),
 					);
 				}
 			}
@@ -362,8 +362,7 @@ class WPSG_Task_Runner {
 			return null;
 		}
 		$table_name = esc_sql( $table_name );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; task ID is prepared.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; task ID is prepared.
 		return $wpdb->get_row(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; task ID is prepared.
@@ -415,10 +414,9 @@ class WPSG_Task_Runner {
 			$data['metadata'] = wp_json_encode( $metadata );
 		}
 
-		wp_cache_delete( 'wpsg_task_status_' . $task_id, 'genioussonu-site-checkup' );
+		wp_cache_delete( 'wpsg_task_status_' . $task_id, 'genioussonu-security-hardening-audit' );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; task ID is prepared.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; task ID is prepared.
 		$exists = $wpdb->get_var(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; task ID is prepared.

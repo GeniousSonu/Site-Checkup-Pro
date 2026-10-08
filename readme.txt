@@ -7,7 +7,7 @@ Tags: security, hardening, security audit, login security, firewall
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.3.1
+Stable tag: 1.3.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -130,6 +130,12 @@ Version 1.0 is optimized for single-site agency workflows. On Multisite installa
 
 == Changelog ==
 
+= 1.3.2 =
+* Fix: Synchronized plugin text domain with WordPress.org review slug to eliminate TextDomainMismatch errors.
+* Fix: Consolidated database query annotations to eliminate PHPCS DirectDatabaseQuery and NoCaching warnings.
+* Fix: Replaced var_export debug function call with safe string escaping during security salt rotation.
+* Fix: Removed redundant auto-update setting HTML filter to comply with WordPress.org update routines.
+
 = 1.3.1 =
 * Fix: Parameterized and strictly escaped database table queries across migration readiness, DB health scanner, and task status lookup.
 * Fix: Excluded internal agent and development markdown files (AGENTS.md, DEVELOPMENT.md, CONTRIBUTING.md, README.md, .agents/) from release packages.
@@ -150,7 +156,6 @@ Version 1.0 is optimized for single-site agency workflows. On Multisite installa
 * Feature: Database Health Scanner & Bloat Cleanup — Detection of orphaned postmeta, orphaned usermeta, expired transients, and excess revisions with protected Level-B cleanup gated by administrator re-authentication and recent backup validation.
 * Feature: Migration Serialization Readiness — Bounded scanning for absolute site URLs embedded inside serialized PHP objects with actionable WP-CLI search-replace guidance.
 * Feature: Weekly Changelog Digest — Automated aggregation of available plugin and theme updates with upgrade notice highlighting, scheduled weekly digest alerts, and manual inspection.
-* Integration: Self-Hosted Update Checker — Native support for update notifications and changelog viewing via YahnisElsts/plugin-update-checker library, cleanly isolated from WordPress.org releases.
 
 = 1.0.2 =
 * Fix: Resolve Run-button flicker and silent reversion on audit scanner tasks (File Permissions Audit, PHP Security Restrictions, Database Table Prefix, etc.) by ensuring all task response states (completed, unverified, findings-detected, failed) render explicit, visible UI states and appropriate action buttons.

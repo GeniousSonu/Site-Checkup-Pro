@@ -23,14 +23,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="wpsg-modal-header">
 			<h3 class="wpsg-modal-title" id="wpsg-reauth-modal-title">
 				<span class="dashicons dashicons-lock" aria-hidden="true" style="color: var(--wpsg-accent-blue);"></span>
-				<?php esc_html_e( 'Confirm Administrator Password', 'genioussonu-site-checkup' ); ?>
+				<?php esc_html_e( 'Confirm Administrator Password', 'genioussonu-security-hardening-audit' ); ?>
 			</h3>
-			<button type="button" class="wpsg-modal-close" data-close-modal aria-label="<?php esc_attr_e( 'Close', 'genioussonu-site-checkup' ); ?>">&times;</button>
+			<button type="button" class="wpsg-modal-close" data-close-modal aria-label="<?php esc_attr_e( 'Close', 'genioussonu-security-hardening-audit' ); ?>">&times;</button>
 		</div>
 
 		<div class="wpsg-modal-body">
 			<p style="margin-top: 0; color: var(--wpsg-text-secondary); font-size: 13px;">
-				<?php esc_html_e( 'This operation modifies core server configurations or active credentials. Please confirm your administrator password to proceed.', 'genioussonu-site-checkup' ); ?>
+				<?php esc_html_e( 'This operation modifies core server configurations or active credentials. Please confirm your administrator password to proceed.', 'genioussonu-security-hardening-audit' ); ?>
 			</p>
 
 			<div class="wpsg-notice wpsg-notice-critical" id="wpsg-reauth-error-box" style="display: none; margin-bottom: 14px;">
@@ -40,25 +40,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			<div class="wpsg-form-row">
 				<label for="wpsg-reauth-password" class="wpsg-form-label">
-					<?php esc_html_e( 'Current Password', 'genioussonu-site-checkup' ); ?>
+					<?php esc_html_e( 'Current Password', 'genioussonu-security-hardening-audit' ); ?>
 				</label>
 				<input
 					type="password"
 					id="wpsg-reauth-password"
 					class="wpsg-input"
 					autocomplete="current-password"
-					placeholder="<?php esc_attr_e( 'Enter your password...', 'genioussonu-site-checkup' ); ?>"
+					placeholder="<?php esc_attr_e( 'Enter your password...', 'genioussonu-security-hardening-audit' ); ?>"
 				/>
 			</div>
 		</div>
 
 		<div class="wpsg-modal-footer">
 			<button type="button" class="wpsg-btn wpsg-btn-secondary" data-close-modal>
-				<?php esc_html_e( 'Cancel', 'genioussonu-site-checkup' ); ?>
+				<?php esc_html_e( 'Cancel', 'genioussonu-security-hardening-audit' ); ?>
 			</button>
 			<button type="button" class="wpsg-btn wpsg-btn-primary" id="wpsg-btn-reauth-submit">
 				<span class="dashicons dashicons-unlock" aria-hidden="true"></span>
-				<?php esc_html_e( 'Verify & Proceed', 'genioussonu-site-checkup' ); ?>
+				<?php esc_html_e( 'Verify & Proceed', 'genioussonu-security-hardening-audit' ); ?>
 			</button>
 		</div>
 	</div>

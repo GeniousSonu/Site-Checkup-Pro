@@ -85,12 +85,12 @@ class WPSG_Enumeration_Guard {
 
 		$warnings = array();
 		if ( ! empty( $theme_has_author_template ) ) {
-			$warnings[] = __( 'Active theme contains an author.php template (designed for public author profiles).', 'genioussonu-site-checkup' );
+			$warnings[] = __( 'Active theme contains an author.php template (designed for public author profiles).', 'genioussonu-security-hardening-audit' );
 		}
 		if ( $author_count > 1 ) {
 			$warnings[] = sprintf(
 				/* translators: %d: author count */
-				__( 'Multiple authors detected (%d registered authors). Multi-author blogs usually expect public author archive pages.', 'genioussonu-site-checkup' ),
+				__( 'Multiple authors detected (%d registered authors). Multi-author blogs usually expect public author archive pages.', 'genioussonu-security-hardening-audit' ),
 				$author_count
 			);
 		}
@@ -100,7 +100,7 @@ class WPSG_Enumeration_Guard {
 			'warnings'      => $warnings,
 			'message'       => ! empty( $warnings )
 				? implode( ' ', $warnings )
-				: __( 'Single-author / business site detected. Safe to block author enumeration.', 'genioussonu-site-checkup' ),
+				: __( 'Single-author / business site detected. Safe to block author enumeration.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 

@@ -55,7 +55,7 @@ class WPSG_External_Fingerprint {
 			'redirection' => 0, // Do not follow redirects to login/homepage
 			'sslverify'   => true,
 			'headers'     => array(
-				'User-Agent'                  => 'SiteCheckupPro-FingerprintScanner/' . ( defined( 'WPSG_VERSION' ) ? WPSG_VERSION : '1.2.0' ),
+				'User-Agent'                  => 'GeniousSonuSiteCheckup-FingerprintScanner/' . ( defined( 'WPSG_VERSION' ) ? WPSG_VERSION : '1.3.1' ),
 				'X-WPSG-Self-Verification'    => '1',
 				'Accept'                      => '*/*',
 			),
@@ -109,12 +109,12 @@ class WPSG_External_Fingerprint {
 		$message = empty( $exposed )
 			? sprintf(
 				/* translators: %d: count */
-				__( 'External fingerprint probe clean: %d sensitive paths checked with zero exposures.', 'genioussonu-site-checkup' ),
+				__( 'External fingerprint probe clean: %d sensitive paths checked with zero exposures.', 'genioussonu-security-hardening-audit' ),
 				$scanned
 			)
 			: sprintf(
 				/* translators: 1: exposed count, 2: total count */
-				__( 'Alert: %1$d external exposure(s) detected out of %2$d paths probed.', 'genioussonu-site-checkup' ),
+				__( 'Alert: %1$d external exposure(s) detected out of %2$d paths probed.', 'genioussonu-security-hardening-audit' ),
 				count( $exposed ),
 				$scanned
 			);
@@ -142,51 +142,51 @@ class WPSG_External_Fingerprint {
 		return array(
 			'git_head' => array(
 				'path'        => '.git/HEAD',
-				'title'       => __( 'Exposed Git Repository Metadata', 'genioussonu-site-checkup' ),
+				'title'       => __( 'Exposed Git Repository Metadata', 'genioussonu-security-hardening-audit' ),
 				'severity'    => 'critical',
 				'pattern'     => '/ref:\s*refs\//i',
-				'description' => __( 'The .git repository directory is publicly accessible, allowing complete source code and history extraction.', 'genioussonu-site-checkup' ),
-				'remediation' => __( 'Block access to .git directories via server rules or remove .git from public document root.', 'genioussonu-site-checkup' ),
+				'description' => __( 'The .git repository directory is publicly accessible, allowing complete source code and history extraction.', 'genioussonu-security-hardening-audit' ),
+				'remediation' => __( 'Block access to .git directories via server rules or remove .git from public document root.', 'genioussonu-security-hardening-audit' ),
 			),
 			'env_file' => array(
 				'path'        => '.env',
-				'title'       => __( 'Exposed Environment File (.env)', 'genioussonu-site-checkup' ),
+				'title'       => __( 'Exposed Environment File (.env)', 'genioussonu-security-hardening-audit' ),
 				'severity'    => 'critical',
 				'pattern'     => '/(?:DB_|APP_|API_KEY|SECRET|PASSWORD)/i',
-				'description' => __( 'Environment configuration file containing plain secrets is publicly readable.', 'genioussonu-site-checkup' ),
-				'remediation' => __( 'Block web access to .env files or move outside the document root immediately.', 'genioussonu-site-checkup' ),
+				'description' => __( 'Environment configuration file containing plain secrets is publicly readable.', 'genioussonu-security-hardening-audit' ),
+				'remediation' => __( 'Block web access to .env files or move outside the document root immediately.', 'genioussonu-security-hardening-audit' ),
 			),
 			'wp_config_backup' => array(
 				'path'        => 'wp-config.php~',
-				'title'       => __( 'Exposed wp-config Backup File', 'genioussonu-site-checkup' ),
+				'title'       => __( 'Exposed wp-config Backup File', 'genioussonu-security-hardening-audit' ),
 				'severity'    => 'critical',
 				'pattern'     => '/DB_PASSWORD/i',
-				'description' => __( 'A text editor backup of wp-config.php is publicly served without PHP interpretation.', 'genioussonu-site-checkup' ),
-				'remediation' => __( 'Delete editor backup files (e.g. wp-config.php~, wp-config.old, wp-config.php.bak) from the server.', 'genioussonu-site-checkup' ),
+				'description' => __( 'A text editor backup of wp-config.php is publicly served without PHP interpretation.', 'genioussonu-security-hardening-audit' ),
+				'remediation' => __( 'Delete editor backup files (e.g. wp-config.php~, wp-config.old, wp-config.php.bak) from the server.', 'genioussonu-security-hardening-audit' ),
 			),
 			'debug_log' => array(
 				'path'        => 'wp-content/debug.log',
-				'title'       => __( 'Publicly Accessible WordPress Debug Log', 'genioussonu-site-checkup' ),
+				'title'       => __( 'Publicly Accessible WordPress Debug Log', 'genioussonu-security-hardening-audit' ),
 				'severity'    => 'high',
 				'pattern'     => '/(?:PHP Notice|PHP Fatal|Stack trace|\[\d{2}-[A-Za-z]{3}-\d{4})/i',
-				'description' => __( 'The WordPress debug.log file is publicly readable, exposing internal paths, queries, or error states.', 'genioussonu-site-checkup' ),
-				'remediation' => __( 'Disable WP_DEBUG_LOG or block direct web requests to *.log files.', 'genioussonu-site-checkup' ),
+				'description' => __( 'The WordPress debug.log file is publicly readable, exposing internal paths, queries, or error states.', 'genioussonu-security-hardening-audit' ),
+				'remediation' => __( 'Disable WP_DEBUG_LOG or block direct web requests to *.log files.', 'genioussonu-security-hardening-audit' ),
 			),
 			'readme_version' => array(
 				'path'        => 'readme.html',
-				'title'       => __( 'WordPress Version Leak via readme.html', 'genioussonu-site-checkup' ),
+				'title'       => __( 'WordPress Version Leak via readme.html', 'genioussonu-security-hardening-audit' ),
 				'severity'    => 'medium',
 				'pattern'     => '/Version\s+[0-9]+/i',
-				'description' => __( 'Default WordPress readme.html file reveals the exact core version installed.', 'genioussonu-site-checkup' ),
-				'remediation' => __( 'Delete readme.html from the WordPress root directory.', 'genioussonu-site-checkup' ),
+				'description' => __( 'Default WordPress readme.html file reveals the exact core version installed.', 'genioussonu-security-hardening-audit' ),
+				'remediation' => __( 'Delete readme.html from the WordPress root directory.', 'genioussonu-security-hardening-audit' ),
 			),
 			'license_txt' => array(
 				'path'        => 'license.txt',
-				'title'       => __( 'Exposed license.txt File', 'genioussonu-site-checkup' ),
+				'title'       => __( 'Exposed license.txt File', 'genioussonu-security-hardening-audit' ),
 				'severity'    => 'low',
 				'pattern'     => '/GNU GENERAL PUBLIC LICENSE/i',
-				'description' => __( 'Default license.txt file helps automated bots fingerprint WordPress installation.', 'genioussonu-site-checkup' ),
-				'remediation' => __( 'Remove or restrict access to license.txt.', 'genioussonu-site-checkup' ),
+				'description' => __( 'Default license.txt file helps automated bots fingerprint WordPress installation.', 'genioussonu-security-hardening-audit' ),
+				'remediation' => __( 'Remove or restrict access to license.txt.', 'genioussonu-security-hardening-audit' ),
 			),
 		);
 	}

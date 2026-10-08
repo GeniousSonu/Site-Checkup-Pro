@@ -111,7 +111,7 @@ class WPSG_Notice_Inbox {
 
 		// Hard allowlist: Core updates and GeniousSonu Site Checkup alerts must NEVER be dismissed!
 		$is_core_update = ( false !== strpos( $safe_html, 'update-nag' ) || ( false !== strpos( $safe_html, 'WordPress' ) && false !== strpos( $safe_html, 'update' ) ) );
-		$is_site_checkup = ( false !== strpos( $safe_html, 'genioussonu-site-checkup' ) || false !== strpos( $safe_html, 'wpsg-' ) );
+		$is_site_checkup = ( false !== strpos( $safe_html, 'genioussonu-security-hardening-audit' ) || false !== strpos( $safe_html, 'wpsg-' ) );
 
 		if ( $is_core_update || $is_site_checkup ) {
 			// Always echo protected notices directly!

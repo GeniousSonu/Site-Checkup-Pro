@@ -75,7 +75,7 @@ class WPSG_Security_Txt {
 				'status'  => 'attention',
 				'exists'  => false,
 				'path'    => $file ? $file : '/.well-known/security.txt',
-				'message' => __( 'Missing /.well-known/security.txt. Generating one provides a standardized contact channel for responsible vulnerability disclosure.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Missing /.well-known/security.txt. Generating one provides a standardized contact channel for responsible vulnerability disclosure.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -85,7 +85,7 @@ class WPSG_Security_Txt {
 				'status'  => 'attention',
 				'exists'  => true,
 				'path'    => $file,
-				'message' => __( 'A /.well-known/security.txt file exists but does not contain a valid Contact: directive.', 'genioussonu-site-checkup' ),
+				'message' => __( 'A /.well-known/security.txt file exists but does not contain a valid Contact: directive.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -93,7 +93,7 @@ class WPSG_Security_Txt {
 			'status'  => 'done',
 			'exists'  => true,
 			'path'    => $file,
-			'message' => __( 'RFC 9116 security disclosure file is present at /.well-known/security.txt and correctly formatted.', 'genioussonu-site-checkup' ),
+			'message' => __( 'RFC 9116 security disclosure file is present at /.well-known/security.txt and correctly formatted.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 
@@ -108,7 +108,7 @@ class WPSG_Security_Txt {
 		if ( ! $doc_root ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Could not determine the web server document root.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Could not determine the web server document root.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -121,7 +121,7 @@ class WPSG_Security_Txt {
 				return array(
 					'success' => false,
 					/* translators: %s: directory path */
-					'message' => sprintf( __( 'The directory %s is not writable by the web server.', 'genioussonu-site-checkup' ), esc_html( $well_known_dir ) ),
+					'message' => sprintf( __( 'The directory %s is not writable by the web server.', 'genioussonu-security-hardening-audit' ), esc_html( $well_known_dir ) ),
 				);
 			}
 		} else {
@@ -129,7 +129,7 @@ class WPSG_Security_Txt {
 				return array(
 					'success' => false,
 					/* translators: %s: document root path */
-					'message' => sprintf( __( 'Document root %s is not writable to create /.well-known/.', 'genioussonu-site-checkup' ), esc_html( $doc_root ) ),
+					'message' => sprintf( __( 'Document root %s is not writable to create /.well-known/.', 'genioussonu-security-hardening-audit' ), esc_html( $doc_root ) ),
 				);
 			}
 			wp_mkdir_p( $well_known_dir );
@@ -140,7 +140,7 @@ class WPSG_Security_Txt {
 		if ( ! $real_dir || 0 !== strpos( $real_dir, $doc_root ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Security error: Destination directory resolves outside of the approved document root.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Security error: Destination directory resolves outside of the approved document root.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -179,7 +179,7 @@ class WPSG_Security_Txt {
 		if ( false === $written ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Failed to write security.txt to /.well-known/ directory.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Failed to write security.txt to /.well-known/ directory.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -189,7 +189,7 @@ class WPSG_Security_Txt {
 
 		return array(
 			'success'  => true,
-			'message'  => __( 'RFC 9116 security.txt successfully generated at /.well-known/security.txt.', 'genioussonu-site-checkup' ),
+			'message'  => __( 'RFC 9116 security.txt successfully generated at /.well-known/security.txt.', 'genioussonu-security-hardening-audit' ),
 			'file'     => $target_file,
 		);
 	}
@@ -204,7 +204,7 @@ class WPSG_Security_Txt {
 		if ( ! $target_file || ! file_exists( $target_file ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'security.txt file does not exist.', 'genioussonu-site-checkup' ),
+				'message' => __( 'security.txt file does not exist.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -215,14 +215,14 @@ class WPSG_Security_Txt {
 			delete_option( 'wpsg_last_security_txt_backup' );
 			return array(
 				'success' => true,
-				'message' => __( 'Previous security.txt restored from backup.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Previous security.txt restored from backup.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
 		wp_delete_file( $target_file );
 		return array(
 			'success' => true,
-			'message' => __( 'security.txt file was removed.', 'genioussonu-site-checkup' ),
+			'message' => __( 'security.txt file was removed.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 }

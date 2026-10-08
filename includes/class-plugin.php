@@ -234,7 +234,7 @@ class WPSG_Plugin {
 		if ( false !== strpos( $rest_route, '/wp/v2/users' ) ) {
 			return new WP_Error(
 				'rest_forbidden_user_enumeration',
-				__( 'User enumeration via REST API is disabled for unauthenticated visitors.', 'genioussonu-site-checkup' ),
+				__( 'User enumeration via REST API is disabled for unauthenticated visitors.', 'genioussonu-security-hardening-audit' ),
 				array( 'status' => rest_authorization_required_code() )
 			);
 		}
@@ -258,11 +258,10 @@ class WPSG_Plugin {
 
 		// Quick cached check or DB lookup.
 		$cache_key = 'wpsg_task_status_' . $task_id;
-		$status    = wp_cache_get( $cache_key, 'genioussonu-site-checkup' );
+		$status    = wp_cache_get( $cache_key, 'genioussonu-security-hardening-audit' );
 
 		if ( false === $status ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; task ID is prepared.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; task ID is prepared.
 			$status = $wpdb->get_var(
 				$wpdb->prepare(
 					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; task ID is prepared.
@@ -270,7 +269,7 @@ class WPSG_Plugin {
 					$task_id
 				)
 			);
-			wp_cache_set( $cache_key, $status, 'genioussonu-site-checkup', 300 );
+			wp_cache_set( $cache_key, $status, 'genioussonu-security-hardening-audit', 300 );
 		}
 
 		return ( 'done' === $status );

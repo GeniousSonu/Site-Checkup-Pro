@@ -44,15 +44,15 @@ class WPSG_Backup_Bridge {
 				'redirect_url'=> $status['trigger_url'],
 				'message'     => sprintf(
 					/* translators: %s: plugin name */
-					__( 'Please trigger a full backup via %s before continuing.', 'genioussonu-site-checkup' ),
-					$status['plugin_name'] ? $status['plugin_name'] : __( 'your backup plugin', 'genioussonu-site-checkup' )
+					__( 'Please trigger a full backup via %s before continuing.', 'genioussonu-security-hardening-audit' ),
+					$status['plugin_name'] ? $status['plugin_name'] : __( 'your backup plugin', 'genioussonu-security-hardening-audit' )
 				),
 			);
 		}
 
 		return array(
 			'success' => false,
-			'message' => __( 'No supported backup plugin detected to trigger automatic backup.', 'genioussonu-site-checkup' ),
+			'message' => __( 'No supported backup plugin detected to trigger automatic backup.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 }

@@ -3,14 +3,14 @@
  * Plugin Name:       GeniousSonu Site Checkup
  * Plugin URI:        https://www.genioussonu.me/plugin/genioussonu-site-checkup/
  * Description:       Complete security audit, site hardening checklist, and vulnerability scanner for WordPress. One-click safe hardening, login protection, and client reports.
- * Version:           1.3.1
+ * Version:           1.3.2
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            SK Sahinur Islam
  * Author URI:        https://www.genioussonu.me/
  * License:           GPLv2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       genioussonu-site-checkup
+ * Text Domain:       genioussonu-security-hardening-audit
  * Domain Path:       /languages
  *
  * @package GeniousSonu_Site_Checkup
@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Plugin Constants.
-define( 'WPSG_VERSION', '1.3.1' );
+define( 'WPSG_VERSION', '1.3.2' );
 define( 'WPSG_PLUGIN_FILE', __FILE__ );
 define( 'WPSG_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WPSG_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -107,7 +107,7 @@ if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
 	add_action( 'admin_notices', function () {
 		printf(
 			'<div class="notice notice-error"><p>%s</p></div>',
-			esc_html__( 'GeniousSonu Site Checkup requires PHP 7.4 or higher. Please upgrade your PHP version.', 'genioussonu-site-checkup' )
+			esc_html__( 'GeniousSonu Site Checkup requires PHP 7.4 or higher. Please upgrade your PHP version.', 'genioussonu-security-hardening-audit' )
 		);
 	} );
 	return;
@@ -124,8 +124,8 @@ if ( is_multisite() ) {
 		}
 		printf(
 			'<div class="notice notice-warning is-dismissible"><p><strong>%s:</strong> %s</p></div>',
-			esc_html__( 'GeniousSonu Site Checkup (Multisite Notice)', 'genioussonu-site-checkup' ),
-			esc_html__( 'Version 1.0 of GeniousSonu Site Checkup is configured for single-site audits. Network-wide operations are restricted to Super Administrators.', 'genioussonu-site-checkup' )
+			esc_html__( 'GeniousSonu Site Checkup (Multisite Notice)', 'genioussonu-security-hardening-audit' ),
+			esc_html__( 'Version 1.0 of GeniousSonu Site Checkup is configured for single-site audits. Network-wide operations are restricted to Super Administrators.', 'genioussonu-security-hardening-audit' )
 		);
 	} );
 }

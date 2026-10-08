@@ -114,11 +114,11 @@ class WPSG_HTTP_Verifier {
 		$target_p = wp_parse_url( $url );
 
 		if ( ! $home_p || ! $target_p || empty( $target_p['host'] ) ) {
-			return new WP_Error( 'invalid_loopback_url', __( 'Invalid loopback URL specified.', 'genioussonu-site-checkup' ) );
+			return new WP_Error( 'invalid_loopback_url', __( 'Invalid loopback URL specified.', 'genioussonu-security-hardening-audit' ) );
 		}
 
 		if ( strtolower( $home_p['host'] ) !== strtolower( $target_p['host'] ) ) {
-			return new WP_Error( 'forbidden_loopback_host', __( 'Loopback verification is strictly confined to home_url() host.', 'genioussonu-site-checkup' ) );
+			return new WP_Error( 'forbidden_loopback_host', __( 'Loopback verification is strictly confined to home_url() host.', 'genioussonu-security-hardening-audit' ) );
 		}
 
 		// Cache key by method, URL, and user-agent / query customizer
@@ -138,7 +138,7 @@ class WPSG_HTTP_Verifier {
 
 		$headers = array(
 			self::VERIFY_HEADER => self::generate_verify_token(),
-			'User-Agent'        => ! empty( $custom_args['user-agent'] ) ? $custom_args['user-agent'] : 'SiteCheckupPro-SelfVerifier/1.0',
+			'User-Agent'        => ! empty( $custom_args['user-agent'] ) ? $custom_args['user-agent'] : 'GeniousSonuSiteCheckup-SelfVerifier/1.0',
 		);
 
 		if ( ! empty( $custom_args['headers'] ) && is_array( $custom_args['headers'] ) ) {
@@ -255,7 +255,7 @@ class WPSG_HTTP_Verifier {
 				return array(
 					'verified' => false,
 					'status'   => 'pending',
-					'message'  => __( 'No HTTP verification procedure defined for this task.', 'genioussonu-site-checkup' ),
+					'message'  => __( 'No HTTP verification procedure defined for this task.', 'genioussonu-security-hardening-audit' ),
 				);
 		}
 	}
@@ -280,14 +280,14 @@ class WPSG_HTTP_Verifier {
 				'verified' => true,
 				'status'   => 'done',
 				/* translators: %s: header name */
-				'message'  => sprintf( __( 'Verified live: %s header confirmed.', 'genioussonu-site-checkup' ), $has_x_frame ? "X-Frame-Options: {$x_frame}" : 'CSP frame-ancestors' ),
+				'message'  => sprintf( __( 'Verified live: %s header confirmed.', 'genioussonu-security-hardening-audit' ), $has_x_frame ? "X-Frame-Options: {$x_frame}" : 'CSP frame-ancestors' ),
 			);
 		}
 
 		return array(
 			'verified' => false,
 			'status'   => 'applied_unverified',
-			'message'  => __( 'Directive applied, but live HTTP response lacks X-Frame-Options or CSP frame-ancestors header.', 'genioussonu-site-checkup' ),
+			'message'  => __( 'Directive applied, but live HTTP response lacks X-Frame-Options or CSP frame-ancestors header.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 
@@ -305,14 +305,14 @@ class WPSG_HTTP_Verifier {
 			return array(
 				'verified' => true,
 				'status'   => 'done',
-				'message'  => __( 'Verified live: X-Content-Type-Options: nosniff header confirmed.', 'genioussonu-site-checkup' ),
+				'message'  => __( 'Verified live: X-Content-Type-Options: nosniff header confirmed.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
 		return array(
 			'verified' => false,
 			'status'   => 'applied_unverified',
-			'message'  => __( 'Directive applied, but live HTTP response lacks X-Content-Type-Options: nosniff header.', 'genioussonu-site-checkup' ),
+			'message'  => __( 'Directive applied, but live HTTP response lacks X-Content-Type-Options: nosniff header.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 
@@ -324,7 +324,7 @@ class WPSG_HTTP_Verifier {
 			return array(
 				'verified' => false,
 				'status'   => 'applied_unverified',
-				'message'  => __( 'HSTS directive is configured, but SSL/HTTPS is not active on this site. HSTS requires HTTPS.', 'genioussonu-site-checkup' ),
+				'message'  => __( 'HSTS directive is configured, but SSL/HTTPS is not active on this site. HSTS requires HTTPS.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -339,14 +339,14 @@ class WPSG_HTTP_Verifier {
 				'verified' => true,
 				'status'   => 'done',
 				/* translators: %s: header value */
-				'message'  => sprintf( __( 'Verified live: Strict-Transport-Security confirmed (%s).', 'genioussonu-site-checkup' ), $hsts ),
+				'message'  => sprintf( __( 'Verified live: Strict-Transport-Security confirmed (%s).', 'genioussonu-security-hardening-audit' ), $hsts ),
 			);
 		}
 
 		return array(
 			'verified' => false,
 			'status'   => 'applied_unverified',
-			'message'  => __( 'HSTS rule applied, but live HTTP response lacks Strict-Transport-Security header.', 'genioussonu-site-checkup' ),
+			'message'  => __( 'HSTS rule applied, but live HTTP response lacks Strict-Transport-Security header.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 
@@ -363,7 +363,7 @@ class WPSG_HTTP_Verifier {
 			return array(
 				'verified' => true,
 				'status'   => 'done',
-				'message'  => __( 'Verified live: X-Powered-By header is successfully suppressed.', 'genioussonu-site-checkup' ),
+				'message'  => __( 'Verified live: X-Powered-By header is successfully suppressed.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -371,7 +371,7 @@ class WPSG_HTTP_Verifier {
 			'verified' => false,
 			'status'   => 'applied_unverified',
 			/* translators: %s: header value */
-			'message'  => sprintf( __( 'X-Powered-By header is still visible in live response (%s).', 'genioussonu-site-checkup' ), $res['headers']['x-powered-by'] ),
+			'message'  => sprintf( __( 'X-Powered-By header is still visible in live response (%s).', 'genioussonu-security-hardening-audit' ), $res['headers']['x-powered-by'] ),
 		);
 	}
 
@@ -407,7 +407,7 @@ class WPSG_HTTP_Verifier {
 			return array(
 				'verified' => true,
 				'status'   => 'done',
-				'message'  => __( 'Verified live: Directory probe returned 403 Forbidden. Directory listing is blocked.', 'genioussonu-site-checkup' ),
+				'message'  => __( 'Verified live: Directory probe returned 403 Forbidden. Directory listing is blocked.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -417,7 +417,7 @@ class WPSG_HTTP_Verifier {
 			return array(
 				'verified' => false,
 				'status'   => 'applied_unverified',
-				'message'  => __( 'Directory listing is still active: server returned an index directory listing.', 'genioussonu-site-checkup' ),
+				'message'  => __( 'Directory listing is still active: server returned an index directory listing.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -427,14 +427,14 @@ class WPSG_HTTP_Verifier {
 				'verified' => true,
 				'status'   => 'done',
 				/* translators: %d: HTTP status code */
-				'message'  => sprintf( __( 'Verified live: Server denied directory listing (HTTP %d).', 'genioussonu-site-checkup' ), $res['code'] ),
+				'message'  => sprintf( __( 'Verified live: Server denied directory listing (HTTP %d).', 'genioussonu-security-hardening-audit' ), $res['code'] ),
 			);
 		}
 
 		return array(
 			'verified' => false,
 			'status'   => 'applied_unverified',
-			'message'  => __( 'Directory browsing directive could not be confirmed. Probe did not return 403 Forbidden.', 'genioussonu-site-checkup' ),
+			'message'  => __( 'Directory browsing directive could not be confirmed. Probe did not return 403 Forbidden.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 
@@ -472,7 +472,7 @@ class WPSG_HTTP_Verifier {
 			return array(
 				'verified' => true,
 				'status'   => 'done',
-				'message'  => __( 'Verified live: Direct web access to .env, wp-config.php, and readme.html is blocked.', 'genioussonu-site-checkup' ),
+				'message'  => __( 'Verified live: Direct web access to .env, wp-config.php, and readme.html is blocked.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -480,7 +480,7 @@ class WPSG_HTTP_Verifier {
 			'verified' => false,
 			'status'   => 'applied_unverified',
 			/* translators: %s: evidence list of files */
-			'message'  => sprintf( __( 'Protection could not be confirmed: %s.', 'genioussonu-site-checkup' ), implode( ', ', $evidence ) ),
+			'message'  => sprintf( __( 'Protection could not be confirmed: %s.', 'genioussonu-security-hardening-audit' ), implode( ', ', $evidence ) ),
 		);
 	}
 
@@ -499,7 +499,7 @@ class WPSG_HTTP_Verifier {
 			return array(
 				'verified' => true,
 				'status'   => 'done',
-				'message'  => __( 'Verified live: Direct xmlrpc.php requests are blocked at server layer (HTTP 403 Forbidden).', 'genioussonu-site-checkup' ),
+				'message'  => __( 'Verified live: Direct xmlrpc.php requests are blocked at server layer (HTTP 403 Forbidden).', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -507,7 +507,7 @@ class WPSG_HTTP_Verifier {
 			'verified' => false,
 			'status'   => 'applied_unverified',
 			/* translators: %d: HTTP status code */
-			'message'  => sprintf( __( 'xmlrpc.php block could not be confirmed (server returned HTTP %d, expected 403).', 'genioussonu-site-checkup' ), $res['code'] ),
+			'message'  => sprintf( __( 'xmlrpc.php block could not be confirmed (server returned HTTP %d, expected 403).', 'genioussonu-security-hardening-audit' ), $res['code'] ),
 		);
 	}
 
@@ -530,7 +530,7 @@ class WPSG_HTTP_Verifier {
 			return array(
 				'verified' => true,
 				'status'   => 'done',
-				'message'  => __( 'Verified live: PHP execution under /uploads/ blocked at server layer (synthetic probe returned 403).', 'genioussonu-site-checkup' ),
+				'message'  => __( 'Verified live: PHP execution under /uploads/ blocked at server layer (synthetic probe returned 403).', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -538,7 +538,7 @@ class WPSG_HTTP_Verifier {
 			'verified' => false,
 			'status'   => 'applied_unverified',
 			/* translators: %d: HTTP status code */
-			'message'  => sprintf( __( 'Uploads PHP execution block not confirmed: probe returned HTTP %d (expected 403 Forbidden).', 'genioussonu-site-checkup' ), $res['code'] ),
+			'message'  => sprintf( __( 'Uploads PHP execution block not confirmed: probe returned HTTP %d (expected 403 Forbidden).', 'genioussonu-security-hardening-audit' ), $res['code'] ),
 		);
 	}
 
@@ -557,7 +557,7 @@ class WPSG_HTTP_Verifier {
 			return array(
 				'verified' => true,
 				'status'   => 'done',
-				'message'  => __( 'Verified live: Malicious SQLi signature query string blocked (HTTP 403 Forbidden).', 'genioussonu-site-checkup' ),
+				'message'  => __( 'Verified live: Malicious SQLi signature query string blocked (HTTP 403 Forbidden).', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -565,7 +565,7 @@ class WPSG_HTTP_Verifier {
 			'verified' => false,
 			'status'   => 'applied_unverified',
 			/* translators: %d: HTTP status code */
-			'message'  => sprintf( __( 'Firewall rule not active: test probe returned HTTP %d (expected 403 Forbidden).', 'genioussonu-site-checkup' ), $res['code'] ),
+			'message'  => sprintf( __( 'Firewall rule not active: test probe returned HTTP %d (expected 403 Forbidden).', 'genioussonu-security-hardening-audit' ), $res['code'] ),
 		);
 	}
 
@@ -583,7 +583,7 @@ class WPSG_HTTP_Verifier {
 			return array(
 				'verified' => true,
 				'status'   => 'done',
-				'message'  => __( 'Verified live: Scanner User-Agent request blocked (HTTP 403 Forbidden).', 'genioussonu-site-checkup' ),
+				'message'  => __( 'Verified live: Scanner User-Agent request blocked (HTTP 403 Forbidden).', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -591,7 +591,7 @@ class WPSG_HTTP_Verifier {
 			'verified' => false,
 			'status'   => 'applied_unverified',
 			/* translators: %d: HTTP status code */
-			'message'  => sprintf( __( 'Bot filter not active: scanner User-Agent returned HTTP %d (expected 403 Forbidden).', 'genioussonu-site-checkup' ), $res['code'] ),
+			'message'  => sprintf( __( 'Bot filter not active: scanner User-Agent returned HTTP %d (expected 403 Forbidden).', 'genioussonu-security-hardening-audit' ), $res['code'] ),
 		);
 	}
 
@@ -609,14 +609,14 @@ class WPSG_HTTP_Verifier {
 			return array(
 				'verified' => false,
 				'status'   => 'applied_unverified',
-				'message'  => __( 'WordPress version meta tag is still visible in page HTML.', 'genioussonu-site-checkup' ),
+				'message'  => __( 'WordPress version meta tag is still visible in page HTML.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
 		return array(
 			'verified' => true,
 			'status'   => 'done',
-			'message'  => __( 'Verified live: WordPress generator meta tag suppressed from HTML output.', 'genioussonu-site-checkup' ),
+			'message'  => __( 'Verified live: WordPress generator meta tag suppressed from HTML output.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 
@@ -638,7 +638,7 @@ class WPSG_HTTP_Verifier {
 				'status'   => 'done',
 				'message'  => sprintf(
 					/* translators: %s: CSP mode */
-					__( 'Verified live: CSP active in %s mode.', 'genioussonu-site-checkup' ),
+					__( 'Verified live: CSP active in %s mode.', 'genioussonu-security-hardening-audit' ),
 					$has_ro ? 'Report-Only' : 'Enforce'
 				),
 			);
@@ -647,7 +647,7 @@ class WPSG_HTTP_Verifier {
 		return array(
 			'verified' => false,
 			'status'   => 'applied_unverified',
-			'message'  => __( 'Content-Security-Policy header not detected on live HTTP response.', 'genioussonu-site-checkup' ),
+			'message'  => __( 'Content-Security-Policy header not detected on live HTTP response.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 
@@ -667,7 +667,7 @@ class WPSG_HTTP_Verifier {
 			return array(
 				'verified' => true,
 				'status'   => 'done',
-				'message'  => __( 'Verified live: /.well-known/security.txt responds with valid contact directives.', 'genioussonu-site-checkup' ),
+				'message'  => __( 'Verified live: /.well-known/security.txt responds with valid contact directives.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -675,7 +675,7 @@ class WPSG_HTTP_Verifier {
 			'verified' => false,
 			'status'   => 'applied_unverified',
 			/* translators: %d: HTTP status code */
-			'message'  => sprintf( __( 'security.txt probe returned HTTP %d (expected 200 with Contact directive).', 'genioussonu-site-checkup' ), $res['code'] ),
+			'message'  => sprintf( __( 'security.txt probe returned HTTP %d (expected 200 with Contact directive).', 'genioussonu-security-hardening-audit' ), $res['code'] ),
 		);
 	}
 
@@ -688,7 +688,7 @@ class WPSG_HTTP_Verifier {
 			return array(
 				'verified' => false,
 				'status'   => 'pending',
-				'message'  => __( 'Login URL rename is not configured.', 'genioussonu-site-checkup' ),
+				'message'  => __( 'Login URL rename is not configured.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -704,7 +704,7 @@ class WPSG_HTTP_Verifier {
 			return array(
 				'verified' => false,
 				'status'   => 'applied_unverified',
-				'message'  => __( 'Direct /wp-login.php access still displays WordPress login form.', 'genioussonu-site-checkup' ),
+				'message'  => __( 'Direct /wp-login.php access still displays WordPress login form.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -712,7 +712,7 @@ class WPSG_HTTP_Verifier {
 			'verified' => true,
 			'status'   => 'done',
 			/* translators: %s: custom login slug */
-			'message'  => sprintf( __( 'Verified live: Direct /wp-login.php access is protected. Custom slug /%s is active.', 'genioussonu-site-checkup' ), esc_html( $slug ) ),
+			'message'  => sprintf( __( 'Verified live: Direct /wp-login.php access is protected. Custom slug /%s is active.', 'genioussonu-security-hardening-audit' ), esc_html( $slug ) ),
 		);
 	}
 
@@ -732,7 +732,7 @@ class WPSG_HTTP_Verifier {
 						'verified' => true,
 						'status'   => 'done',
 						/* translators: 1: constant name, 2: value */
-						'message'  => sprintf( __( 'Constant %1$s is verified in current process (%2$s).', 'genioussonu-site-checkup' ), $constant_name, $val ? 'true' : 'false' ),
+						'message'  => sprintf( __( 'Constant %1$s is verified in current process (%2$s).', 'genioussonu-security-hardening-audit' ), $constant_name, $val ? 'true' : 'false' ),
 					);
 				}
 			}
@@ -747,7 +747,7 @@ class WPSG_HTTP_Verifier {
 					'verified' => true,
 					'status'   => 'done',
 					/* translators: 1: constant name, 2: value */
-					'message'  => sprintf( __( 'Verified live in fresh process: %1$s is set to %2$s.', 'genioussonu-site-checkup' ), $constant_name, $actual ? 'true' : 'false' ),
+					'message'  => sprintf( __( 'Verified live in fresh process: %1$s is set to %2$s.', 'genioussonu-security-hardening-audit' ), $constant_name, $actual ? 'true' : 'false' ),
 				);
 			}
 		}
@@ -756,7 +756,7 @@ class WPSG_HTTP_Verifier {
 			'verified' => false,
 			'status'   => 'applied_unverified',
 			/* translators: %s: constant name */
-			'message'  => sprintf( __( 'Constant %s could not be verified in fresh runtime process.', 'genioussonu-site-checkup' ), $constant_name ),
+			'message'  => sprintf( __( 'Constant %s could not be verified in fresh runtime process.', 'genioussonu-security-hardening-audit' ), $constant_name ),
 		);
 	}
 
@@ -774,14 +774,14 @@ class WPSG_HTTP_Verifier {
 			return array(
 				'verified' => true,
 				'status'   => 'done',
-				'message'  => __( 'Verified live: Author query and unauthenticated user REST endpoints are protected.', 'genioussonu-site-checkup' ),
+				'message'  => __( 'Verified live: Author query and unauthenticated user REST endpoints are protected.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
 		return array(
 			'verified' => false,
 			'status'   => 'applied_unverified',
-			'message'  => __( 'User enumeration protection could not be verified in live checks.', 'genioussonu-site-checkup' ),
+			'message'  => __( 'User enumeration protection could not be verified in live checks.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 }

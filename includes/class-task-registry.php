@@ -108,8 +108,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'trigger_backup',
 			'section'          => 'security_update',
-			'title'            => __( 'Verify Recent Site Backup', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Verifies that a full database & file backup exists within the last 24–48 hours (UpdraftPlus, WPvivid, or host snapshot).', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Verify Recent Site Backup', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Verifies that a full database & file backup exists within the last 24–48 hours (UpdraftPlus, WPvivid, or host snapshot).', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'status_callback'  => function () {
@@ -118,19 +118,19 @@ class WPSG_Task_Registry {
 					'status'  => $b['is_recent'] ? 'done' : 'attention',
 					'message' => $b['is_recent']
 						/* translators: 1: backup plugin name, 2: hours ago */
-						? sprintf( __( 'Verified recent backup (%1$s, %2$s hours ago).', 'genioussonu-site-checkup' ), $b['plugin_name'], $b['age_hours'] )
-						: ( isset( $b['message'] ) ? $b['message'] : __( 'No recent backup found within the last 48 hours.', 'genioussonu-site-checkup' ) ),
+						? sprintf( __( 'Verified recent backup (%1$s, %2$s hours ago).', 'genioussonu-security-hardening-audit' ), $b['plugin_name'], $b['age_hours'] )
+						: ( isset( $b['message'] ) ? $b['message'] : __( 'No recent backup found within the last 48 hours.', 'genioussonu-security-hardening-audit' ) ),
 				);
 			},
 			'run_callback'     => function () {
 				$b = WPSG_Backup_Guard::get_backup_status();
 				if ( $b['is_recent'] ) {
 					/* translators: %s: backup plugin name */
-					return array( 'success' => true, 'message' => sprintf( __( 'Recent backup verified (%s).', 'genioussonu-site-checkup' ), $b['plugin_name'] ) );
+					return array( 'success' => true, 'message' => sprintf( __( 'Recent backup verified (%s).', 'genioussonu-security-hardening-audit' ), $b['plugin_name'] ) );
 				}
 				// If manual confirmation was just recorded
 				WPSG_Backup_Guard::confirm_manual_backup();
-				return array( 'success' => true, 'message' => __( 'Manual host/cPanel backup confirmed for the next 48 hours.', 'genioussonu-site-checkup' ) );
+				return array( 'success' => true, 'message' => __( 'Manual host/cPanel backup confirmed for the next 48 hours.', 'genioussonu-security-hardening-audit' ) );
 			},
 		) ) );
 
@@ -138,8 +138,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'toggle_auto_updates',
 			'section'          => 'security_update',
-			'title'            => __( 'Disable Automatic Updates', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Prevents unverified background core, plugin, and theme updates from breaking client customizations. Agency manages updates manually.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Disable Automatic Updates', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Prevents unverified background core, plugin, and theme updates from breaking client customizations. Agency manages updates manually.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'has_undo'         => true,
@@ -147,14 +147,14 @@ class WPSG_Task_Registry {
 				$active = WPSG_Plugin::get_instance()->is_task_active( 'toggle_auto_updates' );
 				return array(
 					'status'  => $active ? 'done' : 'pending',
-					'message' => $active ? __( 'Automatic updates are blocked via runtime filters.', 'genioussonu-site-checkup' ) : __( 'Automatic updates are currently allowed.', 'genioussonu-site-checkup' ),
+					'message' => $active ? __( 'Automatic updates are blocked via runtime filters.', 'genioussonu-security-hardening-audit' ) : __( 'Automatic updates are currently allowed.', 'genioussonu-security-hardening-audit' ),
 				);
 			},
 			'run_callback'     => function () {
-				return array( 'success' => true, 'message' => __( 'Automatic updates disabled.', 'genioussonu-site-checkup' ) );
+				return array( 'success' => true, 'message' => __( 'Automatic updates disabled.', 'genioussonu-security-hardening-audit' ) );
 			},
 			'undo_callback'    => function () {
-				return array( 'success' => true, 'message' => __( 'Automatic updates enabled.', 'genioussonu-site-checkup' ) );
+				return array( 'success' => true, 'message' => __( 'Automatic updates enabled.', 'genioussonu-security-hardening-audit' ) );
 			},
 		) ) );
 
@@ -162,13 +162,13 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'wordfence_config',
 			'section'          => 'security_update',
-			'title'            => __( 'Wordfence Firewall & Scanner', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Verifies Wordfence WAF status, brute-force lockout rules, and alert preferences against the agency SOP.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Wordfence Firewall & Scanner', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Verifies Wordfence WAF status, brute-force lockout rules, and alert preferences against the agency SOP.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'B',
 			'sub_type'         => 'guided',
 			'status_callback'  => array( 'WPSG_Wordfence_Bridge', 'get_status' ),
 			'guide_data'       => array(
-				'button_label' => __( 'Configure Wordfence', 'genioussonu-site-checkup' ),
+				'button_label' => __( 'Configure Wordfence', 'genioussonu-security-hardening-audit' ),
 				'link'         => admin_url( 'admin.php?page=Wordfence' ),
 			),
 		) ) );
@@ -177,13 +177,13 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'two_factor_auth',
 			'section'          => 'security_update',
-			'title'            => __( 'Enforce Two-Factor Authentication (2FA)', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Ensures an active 2FA plugin is installed and mandatory for all administrator accounts.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Enforce Two-Factor Authentication (2FA)', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Ensures an active 2FA plugin is installed and mandatory for all administrator accounts.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'B',
 			'sub_type'         => 'guided',
 			'status_callback'  => array( 'WPSG_2fa_Bridge', 'get_status' ),
 			'guide_data'       => array(
-				'button_label' => __( 'Configure 2FA', 'genioussonu-site-checkup' ),
+				'button_label' => __( 'Configure 2FA', 'genioussonu-security-hardening-audit' ),
 				'link'         => admin_url( 'plugins.php' ),
 			),
 		) ) );
@@ -192,8 +192,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'vulnerability_database_check',
 			'section'          => 'security_update',
-			'title'            => __( 'Scan Vulnerability Database (Patchstack CVE)', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Cross-references installed plugins and themes against the Patchstack vulnerability database with match-confidence scoring. Cached 24h.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Scan Vulnerability Database (Patchstack CVE)', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Cross-references installed plugins and themes against the Patchstack vulnerability database with match-confidence scoring. Cached 24h.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'status_callback'  => array( 'WPSG_Vulnerability_Checker', 'get_vulnerability_status' ),
@@ -210,8 +210,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'system_environment_check',
 			'section'          => 'general_check',
-			'title'            => __( 'Environment Audit (PHP, WP, SSL)', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Audits PHP version (>= 8.1), WordPress core release, and SSL certificate expiration window.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Environment Audit (PHP, WP, SSL)', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Audits PHP version (>= 8.1), WordPress core release, and SSL certificate expiration window.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'status_callback'  => array( 'WPSG_Scanner', 'check_system_environment' ),
@@ -222,8 +222,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'scan_rogue_admins',
 			'section'          => 'general_check',
-			'title'            => __( 'Detect Rogue / Unrecognized Admins', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Compares administrator users against the accepted baseline snapshot taken at activation. Alerts on any newly created or altered admin.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Detect Rogue / Unrecognized Admins', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Compares administrator users against the accepted baseline snapshot taken at activation. Alerts on any newly created or altered admin.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'status_callback'  => array( 'WPSG_Scanner', 'scan_rogue_admins' ),
@@ -234,8 +234,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'scan_options_integrity',
 			'section'          => 'general_check',
-			'title'            => __( 'wp_options Integrity & Autoload Scan', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Checks for siteurl/home URL hijacking and flags oversized autoloaded options (>100KB) that cause database slowdowns or malware persistence.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'wp_options Integrity & Autoload Scan', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Checks for siteurl/home URL hijacking and flags oversized autoloaded options (>100KB) that cause database slowdowns or malware persistence.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'status_callback'  => array( 'WPSG_Scanner', 'scan_options_integrity' ),
@@ -246,8 +246,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'scan_mu_plugins',
 			'section'          => 'general_check',
-			'title'            => __( 'Audit Must-Use (mu-plugins) Directory', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Inspects wp-content/mu-plugins for unauthorized PHP scripts that execute automatically outside standard plugin controls.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Audit Must-Use (mu-plugins) Directory', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Inspects wp-content/mu-plugins for unauthorized PHP scripts that execute automatically outside standard plugin controls.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'status_callback'  => array( 'WPSG_Scanner', 'scan_mu_plugins' ),
@@ -258,8 +258,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'scan_exposed_files',
 			'section'          => 'general_check',
-			'title'            => __( 'Scan Exposed Backups & Dumps in Webroot', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Scans for public database dumps (*.sql), .env files, and wp-config backups accidentally left in the public webroot.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Scan Exposed Backups & Dumps in Webroot', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Scans for public database dumps (*.sql), .env files, and wp-config backups accidentally left in the public webroot.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'status_callback'  => array( 'WPSG_Scanner', 'scan_exposed_files' ),
@@ -270,8 +270,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'detect_unwanted_plugins',
 			'section'          => 'general_check',
-			'title'            => __( 'Detect & Quarantine Risky Plugins', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Detects leftover migration tools (Better Search Replace, File Manager, Duplicate Page). Deleting zips the plugin first to enable real Undo.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Detect & Quarantine Risky Plugins', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Detects leftover migration tools (Better Search Replace, File Manager, Duplicate Page). Deleting zips the plugin first to enable real Undo.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'has_undo'         => false,
@@ -284,8 +284,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'plugin_integrity_check',
 			'section'          => 'general_check',
-			'title'            => __( 'Scan Closed / Abandoned Plugins (WP.org)', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Checks installed public plugins against the WordPress.org API to detect plugins removed for security vulnerabilities. Cached 24h.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Scan Closed / Abandoned Plugins (WP.org)', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Checks installed public plugins against the WordPress.org API to detect plugins removed for security vulnerabilities. Cached 24h.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'status_callback'  => array( 'WPSG_Plugin_Integrity', 'check_plugin_integrity' ),
@@ -298,8 +298,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'scaffold_child_theme',
 			'section'          => 'general_check',
-			'title'            => __( 'Custom Child Theme Setup', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Verifies if a child theme is active. Generates a clean child theme without third-party online generators.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Custom Child Theme Setup', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Verifies if a child theme is active. Generates a clean child theme without third-party online generators.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'B',
 			'sub_type'         => 'guided',
 			'has_undo'         => true,
@@ -312,8 +312,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'file_permissions_audit',
 			'section'          => 'general_check',
-			'title'            => __( 'File Permissions Audit (wp-config 640, 644/755)', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Audits key files and directories against strict permission baselines (wp-config.php <= 0640, root files <= 0644, directories <= 0755) and flags world-writable bits.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'File Permissions Audit (wp-config 640, 644/755)', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Audits key files and directories against strict permission baselines (wp-config.php <= 0640, root files <= 0644, directories <= 0755) and flags world-writable bits.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'status_callback'  => array( 'WPSG_Scanner', 'audit_file_permissions' ),
@@ -326,8 +326,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'php_server_restrictions',
 			'section'          => 'general_check',
-			'title'            => __( 'PHP Security Restrictions (disable_functions & open_basedir)', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Audits php.ini to detect if dangerous execution functions (exec, shell_exec, system, passthru) are disabled and whether open_basedir is active.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'PHP Security Restrictions (disable_functions & open_basedir)', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Audits php.ini to detect if dangerous execution functions (exec, shell_exec, system, passthru) are disabled and whether open_basedir is active.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'status_callback'  => array( 'WPSG_Scanner', 'check_php_server_restrictions' ),
@@ -340,8 +340,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'db_prefix_check',
 			'section'          => 'general_check',
-			'title'            => __( 'Database Table Prefix Detection', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Checks whether database tables use the default "wp_" prefix or a custom prefix to resist automated SQL injection scripts.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Database Table Prefix Detection', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Checks whether database tables use the default "wp_" prefix or a custom prefix to resist automated SQL injection scripts.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'status_callback'  => array( 'WPSG_Scanner', 'check_db_prefix' ),
@@ -354,8 +354,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'tls_cert_depth_check',
 			'section'          => 'general_check',
-			'title'            => __( 'TLS Protocol & Certificate Chain Depth Probe', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Actively probes server support for legacy TLS 1.0 and 1.1 protocols and verifies intermediate certificate chain completeness.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'TLS Protocol & Certificate Chain Depth Probe', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Actively probes server support for legacy TLS 1.0 and 1.1 protocols and verifies intermediate certificate chain completeness.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'status_callback'  => array( 'WPSG_Scanner', 'check_tls_and_cert_depth' ),
@@ -368,8 +368,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'email_domain_auth_check',
 			'section'          => 'general_check',
-			'title'            => __( 'Domain Email Authentication (SPF & DMARC)', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Informational DNS query verifying SPF and DMARC records for the sending domain to prevent email spoofing and spam folder placement.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Domain Email Authentication (SPF & DMARC)', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Informational DNS query verifying SPF and DMARC records for the sending domain to prevent email spoofing and spam folder placement.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'status_callback'  => array( 'WPSG_Scanner', 'check_domain_email_auth' ),
@@ -382,13 +382,13 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'rest_api_security_audit',
 			'section'          => 'general_check',
-			'title'            => __( 'REST API Security Audit', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Enumerates all registered WordPress REST API endpoints, inspects permission callbacks, maps source plugins/themes, and identifies unauthenticated exposure risks.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'REST API Security Audit', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Enumerates all registered WordPress REST API endpoints, inspects permission callbacks, maps source plugins/themes, and identifies unauthenticated exposure risks.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'status_callback'  => function () {
 				if ( ! class_exists( 'WPSG_Rest_Auditor' ) ) {
-					return array( 'status' => 'pending', 'message' => __( 'REST API Auditor not loaded.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'pending', 'message' => __( 'REST API Auditor not loaded.', 'genioussonu-security-hardening-audit' ) );
 				}
 				$audit = WPSG_Rest_Auditor::audit_routes();
 				$high  = isset( $audit['summary']['high_risk'] ) ? $audit['summary']['high_risk'] : 0;
@@ -397,20 +397,20 @@ class WPSG_Task_Registry {
 					return array(
 						'status'  => 'attention',
 						/* translators: 1: count of high-risk endpoints, 2: total endpoints */
-						'message' => sprintf( __( '%1$d high-risk or publicly exposed REST endpoint(s) detected across %2$d endpoints.', 'genioussonu-site-checkup' ), $high, $total ),
+						'message' => sprintf( __( '%1$d high-risk or publicly exposed REST endpoint(s) detected across %2$d endpoints.', 'genioussonu-security-hardening-audit' ), $high, $total ),
 						'data'    => $audit['summary'],
 					);
 				}
 				return array(
 					'status'  => 'done',
 					/* translators: %d: total endpoints */
-					'message' => sprintf( __( 'All %d registered REST endpoints audited. No unauthorized public write routes detected.', 'genioussonu-site-checkup' ), $total ),
+					'message' => sprintf( __( 'All %d registered REST endpoints audited. No unauthorized public write routes detected.', 'genioussonu-security-hardening-audit' ), $total ),
 					'data'    => $audit['summary'],
 				);
 			},
 			'run_callback'     => function () {
 				if ( ! class_exists( 'WPSG_Rest_Auditor' ) ) {
-					return array( 'success' => false, 'message' => __( 'REST API Auditor not loaded.', 'genioussonu-site-checkup' ) );
+					return array( 'success' => false, 'message' => __( 'REST API Auditor not loaded.', 'genioussonu-security-hardening-audit' ) );
 				}
 				$audit = WPSG_Rest_Auditor::audit_routes();
 				$high  = isset( $audit['summary']['high_risk'] ) ? $audit['summary']['high_risk'] : 0;
@@ -424,9 +424,9 @@ class WPSG_Task_Registry {
 					);
 				}
 				/* translators: 1: count of high-risk endpoints, 2: total endpoints */
-				$high_msg = sprintf( __( 'Audit complete: %1$d high-risk endpoint(s) identified across %2$d endpoints.', 'genioussonu-site-checkup' ), $high, $total );
+				$high_msg = sprintf( __( 'Audit complete: %1$d high-risk endpoint(s) identified across %2$d endpoints.', 'genioussonu-security-hardening-audit' ), $high, $total );
 				/* translators: %d: total endpoints */
-				$clean_msg = sprintf( __( 'Audit complete: all %d endpoints verified with proper authorization.', 'genioussonu-site-checkup' ), $total );
+				$clean_msg = sprintf( __( 'Audit complete: all %d endpoints verified with proper authorization.', 'genioussonu-security-hardening-audit' ), $total );
 				return array(
 					'success' => true,
 					'status'  => $high > 0 ? 'attention' : 'done',
@@ -440,13 +440,13 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'environment_badge_check',
 			'section'          => 'general_check',
-			'title'            => __( 'Environment Tagging & Admin Bar Badge', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Tags the environment (Production, Staging, or Development) and displays a persistent color-coded safety badge in the WordPress top admin bar to prevent accidental changes on production.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Environment Tagging & Admin Bar Badge', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Tags the environment (Production, Staging, or Development) and displays a persistent color-coded safety badge in the WordPress top admin bar to prevent accidental changes on production.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'status_callback'  => function () {
 				if ( ! class_exists( 'WPSG_Environment_Badge' ) ) {
-					return array( 'status' => 'pending', 'message' => __( 'Environment Badge component not loaded.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'pending', 'message' => __( 'Environment Badge component not loaded.', 'genioussonu-security-hardening-audit' ) );
 				}
 				$confirmed = WPSG_Environment_Badge::is_confirmed();
 				$env       = WPSG_Environment_Badge::get_environment();
@@ -454,20 +454,20 @@ class WPSG_Task_Registry {
 					return array(
 						'status'  => 'done',
 						/* translators: %s: environment name */
-						'message' => sprintf( __( 'Active environment confirmed: %s (Admin bar badge active).', 'genioussonu-site-checkup' ), ucfirst( $env ) ),
+						'message' => sprintf( __( 'Active environment confirmed: %s (Admin bar badge active).', 'genioussonu-security-hardening-audit' ), ucfirst( $env ) ),
 						'data'    => array( 'environment' => $env, 'confirmed' => true ),
 					);
 				}
 				return array(
 					'status'  => 'pending',
 					/* translators: %s: environment name */
-					'message' => sprintf( __( 'Unconfirmed environment. Domain heuristics suggest: %s. Click Run to confirm.', 'genioussonu-site-checkup' ), ucfirst( $env ) ),
+					'message' => sprintf( __( 'Unconfirmed environment. Domain heuristics suggest: %s. Click Run to confirm.', 'genioussonu-security-hardening-audit' ), ucfirst( $env ) ),
 					'data'    => array( 'environment' => $env, 'confirmed' => false ),
 				);
 			},
 			'run_callback'     => function () {
 				if ( ! class_exists( 'WPSG_Environment_Badge' ) ) {
-					return array( 'success' => false, 'message' => __( 'Environment Badge component not loaded.', 'genioussonu-site-checkup' ) );
+					return array( 'success' => false, 'message' => __( 'Environment Badge component not loaded.', 'genioussonu-security-hardening-audit' ) );
 				}
 				$suggested = WPSG_Environment_Badge::suggest_environment();
 				update_option( WPSG_Environment_Badge::OPTION_KEY, $suggested );
@@ -483,7 +483,7 @@ class WPSG_Task_Registry {
 					'success' => true,
 					'status'  => 'done',
 					/* translators: %s: environment name */
-					'message' => sprintf( __( 'Environment confirmed as %s. Admin bar badge updated.', 'genioussonu-site-checkup' ), ucfirst( $suggested ) ),
+					'message' => sprintf( __( 'Environment confirmed as %s. Admin bar badge updated.', 'genioussonu-security-hardening-audit' ), ucfirst( $suggested ) ),
 					'data'    => array( 'environment' => $suggested, 'confirmed' => true ),
 				);
 			},
@@ -493,22 +493,22 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'diagnostic_snapshot_check',
 			'section'          => 'general_check',
-			'title'            => __( 'Developer Diagnostic Snapshot', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Generates a sanitized one-click diagnostic snapshot of PHP, server, database, theme, active plugins, and non-sensitive wp-config flags formatted for developer debugging and support tickets.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Developer Diagnostic Snapshot', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Generates a sanitized one-click diagnostic snapshot of PHP, server, database, theme, active plugins, and non-sensitive wp-config flags formatted for developer debugging and support tickets.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'status_callback'  => function () {
 				if ( ! class_exists( 'WPSG_Diagnostic_Snapshot' ) ) {
-					return array( 'status' => 'pending', 'message' => __( 'Diagnostic Snapshot component not loaded.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'pending', 'message' => __( 'Diagnostic Snapshot component not loaded.', 'genioussonu-security-hardening-audit' ) );
 				}
 				return array(
 					'status'  => 'done',
-					'message' => __( 'Diagnostic snapshot generator ready. Click Re-run to generate a fresh export.', 'genioussonu-site-checkup' ),
+					'message' => __( 'Diagnostic snapshot generator ready. Click Re-run to generate a fresh export.', 'genioussonu-security-hardening-audit' ),
 				);
 			},
 			'run_callback'     => function () {
 				if ( ! class_exists( 'WPSG_Diagnostic_Snapshot' ) ) {
-					return array( 'success' => false, 'message' => __( 'Diagnostic Snapshot component not loaded.', 'genioussonu-site-checkup' ) );
+					return array( 'success' => false, 'message' => __( 'Diagnostic Snapshot component not loaded.', 'genioussonu-security-hardening-audit' ) );
 				}
 				$snapshot = WPSG_Diagnostic_Snapshot::compile();
 				if ( class_exists( 'WPSG_Audit_Logger' ) ) {
@@ -522,7 +522,7 @@ class WPSG_Task_Registry {
 				return array(
 					'success'  => true,
 					'status'   => 'done',
-					'message'  => __( 'Developer diagnostic snapshot generated successfully.', 'genioussonu-site-checkup' ),
+					'message'  => __( 'Developer diagnostic snapshot generated successfully.', 'genioussonu-security-hardening-audit' ),
 					'markdown' => $snapshot['markdown'],
 					'data'     => $snapshot,
 				);
@@ -533,13 +533,13 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'cron_job_audit',
 			'section'          => 'general_check',
-			'title'            => __( 'WP-Cron Scheduled Events Audit', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Lists all scheduled WP-Cron background jobs, detects overdue stalled tasks indicating cron failure, and identifies duplicate conflicting hook registrations.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'WP-Cron Scheduled Events Audit', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Lists all scheduled WP-Cron background jobs, detects overdue stalled tasks indicating cron failure, and identifies duplicate conflicting hook registrations.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'status_callback'  => function () {
 				if ( ! class_exists( 'WPSG_Cron_Auditor' ) ) {
-					return array( 'status' => 'pending', 'message' => __( 'Cron Auditor component not loaded.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'pending', 'message' => __( 'Cron Auditor component not loaded.', 'genioussonu-security-hardening-audit' ) );
 				}
 				$audit = WPSG_Cron_Auditor::audit_cron_jobs();
 				$overdue = $audit['summary']['overdue_count'];
@@ -549,20 +549,20 @@ class WPSG_Task_Registry {
 					return array(
 						'status'  => 'attention',
 						/* translators: 1: overdue count, 2: duplicate count, 3: total jobs */
-						'message' => sprintf( __( 'Cron anomalies detected: %1$d overdue task(s), %2$d duplicate registration(s) across %3$d scheduled events.', 'genioussonu-site-checkup' ), $overdue, $dupes, $total ),
+						'message' => sprintf( __( 'Cron anomalies detected: %1$d overdue task(s), %2$d duplicate registration(s) across %3$d scheduled events.', 'genioussonu-security-hardening-audit' ), $overdue, $dupes, $total ),
 						'data'    => $audit['summary'],
 					);
 				}
 				return array(
 					'status'  => 'done',
 					/* translators: %d: total scheduled jobs */
-					'message' => sprintf( __( 'All %d scheduled WP-Cron jobs running normally. No overdue or duplicate tasks found.', 'genioussonu-site-checkup' ), $total ),
+					'message' => sprintf( __( 'All %d scheduled WP-Cron jobs running normally. No overdue or duplicate tasks found.', 'genioussonu-security-hardening-audit' ), $total ),
 					'data'    => $audit['summary'],
 				);
 			},
 			'run_callback'     => function () {
 				if ( ! class_exists( 'WPSG_Cron_Auditor' ) ) {
-					return array( 'success' => false, 'message' => __( 'Cron Auditor component not loaded.', 'genioussonu-site-checkup' ) );
+					return array( 'success' => false, 'message' => __( 'Cron Auditor component not loaded.', 'genioussonu-security-hardening-audit' ) );
 				}
 				$audit   = WPSG_Cron_Auditor::audit_cron_jobs();
 				$overdue = $audit['summary']['overdue_count'];
@@ -577,9 +577,9 @@ class WPSG_Task_Registry {
 					);
 				}
 				/* translators: 1: overdue count, 2: duplicate count */
-				$overdue_msg = sprintf( __( 'Cron scan complete: %1$d overdue task(s), %2$d duplicate(s) found.', 'genioussonu-site-checkup' ), $overdue, $dupes );
+				$overdue_msg = sprintf( __( 'Cron scan complete: %1$d overdue task(s), %2$d duplicate(s) found.', 'genioussonu-security-hardening-audit' ), $overdue, $dupes );
 				/* translators: %d: total scheduled jobs */
-				$clean_msg   = sprintf( __( 'Cron scan complete: all %d events verified and scheduled properly.', 'genioussonu-site-checkup' ), $total );
+				$clean_msg   = sprintf( __( 'Cron scan complete: all %d events verified and scheduled properly.', 'genioussonu-security-hardening-audit' ), $total );
 				return array(
 					'success' => true,
 					'status'  => ( $overdue > 0 || $dupes > 0 ) ? 'attention' : 'done',
@@ -593,13 +593,13 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'db_health_scanner',
 			'section'          => 'general_check',
-			'title'            => __( 'Database Overhead & Orphaned Data Scanner', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Detects orphaned postmeta, orphaned usermeta, expired transients, and excess post revisions with storage impact metrics and protected Level-B cleanup.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Database Overhead & Orphaned Data Scanner', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Detects orphaned postmeta, orphaned usermeta, expired transients, and excess post revisions with storage impact metrics and protected Level-B cleanup.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'status_callback'  => function () {
 				if ( ! class_exists( 'WPSG_Db_Health_Scanner' ) ) {
-					return array( 'status' => 'pending', 'message' => __( 'Database Health Scanner component not loaded.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'pending', 'message' => __( 'Database Health Scanner component not loaded.', 'genioussonu-security-hardening-audit' ) );
 				}
 				$scan = WPSG_Db_Health_Scanner::scan();
 				$bloat = $scan['summary']['total_bloat_items'];
@@ -608,19 +608,19 @@ class WPSG_Task_Registry {
 					return array(
 						'status'  => 'attention',
 						/* translators: 1: bloat items count, 2: estimated megabytes */
-						'message' => sprintf( __( '%1$d orphaned/stale database item(s) found (~%2$s MB overhead). Click Run to inspect.', 'genioussonu-site-checkup' ), $bloat, $mb ),
+						'message' => sprintf( __( '%1$d orphaned/stale database item(s) found (~%2$s MB overhead). Click Run to inspect.', 'genioussonu-security-hardening-audit' ), $bloat, $mb ),
 						'data'    => $scan['summary'],
 					);
 				}
 				return array(
 					'status'  => 'done',
-					'message' => __( 'Database is optimized. Zero orphaned metadata or expired transients detected.', 'genioussonu-site-checkup' ),
+					'message' => __( 'Database is optimized. Zero orphaned metadata or expired transients detected.', 'genioussonu-security-hardening-audit' ),
 					'data'    => $scan['summary'],
 				);
 			},
 			'run_callback'     => function () {
 				if ( ! class_exists( 'WPSG_Db_Health_Scanner' ) ) {
-					return array( 'success' => false, 'message' => __( 'Database Health Scanner component not loaded.', 'genioussonu-site-checkup' ) );
+					return array( 'success' => false, 'message' => __( 'Database Health Scanner component not loaded.', 'genioussonu-security-hardening-audit' ) );
 				}
 				$scan  = WPSG_Db_Health_Scanner::scan();
 				$bloat = $scan['summary']['total_bloat_items'];
@@ -634,11 +634,11 @@ class WPSG_Task_Registry {
 					);
 				}
 				/* translators: 1: bloat items count, 2: estimated megabytes */
-				$bloat_msg = sprintf( __( 'Scan complete: %1$d orphaned/stale item(s) identified (~%2$s MB overhead).', 'genioussonu-site-checkup' ), $bloat, $mb );
+				$bloat_msg = sprintf( __( 'Scan complete: %1$d orphaned/stale item(s) identified (~%2$s MB overhead).', 'genioussonu-security-hardening-audit' ), $bloat, $mb );
 				return array(
 					'success' => true,
 					'status'  => $bloat > 0 ? 'attention' : 'done',
-					'message' => $bloat > 0 ? $bloat_msg : __( 'Scan complete: database is clean and optimized.', 'genioussonu-site-checkup' ),
+					'message' => $bloat > 0 ? $bloat_msg : __( 'Scan complete: database is clean and optimized.', 'genioussonu-security-hardening-audit' ),
 					'summary' => $scan['summary'],
 					'details' => $scan['details'],
 				);
@@ -649,13 +649,13 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'migration_readiness_check',
 			'section'          => 'general_check',
-			'title'            => __( 'Migration URL & Serialization Risk Check', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Scans the database for hardcoded absolute URLs embedded inside PHP serialized strings that break during domain migrations, providing safe WP-CLI guidance.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Migration URL & Serialization Risk Check', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Scans the database for hardcoded absolute URLs embedded inside PHP serialized strings that break during domain migrations, providing safe WP-CLI guidance.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'status_callback'  => function () {
 				if ( ! class_exists( 'WPSG_Migration_Readiness' ) ) {
-					return array( 'status' => 'pending', 'message' => __( 'Migration Readiness component not loaded.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'pending', 'message' => __( 'Migration Readiness component not loaded.', 'genioussonu-security-hardening-audit' ) );
 				}
 				$scan  = WPSG_Migration_Readiness::scan();
 				$count = $scan['summary']['total_findings'];
@@ -663,19 +663,19 @@ class WPSG_Task_Registry {
 					return array(
 						'status'  => 'attention',
 						/* translators: %d: number of serialized database rows */
-						'message' => sprintf( __( '%d serialized database row(s) contain hardcoded domain URLs. Standard SQL export/import will corrupt these strings.', 'genioussonu-site-checkup' ), $count ),
+						'message' => sprintf( __( '%d serialized database row(s) contain hardcoded domain URLs. Standard SQL export/import will corrupt these strings.', 'genioussonu-security-hardening-audit' ), $count ),
 						'data'    => $scan['summary'],
 					);
 				}
 				return array(
 					'status'  => 'done',
-					'message' => __( 'Zero serialized URL risks detected. Database is ready for safe migration.', 'genioussonu-site-checkup' ),
+					'message' => __( 'Zero serialized URL risks detected. Database is ready for safe migration.', 'genioussonu-security-hardening-audit' ),
 					'data'    => $scan['summary'],
 				);
 			},
 			'run_callback'     => function () {
 				if ( ! class_exists( 'WPSG_Migration_Readiness' ) ) {
-					return array( 'success' => false, 'message' => __( 'Migration Readiness component not loaded.', 'genioussonu-site-checkup' ) );
+					return array( 'success' => false, 'message' => __( 'Migration Readiness component not loaded.', 'genioussonu-security-hardening-audit' ) );
 				}
 				$scan  = WPSG_Migration_Readiness::scan();
 				$count = $scan['summary']['total_findings'];
@@ -688,11 +688,11 @@ class WPSG_Task_Registry {
 					);
 				}
 				/* translators: %d: number of serialized database rows */
-				$risk_msg = sprintf( __( 'Scan complete: %d serialized row(s) contain absolute URLs. Review WP-CLI guidance.', 'genioussonu-site-checkup' ), $count );
+				$risk_msg = sprintf( __( 'Scan complete: %d serialized row(s) contain absolute URLs. Review WP-CLI guidance.', 'genioussonu-security-hardening-audit' ), $count );
 				return array(
 					'success'  => true,
 					'status'   => $count > 0 ? 'attention' : 'done',
-					'message'  => $count > 0 ? $risk_msg : __( 'Scan complete: no serialized absolute URL risks detected.', 'genioussonu-site-checkup' ),
+					'message'  => $count > 0 ? $risk_msg : __( 'Scan complete: no serialized absolute URL risks detected.', 'genioussonu-security-hardening-audit' ),
 					'summary'  => $scan['summary'],
 					'guidance' => $scan['guidance'],
 				);
@@ -703,13 +703,13 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'changelog_digest_check',
 			'section'          => 'general_check',
-			'title'            => __( 'Update Changelog Intelligence Digest', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Aggregates changelogs and release notes for available plugin/theme updates and delivers a weekly intelligence digest via alerts and dashboard.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Update Changelog Intelligence Digest', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Aggregates changelogs and release notes for available plugin/theme updates and delivers a weekly intelligence digest via alerts and dashboard.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'status_callback'  => function () {
 				if ( ! class_exists( 'WPSG_Changelog_Digest' ) ) {
-					return array( 'status' => 'pending', 'message' => __( 'Changelog Digest component not loaded.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'pending', 'message' => __( 'Changelog Digest component not loaded.', 'genioussonu-security-hardening-audit' ) );
 				}
 				$digest = WPSG_Changelog_Digest::compile_digest();
 				$total  = $digest['summary']['total_updates'];
@@ -717,19 +717,19 @@ class WPSG_Task_Registry {
 					return array(
 						'status'  => 'attention',
 						/* translators: %d: number of updates */
-						'message' => sprintf( __( '%d plugin/theme update(s) available with changelog summaries ready for review.', 'genioussonu-site-checkup' ), $total ),
+						'message' => sprintf( __( '%d plugin/theme update(s) available with changelog summaries ready for review.', 'genioussonu-security-hardening-audit' ), $total ),
 						'data'    => $digest['summary'],
 					);
 				}
 				return array(
 					'status'  => 'done',
-					'message' => __( 'All plugins and themes are up to date. Weekly changelog digest scheduled.', 'genioussonu-site-checkup' ),
+					'message' => __( 'All plugins and themes are up to date. Weekly changelog digest scheduled.', 'genioussonu-security-hardening-audit' ),
 					'data'    => $digest['summary'],
 				);
 			},
 			'run_callback'     => function () {
 				if ( ! class_exists( 'WPSG_Changelog_Digest' ) ) {
-					return array( 'success' => false, 'message' => __( 'Changelog Digest component not loaded.', 'genioussonu-site-checkup' ) );
+					return array( 'success' => false, 'message' => __( 'Changelog Digest component not loaded.', 'genioussonu-security-hardening-audit' ) );
 				}
 				$digest = WPSG_Changelog_Digest::compile_digest();
 				$total  = $digest['summary']['total_updates'];
@@ -742,11 +742,11 @@ class WPSG_Task_Registry {
 					);
 				}
 				/* translators: %d: number of updates */
-				$up_msg = sprintf( __( 'Digest compiled: %d update(s) available with release notes.', 'genioussonu-site-checkup' ), $total );
+				$up_msg = sprintf( __( 'Digest compiled: %d update(s) available with release notes.', 'genioussonu-security-hardening-audit' ), $total );
 				return array(
 					'success' => true,
 					'status'  => $total > 0 ? 'attention' : 'done',
-					'message' => $total > 0 ? $up_msg : __( 'Digest compiled: all plugins and themes are current.', 'genioussonu-site-checkup' ),
+					'message' => $total > 0 ? $up_msg : __( 'Digest compiled: all plugins and themes are current.', 'genioussonu-security-hardening-audit' ),
 					'summary' => $digest['summary'],
 					'items'   => $digest['items'],
 				);
@@ -757,13 +757,13 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'external_fingerprint_check',
 			'section'          => 'general_check',
-			'title'            => __( 'External Fingerprint & Information Disclosure Audit', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Conducts safe, non-destructive loopback HTTP probes against the site origin to detect exposed sensitive files, version disclosures, backup artifacts, and debug logs.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'External Fingerprint & Information Disclosure Audit', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Conducts safe, non-destructive loopback HTTP probes against the site origin to detect exposed sensitive files, version disclosures, backup artifacts, and debug logs.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'status_callback'  => function () {
 				if ( ! class_exists( 'WPSG_External_Fingerprint' ) ) {
-					return array( 'status' => 'pending', 'message' => __( 'External Fingerprint scanner not loaded.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'pending', 'message' => __( 'External Fingerprint scanner not loaded.', 'genioussonu-security-hardening-audit' ) );
 				}
 				$res         = WPSG_External_Fingerprint::scan();
 				$exposed_cnt = isset( $res['exposed_count'] ) ? (int) $res['exposed_count'] : 0;
@@ -776,7 +776,7 @@ class WPSG_Task_Registry {
 			},
 			'run_callback'     => function () {
 				if ( ! class_exists( 'WPSG_External_Fingerprint' ) ) {
-					return array( 'success' => false, 'message' => __( 'External Fingerprint scanner not loaded.', 'genioussonu-site-checkup' ) );
+					return array( 'success' => false, 'message' => __( 'External Fingerprint scanner not loaded.', 'genioussonu-security-hardening-audit' ) );
 				}
 				$res         = WPSG_External_Fingerprint::scan( true );
 				$exposed_cnt = isset( $res['exposed_count'] ) ? (int) $res['exposed_count'] : 0;
@@ -806,8 +806,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'disable_xmlrpc',
 			'section'          => 'hardening',
-			'title'            => __( 'Disable XML-RPC (Runtime Filter)', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Disables XML-RPC pingbacks and brute-force vectors via WordPress core filters and removes discovery link headers.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Disable XML-RPC (Runtime Filter)', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Disables XML-RPC pingbacks and brute-force vectors via WordPress core filters and removes discovery link headers.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'has_undo'         => true,
@@ -815,14 +815,14 @@ class WPSG_Task_Registry {
 				$active = WPSG_Plugin::get_instance()->is_task_active( 'disable_xmlrpc' );
 				return array(
 					'status'  => $active ? 'done' : 'pending',
-					'message' => $active ? __( 'XML-RPC is disabled via core filters.', 'genioussonu-site-checkup' ) : __( 'XML-RPC is currently enabled.', 'genioussonu-site-checkup' ),
+					'message' => $active ? __( 'XML-RPC is disabled via core filters.', 'genioussonu-security-hardening-audit' ) : __( 'XML-RPC is currently enabled.', 'genioussonu-security-hardening-audit' ),
 				);
 			},
 			'run_callback'     => function () {
-				return array( 'success' => true, 'message' => __( 'XML-RPC runtime filter activated.', 'genioussonu-site-checkup' ) );
+				return array( 'success' => true, 'message' => __( 'XML-RPC runtime filter activated.', 'genioussonu-security-hardening-audit' ) );
 			},
 			'undo_callback'    => function () {
-				return array( 'success' => true, 'message' => __( 'XML-RPC filter deactivated.', 'genioussonu-site-checkup' ) );
+				return array( 'success' => true, 'message' => __( 'XML-RPC filter deactivated.', 'genioussonu-security-hardening-audit' ) );
 			},
 		) ) );
 
@@ -830,8 +830,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'restrict_rest_api',
 			'section'          => 'hardening',
-			'title'            => __( 'Restrict REST API User Enumeration', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Prevents unauthenticated visitors and bots from enumerating usernames via the /wp/v2/users REST route.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Restrict REST API User Enumeration', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Prevents unauthenticated visitors and bots from enumerating usernames via the /wp/v2/users REST route.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'has_undo'         => true,
@@ -839,14 +839,14 @@ class WPSG_Task_Registry {
 				$active = WPSG_Plugin::get_instance()->is_task_active( 'restrict_rest_api' );
 				return array(
 					'status'  => $active ? 'done' : 'pending',
-					'message' => $active ? __( 'REST user enumeration restricted for visitors.', 'genioussonu-site-checkup' ) : __( 'REST user enumeration is publicly accessible.', 'genioussonu-site-checkup' ),
+					'message' => $active ? __( 'REST user enumeration restricted for visitors.', 'genioussonu-security-hardening-audit' ) : __( 'REST user enumeration is publicly accessible.', 'genioussonu-security-hardening-audit' ),
 				);
 			},
 			'run_callback'     => function () {
-				return array( 'success' => true, 'message' => __( 'REST user route restriction activated.', 'genioussonu-site-checkup' ) );
+				return array( 'success' => true, 'message' => __( 'REST user route restriction activated.', 'genioussonu-security-hardening-audit' ) );
 			},
 			'undo_callback'    => function () {
-				return array( 'success' => true, 'message' => __( 'REST user route restriction deactivated.', 'genioussonu-site-checkup' ) );
+				return array( 'success' => true, 'message' => __( 'REST user route restriction deactivated.', 'genioussonu-security-hardening-audit' ) );
 			},
 		) ) );
 
@@ -857,8 +857,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'hide_php_version',
 			'section'          => 'hardening',
-			'title'            => __( 'Hide PHP Version (X-Powered-By)', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Strips the X-Powered-By server response header. Prioritizes Header unset for modern PHP-FPM servers.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Hide PHP Version (X-Powered-By)', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Strips the X-Powered-By server response header. Prioritizes Header unset for modern PHP-FPM servers.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'writes_files',
 			'requires_backup'  => true,
@@ -873,10 +873,10 @@ class WPSG_Task_Registry {
 				}
 				$has = WPSG_Htaccess_Manager::has_named_rule( 'HidePHPVersion' );
 				if ( $has ) {
-					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'genioussonu-security-hardening-audit' ) );
 				}
 				if ( ! WPSG_Htaccess_Manager::supports_htaccess() && ! WPSG_Htaccess_Manager::has_nginx_tier1() && ! WPSG_Htaccess_Manager::has_nginx_tier2() ) {
-					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-security-hardening-audit' ) );
 				}
 				return array( 'status' => 'pending', 'message' => '' );
 			},
@@ -898,8 +898,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'clickjacking_protection',
 			'section'          => 'hardening',
-			'title'            => __( 'Clickjacking Protection (X-Frame-Options)', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Prevents the site from being loaded inside unauthorized iframes to protect against clickjacking attacks.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Clickjacking Protection (X-Frame-Options)', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Prevents the site from being loaded inside unauthorized iframes to protect against clickjacking attacks.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'writes_files',
 			'requires_backup'  => true,
@@ -914,10 +914,10 @@ class WPSG_Task_Registry {
 				}
 				$has = WPSG_Htaccess_Manager::has_named_rule( 'Clickjacking' );
 				if ( $has ) {
-					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'genioussonu-security-hardening-audit' ) );
 				}
 				if ( ! WPSG_Htaccess_Manager::supports_htaccess() && ! WPSG_Htaccess_Manager::has_nginx_tier1() && ! WPSG_Htaccess_Manager::has_nginx_tier2() ) {
-					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-security-hardening-audit' ) );
 				}
 				return array( 'status' => 'pending', 'message' => '' );
 			},
@@ -939,8 +939,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'nosniff_header',
 			'section'          => 'hardening',
-			'title'            => __( 'MIME Sniffing (X-Content-Type-Options)', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Prevents browsers from MIME-sniffing a response away from the declared content-type.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'MIME Sniffing (X-Content-Type-Options)', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Prevents browsers from MIME-sniffing a response away from the declared content-type.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'writes_files',
 			'requires_backup'  => true,
@@ -955,10 +955,10 @@ class WPSG_Task_Registry {
 				}
 				$has = WPSG_Htaccess_Manager::has_named_rule( 'MimeSniffing' );
 				if ( $has ) {
-					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'genioussonu-security-hardening-audit' ) );
 				}
 				if ( ! WPSG_Htaccess_Manager::supports_htaccess() && ! WPSG_Htaccess_Manager::has_nginx_tier1() && ! WPSG_Htaccess_Manager::has_nginx_tier2() ) {
-					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-security-hardening-audit' ) );
 				}
 				return array( 'status' => 'pending', 'message' => '' );
 			},
@@ -980,8 +980,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'hsts_header',
 			'section'          => 'hardening',
-			'title'            => __( 'HTTP Strict Transport Security (HSTS)', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Enforces HTTPS communication with browsers, protecting against man-in-the-middle SSL-strip attacks.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'HTTP Strict Transport Security (HSTS)', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Enforces HTTPS communication with browsers, protecting against man-in-the-middle SSL-strip attacks.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'writes_files',
 			'requires_backup'  => true,
@@ -991,7 +991,7 @@ class WPSG_Task_Registry {
 			'nginx_snippet'    => $hsts_nginx,
 			'status_callback'  => function () {
 				if ( ! is_ssl() ) {
-					return array( 'status' => 'attention', 'message' => __( 'HSTS requires active SSL/HTTPS. Enable HTTPS to activate HSTS enforcement.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'attention', 'message' => __( 'HSTS requires active SSL/HTTPS. Enable HTTPS to activate HSTS enforcement.', 'genioussonu-security-hardening-audit' ) );
 				}
 				$http = class_exists( 'WPSG_HTTP_Verifier' ) ? WPSG_HTTP_Verifier::verify_task( 'hsts_header' ) : array( 'verified' => false );
 				if ( ! empty( $http['verified'] ) ) {
@@ -999,10 +999,10 @@ class WPSG_Task_Registry {
 				}
 				$has = WPSG_Htaccess_Manager::has_named_rule( 'HSTS' );
 				if ( $has ) {
-					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'genioussonu-security-hardening-audit' ) );
 				}
 				if ( ! WPSG_Htaccess_Manager::supports_htaccess() && ! WPSG_Htaccess_Manager::has_nginx_tier1() && ! WPSG_Htaccess_Manager::has_nginx_tier2() ) {
-					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-security-hardening-audit' ) );
 				}
 				return array( 'status' => 'pending', 'message' => '' );
 			},
@@ -1024,8 +1024,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'disable_directory_listing',
 			'section'          => 'hardening',
-			'title'            => __( 'Disable Directory Browsing (Indexes)', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Prevents visitors from viewing directory file listings in folders without an index file (e.g., /wp-content/uploads/).', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Disable Directory Browsing (Indexes)', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Prevents visitors from viewing directory file listings in folders without an index file (e.g., /wp-content/uploads/).', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'writes_files',
 			'requires_backup'  => true,
@@ -1040,10 +1040,10 @@ class WPSG_Task_Registry {
 				}
 				$has = WPSG_Htaccess_Manager::has_named_rule( 'DisableIndexes' );
 				if ( $has ) {
-					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'genioussonu-security-hardening-audit' ) );
 				}
 				if ( ! WPSG_Htaccess_Manager::supports_htaccess() && ! WPSG_Htaccess_Manager::has_nginx_tier1() && ! WPSG_Htaccess_Manager::has_nginx_tier2() ) {
-					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-security-hardening-audit' ) );
 				}
 				return array( 'status' => 'pending', 'message' => '' );
 			},
@@ -1065,8 +1065,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'protect_sensitive_files',
 			'section'          => 'hardening',
-			'title'            => __( 'Protect Sensitive System Files', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Blocks web access to .env, .git, .bak, readme.html, and wp-config.php directly at the web server layer.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Protect Sensitive System Files', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Blocks web access to .env, .git, .bak, readme.html, and wp-config.php directly at the web server layer.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'writes_files',
 			'requires_backup'  => true,
@@ -1081,10 +1081,10 @@ class WPSG_Task_Registry {
 				}
 				$has = WPSG_Htaccess_Manager::has_named_rule( 'ProtectSensitiveFiles' );
 				if ( $has ) {
-					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'genioussonu-security-hardening-audit' ) );
 				}
 				if ( ! WPSG_Htaccess_Manager::supports_htaccess() && ! WPSG_Htaccess_Manager::has_nginx_tier1() && ! WPSG_Htaccess_Manager::has_nginx_tier2() ) {
-					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-security-hardening-audit' ) );
 				}
 				return array( 'status' => 'pending', 'message' => '' );
 			},
@@ -1106,8 +1106,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'block_xmlrpc_htaccess',
 			'section'          => 'hardening',
-			'title'            => __( 'Block xmlrpc.php at Server Level', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Drops requests to xmlrpc.php before WordPress PHP boots, preventing DDoS amplification attacks.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Block xmlrpc.php at Server Level', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Drops requests to xmlrpc.php before WordPress PHP boots, preventing DDoS amplification attacks.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'writes_files',
 			'requires_backup'  => true,
@@ -1122,10 +1122,10 @@ class WPSG_Task_Registry {
 				}
 				$has = WPSG_Htaccess_Manager::has_named_rule( 'BlockXMLRPC' );
 				if ( $has ) {
-					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'genioussonu-security-hardening-audit' ) );
 				}
 				if ( ! WPSG_Htaccess_Manager::supports_htaccess() && ! WPSG_Htaccess_Manager::has_nginx_tier1() && ! WPSG_Htaccess_Manager::has_nginx_tier2() ) {
-					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-security-hardening-audit' ) );
 				}
 				return array( 'status' => 'pending', 'message' => '' );
 			},
@@ -1144,8 +1144,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'disable_file_edit',
 			'section'          => 'hardening',
-			'title'            => __( 'Disable Theme & Plugin Editor (wp-config.php)', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Adds DISALLOW_FILE_EDIT to wp-config.php so compromised admin accounts cannot inject PHP via the dashboard editor.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Disable Theme & Plugin Editor (wp-config.php)', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Adds DISALLOW_FILE_EDIT to wp-config.php so compromised admin accounts cannot inject PHP via the dashboard editor.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'writes_files',
 			'requires_backup'  => true,
@@ -1159,14 +1159,14 @@ class WPSG_Task_Registry {
 				}
 				$disallow = defined( 'DISALLOW_FILE_EDIT' ) && DISALLOW_FILE_EDIT;
 				if ( $disallow ) {
-					return array( 'status' => 'applied_unverified', 'message' => __( 'Constant defined, awaiting fresh process verification.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Constant defined, awaiting fresh process verification.', 'genioussonu-security-hardening-audit' ) );
 				}
 				if ( class_exists( 'WPSG_Wp_Config_Manager' ) && WPSG_Wp_Config_Manager::has_constant_in_file( 'DISALLOW_FILE_EDIT' ) ) {
-					return array( 'status' => 'applied_unverified', 'message' => __( 'Constant configured in wp-config.php, awaiting fresh process verification.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Constant configured in wp-config.php, awaiting fresh process verification.', 'genioussonu-security-hardening-audit' ) );
 				}
 				return array(
 					'status'  => 'pending',
-					'message' => __( 'File editing is currently enabled in wp-admin.', 'genioussonu-site-checkup' ),
+					'message' => __( 'File editing is currently enabled in wp-admin.', 'genioussonu-security-hardening-audit' ),
 				);
 			},
 			'diff_callback'    => function () {
@@ -1184,8 +1184,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'rotate_salts',
 			'section'          => 'hardening',
-			'title'            => __( 'Rotate WordPress Security Salts & Keys', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Generates 8 fresh 64-char crypto salts in wp-config.php, immediately invalidating all active browser cookies and sessions.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Rotate WordPress Security Salts & Keys', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Generates 8 fresh 64-char crypto salts in wp-config.php, immediately invalidating all active browser cookies and sessions.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'writes_files',
 			'requires_backup'  => true,
@@ -1197,12 +1197,12 @@ class WPSG_Task_Registry {
 					return array(
 						'status'  => 'done',
 						/* translators: %s: number of days */
-						'message' => sprintf( __( 'Salts rotated successfully (%s day(s) ago).', 'genioussonu-site-checkup' ), $days ),
+						'message' => sprintf( __( 'Salts rotated successfully (%s day(s) ago).', 'genioussonu-security-hardening-audit' ), $days ),
 					);
 				}
 				return array(
 					'status'  => 'pending',
-					'message' => __( 'Salts can be rotated on demand. Invalidates all active login sessions.', 'genioussonu-site-checkup' ),
+					'message' => __( 'Salts can be rotated on demand. Invalidates all active login sessions.', 'genioussonu-security-hardening-audit' ),
 				);
 			},
 			'run_callback'     => function () {
@@ -1214,15 +1214,15 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'login_url_rename',
 			'section'          => 'hardening',
-			'title'            => __( 'Rename wp-admin Login URL', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Hides wp-login.php behind a custom slug. Bridges to WPS Hide Login if present. Recovery is exclusively via WPSG_DISABLE_LOGIN_RENAME in wp-config.php.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Rename wp-admin Login URL', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Hides wp-login.php behind a custom slug. Bridges to WPS Hide Login if present. Recovery is exclusively via WPSG_DISABLE_LOGIN_RENAME in wp-config.php.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'B',
 			'sub_type'         => 'guided',
 			'status_callback'  => function () {
 				if ( WPSG_Login_Renamer::is_wps_hide_login_active() ) {
 					return array(
 						'status'  => 'done',
-						'message' => __( 'Managed via WPS Hide Login.', 'genioussonu-site-checkup' ),
+						'message' => __( 'Managed via WPS Hide Login.', 'genioussonu-security-hardening-audit' ),
 					);
 				}
 				$slug = WPSG_Login_Renamer::get_login_slug();
@@ -1234,7 +1234,7 @@ class WPSG_Task_Registry {
 					return array(
 						'status'  => 'applied_unverified',
 						/* translators: %s: custom login slug */
-						'message' => sprintf( __( 'Custom login URL set (/%s/), but live probe could not verify redirection yet.', 'genioussonu-site-checkup' ), $slug ),
+						'message' => sprintf( __( 'Custom login URL set (/%s/), but live probe could not verify redirection yet.', 'genioussonu-security-hardening-audit' ), $slug ),
 					);
 				}
 				$conflict = WPSG_Login_Renamer::get_conflicting_plugin();
@@ -1242,16 +1242,16 @@ class WPSG_Task_Registry {
 					return array(
 						'status'  => 'attention',
 						/* translators: %s: conflicting plugin name */
-						'message' => sprintf( __( 'Managed via %s.', 'genioussonu-site-checkup' ), $conflict ),
+						'message' => sprintf( __( 'Managed via %s.', 'genioussonu-security-hardening-audit' ), $conflict ),
 					);
 				}
 				return array(
 					'status'  => 'pending',
-					'message' => __( 'Login URL is currently default (/wp-login.php).', 'genioussonu-site-checkup' ),
+					'message' => __( 'Login URL is currently default (/wp-login.php).', 'genioussonu-security-hardening-audit' ),
 				);
 			},
 			'guide_data'       => array(
-				'button_label' => __( 'Change Login URL', 'genioussonu-site-checkup' ),
+				'button_label' => __( 'Change Login URL', 'genioussonu-security-hardening-audit' ),
 				'action'       => 'modal_login_rename',
 			),
 		) ) );
@@ -1260,8 +1260,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'wp_debug_display_check',
 			'section'          => 'hardening',
-			'title'            => __( 'Disable Front-End Debug Output (WP_DEBUG_DISPLAY)', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Prevents database errors and PHP warnings from displaying on the front-end to site visitors by setting WP_DEBUG_DISPLAY to false in wp-config.php.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Disable Front-End Debug Output (WP_DEBUG_DISPLAY)', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Prevents database errors and PHP warnings from displaying on the front-end to site visitors by setting WP_DEBUG_DISPLAY to false in wp-config.php.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'writes_files',
 			'requires_backup'  => true,
@@ -1275,7 +1275,7 @@ class WPSG_Task_Registry {
 				}
 				$raw = WPSG_Scanner::check_wp_debug_display();
 				if ( isset( $raw['status'] ) && 'done' === $raw['status'] ) {
-					return array( 'status' => 'applied_unverified', 'message' => __( 'WP_DEBUG_DISPLAY set to false in wp-config.php, awaiting fresh process verification.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'applied_unverified', 'message' => __( 'WP_DEBUG_DISPLAY set to false in wp-config.php, awaiting fresh process verification.', 'genioussonu-security-hardening-audit' ) );
 				}
 				return $raw;
 			},
@@ -1297,8 +1297,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'security_txt_check',
 			'section'          => 'hardening',
-			'title'            => __( 'Security Disclosure Policy (security.txt)', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Verifies and generates RFC 9116 responsible disclosure contact information at /.well-known/security.txt inside the document root.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Security Disclosure Policy (security.txt)', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Verifies and generates RFC 9116 responsible disclosure contact information at /.well-known/security.txt inside the document root.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'has_undo'         => true,
@@ -1309,7 +1309,7 @@ class WPSG_Task_Registry {
 					if ( ! empty( $http['verified'] ) ) {
 						return array( 'status' => 'done', 'message' => $http['message'] );
 					}
-					return array( 'status' => 'applied_unverified', 'message' => __( 'security.txt exists on disk, but live HTTP request did not confirm 200 OK at /.well-known/security.txt.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'applied_unverified', 'message' => __( 'security.txt exists on disk, but live HTTP request did not confirm 200 OK at /.well-known/security.txt.', 'genioussonu-security-hardening-audit' ) );
 				}
 				return $raw;
 			},
@@ -1325,8 +1325,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'robots_txt_review',
 			'section'          => 'seo_sop',
-			'title'            => __( 'Audit robots.txt Directives', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Ensures search engines are not accidentally disallowed from crawling the site and that sensitive admin endpoints are disallowed.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Audit robots.txt Directives', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Ensures search engines are not accidentally disallowed from crawling the site and that sensitive admin endpoints are disallowed.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'C',
 			'sub_type'         => 'manual',
 			'status_callback'  => function () {
@@ -1334,7 +1334,7 @@ class WPSG_Task_Registry {
 				if ( 0 === $blog_public ) {
 					return array(
 						'status'  => 'attention',
-						'message' => __( 'Search engine visibility is disabled in Settings &rarr; Reading (Disallow: /).', 'genioussonu-site-checkup' ),
+						'message' => __( 'Search engine visibility is disabled in Settings &rarr; Reading (Disallow: /).', 'genioussonu-security-hardening-audit' ),
 					);
 				}
 				$file = get_home_path() . 'robots.txt';
@@ -1343,13 +1343,13 @@ class WPSG_Task_Registry {
 					if ( preg_match( '/Disallow:\s*\/\s*$/m', $content ) ) {
 						return array(
 							'status'  => 'attention',
-							'message' => __( 'Physical robots.txt is blocking crawlers with "Disallow: /".', 'genioussonu-site-checkup' ),
+							'message' => __( 'Physical robots.txt is blocking crawlers with "Disallow: /".', 'genioussonu-security-hardening-audit' ),
 						);
 					}
 				}
 				return array(
 					'status'  => 'done',
-					'message' => __( 'Search engine indexing permitted. No crawl-blocking directives found.', 'genioussonu-site-checkup' ),
+					'message' => __( 'Search engine indexing permitted. No crawl-blocking directives found.', 'genioussonu-security-hardening-audit' ),
 				);
 			},
 			'guide_data'       => array(
@@ -1362,8 +1362,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'gsc_bing_audit',
 			'section'          => 'seo_sop',
-			'title'            => __( 'Google Search Console & Bing Review', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Audit indexing coverage, security actions, and sitemaps directly in Google Search Console and Bing Webmaster Tools.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Google Search Console & Bing Review', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Audit indexing coverage, security actions, and sitemaps directly in Google Search Console and Bing Webmaster Tools.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'B',
 			'sub_type'         => 'guided',
 			'guide_data'       => array(
@@ -1376,8 +1376,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'gsc_removal_reminder',
 			'section'          => 'seo_sop',
-			'title'            => __( '6-Month GSC URL Removal Review', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Google Search Console temporary URL removals expire after 6 months. Track submitted removals and schedule rechecks.', 'genioussonu-site-checkup' ),
+			'title'            => __( '6-Month GSC URL Removal Review', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Google Search Console temporary URL removals expire after 6 months. Track submitted removals and schedule rechecks.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'C',
 			'sub_type'         => 'manual',
 		) ) );
@@ -1390,8 +1390,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'cpanel_password_rotation',
 			'section'          => 'regular_checks',
-			'title'            => __( 'Rotate cPanel / Hosting Credentials (15d)', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Rotate cPanel, FTP, and hosting passwords every 15 days in adherence to the agency security policy. Update vault.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Rotate cPanel / Hosting Credentials (15d)', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Rotate cPanel, FTP, and hosting passwords every 15 days in adherence to the agency security policy. Update vault.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'C',
 			'sub_type'         => 'manual',
 		) ) );
@@ -1400,8 +1400,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'admin_password_rotation',
 			'section'          => 'regular_checks',
-			'title'            => __( 'Rotate WordPress Admin Password (15d)', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Rotate main administrator credentials every 15 days, notify client if necessary, and store in secure team vault.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Rotate WordPress Admin Password (15d)', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Rotate main administrator credentials every 15 days, notify client if necessary, and store in secure team vault.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'C',
 			'sub_type'         => 'manual',
 		) ) );
@@ -1410,8 +1410,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'staging_site_protection',
 			'section'          => 'regular_checks',
-			'title'            => __( 'Verify Staging Site Auth Protection', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Ensure staging and development environments are shielded by HTTP Basic Auth (Directory Privacy) to prevent indexing and bot probing.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Verify Staging Site Auth Protection', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Ensure staging and development environments are shielded by HTTP Basic Auth (Directory Privacy) to prevent indexing and bot probing.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'C',
 			'sub_type'         => 'manual',
 			'status_callback'  => function () {
@@ -1421,17 +1421,17 @@ class WPSG_Task_Registry {
 				if ( $is_staging && ! $has_auth ) {
 					return array(
 						'status'  => 'attention',
-						'message' => __( 'Staging domain detected without HTTP Basic Auth wall.', 'genioussonu-site-checkup' ),
+						'message' => __( 'Staging domain detected without HTTP Basic Auth wall.', 'genioussonu-security-hardening-audit' ),
 					);
 				} elseif ( $has_auth ) {
 					return array(
 						'status'  => 'done',
-						'message' => __( 'HTTP Basic Auth protection is active.', 'genioussonu-site-checkup' ),
+						'message' => __( 'HTTP Basic Auth protection is active.', 'genioussonu-security-hardening-audit' ),
 					);
 				}
 				return array(
 					'status'  => 'pending',
-					'message' => __( 'Manual audit required: verify Directory Privacy in cPanel.', 'genioussonu-site-checkup' ),
+					'message' => __( 'Manual audit required: verify Directory Privacy in cPanel.', 'genioussonu-security-hardening-audit' ),
 				);
 			},
 		) ) );
@@ -1440,8 +1440,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'wordfence_email_alert',
 			'section'          => 'regular_checks',
-			'title'            => __( 'Wordfence Email Alert Routing', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Verify security alert notifications from Wordfence route to designated agency monitoring inbox.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Wordfence Email Alert Routing', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Verify security alert notifications from Wordfence route to designated agency monitoring inbox.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'C',
 			'sub_type'         => 'manual',
 		) ) );
@@ -1450,8 +1450,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'backup_restore_test',
 			'section'          => 'regular_checks',
-			'title'            => __( 'Quarterly Backup Restore Test (90d)', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Untested backups are worthless. Conduct a quarterly rehearsal restoring a database and file backup to a staging environment.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Quarterly Backup Restore Test (90d)', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Untested backups are worthless. Conduct a quarterly rehearsal restoring a database and file backup to a staging environment.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'C',
 			'sub_type'         => 'manual',
 		) ) );
@@ -1460,8 +1460,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'domain_ssl_hosting_expiry',
 			'section'          => 'regular_checks',
-			'title'            => __( 'Domain, SSL & Hosting Expiry Audit (90d)', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Quarterly review of domain registration, auto-renewal status, SSL certificate validity, and hosting plan limits.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Domain, SSL & Hosting Expiry Audit (90d)', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Quarterly review of domain registration, auto-renewal status, SSL certificate validity, and hosting plan limits.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'C',
 			'sub_type'         => 'manual',
 		) ) );
@@ -1470,8 +1470,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'incident_response_contact',
 			'section'          => 'regular_checks',
-			'title'            => __( 'Incident Response Emergency Contact Sheet', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Record emergency contact details and escalation protocols in the event of a security incident. Surfaced on client reports.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Incident Response Emergency Contact Sheet', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Record emergency contact details and escalation protocols in the event of a security incident. Surfaced on client reports.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'C',
 			'sub_type'         => 'manual',
 			'status_callback'  => function () {
@@ -1479,10 +1479,10 @@ class WPSG_Task_Registry {
 				$has_contact = ! empty( $s['incident_contact_email'] ) || ! empty( $s['incident_contact_phone'] );
 				$contact_val = ! empty( $s['incident_contact_name'] ) ? $s['incident_contact_name'] : ( ! empty( $s['incident_contact_email'] ) ? $s['incident_contact_email'] : '' );
 				/* translators: %s: contact details */
-				$msg_contact = sprintf( __( 'Incident contact configured: %s', 'genioussonu-site-checkup' ), esc_html( $contact_val ) );
+				$msg_contact = sprintf( __( 'Incident contact configured: %s', 'genioussonu-security-hardening-audit' ), esc_html( $contact_val ) );
 				return array(
 					'status'  => $has_contact ? 'done' : 'attention',
-					'message' => $has_contact ? $msg_contact : __( 'No emergency incident contact details recorded. Update in Settings.', 'genioussonu-site-checkup' ),
+					'message' => $has_contact ? $msg_contact : __( 'No emergency incident contact details recorded. Update in Settings.', 'genioussonu-security-hardening-audit' ),
 				);
 			},
 		) ) );
@@ -1495,8 +1495,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'block_user_enumeration',
 			'section'          => 'advanced_protection',
-			'title'            => __( 'Block User & Author Enumeration', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Restricts unauthenticated access to /wp/v2/users and intercepts ?author= numeric queries to prevent attacker username discovery.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Block User & Author Enumeration', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Restricts unauthenticated access to /wp/v2/users and intercepts ?author= numeric queries to prevent attacker username discovery.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'has_undo'         => true,
@@ -1507,20 +1507,20 @@ class WPSG_Task_Registry {
 					if ( ! empty( $http['verified'] ) ) {
 						return array( 'status' => 'done', 'message' => $http['message'] );
 					}
-					return array( 'status' => 'applied_unverified', 'message' => __( 'User enumeration protection enabled in settings, but live probe was not blocked.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'applied_unverified', 'message' => __( 'User enumeration protection enabled in settings, but live probe was not blocked.', 'genioussonu-security-hardening-audit' ) );
 				}
 				return array(
 					'status'  => 'pending',
-					'message' => __( 'User enumeration protection is disabled.', 'genioussonu-site-checkup' ),
+					'message' => __( 'User enumeration protection is disabled.', 'genioussonu-security-hardening-audit' ),
 				);
 			},
 			'run_callback'     => function () {
 				update_option( 'wpsg_block_user_enumeration', true );
-				return array( 'success' => true, 'message' => __( 'User & author enumeration blocked.', 'genioussonu-site-checkup' ) );
+				return array( 'success' => true, 'message' => __( 'User & author enumeration blocked.', 'genioussonu-security-hardening-audit' ) );
 			},
 			'undo_callback'    => function () {
 				delete_option( 'wpsg_block_user_enumeration' );
-				return array( 'success' => true, 'message' => __( 'User enumeration protection disabled.', 'genioussonu-site-checkup' ) );
+				return array( 'success' => true, 'message' => __( 'User enumeration protection disabled.', 'genioussonu-security-hardening-audit' ) );
 			},
 		) ) );
 
@@ -1528,8 +1528,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'login_hardening',
 			'section'          => 'advanced_protection',
-			'title'            => __( 'Login Throttling & Honeypot Protection', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Enforces atomic DB-level progressive lockouts (1m, 15m, 60m), silent honeypots, and generic error masking.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Login Throttling & Honeypot Protection', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Enforces atomic DB-level progressive lockouts (1m, 15m, 60m), silent honeypots, and generic error masking.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'has_undo'         => true,
@@ -1537,16 +1537,16 @@ class WPSG_Task_Registry {
 				$active = get_option( 'wpsg_login_hardening', true );
 				return array(
 					'status'  => $active ? 'done' : 'pending',
-					'message' => $active ? __( 'Progressive login throttling and honeypot active.', 'genioussonu-site-checkup' ) : __( 'Login throttling is disabled.', 'genioussonu-site-checkup' ),
+					'message' => $active ? __( 'Progressive login throttling and honeypot active.', 'genioussonu-security-hardening-audit' ) : __( 'Login throttling is disabled.', 'genioussonu-security-hardening-audit' ),
 				);
 			},
 			'run_callback'     => function () {
 				update_option( 'wpsg_login_hardening', true );
-				return array( 'success' => true, 'message' => __( 'Login throttling & honeypot enabled.', 'genioussonu-site-checkup' ) );
+				return array( 'success' => true, 'message' => __( 'Login throttling & honeypot enabled.', 'genioussonu-security-hardening-audit' ) );
 			},
 			'undo_callback'    => function () {
 				delete_option( 'wpsg_login_hardening' );
-				return array( 'success' => true, 'message' => __( 'Login throttling disabled.', 'genioussonu-site-checkup' ) );
+				return array( 'success' => true, 'message' => __( 'Login throttling disabled.', 'genioussonu-security-hardening-audit' ) );
 			},
 		) ) );
 
@@ -1554,8 +1554,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'session_governance',
 			'section'          => 'advanced_protection',
-			'title'            => __( 'Active Session Management', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Review concurrent logged-in sessions across devices, terminate stale logins, and enforce automatic session invalidation on password updates.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Active Session Management', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Review concurrent logged-in sessions across devices, terminate stale logins, and enforce automatic session invalidation on password updates.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'B',
 			'sub_type'         => 'guided',
 			'guide_data'       => array( 'action' => 'open_sessions_modal' ),
@@ -1565,7 +1565,7 @@ class WPSG_Task_Registry {
 				return array(
 					'status'  => ( $count <= 2 ) ? 'done' : 'attention',
 					/* translators: %d: number of active sessions */
-					'message' => sprintf( __( '%d active session(s) recorded for current administrator.', 'genioussonu-site-checkup' ), $count ),
+					'message' => sprintf( __( '%d active session(s) recorded for current administrator.', 'genioussonu-security-hardening-audit' ), $count ),
 				);
 			},
 		) ) );
@@ -1574,8 +1574,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'hide_wordpress_fingerprint',
 			'section'          => 'advanced_protection',
-			'title'            => __( 'Hide WordPress Version Meta Tag', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Removes the WordPress generator tag from HTML headers and RSS feeds to reduce version fingerprinting.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Hide WordPress Version Meta Tag', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Removes the WordPress generator tag from HTML headers and RSS feeds to reduce version fingerprinting.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'has_undo'         => true,
@@ -1586,20 +1586,20 @@ class WPSG_Task_Registry {
 					if ( ! empty( $http['verified'] ) ) {
 						return array( 'status' => 'done', 'message' => $http['message'] );
 					}
-					return array( 'status' => 'applied_unverified', 'message' => __( 'Generator tag suppression enabled, but live HTML probe still detected WordPress version string.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Generator tag suppression enabled, but live HTML probe still detected WordPress version string.', 'genioussonu-security-hardening-audit' ) );
 				}
 				return array(
 					'status'  => 'pending',
-					'message' => __( 'WordPress generator tag is currently public.', 'genioussonu-site-checkup' ),
+					'message' => __( 'WordPress generator tag is currently public.', 'genioussonu-security-hardening-audit' ),
 				);
 			},
 			'run_callback'     => function () {
 				update_option( 'wpsg_hide_generator', true );
-				return array( 'success' => true, 'message' => __( 'WordPress generator version hidden.', 'genioussonu-site-checkup' ) );
+				return array( 'success' => true, 'message' => __( 'WordPress generator version hidden.', 'genioussonu-security-hardening-audit' ) );
 			},
 			'undo_callback'    => function () {
 				delete_option( 'wpsg_hide_generator' );
-				return array( 'success' => true, 'message' => __( 'WordPress generator tag restored.', 'genioussonu-site-checkup' ) );
+				return array( 'success' => true, 'message' => __( 'WordPress generator tag restored.', 'genioussonu-security-hardening-audit' ) );
 			},
 		) ) );
 
@@ -1607,8 +1607,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'strip_script_versions',
 			'section'          => 'advanced_protection',
-			'title'            => __( 'Remove ?ver= from Enqueued Scripts & Styles', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Strips version query strings from script and stylesheet URLs (Opt-in: may impact browser caching on file updates).', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Remove ?ver= from Enqueued Scripts & Styles', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Strips version query strings from script and stylesheet URLs (Opt-in: may impact browser caching on file updates).', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'has_undo'         => true,
@@ -1616,16 +1616,16 @@ class WPSG_Task_Registry {
 				$active = get_option( 'wpsg_strip_ver', false );
 				return array(
 					'status'  => $active ? 'done' : 'pending',
-					'message' => $active ? __( 'Version strings stripped from enqueued assets.', 'genioussonu-site-checkup' ) : __( 'Version query strings remain enabled.', 'genioussonu-site-checkup' ),
+					'message' => $active ? __( 'Version strings stripped from enqueued assets.', 'genioussonu-security-hardening-audit' ) : __( 'Version query strings remain enabled.', 'genioussonu-security-hardening-audit' ),
 				);
 			},
 			'run_callback'     => function () {
 				update_option( 'wpsg_strip_ver', true );
-				return array( 'success' => true, 'message' => __( '?ver= parameters removed from scripts and styles.', 'genioussonu-site-checkup' ) );
+				return array( 'success' => true, 'message' => __( '?ver= parameters removed from scripts and styles.', 'genioussonu-security-hardening-audit' ) );
 			},
 			'undo_callback'    => function () {
 				delete_option( 'wpsg_strip_ver' );
-				return array( 'success' => true, 'message' => __( 'Asset version parameters restored.', 'genioussonu-site-checkup' ) );
+				return array( 'success' => true, 'message' => __( 'Asset version parameters restored.', 'genioussonu-security-hardening-audit' ) );
 			},
 		) ) );
 
@@ -1633,8 +1633,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'deny_uploads_php',
 			'section'          => 'advanced_protection',
-			'title'            => __( 'Block PHP Execution in /wp-content/uploads/', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Prevents direct execution of PHP scripts in the uploads folder, shutting down web shells uploaded via plugin vulnerabilities.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Block PHP Execution in /wp-content/uploads/', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Prevents direct execution of PHP scripts in the uploads folder, shutting down web shells uploaded via plugin vulnerabilities.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'writes_files',
 			'requires_backup'  => true,
@@ -1649,14 +1649,14 @@ class WPSG_Task_Registry {
 				}
 				$has = WPSG_Htaccess_Manager::has_named_rule( 'deny_uploads_php' );
 				if ( $has ) {
-					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'genioussonu-security-hardening-audit' ) );
 				}
 				if ( ! WPSG_Htaccess_Manager::supports_htaccess() && ! WPSG_Htaccess_Manager::has_nginx_tier1() && ! WPSG_Htaccess_Manager::has_nginx_tier2() ) {
-					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-security-hardening-audit' ) );
 				}
 				return array(
 					'status'  => 'pending',
-					'message' => __( 'PHP execution currently allowed in /uploads/.', 'genioussonu-site-checkup' ),
+					'message' => __( 'PHP execution currently allowed in /uploads/.', 'genioussonu-security-hardening-audit' ),
 				);
 			},
 			'diff_callback'    => function () {
@@ -1674,8 +1674,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'core_checksum_integrity',
 			'section'          => 'advanced_protection',
-			'title'            => __( 'WordPress Core Files Checksum Scan', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Compares local WordPress core files against official WordPress.org release checksums (strictly excluding wp-content).', 'genioussonu-site-checkup' ),
+			'title'            => __( 'WordPress Core Files Checksum Scan', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Compares local WordPress core files against official WordPress.org release checksums (strictly excluding wp-content).', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'status_callback'  => function () {
@@ -1690,8 +1690,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'scan_uploads_executables',
 			'section'          => 'advanced_protection',
-			'title'            => __( 'Scan Uploads for Executable Scripts', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Audits /wp-content/uploads/ for suspicious .php, .phtml, or .phar scripts.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Scan Uploads for Executable Scripts', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Audits /wp-content/uploads/ for suspicious .php, .phtml, or .phar scripts.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'status_callback'  => function () {
@@ -1706,8 +1706,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'basic_firewall_rules',
 			'section'          => 'advanced_protection',
-			'title'            => __( 'Lightweight Query String Firewall', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Hardcoded rule set blocking SQL injection, XSS, and traversal signatures in URL query strings (Opt-in; does not replace a network WAF).', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Lightweight Query String Firewall', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Hardcoded rule set blocking SQL injection, XSS, and traversal signatures in URL query strings (Opt-in; does not replace a network WAF).', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'writes_files',
 			'requires_backup'  => true,
@@ -1722,14 +1722,14 @@ class WPSG_Task_Registry {
 				}
 				$has = WPSG_Htaccess_Manager::has_named_rule( 'basic_firewall_sqli' );
 				if ( $has ) {
-					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'genioussonu-security-hardening-audit' ) );
 				}
 				if ( ! WPSG_Htaccess_Manager::supports_htaccess() && ! WPSG_Htaccess_Manager::has_nginx_tier1() && ! WPSG_Htaccess_Manager::has_nginx_tier2() ) {
-					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-security-hardening-audit' ) );
 				}
 				return array(
 					'status'  => 'pending',
-					'message' => __( 'Query string firewall is disabled.', 'genioussonu-site-checkup' ),
+					'message' => __( 'Query string firewall is disabled.', 'genioussonu-security-hardening-audit' ),
 				);
 			},
 			'diff_callback'    => function () {
@@ -1753,8 +1753,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'bad_bots_noise_reduction',
 			'section'          => 'advanced_protection',
-			'title'            => __( 'Noise Reduction: Block Known Vulnerability Scanners', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Blocks requests matching known scanner user agents (sqlmap, nikto, wpscan). Accurately labeled: reduces automated scan log noise.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Noise Reduction: Block Known Vulnerability Scanners', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Blocks requests matching known scanner user agents (sqlmap, nikto, wpscan). Accurately labeled: reduces automated scan log noise.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'writes_files',
 			'requires_backup'  => true,
@@ -1769,14 +1769,14 @@ class WPSG_Task_Registry {
 				}
 				$has = WPSG_Htaccess_Manager::has_named_rule( 'bad_bots' );
 				if ( $has ) {
-					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'applied_unverified', 'message' => __( 'Directive applied, but live HTTP verification could not confirm enforcement yet.', 'genioussonu-security-hardening-audit' ) );
 				}
 				if ( ! WPSG_Htaccess_Manager::supports_htaccess() && ! WPSG_Htaccess_Manager::has_nginx_tier1() && ! WPSG_Htaccess_Manager::has_nginx_tier2() ) {
-					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'pending', 'is_na' => false, 'message' => __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-security-hardening-audit' ) );
 				}
 				return array(
 					'status'  => 'pending',
-					'message' => __( 'Scanner user-agent filter disabled.', 'genioussonu-site-checkup' ),
+					'message' => __( 'Scanner user-agent filter disabled.', 'genioussonu-security-hardening-audit' ),
 				);
 			},
 			'diff_callback'    => function () {
@@ -1794,8 +1794,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'security_headers_csp',
 			'section'          => 'advanced_protection',
-			'title'            => __( 'Content-Security-Policy (Report-Only Mode)', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Deploys CSP in safe Report-Only mode to log potential violations without breaking page builders or analytics.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Content-Security-Policy (Report-Only Mode)', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Deploys CSP in safe Report-Only mode to log potential violations without breaking page builders or analytics.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'has_undo'         => true,
@@ -1806,20 +1806,20 @@ class WPSG_Task_Registry {
 					if ( ! empty( $http['verified'] ) ) {
 						return array( 'status' => 'done', 'message' => $http['message'] );
 					}
-					return array( 'status' => 'applied_unverified', 'message' => __( 'CSP enabled in settings, but live HTTP header could not be verified on front-end.', 'genioussonu-site-checkup' ) );
+					return array( 'status' => 'applied_unverified', 'message' => __( 'CSP enabled in settings, but live HTTP header could not be verified on front-end.', 'genioussonu-security-hardening-audit' ) );
 				}
 				return array(
 					'status'  => 'pending',
-					'message' => __( 'Content-Security-Policy is disabled.', 'genioussonu-site-checkup' ),
+					'message' => __( 'Content-Security-Policy is disabled.', 'genioussonu-security-hardening-audit' ),
 				);
 			},
 			'run_callback'     => function () {
 				update_option( 'wpsg_csp_mode', 'report_only' );
-				return array( 'success' => true, 'message' => __( 'CSP enabled in Report-Only mode.', 'genioussonu-site-checkup' ) );
+				return array( 'success' => true, 'message' => __( 'CSP enabled in Report-Only mode.', 'genioussonu-security-hardening-audit' ) );
 			},
 			'undo_callback'    => function () {
 				delete_option( 'wpsg_csp_mode' );
-				return array( 'success' => true, 'message' => __( 'Content-Security-Policy disabled.', 'genioussonu-site-checkup' ) );
+				return array( 'success' => true, 'message' => __( 'Content-Security-Policy disabled.', 'genioussonu-security-hardening-audit' ) );
 			},
 		) ) );
 
@@ -1827,8 +1827,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'admin_notice_focus_mode',
 			'section'          => 'advanced_protection',
-			'title'            => __( 'Admin Notice Focus Mode & Dashboard Declutter', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Buffers and sanitizes promotional plugin notices while never suppressing WordPress core updates or security warnings.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Admin Notice Focus Mode & Dashboard Declutter', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Buffers and sanitizes promotional plugin notices while never suppressing WordPress core updates or security warnings.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'A',
 			'sub_type'         => 'instant',
 			'has_undo'         => true,
@@ -1836,18 +1836,18 @@ class WPSG_Task_Registry {
 				$active = get_option( 'wpsg_focus_mode', false );
 				return array(
 					'status'  => $active ? 'done' : 'pending',
-					'message' => $active ? __( 'Notice Focus Mode and dashboard declutter active.', 'genioussonu-site-checkup' ) : __( 'Standard WordPress admin notices visible.', 'genioussonu-site-checkup' ),
+					'message' => $active ? __( 'Notice Focus Mode and dashboard declutter active.', 'genioussonu-security-hardening-audit' ) : __( 'Standard WordPress admin notices visible.', 'genioussonu-security-hardening-audit' ),
 				);
 			},
 			'run_callback'     => function () {
 				update_option( 'wpsg_focus_mode', true );
 				update_option( 'wpsg_declutter_dashboard', true );
-				return array( 'success' => true, 'message' => __( 'Focus Mode enabled.', 'genioussonu-site-checkup' ) );
+				return array( 'success' => true, 'message' => __( 'Focus Mode enabled.', 'genioussonu-security-hardening-audit' ) );
 			},
 			'undo_callback'    => function () {
 				delete_option( 'wpsg_focus_mode' );
 				delete_option( 'wpsg_declutter_dashboard' );
-				return array( 'success' => true, 'message' => __( 'Standard admin notices restored.', 'genioussonu-site-checkup' ) );
+				return array( 'success' => true, 'message' => __( 'Standard admin notices restored.', 'genioussonu-security-hardening-audit' ) );
 			},
 		) ) );
 
@@ -1855,8 +1855,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'audit_app_passwords',
 			'section'          => 'advanced_protection',
-			'title'            => __( 'Audit & Govern Application Passwords', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Audit all active application passwords across users, surface unused credentials, and revoke with re-authentication.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Audit & Govern Application Passwords', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Audit all active application passwords across users, surface unused credentials, and revoke with re-authentication.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'B',
 			'sub_type'         => 'guided',
 			'guide_data'       => array( 'action' => 'open_app_passwords_modal' ),
@@ -1866,7 +1866,7 @@ class WPSG_Task_Registry {
 				return array(
 					'status'  => ( 0 === $count ) ? 'done' : 'attention',
 					/* translators: %d: number of application passwords */
-					'message' => sprintf( __( '%d application password(s) active on this site.', 'genioussonu-site-checkup' ), $count ),
+					'message' => sprintf( __( '%d application password(s) active on this site.', 'genioussonu-security-hardening-audit' ), $count ),
 				);
 			},
 		) ) );
@@ -1878,8 +1878,8 @@ class WPSG_Task_Registry {
 		$this->register( new WPSG_Task( array(
 			'id'               => 'client_security_report',
 			'section'          => 'report',
-			'title'            => __( 'Client SOP Coverage Report', 'genioussonu-site-checkup' ),
-			'description'      => __( 'Generate a print-ready client audit report summarizing completed hardening, active protections, and outstanding items.', 'genioussonu-site-checkup' ),
+			'title'            => __( 'Client SOP Coverage Report', 'genioussonu-security-hardening-audit' ),
+			'description'      => __( 'Generate a print-ready client audit report summarizing completed hardening, active protections, and outstanding items.', 'genioussonu-security-hardening-audit' ),
 			'automation_level' => 'D',
 			'sub_type'         => 'report',
 		) ) );

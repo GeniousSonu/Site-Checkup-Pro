@@ -3,7 +3,7 @@
  * Translation Template (POT) Generator for GeniousSonu Site Checkup
  *
  * Scans all plugin PHP files for __(), _e(), esc_html__(), esc_attr__(), esc_html_e(),
- * and esc_attr_e() using text domain 'genioussonu-site-checkup' and compiles languages/genioussonu-site-checkup.pot.
+ * and esc_attr_e() using text domain 'genioussonu-security-hardening-audit' and compiles languages/genioussonu-security-hardening-audit.pot.
  *
  * @package GeniousSonu_Site_Checkup
  * @author  SK Sahinur Islam <https://www.genioussonu.me/>
@@ -18,7 +18,7 @@ if ( php_sapi_name() !== 'cli' ) {
 
 $root_dir   = dirname( __DIR__ );
 $lang_dir   = $root_dir . '/languages';
-$output_pot = $lang_dir . '/genioussonu-site-checkup.pot';
+$output_pot = $lang_dir . '/genioussonu-security-hardening-audit.pot';
 
 if ( ! is_dir( $lang_dir ) ) {
 	mkdir( $lang_dir, 0755, true );

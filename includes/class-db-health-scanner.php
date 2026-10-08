@@ -66,18 +66,15 @@ class WPSG_Db_Health_Scanner {
 		$like_esc = method_exists( $wpdb, 'esc_like' ) ? $wpdb->esc_like( '_transient_timeout_' ) : addcslashes( '_transient_timeout_', '_%\\' );
 
 		// 1. Orphaned postmeta (no matching post in wp_posts)
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifiers come from the fixed table allowlist and are escaped.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifiers come from the fixed table allowlist and are escaped.
 		$orphaned_postmeta = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$postmeta_table} pm LEFT JOIN {$posts_table} p ON pm.post_id = p.ID WHERE p.ID IS NULL" );
 
 		// 2. Orphaned usermeta (no matching user in wp_users)
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifiers come from the fixed table allowlist and are escaped.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifiers come from the fixed table allowlist and are escaped.
 		$orphaned_usermeta = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$usermeta_table} um LEFT JOIN {$users_table} u ON um.user_id = u.ID WHERE u.ID IS NULL" );
 
 		// 3. Expired transients in wp_options
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; all values are prepared.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; all values are prepared.
 		$expired_transients = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; values use placeholders.
@@ -89,8 +86,7 @@ class WPSG_Db_Health_Scanner {
 
 		// 4. Excess post revisions beyond threshold
 		$threshold = max( 1, (int) $revision_threshold );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; post type is prepared.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; post type is prepared.
 		$total_revisions = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; post type uses a placeholder.
@@ -100,8 +96,7 @@ class WPSG_Db_Health_Scanner {
 		);
 
 		// Count posts having revisions
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; post type is prepared.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; post type is prepared.
 		$posts_with_revisions = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; post type uses a placeholder.
@@ -132,31 +127,31 @@ class WPSG_Db_Health_Scanner {
 			),
 			'details' => array(
 				'orphaned_postmeta'  => array(
-					'label'        => __( 'Orphaned Post Metadata', 'genioussonu-site-checkup' ),
+					'label'        => __( 'Orphaned Post Metadata', 'genioussonu-security-hardening-audit' ),
 					'count'        => $orphaned_postmeta,
 					'estimated_kb' => $est_postmeta_kb,
-					'description'  => __( 'Meta keys referencing posts that no longer exist.', 'genioussonu-site-checkup' ),
+					'description'  => __( 'Meta keys referencing posts that no longer exist.', 'genioussonu-security-hardening-audit' ),
 				),
 				'orphaned_usermeta'  => array(
-					'label'        => __( 'Orphaned User Metadata', 'genioussonu-site-checkup' ),
+					'label'        => __( 'Orphaned User Metadata', 'genioussonu-security-hardening-audit' ),
 					'count'        => $orphaned_usermeta,
 					'estimated_kb' => $est_usermeta_kb,
-					'description'  => __( 'Meta keys referencing deleted user accounts.', 'genioussonu-site-checkup' ),
+					'description'  => __( 'Meta keys referencing deleted user accounts.', 'genioussonu-security-hardening-audit' ),
 				),
 				'expired_transients' => array(
-					'label'        => __( 'Expired Transients', 'genioussonu-site-checkup' ),
+					'label'        => __( 'Expired Transients', 'genioussonu-security-hardening-audit' ),
 					'count'        => $expired_transients,
 					'estimated_kb' => $est_transients_kb,
-					'description'  => __( 'Stale transient cache rows remaining in the options table.', 'genioussonu-site-checkup' ),
+					'description'  => __( 'Stale transient cache rows remaining in the options table.', 'genioussonu-security-hardening-audit' ),
 				),
 				'excess_revisions'   => array(
-					'label'        => __( 'Excess Post Revisions', 'genioussonu-site-checkup' ),
+					'label'        => __( 'Excess Post Revisions', 'genioussonu-security-hardening-audit' ),
 					'count'        => $excess_revisions,
 					'total_count'  => $total_revisions,
 					'threshold'    => $threshold,
 					'estimated_kb' => $est_revisions_kb,
 					/* translators: %d: revision threshold */
-					'description'  => sprintf( __( 'Post revisions beyond %d per post.', 'genioussonu-site-checkup' ), $threshold ),
+					'description'  => sprintf( __( 'Post revisions beyond %d per post.', 'genioussonu-security-hardening-audit' ), $threshold ),
 				),
 			),
 			'scanned_at' => current_time( 'mysql' ),
@@ -178,7 +173,7 @@ class WPSG_Db_Health_Scanner {
 
 		// 1. Authorization check
 		if ( ! current_user_can( 'manage_options' ) ) {
-			return array( 'success' => false, 'message' => __( 'Insufficient permissions to perform database cleanup.', 'genioussonu-site-checkup' ) );
+			return array( 'success' => false, 'message' => __( 'Insufficient permissions to perform database cleanup.', 'genioussonu-security-hardening-audit' ) );
 		}
 
 		// 2. Re-authentication verification
@@ -187,7 +182,7 @@ class WPSG_Db_Health_Scanner {
 				return array(
 					'success'      => false,
 					'needs_reauth' => true,
-					'message'      => __( 'Database cleanup requires fresh administrator password verification.', 'genioussonu-site-checkup' ),
+					'message'      => __( 'Database cleanup requires fresh administrator password verification.', 'genioussonu-security-hardening-audit' ),
 				);
 			}
 		}
@@ -199,7 +194,7 @@ class WPSG_Db_Health_Scanner {
 				return array(
 					'success'      => false,
 					'needs_backup' => true,
-					'message'      => __( 'Database cleanup blocked: No verified backup within 48 hours. Please verify or take a backup first.', 'genioussonu-site-checkup' ),
+					'message'      => __( 'Database cleanup blocked: No verified backup within 48 hours. Please verify or take a backup first.', 'genioussonu-security-hardening-audit' ),
 				);
 			}
 		}
@@ -213,7 +208,7 @@ class WPSG_Db_Health_Scanner {
 		if ( false === $posts_table || false === $postmeta_table || false === $usermeta_table || false === $users_table || false === $options_table ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Database cleanup stopped because a database table name failed validation.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Database cleanup stopped because a database table name failed validation.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 		$posts_table    = esc_sql( $posts_table );
@@ -226,8 +221,7 @@ class WPSG_Db_Health_Scanner {
 
 		// Cleanup orphaned postmeta
 		if ( 'all' === $type || 'orphaned_postmeta' === $type ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifiers come from the fixed table allowlist and are escaped.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifiers come from the fixed table allowlist and are escaped.
 			$deleted = $wpdb->query(
 				"DELETE pm FROM {$postmeta_table} pm LEFT JOIN {$posts_table} p ON pm.post_id = p.ID WHERE p.ID IS NULL"
 			);
@@ -236,8 +230,7 @@ class WPSG_Db_Health_Scanner {
 
 		// Cleanup orphaned usermeta
 		if ( 'all' === $type || 'orphaned_usermeta' === $type ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifiers come from the fixed table allowlist and are escaped.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifiers come from the fixed table allowlist and are escaped.
 			$deleted = $wpdb->query(
 				"DELETE um FROM {$usermeta_table} um LEFT JOIN {$users_table} u ON um.user_id = u.ID WHERE u.ID IS NULL"
 			);
@@ -248,8 +241,7 @@ class WPSG_Db_Health_Scanner {
 		if ( 'all' === $type || 'expired_transients' === $type ) {
 			$current_time = time();
 			// Get expired timeout keys
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; values are prepared.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; values are prepared.
 			$expired_keys = $wpdb->get_col(
 				$wpdb->prepare(
 					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; values use placeholders.
@@ -263,8 +255,7 @@ class WPSG_Db_Health_Scanner {
 			if ( ! empty( $expired_keys ) ) {
 				foreach ( $expired_keys as $timeout_key ) {
 					$transient_key = str_replace( '_transient_timeout_', '_transient_', $timeout_key );
-					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-					// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; option names are prepared.
+					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; option names are prepared.
 					$wpdb->query(
 						$wpdb->prepare(
 							// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; option names use placeholders.
@@ -282,8 +273,7 @@ class WPSG_Db_Health_Scanner {
 		// Cleanup excess revisions
 		if ( 'all' === $type || 'excess_revisions' === $type ) {
 			// Delete revisions keeping latest 5
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; query contains fixed SQL only.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; query contains fixed SQL only.
 			$old_revisions = $wpdb->get_col(
 				$wpdb->prepare(
 					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; this query has no runtime values.
@@ -298,8 +288,7 @@ class WPSG_Db_Health_Scanner {
 			if ( ! empty( $old_revisions ) ) {
 				$revision_ids = array_values( array_map( 'absint', $old_revisions ) );
 				$id_placeholders = implode( ', ', array_fill( 0, count( $revision_ids ), '%d' ) );
-				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-				// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table is allowlisted; placeholder count matches the absint ID array passed variadically.
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table is allowlisted; placeholder count matches the absint ID array passed variadically.
 				$wpdb->query(
 					$wpdb->prepare(
 						// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table is allowlisted; placeholders exactly match the absint ID array.
@@ -307,8 +296,7 @@ class WPSG_Db_Health_Scanner {
 						...$revision_ids
 					)
 				);
-				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-				// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table is allowlisted; placeholder count matches the absint ID array passed variadically.
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table is allowlisted; placeholder count matches the absint ID array passed variadically.
 				$wpdb->query(
 					$wpdb->prepare(
 						// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table is allowlisted; placeholders exactly match the absint ID array.
@@ -338,7 +326,7 @@ class WPSG_Db_Health_Scanner {
 			'total_deleted'  => $total_deleted,
 			'deleted_counts' => $deleted_counts,
 			/* translators: %d: number of deleted items */
-			'message'        => sprintf( __( 'Database cleanup complete: %d orphaned items removed safely.', 'genioussonu-site-checkup' ), $total_deleted ),
+			'message'        => sprintf( __( 'Database cleanup complete: %d orphaned items removed safely.', 'genioussonu-security-hardening-audit' ), $total_deleted ),
 		);
 	}
 	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared

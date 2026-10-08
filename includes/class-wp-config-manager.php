@@ -24,8 +24,8 @@ class WPSG_Wp_Config_Manager {
 	/**
 	 * Marker comment for injected constants.
 	 */
-	const MARKER_BEGIN = "/* BEGIN SiteCheckupPro-Config */\n";
-	const MARKER_END   = "/* END SiteCheckupPro-Config */\n";
+	const MARKER_BEGIN = "/* BEGIN GeniousSonuSiteCheckup-Config */\n";
+	const MARKER_END   = "/* END GeniousSonuSiteCheckup-Config */\n";
 
 	/**
 	 * Locate wp-config.php path (handles standard webroot and one level above webroot).
@@ -87,7 +87,7 @@ class WPSG_Wp_Config_Manager {
 		if ( ! $config_path || ! wp_is_writable( $config_path ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'wp-config.php is not writable or could not be located.', 'genioussonu-site-checkup' ),
+				'message' => __( 'wp-config.php is not writable or could not be located.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -103,7 +103,7 @@ class WPSG_Wp_Config_Manager {
 		if ( empty( $clean ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'No valid security constants specified.', 'genioussonu-site-checkup' ),
+				'message' => __( 'No valid security constants specified.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -112,15 +112,17 @@ class WPSG_Wp_Config_Manager {
 		if ( ! $backup_path ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Could not create safety backup of wp-config.php.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Could not create safety backup of wp-config.php.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
 		$content = file_get_contents( $config_path );
 
-		// Remove existing SiteCheckupPro block if present.
-		$pattern = '/' . preg_quote( self::MARKER_BEGIN, '/' ) . '.*?' . preg_quote( self::MARKER_END, '/' ) . '/s';
-		$content = preg_replace( $pattern, '', $content );
+		// Remove existing marker blocks if present (both current and legacy).
+		$legacy_pattern = '/\/\* BEGIN SiteCheckupPro-Config \*\/.*?\/\* END SiteCheckupPro-Config \*\/\n?/s';
+		$content        = preg_replace( $legacy_pattern, '', $content );
+		$pattern        = '/' . preg_quote( self::MARKER_BEGIN, '/' ) . '.*?' . preg_quote( self::MARKER_END, '/' ) . '/s';
+		$content        = preg_replace( $pattern, '', $content );
 
 		// Build new block.
 		$block = self::MARKER_BEGIN;
@@ -146,13 +148,13 @@ class WPSG_Wp_Config_Manager {
 			copy( $backup_path, $config_path );
 			return array(
 				'success' => false,
-				'message' => __( 'Failed to write updated constants to wp-config.php. Rolled back.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Failed to write updated constants to wp-config.php. Rolled back.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
 		return array(
 			'success' => true,
-			'message' => __( 'Security constants updated successfully in wp-config.php.', 'genioussonu-site-checkup' ),
+			'message' => __( 'Security constants updated successfully in wp-config.php.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 
@@ -166,7 +168,7 @@ class WPSG_Wp_Config_Manager {
 		if ( ! $config_path || ! wp_is_writable( $config_path ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'wp-config.php is not writable.', 'genioussonu-site-checkup' ),
+				'message' => __( 'wp-config.php is not writable.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -175,7 +177,7 @@ class WPSG_Wp_Config_Manager {
 		if ( ! $backup_path ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Could not create safety backup of wp-config.php.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Could not create safety backup of wp-config.php.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -200,7 +202,7 @@ class WPSG_Wp_Config_Manager {
 			$regex = '/^[ \t]*define\s*\(\s*[\'"]' . preg_quote( $salt_key, '/' ) . '[\'"].*?\);[ \t]*$/m';
 			if ( preg_match( $regex, $content ) ) {
 				$content = preg_replace_callback( $regex, function () use ( $salt_key, $new_salt ) {
-					return "define( '{$salt_key}', " . var_export( $new_salt, true ) . " );";
+					return "define( '{$salt_key}', '" . addcslashes( $new_salt, "'\\" ) . "' );";
 				}, $content );
 			}
 		}
@@ -211,7 +213,7 @@ class WPSG_Wp_Config_Manager {
 			copy( $backup_path, $config_path );
 			return array(
 				'success' => false,
-				'message' => __( 'Failed to write updated salts. Restored from backup.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Failed to write updated salts. Restored from backup.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -219,7 +221,7 @@ class WPSG_Wp_Config_Manager {
 
 		return array(
 			'success' => true,
-			'message' => __( 'All 8 WordPress security salts rotated successfully.', 'genioussonu-site-checkup' ),
+			'message' => __( 'All 8 WordPress security salts rotated successfully.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 
@@ -240,7 +242,7 @@ class WPSG_Wp_Config_Manager {
 		return array(
 			'file'         => 'wp-config.php',
 			'insert_block' => $block,
-			'description'  => __( 'The following configuration block will be inserted into wp-config.php.', 'genioussonu-site-checkup' ),
+			'description'  => __( 'The following configuration block will be inserted into wp-config.php.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 

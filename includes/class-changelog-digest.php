@@ -146,7 +146,7 @@ class WPSG_Changelog_Digest {
 			$total = $digest['summary']['total_updates'];
 			$msg   = sprintf(
 				/* translators: %d: total available updates */
-				__( 'Weekly Changelog Digest: %d update(s) available for installed plugins and themes.', 'genioussonu-site-checkup' ),
+				__( 'Weekly Changelog Digest: %d update(s) available for installed plugins and themes.', 'genioussonu-security-hardening-audit' ),
 				$total
 			);
 			return WPSG_Alert_Dispatcher::dispatch( 'weekly_changelog_digest', $msg, $digest['items'] );

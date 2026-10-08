@@ -1334,10 +1334,9 @@ run_test( "Plugins Screen: Action links and row meta provide Settings, Docs & FA
 	return ( $has_settings_action && $has_settings_meta && $has_docs_meta && $has_tutorials_meta );
 } );
 
-// TEST 35: Auto-Updates Column Support & Toggle
-run_test( "Auto-Updates: Enables auto-update toggle link and updates transient data", function () {
+// TEST 35: Auto-Updates Transient Support & Filter
+run_test( "Auto-Updates: Enables auto-update transient data and core auto-update filter", function () {
 	$plugin = WPSG_Plugin::get_instance();
-	$menu = WPSG_Admin_Menu::get_instance();
 	$basename = defined( 'WPSG_BASENAME' ) ? WPSG_BASENAME : 'genioussonu-site-checkup/genioussonu-site-checkup.php';
 
 	// 1. Transient filter sets update-supported data in no_update when up-to-date
@@ -1346,26 +1345,17 @@ run_test( "Auto-Updates: Enables auto-update toggle link and updates transient d
 	$mock_transient->no_update = array();
 	$filtered_transient = $plugin->filter_update_plugins_transient( $mock_transient );
 
-	$has_no_update_entry = isset( $filtered_transient->no_update[ $basename ] ) && 'genioussonu-site-checkup' === $filtered_transient->no_update[ $basename ]->slug;
+	$has_no_update_entry = isset( $filtered_transient->no_update[ $basename ] ) && 'genioussonu-security-hardening-audit' === $filtered_transient->no_update[ $basename ]->slug;
 
-	// 2. Auto-update setting HTML generates toggle link when disabled
-	update_site_option( 'auto_update_plugins', array() );
-	$html_disabled = $menu->filter_auto_update_setting_html( '', $basename, array() );
-	$has_enable_link = ( false !== strpos( $html_disabled, 'toggle-auto-update' ) && false !== strpos( $html_disabled, 'Enable auto-updates' ) && false !== strpos( $html_disabled, 'action=enable-auto-update' ) );
-
-	// 3. Auto-update setting HTML generates toggle link when enabled
+	// 2. Background auto_update_plugin filter check
 	update_site_option( 'auto_update_plugins', array( $basename ) );
-	$html_enabled = $menu->filter_auto_update_setting_html( '', $basename, array() );
-	$has_disable_link = ( false !== strpos( $html_enabled, 'toggle-auto-update' ) && false !== strpos( $html_enabled, 'Disable auto-updates' ) && false !== strpos( $html_enabled, 'action=disable-auto-update' ) );
-
-	// 4. Background auto_update_plugin filter check
 	$item = (object) array( 'plugin' => $basename );
 	$should_update = $plugin->filter_auto_update_plugin( false, $item );
 
 	// Reset option
 	delete_site_option( 'auto_update_plugins' );
 
-	return ( $has_no_update_entry && $has_enable_link && $has_disable_link && true === $should_update );
+	return ( $has_no_update_entry && true === $should_update );
 } );
 
 // TEST 38: HKDF Encryption & Decryption Roundtrip with Tamper Detection

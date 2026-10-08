@@ -34,9 +34,9 @@ fi
 
 # Clean previous build artifacts and old root zip variants
 rm -rf build/
-rm -f genioussonu-site-checkup-selfhosted.zip genioussonu-site-checkup-wporg.zip
+rm -f genioussonu-site-checkup-selfhosted.zip genioussonu-site-checkup-wporg.zip genioussonu-security-hardening-audit*.zip
 mkdir -p build/self-hosted/genioussonu-site-checkup
-mkdir -p build/wporg/genioussonu-site-checkup
+mkdir -p build/wporg/genioussonu-security-hardening-audit
 
 # 2. Build Target A: Self-Hosted Release (includes Update Checker)
 echo "Packaging Target 1: Self-Hosted (with Update Checker)..."
@@ -47,22 +47,23 @@ zip -r ../genioussonu-site-checkup-selfhosted.zip genioussonu-site-checkup -x "*
 cd "${ROOT_DIR}"
 
 # 3. Build Target B: WordPress.org Release (Guideline 8 Compliant: Strips Update Checker)
-echo "Packaging Target 2: WordPress.org Compliant (stripped update-checker)..."
-rsync -rc --exclude-from='.distignore' ./ build/wporg/genioussonu-site-checkup/
+echo "Packaging Target 2: WordPress.org Compliant (stripped update-checker, slug: genioussonu-security-hardening-audit)..."
+rsync -rc --exclude-from='.distignore' ./ build/wporg/genioussonu-security-hardening-audit/
 
 # Strip update checker completely from WP.org build target
-rm -f build/wporg/genioussonu-site-checkup/includes/class-update-checker.php
-rm -rf build/wporg/genioussonu-site-checkup/includes/plugin-update-checker/
+rm -f build/wporg/genioussonu-security-hardening-audit/includes/class-update-checker.php
+rm -rf build/wporg/genioussonu-security-hardening-audit/includes/plugin-update-checker/
+rm -f build/wporg/genioussonu-security-hardening-audit/update-info.json
 
 # Strip Tier 2 Nginx companion completely from WP.org build target
-rm -f build/wporg/genioussonu-site-checkup/includes/class-nginx-tier2.php
+rm -f build/wporg/genioussonu-security-hardening-audit/includes/class-nginx-tier2.php
 
 # Strip internal dev and agent files completely from release builds
-rm -rf build/wporg/genioussonu-site-checkup/.agents/
-rm -f build/wporg/genioussonu-site-checkup/AGENTS.md
-rm -f build/wporg/genioussonu-site-checkup/DEVELOPMENT.md
-rm -f build/wporg/genioussonu-site-checkup/CONTRIBUTING.md
-rm -f build/wporg/genioussonu-site-checkup/README.md
+rm -rf build/wporg/genioussonu-security-hardening-audit/.agents/
+rm -f build/wporg/genioussonu-security-hardening-audit/AGENTS.md
+rm -f build/wporg/genioussonu-security-hardening-audit/DEVELOPMENT.md
+rm -f build/wporg/genioussonu-security-hardening-audit/CONTRIBUTING.md
+rm -f build/wporg/genioussonu-security-hardening-audit/README.md
 rm -rf build/self-hosted/genioussonu-site-checkup/.agents/
 rm -f build/self-hosted/genioussonu-site-checkup/AGENTS.md
 rm -f build/self-hosted/genioussonu-site-checkup/DEVELOPMENT.md
@@ -70,15 +71,16 @@ rm -f build/self-hosted/genioussonu-site-checkup/CONTRIBUTING.md
 rm -f build/self-hosted/genioussonu-site-checkup/README.md
 
 cd build/wporg
-zip -r ../genioussonu-site-checkup-wporg.zip genioussonu-site-checkup -x "*.DS_Store"
-# Copy the clean, fully compliant WP.org package as the official root release with the actual plugin name
-cp ../genioussonu-site-checkup-wporg.zip "${ROOT_DIR}/genioussonu-site-checkup.zip"
+zip -r ../genioussonu-security-hardening-audit-wporg.zip genioussonu-security-hardening-audit -x "*.DS_Store"
+# Copy the clean, fully compliant WP.org package
+cp ../genioussonu-security-hardening-audit-wporg.zip "${ROOT_DIR}/genioussonu-security-hardening-audit.zip"
+cp ../genioussonu-security-hardening-audit-wporg.zip "${ROOT_DIR}/genioussonu-site-checkup.zip"
 cd "${ROOT_DIR}"
 
 echo ""
 echo "======================================================="
 echo " Build Complete:"
-echo " Official Package: genioussonu-site-checkup.zip ($(du -h genioussonu-site-checkup.zip | cut -f1)) [WP.org Compliant, Latest]"
-echo " WP.org Build Dir: build/wporg/genioussonu-site-checkup/"
-echo " Self-Hosted Zip:  build/genioussonu-site-checkup-selfhosted.zip ($(du -h build/genioussonu-site-checkup-selfhosted.zip | cut -f1))"
+echo " Official WP.org Package: genioussonu-security-hardening-audit.zip ($(du -h genioussonu-security-hardening-audit.zip | cut -f1)) [WP.org Compliant, Latest]"
+echo " WP.org Build Dir:        build/wporg/genioussonu-security-hardening-audit/"
+echo " Self-Hosted Zip:         build/genioussonu-site-checkup-selfhosted.zip ($(du -h build/genioussonu-site-checkup-selfhosted.zip | cut -f1))"
 echo "======================================================="

@@ -32,17 +32,17 @@ class WPSG_SSRF_Guard {
 	 */
 	public static function validate_url( $url ) {
 		if ( ! is_string( $url ) || empty( $url ) ) {
-			return new WP_Error( 'invalid_url', __( 'Empty or non-string URL specified.', 'genioussonu-site-checkup' ) );
+			return new WP_Error( 'invalid_url', __( 'Empty or non-string URL specified.', 'genioussonu-security-hardening-audit' ) );
 		}
 
 		$parsed = wp_parse_url( $url );
 		if ( ! $parsed || empty( $parsed['scheme'] ) || empty( $parsed['host'] ) ) {
-			return new WP_Error( 'invalid_url', __( 'Malformed URL or missing host/scheme.', 'genioussonu-site-checkup' ) );
+			return new WP_Error( 'invalid_url', __( 'Malformed URL or missing host/scheme.', 'genioussonu-security-hardening-audit' ) );
 		}
 
 		$scheme = strtolower( $parsed['scheme'] );
 		if ( 'http' !== $scheme && 'https' !== $scheme ) {
-			return new WP_Error( 'forbidden_scheme', __( 'Only HTTP and HTTPS protocols are permitted.', 'genioussonu-site-checkup' ) );
+			return new WP_Error( 'forbidden_scheme', __( 'Only HTTP and HTTPS protocols are permitted.', 'genioussonu-security-hardening-audit' ) );
 		}
 
 		$host = strtolower( trim( $parsed['host'] ) );
@@ -50,7 +50,7 @@ class WPSG_SSRF_Guard {
 
 		// Reject obvious loopback and literal IP patterns directly.
 		if ( 'localhost' === $host || '127.0.0.1' === $host || '::1' === $host || '169.254.169.254' === $host ) {
-			return new WP_Error( 'forbidden_host', __( 'Target host is a reserved or internal address.', 'genioussonu-site-checkup' ) );
+			return new WP_Error( 'forbidden_host', __( 'Target host is a reserved or internal address.', 'genioussonu-security-hardening-audit' ) );
 		}
 
 		// Single combined DNS query for both A (IPv4) and AAAA (IPv6) records.
@@ -83,7 +83,7 @@ class WPSG_SSRF_Guard {
 		}
 
 		if ( empty( $ips ) ) {
-			return new WP_Error( 'dns_resolution_failed', __( 'Could not resolve domain name to any valid IP address.', 'genioussonu-site-checkup' ) );
+			return new WP_Error( 'dns_resolution_failed', __( 'Could not resolve domain name to any valid IP address.', 'genioussonu-security-hardening-audit' ) );
 		}
 
 		// Validate EVERY resolved IP address. If even ONE IP is internal/private, reject the host!
@@ -93,7 +93,7 @@ class WPSG_SSRF_Guard {
 					'forbidden_ip',
 					sprintf(
 						/* translators: %s: forbidden IP */
-						__( 'Destination resolved to forbidden private, loopback, or metadata IP: %s', 'genioussonu-site-checkup' ),
+						__( 'Destination resolved to forbidden private, loopback, or metadata IP: %s', 'genioussonu-security-hardening-audit' ),
 						esc_html( $ip )
 					)
 				);

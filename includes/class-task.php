@@ -169,7 +169,7 @@ class WPSG_Task {
 
 		return array(
 			'success' => false,
-			'message' => __( 'No run callback registered for this task.', 'genioussonu-site-checkup' ),
+			'message' => __( 'No run callback registered for this task.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 
@@ -185,7 +185,7 @@ class WPSG_Task {
 
 		return array(
 			'success' => false,
-			'message' => __( 'No undo callback registered for this task.', 'genioussonu-site-checkup' ),
+			'message' => __( 'No undo callback registered for this task.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 
@@ -208,7 +208,7 @@ class WPSG_Task {
 				return array(
 					'status'  => 'attention',
 					/* translators: %s: environmental notice / error message */
-					'message' => sprintf( __( 'Check encountered an environmental notice: %s', 'genioussonu-site-checkup' ), $e->getMessage() ),
+					'message' => sprintf( __( 'Check encountered an environmental notice: %s', 'genioussonu-security-hardening-audit' ), $e->getMessage() ),
 				);
 			}
 		}
@@ -267,7 +267,7 @@ class WPSG_Task {
 				$can_apply_automated = false;
 				$is_na               = false;
 				if ( empty( $live_message ) || 'not_applicable' === $status ) {
-					$live_message = __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-site-checkup' );
+					$live_message = __( 'Cannot be applied automatically on this hosting setup — manual step required.', 'genioussonu-security-hardening-audit' );
 				}
 				if ( 'not_applicable' === $status || 'pending' === $status ) {
 					$status = ( $db_obj && in_array( $db_obj->status, array( 'done', 'applied_unverified' ), true ) ) ? $db_obj->status : 'pending';
@@ -284,7 +284,7 @@ class WPSG_Task {
 		if ( $next_reminder_at && strtotime( $next_reminder_at ) <= time() ) {
 			$status = 'attention';
 			/* translators: %s: due date/time string */
-			$live_message = sprintf( __( 'Overdue reminder: scheduled review was due on %s.', 'genioussonu-site-checkup' ), $next_reminder_at );
+			$live_message = sprintf( __( 'Overdue reminder: scheduled review was due on %s.', 'genioussonu-security-hardening-audit' ), $next_reminder_at );
 		}
 
 		$can_verify = ( 'writes_files' === $this->sub_type || ! empty( $this->nginx_snippet ) || in_array( $this->id, array( 'block_user_enumeration', 'hide_wordpress_fingerprint', 'security_headers_csp', 'security_txt_check', 'login_url_rename', 'disable_file_edit', 'wp_debug_display_check', 'vulnerability_database_check' ), true ) );

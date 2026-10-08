@@ -39,8 +39,7 @@ class WPSG_Report_Generator {
 		$db_rows      = array();
 		if ( false !== $status_table && isset( $wpdb ) && is_object( $wpdb ) && method_exists( $wpdb, 'get_results' ) ) {
 			$output_type = defined( 'OBJECT_K' ) ? OBJECT_K : 'OBJECT_K';
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifier is allowlisted and escaped; query has no runtime values.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifier is allowlisted and escaped; query has no runtime values.
 			$raw = $wpdb->get_results( "SELECT * FROM {$status_table}", $output_type );
 			if ( is_array( $raw ) ) {
 				$db_rows = $raw;

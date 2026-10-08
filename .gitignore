@@ -1,6 +1,7 @@
 # Build and distribution artifacts
 build/
 genioussonu-site-checkup-*.zip
+genioussonu-security-hardening-audit-*.zip
 *.log
 *.tmp
 .DS_Store

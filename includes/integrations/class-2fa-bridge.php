@@ -76,7 +76,7 @@ class WPSG_2fa_Bridge {
 				'config_url'  => $active_provider['link'],
 				'message'     => sprintf(
 					/* translators: %s: provider name */
-					__( 'Two-Factor Authentication is active via %s.', 'genioussonu-site-checkup' ),
+					__( 'Two-Factor Authentication is active via %s.', 'genioussonu-security-hardening-audit' ),
 					$active_provider['name']
 				),
 			);
@@ -87,7 +87,7 @@ class WPSG_2fa_Bridge {
 			'has_2fa'     => false,
 			'provider'    => '',
 			'install_url' => admin_url( 'plugin-install.php?s=two-factor&tab=search&type=term' ),
-			'message'     => __( 'No active Two-Factor Authentication plugin detected. Enforcing 2FA for administrators is strongly recommended in the SOP.', 'genioussonu-site-checkup' ),
+			'message'     => __( 'No active Two-Factor Authentication plugin detected. Enforcing 2FA for administrators is strongly recommended in the SOP.', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 }

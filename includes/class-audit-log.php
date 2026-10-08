@@ -180,8 +180,7 @@ class WPSG_Audit_Log {
 		$sort_col = isset( $allowed_orderby[ $orderby ] ) ? $allowed_orderby[ $orderby ] : 'a.created_at';
 		$sort_dir = 'ASC' === strtoupper( $order ) ? 'ASC' : 'DESC';
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifiers are allowlisted and escaped; pagination values are prepared.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifiers are allowlisted and escaped; pagination values are prepared.
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table and sort identifiers are allowlisted and escaped; pagination values are prepared.
@@ -219,8 +218,7 @@ class WPSG_Audit_Log {
 		$table_name = esc_sql( $table_name );
 		$days       = absint( $days );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; retention days are prepared.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table identifier is allowlisted and escaped; retention days are prepared.
 		$deleted = $wpdb->query(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table identifier is allowlisted and escaped; retention days are prepared.

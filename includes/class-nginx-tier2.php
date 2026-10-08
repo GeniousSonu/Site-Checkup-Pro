@@ -176,7 +176,7 @@ class WPSG_Nginx_Tier2 {
 		if ( false === @file_put_contents( $staging_file, $content ) ) {
 			return array(
 				'success' => false,
-				'message' => __( 'Could not write directive to Nginx staging path. Verify directory permissions.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Could not write directive to Nginx staging path. Verify directory permissions.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -188,7 +188,7 @@ class WPSG_Nginx_Tier2 {
 				'success' => false,
 				'message' => sprintf(
 					/* translators: %s: syntax test error message */
-					__( 'Nginx configuration test failed (%s). Rule was safely discarded before going live.', 'genioussonu-site-checkup' ),
+					__( 'Nginx configuration test failed (%s). Rule was safely discarded before going live.', 'genioussonu-security-hardening-audit' ),
 					$test_res['output']
 				),
 			);
@@ -199,7 +199,7 @@ class WPSG_Nginx_Tier2 {
 			@unlink( $staging_file );
 			return array(
 				'success' => false,
-				'message' => __( 'Could not atomically move validated config into live Nginx directory.', 'genioussonu-site-checkup' ),
+				'message' => __( 'Could not atomically move validated config into live Nginx directory.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -214,13 +214,13 @@ class WPSG_Nginx_Tier2 {
 			return array(
 				'success' => false,
 				/* translators: %s: reload error output */
-				'message' => sprintf( __( 'Nginx reload failed: %s. Rule was rolled back.', 'genioussonu-site-checkup' ), $reload_res['output'] ),
+				'message' => sprintf( __( 'Nginx reload failed: %s. Rule was rolled back.', 'genioussonu-security-hardening-audit' ), $reload_res['output'] ),
 			);
 		}
 
 		return array(
 			'success' => true,
-			'message' => __( 'Nginx directive validated and applied successfully (Tier 2).', 'genioussonu-site-checkup' ),
+			'message' => __( 'Nginx directive validated and applied successfully (Tier 2).', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 
@@ -246,7 +246,7 @@ class WPSG_Nginx_Tier2 {
 				@rename( $staging_file, $live_file );
 				return array(
 					'success' => false,
-					'message' => __( 'Nginx configuration test failed after removal attempt. Rolled back.', 'genioussonu-site-checkup' ),
+					'message' => __( 'Nginx configuration test failed after removal attempt. Rolled back.', 'genioussonu-security-hardening-audit' ),
 				);
 			}
 
@@ -256,7 +256,7 @@ class WPSG_Nginx_Tier2 {
 
 		return array(
 			'success' => true,
-			'message' => __( 'Nginx directive removed successfully (Tier 2).', 'genioussonu-site-checkup' ),
+			'message' => __( 'Nginx directive removed successfully (Tier 2).', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 

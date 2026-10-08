@@ -32,6 +32,7 @@ class WPSG_Rest_Auditor {
 		if ( empty( $server ) ) {
 			if ( class_exists( 'WP_REST_Server' ) ) {
 				$server = new WP_REST_Server();
+				// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Triggering core rest_api_init to discover endpoints.
 				do_action( 'rest_api_init', $server );
 			}
 		}
@@ -40,9 +41,12 @@ class WPSG_Rest_Auditor {
 
 		// If still empty (e.g. called in CLI or early hook), trigger rest_api_init and retry.
 		if ( empty( $routes ) && function_exists( 'rest_get_server' ) ) {
+			// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Accessing core global REST server instance.
 			global $wp_rest_server;
 			if ( empty( $wp_rest_server ) && class_exists( 'WP_REST_Server' ) ) {
+				// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Initializing core global REST server instance.
 				$wp_rest_server = new WP_REST_Server();
+				// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Triggering core rest_api_init to discover endpoints.
 				do_action( 'rest_api_init', $wp_rest_server );
 			}
 			if ( ! empty( $wp_rest_server ) ) {
@@ -135,32 +139,32 @@ class WPSG_Rest_Auditor {
 		if ( empty( $callback ) ) {
 			return array(
 				'type'   => 'public',
-				'label'  => __( 'Publicly Accessible', 'genioussonu-site-checkup' ),
-				'detail' => __( 'No permission_callback registered (open to unauthenticated access).', 'genioussonu-site-checkup' ),
+				'label'  => __( 'Publicly Accessible', 'genioussonu-security-hardening-audit' ),
+				'detail' => __( 'No permission_callback registered (open to unauthenticated access).', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
 		if ( is_string( $callback ) && '__return_true' === $callback ) {
 			return array(
 				'type'   => 'public',
-				'label'  => __( 'Publicly Accessible', 'genioussonu-site-checkup' ),
-				'detail' => __( 'Explicit __return_true callback registered.', 'genioussonu-site-checkup' ),
+				'label'  => __( 'Publicly Accessible', 'genioussonu-security-hardening-audit' ),
+				'detail' => __( 'Explicit __return_true callback registered.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
 		if ( is_string( $callback ) && '__return_false' === $callback ) {
 			return array(
 				'type'   => 'protected',
-				'label'  => __( 'Protected', 'genioussonu-site-checkup' ),
-				'detail' => __( 'Explicit __return_false callback registered (always forbidden).', 'genioussonu-site-checkup' ),
+				'label'  => __( 'Protected', 'genioussonu-security-hardening-audit' ),
+				'detail' => __( 'Explicit __return_false callback registered (always forbidden).', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
 		if ( is_string( $callback ) && 'is_user_logged_in' === $callback ) {
 			return array(
 				'type'   => 'protected',
-				'label'  => __( 'Protected', 'genioussonu-site-checkup' ),
-				'detail' => __( 'Requires logged-in WordPress user.', 'genioussonu-site-checkup' ),
+				'label'  => __( 'Protected', 'genioussonu-security-hardening-audit' ),
+				'detail' => __( 'Requires logged-in WordPress user.', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
@@ -179,21 +183,21 @@ class WPSG_Rest_Auditor {
 						if ( false !== strpos( $class_name, 'Posts' ) || false !== strpos( $class_name, 'Terms' ) || false !== strpos( $class_name, 'Attachments' ) ) {
 							return array(
 								'type'   => 'public',
-								'label'  => __( 'Publicly Accessible', 'genioussonu-site-checkup' ),
+								'label'  => __( 'Publicly Accessible', 'genioussonu-security-hardening-audit' ),
 								'detail' => sprintf( '%s::%s (Core public read check)', $class_name, $method ),
 							);
 						}
 					}
 					return array(
 						'type'   => 'protected',
-						'label'  => __( 'Protected', 'genioussonu-site-checkup' ),
+						'label'  => __( 'Protected', 'genioussonu-security-hardening-audit' ),
 						'detail' => sprintf( '%s::%s (WP_REST_Controller capability guard)', $class_name, $method ),
 					);
 				}
 
 				return array(
 					'type'   => 'protected',
-					'label'  => __( 'Protected', 'genioussonu-site-checkup' ),
+					'label'  => __( 'Protected', 'genioussonu-security-hardening-audit' ),
 					'detail' => sprintf( '%s::%s', $class_name, $method ),
 				);
 			}
@@ -206,7 +210,7 @@ class WPSG_Rest_Auditor {
 					if ( false !== stripos( $code, 'current_user_can' ) || false !== stripos( $code, 'user_can' ) || false !== stripos( $code, 'is_user_logged_in' ) ) {
 						return array(
 							'type'   => 'protected',
-							'label'  => __( 'Protected', 'genioussonu-site-checkup' ),
+							'label'  => __( 'Protected', 'genioussonu-security-hardening-audit' ),
 							'detail' => sprintf( '%s::%s (Verified capability check)', $class_name, $method ),
 						);
 					}
@@ -217,7 +221,7 @@ class WPSG_Rest_Auditor {
 
 			return array(
 				'type'   => 'needs_review',
-				'label'  => __( 'Needs Review', 'genioussonu-site-checkup' ),
+				'label'  => __( 'Needs Review', 'genioussonu-security-hardening-audit' ),
 				'detail' => sprintf( '%s::%s (Custom verification callback)', $class_name, $method ),
 			);
 		}
@@ -230,15 +234,15 @@ class WPSG_Rest_Auditor {
 				if ( false !== stripos( $code, 'current_user_can' ) || false !== stripos( $code, 'user_can' ) || false !== stripos( $code, 'is_user_logged_in' ) ) {
 					return array(
 						'type'   => 'protected',
-						'label'  => __( 'Protected', 'genioussonu-site-checkup' ),
-						'detail' => __( 'Closure with capability/auth verification check', 'genioussonu-site-checkup' ),
+						'label'  => __( 'Protected', 'genioussonu-security-hardening-audit' ),
+						'detail' => __( 'Closure with capability/auth verification check', 'genioussonu-security-hardening-audit' ),
 					);
 				}
 				if ( false !== stripos( $code, 'return true' ) && false === stripos( $code, 'current_user_can' ) ) {
 					return array(
 						'type'   => 'public',
-						'label'  => __( 'Publicly Accessible', 'genioussonu-site-checkup' ),
-						'detail' => __( 'Closure unconditionally returning true', 'genioussonu-site-checkup' ),
+						'label'  => __( 'Publicly Accessible', 'genioussonu-security-hardening-audit' ),
+						'detail' => __( 'Closure unconditionally returning true', 'genioussonu-security-hardening-audit' ),
 					);
 				}
 			} catch ( Exception $e ) {
@@ -247,15 +251,15 @@ class WPSG_Rest_Auditor {
 
 			return array(
 				'type'   => 'needs_review',
-				'label'  => __( 'Needs Review', 'genioussonu-site-checkup' ),
-				'detail' => __( 'Anonymous closure callback (inspect code)', 'genioussonu-site-checkup' ),
+				'label'  => __( 'Needs Review', 'genioussonu-security-hardening-audit' ),
+				'detail' => __( 'Anonymous closure callback (inspect code)', 'genioussonu-security-hardening-audit' ),
 			);
 		}
 
 		return array(
 			'type'   => 'needs_review',
-			'label'  => __( 'Needs Review', 'genioussonu-site-checkup' ),
-			'detail' => is_string( $callback ) ? $callback : __( 'Dynamic callback', 'genioussonu-site-checkup' ),
+			'label'  => __( 'Needs Review', 'genioussonu-security-hardening-audit' ),
+			'detail' => is_string( $callback ) ? $callback : __( 'Dynamic callback', 'genioussonu-security-hardening-audit' ),
 		);
 	}
 
