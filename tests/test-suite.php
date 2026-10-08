@@ -1240,13 +1240,10 @@ run_test( "Guideline 7 Consent: Security webhooks blocked until explicit user op
 // TEST 32: WP.org Guideline 8: Dual Build Separation
 run_test( "Guideline 8 Separation: WordPress.org release build strictly excludes update-checker", function () {
 	$root = dirname( __DIR__ );
-	$wporg_file      = $root . '/build/wporg/genioussonu-site-checkup/includes/class-update-checker.php';
-	$wporg_puc       = $root . '/build/wporg/genioussonu-site-checkup/includes/plugin-update-checker';
-	$selfhosted_file = $root . '/build/self-hosted/genioussonu-site-checkup/includes/class-update-checker.php';
-	$selfhosted_puc  = $root . '/build/self-hosted/genioussonu-site-checkup/includes/plugin-update-checker';
+	$wporg_zip = $root . '/genioussonu-security-hardening-audit.zip';
 
-	// If build directory doesn't exist yet in local run, run builder
-	if ( ! file_exists( $wporg_file ) && ! file_exists( $selfhosted_file ) ) {
+	// If zip does not exist yet, run builder
+	if ( ! file_exists( $wporg_zip ) ) {
 		$main_file    = $root . '/genioussonu-site-checkup.php';
 		$main_content = file_get_contents( $main_file );
 		if ( ! preg_match( '/^[ \t\/*#]*Version:\s*([0-9]+\.[0-9]+(?:\.[0-9]+)?)/mi', $main_content, $matches ) ) {
@@ -1255,11 +1252,37 @@ run_test( "Guideline 8 Separation: WordPress.org release build strictly excludes
 		exec( 'bash ' . escapeshellarg( $root . '/bin/build-release.sh' ) . ' ' . escapeshellarg( $matches[1] ) );
 	}
 
-	$wporg_tier2       = $root . '/build/wporg/genioussonu-site-checkup/includes/class-nginx-tier2.php';
-	$selfhosted_tier2  = $root . '/build/self-hosted/genioussonu-site-checkup/includes/class-nginx-tier2.php';
+	if ( ! file_exists( $wporg_zip ) ) {
+		return false;
+	}
 
-	$wporg_clean       = ! file_exists( $wporg_file ) && ! file_exists( $wporg_puc ) && ! file_exists( $wporg_tier2 );
-	$selfhosted_has_it = file_exists( $selfhosted_file ) && file_exists( $selfhosted_puc ) && file_exists( $selfhosted_tier2 );
+	$zip = new ZipArchive();
+	if ( $zip->open( $wporg_zip ) !== true ) {
+		return false;
+	}
+
+	$has_update_checker = false;
+	$has_puc            = false;
+	$has_tier2          = false;
+
+	for ( $i = 0; $i < $zip->numFiles; $i++ ) {
+		$filename = $zip->getNameIndex( $i );
+		if ( strpos( $filename, 'class-update-checker.php' ) !== false ) {
+			$has_update_checker = true;
+		}
+		if ( strpos( $filename, 'plugin-update-checker' ) !== false ) {
+			$has_puc = true;
+		}
+		if ( strpos( $filename, 'class-nginx-tier2.php' ) !== false ) {
+			$has_tier2 = true;
+		}
+	}
+	$zip->close();
+
+	$wporg_clean       = ! $has_update_checker && ! $has_puc && ! $has_tier2;
+	$selfhosted_has_it = file_exists( $root . '/includes/class-update-checker.php' ) &&
+	                     is_dir( $root . '/includes/plugin-update-checker' ) &&
+	                     file_exists( $root . '/includes/class-nginx-tier2.php' );
 
 	return ( $wporg_clean && $selfhosted_has_it );
 } );
