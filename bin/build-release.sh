@@ -75,6 +75,7 @@ zip -r ../genioussonu-security-hardening-audit-wporg.zip genioussonu-security-ha
 # Copy the single official package for WordPress.org publication
 cp ../genioussonu-security-hardening-audit-wporg.zip "${ROOT_DIR}/genioussonu-security-hardening-audit.zip"
 cd "${ROOT_DIR}"
+rm -rf build/
 
 echo ""
 echo "======================================================="
